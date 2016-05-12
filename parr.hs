@@ -49,9 +49,40 @@ example1 =
 -- conditional, f before g
 
 example2 =
-      let f = arr (+1)
-          g = arr (*2)
+      let f = (+1)
+          g = (*2)
       in f <|||> g <&&&> (+)
+
+-- idea lazily copied from:
+-- https://gist.github.com/morae/8494016
+
+mergesort :: (a -> a -> Ordering) -> [a] -> [a]
+mergesort fn xs
+    | len == 1 = xs
+    -- we get multithreading for zero readability cost here
+    -- first we split the sorting process into two different processes
+    -- and then we merge them with the merge fn
+    -- this is probably not the best performance as we aggressively
+    -- multithread this here and probably end up having to wait most of the time
+    --
+    -- a good idea would be to have a helper function that does't spawn any
+    -- new threaded computations
+    | otherwise = (mergesort fn <|||> mergesort fn <&&&> merge fn) (fsthalf xs, sndhalf xs)
+       where len = length xs
+             fsthalf :: [a] -> [a]
+             fsthalf xs = take (length xs `div` 2) xs
+
+             sndhalf :: [a] -> [a]
+             sndhalf xs = drop (length xs `div` 2) xs
+
+             merge :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+             merge fn xs [] = xs
+             merge fn [] ys = ys
+             merge fn (x:xs) (y:ys)
+                   | (fn x y) == LT = x:(merge fn xs (y:ys))
+                   | (fn x y) == EQ = x:(merge fn xs (y:ys))
+                   | otherwise = y:(merge fn (x:xs) ys)
+
 -- f and g get evaluated in parallel and their results are then
 -- merged into a single result with (+)
 -- this can be particularly useful for two long running
