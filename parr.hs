@@ -72,8 +72,6 @@ class (Arrow arr) => ParallelSplit arr where
 -- TODO: remove duplicated code
 
 instance ParallelSplit ParKleisli where
-    (<|?>) f g =
-
     -- do this with the par monad so we can have this type in parallel
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawnP (evalKleisli f a)
                                             y2 <- spawnP (evalKleisli g a)
