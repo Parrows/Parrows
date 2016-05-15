@@ -58,6 +58,8 @@ parMapPR (P f) = sequence . fmap f
 -- of parallelism with normal functions
 
 class (Arrow arr) => ParallelSplit arr where
+    --(<|?>) :: (NFData b) => arr [a] [b] -> arr [a] [b] -> arr [a] [b]
+
     (<||>) :: (NFData b, NFData c) => arr a b -> arr a c -> arr a (b, c)
     (<&&>) :: arr a (b, c) -> (b -> c -> d) -> arr a d
 
@@ -70,6 +72,8 @@ class (Arrow arr) => ParallelSplit arr where
 -- TODO: remove duplicated code
 
 instance ParallelSplit ParKleisli where
+    (<|?>) f g =
+
     -- do this with the par monad so we can have this type in parallel
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawnP (evalKleisli f a)
                                             y2 <- spawnP (evalKleisli g a)
@@ -109,8 +113,7 @@ instance ParallelSplit (->) where
                                in uncurry mergefn bd
     -- foldr1 is probably not the best choice for this?
     liftToParMap f = \as -> parMap rdeepseq f as
-    reduce f mergefn = \as -> let bs = f as
-                              in foldr1 mergefn bs
+    reduce f mergefn = \as -> foldr1 mergefn (f as)
 
 
 unwrapKleisli :: ParKleisli a b -> (a -> ParRes b)
