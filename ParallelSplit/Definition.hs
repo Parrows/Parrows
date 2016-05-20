@@ -59,11 +59,12 @@ instance Arrow (ParKleisli) where
 -- this could be broken down for arrows so we can use this kind
 -- of parallelism with normal functions
 class (Arrow arr) => ParallelSplit arr where
+    (<||=>) :: (NFData b) => arr a b -> arr a b -> arr a [b]
+    (<&&=>) :: arr a [b] -> (b -> b -> b) -> arr a b
+    (<|||=>) :: (NFData b) => arr a b -> arr a b -> arr [a] [[b]]
+    (<&&&=>) :: arr [a] [[b]] -> (b -> b -> b) -> arr [a] [b]
+
     (<||>) :: (NFData b, NFData c) => arr a b -> arr a c -> arr a (b, c)
     (<&&>) :: arr a (b, c) -> (b -> c -> d) -> arr a d
-
     (<|||>) :: (NFData b, NFData d) => arr a b -> arr c d -> arr (a, c) (b, d)
     (<&&&>) :: arr (a, c) (b, d) -> (b -> d -> e) -> arr (a, c) e
-
-    liftToParMap :: (NFData b) => Strategy b -> arr a b -> arr [a] [b]
-    reduce :: arr [a] [b] -> (b -> b -> b) -> arr [a] b

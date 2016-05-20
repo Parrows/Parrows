@@ -8,6 +8,14 @@ import Control.Parallel.Strategies
 -- how does the strictness concern us here?
 
 instance ParallelSplit ParKleisli where
+    (<||=>) f g = P $ \a -> PR $ runPar $ do y1 <- spawnP (evalKleisli f a)
+                                             y2 <- spawnP (evalKleisli g a)
+                                             b1  <- get y1
+                                             b2  <- get y2
+                                             return [b1, b2]
+    (<&&=>) (P f) mergefn = P $ \a -> let (PR b) = f a
+                                      in PR $ foldr1 mergefn b
+
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawnP (evalKleisli f a)
                                             y2 <- spawnP (evalKleisli g a)
                                             b  <- get y1
@@ -22,11 +30,15 @@ instance ParallelSplit ParKleisli where
                                                   return (b, d)
     (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
                                        in PR $ uncurry mergefn bd
-    liftToParMap strategy f = P $ \as -> parMapPR strategy f as
-    reduce (P f) mergefn = P $ \as -> let (PR bs) = f as
-                                      in PR $ foldr1 mergefn bs
 
 instance ParallelSplit (->) where
+    (<||=>) f g = \a -> runPar $ do y1 <- spawnP (f a)
+                                    y2 <- spawnP (g a)
+                                    b1  <- get y1
+                                    b2  <- get y2
+                                    return [b1, b2]
+    (<&&=>) f mergefn = \a -> foldr1 mergefn (f a)
+
     (<||>) f g = \a -> runPar $ do y1 <- spawnP (f a)
                                    y2 <- spawnP (g a)
                                    b  <- get y1
@@ -41,8 +53,6 @@ instance ParallelSplit (->) where
                                          return (b, d)
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
-    liftToParMap = parMap
-    reduce f mergefn = \as -> foldr1 mergefn (f as)
 
 parMapPR :: Strategy b -> ParKleisli a b -> [a] -> ParRes [b]
 parMapPR strategy (P f) = sequence . parMap (\(PR x) -> return (PR (x `using` strategy))) f
