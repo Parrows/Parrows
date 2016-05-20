@@ -18,7 +18,7 @@ instance ParallelSplit ParKleisli where
                                           b `par` d `pseq` (b, d)
     (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
                                        in PR $ uncurry mergefn bd
-    liftToParMap f = P $ \as -> parMapPR f as
+    liftToParMap strategy f = P $ \as -> parMapPR strategy f as
     reduce (P f) mergefn = P $ \as -> let (PR bs) = f as
                                       in PR $ foldr1 mergefn bs
 
@@ -35,11 +35,11 @@ instance ParallelSplit (->) where
                                  b `par` d `pseq` (b, d)
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
-    liftToParMap = parMap rdeepseq
+    liftToParMap = parMap
     reduce f mergefn = \as -> foldr1 mergefn (f as)
 
-parMapPR :: ParKleisli a b -> [a] -> ParRes [b]
-parMapPR (P f) = sequence . fmap f
+parMapPR :: Strategy b -> ParKleisli a b -> [a] -> ParRes [b]
+parMapPR strategy (P f) = sequence . parMap (\(PR x) -> return (PR (x `using` strategy))) f
 
 unwrapKleisli :: ParKleisli a b -> (a -> ParRes b)
 unwrapKleisli (P f) = f

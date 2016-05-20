@@ -1,6 +1,7 @@
 module ParallelSplit.Definition where
 
 import Control.DeepSeq
+import Control.Parallel.Strategies
 
 -- basic arrows
 class Arrow a where
@@ -39,6 +40,9 @@ instance Applicative ParRes where
     pure = PR
 -- boilerplate ends
 
+instance (NFData a) => NFData (ParRes a) where
+    rnf (PR a) = rnf a
+
 newtype ParKleisli a b = P (a -> ParRes b)
 -- same Kleisli type as above, so:
 instance Arrow (ParKleisli) where
@@ -61,5 +65,5 @@ class (Arrow arr) => ParallelSplit arr where
     (<|||>) :: (NFData b, NFData d) => arr a b -> arr c d -> arr (a, c) (b, d)
     (<&&&>) :: arr (a, c) (b, d) -> (b -> d -> e) -> arr (a, c) e
 
-    liftToParMap :: (NFData b) => arr a b -> arr [a] [b]
+    liftToParMap :: (NFData b) => Strategy b -> arr a b -> arr [a] [b]
     reduce :: arr [a] [b] -> (b -> b -> b) -> arr [a] b
