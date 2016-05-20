@@ -48,7 +48,9 @@ cabal-version:       >=1.10
 
 library
   -- Modules exported by the library.
-  exposed-modules:     ParallelSplit.ParMonad, ParallelSplit.Definition
+  exposed-modules:     ParallelSplit.ParMonad,
+                       ParallelSplit.Definition
+                       ParallelSplit.Multicore
 
   -- Modules included in this library but not exported.
   -- other-modules:
