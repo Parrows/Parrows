@@ -5,6 +5,9 @@ import ParallelSplit.Definition
 import Control.Parallel
 import Control.Parallel.Strategies
 
+-- investigate the different evaluation Strategies
+-- if we use this kind of parallelism
+
 instance ParallelSplit ParKleisli where
     (<||>) f g = P $ \a -> PR $ let b = evalKleisli f a
                                     c = evalKleisli g a

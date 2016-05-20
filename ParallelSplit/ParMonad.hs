@@ -4,6 +4,9 @@ import ParallelSplit.Definition
 import Control.Monad.Par (runPar, spawnP, get)
 import Control.Parallel.Strategies
 
+-- do we use spawn or spawnP here?
+-- how does the strictness concern us here?
+
 instance ParallelSplit ParKleisli where
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawnP (evalKleisli f a)
                                             y2 <- spawnP (evalKleisli g a)
