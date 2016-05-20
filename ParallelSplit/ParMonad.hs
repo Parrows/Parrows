@@ -44,7 +44,7 @@ instance ParallelSplit (->) where
 parMapPR :: Strategy b -> ParKleisli a b -> [a] -> ParRes [b]
 parMapPR strategy (P f) = sequence . parMap (\(PR x) -> return (PR (x `using` strategy))) f
 
-unwrapKleisli :: ParKleisli a b -> (a -> ParRes b)
+unwrapKleisli :: ParKleisli a b -> a -> ParRes b
 unwrapKleisli (P f) = f
 
 unwrapParRes :: ParRes a -> a
