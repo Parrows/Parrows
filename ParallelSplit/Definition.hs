@@ -61,8 +61,8 @@ instance Arrow (ParKleisli) where
 class (Arrow arr) => ParallelSplit arr where
     (<||=>) :: (NFData b) => arr a b -> arr a b -> arr a [b]
     (<&&=>) :: arr a [b] -> (b -> b -> b) -> arr a b
-    (<|||=>) :: (NFData b) => arr a b -> arr a b -> arr [a] [[b]]
-    (<&&&=>) :: arr [a] [[b]] -> (b -> b -> b) -> arr [a] [b]
+    --(<|||=>) :: (NFData b) => arr a b -> arr a b -> arr [a] [[b]]
+    --(<&&&=>) :: arr [a] [[b]] -> (b -> b -> b) -> arr [a] [b]
 
     (<||>) :: (NFData b, NFData c) => arr a b -> arr a c -> arr a (b, c)
     (<&&>) :: arr a (b, c) -> (b -> c -> d) -> arr a d
