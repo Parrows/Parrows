@@ -49,9 +49,6 @@ instance ParallelSplit (->) where
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
 
-parMapPR :: Strategy b -> ParKleisli a b -> [a] -> ParRes [b]
-parMapPR strategy (P f) = sequence . parMap (\(PR x) -> return (PR (x `using` strategy))) f
-
 unwrapKleisli :: ParKleisli a b -> a -> ParRes b
 unwrapKleisli (P f) = f
 

@@ -62,7 +62,8 @@ library
   build-depends:       base >=4.8 && <4.9,
                        deepseq >=1.4 && <1.5,
                        monad-par >= 0.3 && < 0.4,
-                       parallel >= 3.2 && < 3.3
+                       parallel >= 3.2 && < 3.3,
+                       split >= 0.2 && < 0.3
 
   -- Directories containing source files.
   -- hs-source-dirs:
