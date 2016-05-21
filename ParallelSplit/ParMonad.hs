@@ -8,7 +8,7 @@ import Data.List.Split
 -- do we use spawn or spawnP here?
 -- how does the strictness concern us here?
 
-instance ParallelSplit ParKleisli where
+{-instance ParallelSplit ParKleisli where
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawn_ (return (evalKleisli f a))
                                             y2 <- spawn_ (return (evalKleisli g a))
                                             b  <- get y1
@@ -23,7 +23,7 @@ instance ParallelSplit ParKleisli where
                                                   return (b, d)
     (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
                                        in PR $ uncurry mergefn bd
-
+-}
 instance ParallelSplit (->) where
     (<||>) f g = \a -> runPar $ do y1 <- spawn_ (return (f a))
                                    y2 <- spawn_ (return (g a))
@@ -39,17 +39,6 @@ instance ParallelSplit (->) where
                                          return (b, d)
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
-
-chunkCount len threadcnt
-    | threadcnt > len = 1
-    | otherwise = len `div` threadcnt
-
-parMap :: (NFData b) => Int -> (a -> b) -> [a] -> [b]
-parMap threadcnt f as = go f (chunksOf (chunkCount (length as) threadcnt) as)
-                        where
-                            go f [] = []
-                            go f [as] = map f as
-                            go f (as:rest) = (map f <|||> go f <&&&> (++)) (as, rest)
 
 unwrapKleisli :: ParKleisli a b -> a -> ParRes b
 unwrapKleisli (P f) = f

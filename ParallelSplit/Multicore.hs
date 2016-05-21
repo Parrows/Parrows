@@ -5,11 +5,12 @@ import ParallelSplit.Definition
 import Control.Parallel
 import Control.Parallel.Strategies
 import Data.List.Split
+import Debug.Trace
 
 -- investigate the different evaluation Strategies
 -- if we use this kind of parallelism
 
-instance ParallelSplit ParKleisli where
+{-instance ParallelSplit ParKleisli where
     (<||>) f g = P $ \a -> PR $ let b = evalKleisli f a
                                     c = evalKleisli g a
                                 in
@@ -22,8 +23,18 @@ instance ParallelSplit ParKleisli where
                                           b `par` d `pseq` (b, d)
     (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
                                        in PR $ uncurry mergefn bd
+-}
 
 instance ParallelSplit (->) where
+    (<|||=>) f g = \as -> let b1 = f (as !! 0)
+                              b2 = g (as !! 1)
+                          in
+                              b1 `par` b2 `pseq` [b1, b2]
+    (<|||==>) f g = \(fst:rest) -> let b1 = f fst
+                                       b2 = g rest
+                                   in
+                                       b1 `par` b2 `pseq` b1 : b2
+
     (<||>) f g = \a -> let b = f a
                            c = g a
                        in
@@ -37,16 +48,9 @@ instance ParallelSplit (->) where
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
 
-chunkCount len threadcnt
-   | threadcnt > len = 1
-   | otherwise = len `div` threadcnt
-
 parMap :: (NFData b) => Int -> (a -> b) -> [a] -> [b]
-parMap threadcnt f as = go f (chunksOf (chunkCount (length as) threadcnt) as)
-                       where
-                           go f [] = []
-                           go f [as] = map f as
-                           go f (as:rest) = (map f <|||> go f <&&&> (++)) (as, rest)
+parMap threadcnt f as = ((chunky (min threadcnt (length as)) (map f)) <&&&=> (++)) (chunksOf chkln as)
+                        where chkln = (chunkLen (length as) threadcnt)
 
 unwrapKleisli :: ParKleisli a b -> a -> ParRes b
 unwrapKleisli (P f) = f

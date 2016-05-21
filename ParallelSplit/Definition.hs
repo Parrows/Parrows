@@ -2,6 +2,7 @@ module ParallelSplit.Definition where
 
 import Control.DeepSeq
 import Control.Parallel.Strategies
+import Data.List.Split
 
 -- basic arrows
 class Arrow a where
@@ -59,7 +60,22 @@ instance Arrow (ParKleisli) where
 -- this could be broken down for arrows so we can use this kind
 -- of parallelism with normal functions
 class (Arrow arr) => ParallelSplit arr where
+    (<|||=>) :: (NFData b) => arr a b -> arr a b -> arr [a] [b]
+    (<|||==>) :: (NFData b) => arr a b -> arr [a] [b] -> arr [a] [b]
+    (<&&&=>) :: arr [a] [b] -> (b -> b -> b) -> arr [a] b
+    (<&&&=>) f mergefn = f >>> arr (foldr1 mergefn)
+
     (<||>) :: (NFData b, NFData c) => arr a b -> arr a c -> arr a (b, c)
     (<&&>) :: arr a (b, c) -> (b -> c -> d) -> arr a d
     (<|||>) :: (NFData b, NFData d) => arr a b -> arr c d -> arr (a, c) (b, d)
     (<&&&>) :: arr (a, c) (b, d) -> (b -> d -> e) -> arr (a, c) e
+
+chunkLen len threadcnt
+   | threadcnt > len = 1
+   | otherwise = len `div` threadcnt
+
+chunky :: (ParallelSplit arr, NFData b) => Int -> (a -> b) -> arr [a] [b]
+chunky 0 fn = arr $ \xs -> []
+chunky 1 fn = arr $ \[x] -> [fn x]
+chunky 2 fn = arr fn <|||=> arr fn
+chunky x fn = arr fn <|||==> (chunky (x-1) fn)

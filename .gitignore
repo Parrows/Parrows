@@ -16,3 +16,7 @@ cabal.sandbox.config
 .stack-work/
 
 *.exe
+
+*.iml
+
+.idea/

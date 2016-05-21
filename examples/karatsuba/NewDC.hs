@@ -1,6 +1,6 @@
 module NewDC where
 
-import ParallelSplit.ParMonad
+import ParallelSplit.Multicore
 import ParallelSplit.Definition
 import Control.Parallel.Strategies hiding (parMap)
 import Data.List
