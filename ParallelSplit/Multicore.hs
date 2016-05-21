@@ -4,6 +4,7 @@ import ParallelSplit.Definition
 
 import Control.Parallel
 import Control.Parallel.Strategies
+import Data.List.Split
 
 -- investigate the different evaluation Strategies
 -- if we use this kind of parallelism
@@ -48,6 +49,17 @@ instance ParallelSplit (->) where
                                  b `par` d `pseq` (b, d)
     (<&&&>) f mergefn = \ac -> let bd = f ac
                                in uncurry mergefn bd
+
+chunkCount len threadcnt
+   | threadcnt > len = 1
+   | otherwise = len `div` threadcnt
+
+parMap :: (NFData b) => Int -> (a -> b) -> [a] -> [b]
+parMap threadcnt f as = go f (chunksOf (chunkCount (length as) threadcnt) as)
+                       where
+                           go f [] = []
+                           go f [as] = map f as
+                           go f (as:rest) = (map f <|||> go f <&&&> (++)) (as, rest)
 
 unwrapKleisli :: ParKleisli a b -> a -> ParRes b
 unwrapKleisli (P f) = f
