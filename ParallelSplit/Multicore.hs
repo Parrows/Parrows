@@ -10,13 +10,6 @@ import Data.List.Split
 -- if we use this kind of parallelism
 
 instance ParallelSplit ParKleisli where
-    (<||=>) f g = P $ \a -> PR $ let b = evalKleisli f a
-                                     c = evalKleisli g a
-                                 in
-                                     b `par` c `pseq` [b, c]
-    (<&&=>) (P f) mergefn = P $ \as -> let (PR bs) = f as
-                                       in PR $ foldr1 mergefn bs
-
     (<||>) f g = P $ \a -> PR $ let b = evalKleisli f a
                                     c = evalKleisli g a
                                 in
@@ -31,12 +24,6 @@ instance ParallelSplit ParKleisli where
                                        in PR $ uncurry mergefn bd
 
 instance ParallelSplit (->) where
-    (<||=>) f g = \a -> let b1 = f a
-                            b2 = g a
-                        in
-                            b1 `par` b2 `pseq` [b1, b2]
-    (<&&=>) f mergefn = \as -> let bs = f as
-                             in foldr1 mergefn bs
     (<||>) f g = \a -> let b = f a
                            c = g a
                        in

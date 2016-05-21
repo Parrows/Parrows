@@ -3,6 +3,8 @@ module Main where
 import Control.DeepSeq
 import ParallelSplit.Definition
 import ParallelSplit.ParMonad
+import Control.Parallel.Strategies hiding (parMap)
+import Control.DeepSeq
 
 -- TODO: remove duplicated code
 
@@ -46,4 +48,6 @@ order x y
     | x < y = LT
     | x == y = EQ
 
-main = print $ mergesortPar order stuff
+-- main = print $ mergesortPar order stuff
+main = let b = parMap 4 (map (+1)) [stuff, stuff, stuff, stuff, stuff, stuff]
+       in b `deepseq` print "done"

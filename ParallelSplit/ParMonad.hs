@@ -9,14 +9,6 @@ import Data.List.Split
 -- how does the strictness concern us here?
 
 instance ParallelSplit ParKleisli where
-    (<||=>) f g = P $ \a -> PR $ runPar $ do y1 <- spawn_ (return (evalKleisli f a))
-                                             y2 <- spawn_ (return (evalKleisli g a))
-                                             b1  <- get y1
-                                             b2  <- get y2
-                                             return [b1, b2]
-    (<&&=>) (P f) mergefn = P $ \a -> let (PR b) = f a
-                                      in PR $ foldr1 mergefn b
-
     (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawn_ (return (evalKleisli f a))
                                             y2 <- spawn_ (return (evalKleisli g a))
                                             b  <- get y1
@@ -33,13 +25,6 @@ instance ParallelSplit ParKleisli where
                                        in PR $ uncurry mergefn bd
 
 instance ParallelSplit (->) where
-    (<||=>) f g = \a -> runPar $ do y1 <- spawn_ (return (f a))
-                                    y2 <- spawn_ (return (g a))
-                                    b1  <- get y1
-                                    b2  <- get y2
-                                    return [b1, b2]
-    (<&&=>) f mergefn = \a -> foldr1 mergefn (f a)
-
     (<||>) f g = \a -> runPar $ do y1 <- spawn_ (return (f a))
                                    y2 <- spawn_ (return (g a))
                                    b  <- get y1
