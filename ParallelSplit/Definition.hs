@@ -63,7 +63,6 @@ class (Arrow arr) => ParallelSplit arr where
     (<|||=>) :: (NFData b) => arr a b -> arr a b -> arr [a] [b]
     (<|||==>) :: (NFData b) => arr a b -> arr [a] [b] -> arr [a] [b]
     (<&&&=>) :: arr [a] [b] -> (b -> b -> b) -> arr [a] b
-    (<&&&=>) f mergefn = f >>> arr (foldr1 mergefn)
 
     (<||>) :: (NFData b, NFData c) => arr a b -> arr a c -> arr a (b, c)
     (<&&>) :: arr a (b, c) -> (b -> c -> d) -> arr a d
@@ -76,6 +75,9 @@ chunkLen len threadcnt
 
 chunky :: (ParallelSplit arr, NFData b) => Int -> (a -> b) -> arr [a] [b]
 chunky 0 fn = arr $ \xs -> []
-chunky 1 fn = arr $ \[x] -> [fn x]
+-- the last chunk evalutes the rest (if there is some)
+-- this is by far better than the alternative of dropping
+-- the values :D
+chunky 1 fn = arr $ \xs -> map fn xs
 chunky 2 fn = arr fn <|||=> arr fn
 chunky x fn = arr fn <|||==> (chunky (x-1) fn)

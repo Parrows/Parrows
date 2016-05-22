@@ -1,5 +1,7 @@
 -- Matrix Multiplication is a parMap
-import Control.Parallel.Strategies
+
+import ParallelSplit.Definition
+import ParallelSplit.Multicore
 import Data.List.Split
 
 type Scalar = Float
@@ -30,18 +32,10 @@ rows matrix = reverse $ go (dimY matrix - 1) matrix
 matrixP :: Matrix -> Matrix -> Matrix
 matrixP x y
     | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ parMap rdeepseq sum (zipWith (*) <$> rows x <*> y)
+    | otherwise = chunksOf (dimX y) $ parMap 4 sum (zipWith (*) <$> rows x <*> y)
 
 testMatrix :: Matrix
-testMatrix = [[1,4,7],[2,5,8],[3,6,9]]
-
-idMatrix :: Matrix
-idMatrix = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+testMatrix = replicate 1500 [1..1500]
 
 main :: IO ()
-main = do
-    print $ valAt 1 [1,2]
-    print $ row 1 testMatrix
-    print $ rows testMatrix
-    print $ matrixP testMatrix idMatrix
-    print $ matrixP testMatrix testMatrix
+main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))

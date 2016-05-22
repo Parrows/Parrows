@@ -25,15 +25,19 @@ import Debug.Trace
                                        in PR $ uncurry mergefn bd
 -}
 
+scnd x y = y
+
 instance ParallelSplit (->) where
     (<|||=>) f g = \as -> let b1 = f (as !! 0)
                               b2 = g (as !! 1)
                           in
-                              b1 `par` b2 `pseq` [b1, b2]
+                              b1 `par` b2 `scnd` [b1, b2]
     (<|||==>) f g = \(fst:rest) -> let b1 = f fst
                                        b2 = g rest
                                    in
-                                       b1 `par` b2 `pseq` b1 : b2
+                                       b1 `par` b2 `scnd` b1 : b2
+    (<&&&=>) f mergefn = \as -> let res = f as
+                                in res `pseq` foldr1 mergefn res
 
     (<||>) f g = \a -> let b = f a
                            c = g a
@@ -49,7 +53,7 @@ instance ParallelSplit (->) where
                                in uncurry mergefn bd
 
 parMap :: (NFData b) => Int -> (a -> b) -> [a] -> [b]
-parMap threadcnt f as = ((chunky (min threadcnt (length as)) (map f)) <&&&=> (++)) (chunksOf chkln as)
+parMap threadcnt f as = using (((chunky (min threadcnt (length as)) (map f)) <&&&=> (++)) (chunksOf chkln as)) rpar
                         where chkln = (chunkLen (length as) threadcnt)
 
 unwrapKleisli :: ParKleisli a b -> a -> ParRes b
