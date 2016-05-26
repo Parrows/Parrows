@@ -1,7 +1,7 @@
 module ParallelSplit.ParMonad where
 
 import ParallelSplit.Definition
-import Control.Monad.Par (runPar, spawn_, get)
+import Control.Monad.Par (runPar, spawnP, get)
 import Control.Parallel.Strategies
 import Data.List.Split
 
@@ -24,27 +24,10 @@ import Data.List.Split
     (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
                                        in PR $ uncurry mergefn bd
 -}
-instance ParallelSplit (->) where
-    (<||>) f g = \a -> runPar $ do y1 <- spawn_ (return (f a))
-                                   y2 <- spawn_ (return (g a))
-                                   b  <- get y1
-                                   c  <- get y2
-                                   return (b, c)
-    (<&&>) f mergefn = \a -> let bc = f a
-                             in uncurry mergefn bc
-    (<|||>) f g = \(a, c) -> runPar $ do y1 <- spawn_ (return (f a))
-                                         y2 <- spawn_ (return (g c))
-                                         b  <- get y1
-                                         d  <- get y2
-                                         return (b, d)
-    (<&&&>) f mergefn = \ac -> let bd = f ac
-                               in uncurry mergefn bd
 
-unwrapKleisli :: ParKleisli a b -> a -> ParRes b
-unwrapKleisli (P f) = f
+spawn' f x = do y <- spawnP (f x)
+                get y
 
-unwrapParRes :: ParRes a -> a
-unwrapParRes (PR a) = a
+instance ParallelSpawn (->) where
+    spawn (Parrow fs) = \as -> runPar $ sequence (zipWith (\f a -> f a) (map spawn' fs) as)
 
-evalKleisli :: ParKleisli a b -> a -> b
-evalKleisli fn a = unwrapParRes $ unwrapKleisli fn a

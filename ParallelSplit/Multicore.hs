@@ -25,6 +25,7 @@ import Debug.Trace
                                        in PR $ uncurry mergefn bd
 -}
 
+{-
 scnd x y = y
 
 instance ParallelSplit (->) where
@@ -64,3 +65,5 @@ unwrapParRes (PR a) = a
 
 evalKleisli :: ParKleisli a b -> a -> b
 evalKleisli fn a = unwrapParRes $ unwrapKleisli fn a
+
+-}
