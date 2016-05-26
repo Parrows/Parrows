@@ -8,18 +8,18 @@ import Control.Category
 import Control.Arrow
 import Data.Monoid
 
-data Parrow arr a b = Parrow [arr a b]
+type Parrow arr a b = [arr a b]
 
-instance Monoid (Parrow arr a b) where
-    mempty = Parrow []
-    mappend (Parrow xs) (Parrow ys) = Parrow $ xs `mappend` ys
+(...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c
+(...) parr arr = map (>>> arr) parr
 
--- TODO: is Parrow a monad?
+(....) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
+(....) f g = zipWith (>>>) f g
 
 toPar :: (Arrow arr) => arr a b -> Parrow arr a b
-toPar arr = Parrow $ [arr]
+toPar arr = [arr]
 (<|||>) :: (Arrow arr) => Parrow arr a b -> arr a b -> Parrow arr a b
-(<|||>) (Parrow fs) g = Parrow $ fs `mappend` [g]
+(<|||>) (fs) g = fs `mappend` [g]
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
 (<||||>) = mappend
 
@@ -37,11 +37,12 @@ instance ArrowRun (->) where
 instance (MonadUnwrap m) => ArrowRun (Kleisli m) where
     runArrow (Kleisli f) a = unwrap $ f a
 
--- this could be broken down for arrows so we can use this kind
--- of parallelism with normal functions
 class (Arrow arr) => ParallelSpawn arr where
     spawn :: (NFData b) => Parrow arr a b -> arr [a] [b]
 
--- default implementation without threading
---instance (ArrowRun arr) => ParallelSpawn arr where
---    spawn (Parrow fs) = arr $ zipWith fs
+--default implementation without threading
+instance (ArrowRun arr) => ParallelSpawn arr where
+    spawn fs = arr $ zipWith runArrow fs
+
+parMap :: (ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
+parMap fn as = runArrow (spawn (replicate (length as) fn)) as

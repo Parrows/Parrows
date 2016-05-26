@@ -29,5 +29,5 @@ spawn' f x = do y <- spawnP (f x)
                 get y
 
 instance ParallelSpawn (->) where
-    spawn (Parrow fs) = \as -> runPar $ sequence (zipWith (\f a -> f a) (map spawn' fs) as)
+    spawn fs = \as -> runPar $ sequence (zipWith (\f a -> f a) (map spawn' fs) as)
 
