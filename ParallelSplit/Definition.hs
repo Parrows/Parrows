@@ -1,12 +1,13 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 module ParallelSplit.Definition where
 
-import Control.DeepSeq
-import Control.Parallel.Strategies
-import Data.List.Split
-import Control.Category
 import Control.Arrow
+import Control.DeepSeq
+import Control.Category
+import Control.Parallel.Strategies
+
 import Data.Monoid
+import Data.List.Split
 
 type Parrow arr a b = [arr a b]
 
@@ -19,11 +20,12 @@ type Parrow arr a b = [arr a b]
 toPar :: (Arrow arr) => arr a b -> Parrow arr a b
 toPar arr = [arr]
 (<|||>) :: (Arrow arr) => Parrow arr a b -> arr a b -> Parrow arr a b
-(<|||>) (fs) g = fs `mappend` [g]
+(<|||>) fs g = fs ++ [g]
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
-(<||||>) = mappend
+(<||||>) = (++)
 
--- TODO: merge operation?
+(<$$$>) :: (ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
+(<$$$>) arr as = runArrow (spawn arr) as
 
 class (Monad m) => MonadUnwrap m where
     unwrap :: m a -> a
