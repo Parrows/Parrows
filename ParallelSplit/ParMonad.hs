@@ -12,7 +12,7 @@ spawn' f x = do y <- spawnP (f x)
 
 parZipWith' :: (ArrowRun arr, NFData b) => [arr a b] -> arr [a] (Par [b])
 parZipWith' fs = arr $ \as -> do
-                                 ibs <- zipWithM (\f a -> Control.Monad.Par.spawn $ return ((runArrow f a))) fs as
+                                 ibs <- zipWithM (\f a -> Control.Monad.Par.spawn $ return $ runArrow f a) fs as
                                  mapM get ibs
 
 instance ParallelSpawn (->) where
