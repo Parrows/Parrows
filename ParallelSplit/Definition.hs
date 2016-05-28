@@ -3,24 +3,9 @@ module ParallelSplit.Definition where
 import Control.Arrow
 import Control.DeepSeq
 import Control.Category
-import Control.Parallel.Strategies
 
 import Data.Monoid
 import Data.List.Split
-
-class (Monad m) => MonadUnwrap m where
-    unwrap :: m a -> a
-
-class (Arrow arr) => ArrowRun arr where
-    runArrow :: arr a b -> a -> b
-
-instance ArrowRun (->) where
-    runArrow f a = f a
-
-instance (MonadUnwrap m) => ArrowRun (Kleisli m) where
-    runArrow (Kleisli f) a = unwrap $ f a
-
--- now for the Parrow stuff
 
 type Parrow arr a b = [arr a b]
 
@@ -47,15 +32,26 @@ toPar = return
 -- merge a computation, this is basically a parallel zipWith
 
 (<$$>) :: (ParallelSpawn arr, NFData b) => Parrow arr a b -> arr [a] [b]
-(<$$>) arr = spawn arr
-
-(<$$$>) :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
-(<$$$>) arr as = runArrow (spawn arr) as
+(<$$>) = spawn
 
 -- some skeletons
 
-parZipWith :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
-parZipWith = (<$$$>)
+parEval :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
+parEval = arr (<$$>)
 
-parMap :: (ParallelSpawn arr, ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
-parMap fn as = parZipWith (replicate (length as) fn) as
+{-
+parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (a, b) c -> [a] -> (arr [b] [c])
+parZipWith fn as = arr $ \bs -> app (_, bs)
+-}
+
+len :: (Arrow arr) => arr [a] Int
+len = arr $ length
+
+rep :: (ArrowApply arr) => arr (Int, (arr a b)) (Parrow arr a b)
+rep = arr $ \(l, fn) -> app (app (arr replicate, l), fn)
+
+--arr (app (app (arr replicate, app (arr length, [1])), (+1)))
+
+--arr (app (app (arr replicate, app (arr length, as)), fn))
+parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
+parMap = arr $ \(fn, as) -> app (app (parEval, app (rep, ((app (len, as), arr fn)) ) ), as)
