@@ -22,8 +22,8 @@ import Control.Parallel.Strategies (parList,using,NFData)
 import Control.Parallel.Strategies (rdeepseq,Strategy)
 
 import ParallelSplit.Definition
---import ParallelSplit.ParMonad
-import ParallelSplit.Multicore
+import ParallelSplit.ParMonad
+--import ParallelSplit.Multicore
 
 -- import Eden
 -- import RW 

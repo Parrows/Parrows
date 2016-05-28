@@ -42,5 +42,8 @@ instance (MonadUnwrap m) => ArrowRun (Kleisli m) where
 class (Arrow arr) => ParallelSpawn arr where
     spawn :: (NFData b) => Parrow arr a b -> arr [a] [b]
 
+parZipWith :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
+parZipWith fs as = runArrow (spawn fs) as
+
 parMap :: (ParallelSpawn arr, ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
-parMap fn as = runArrow (spawn (replicate (length as) fn)) as
+parMap fn as = parZipWith (replicate (length as) fn) as
