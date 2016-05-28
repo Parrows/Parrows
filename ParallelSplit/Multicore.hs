@@ -67,3 +67,6 @@ evalKleisli :: ParKleisli a b -> a -> b
 evalKleisli fn a = unwrapParRes $ unwrapKleisli fn a
 
 -}
+
+instance ParallelSpawn (->) where
+    spawn fs = \as -> zipWith ($) fs as `using` parList rdeepseq
