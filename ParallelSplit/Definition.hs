@@ -46,6 +46,9 @@ toPar = return
 
 -- merge a computation, this is basically a parallel zipWith
 
+(<$$>) :: (ParallelSpawn arr, NFData b) => Parrow arr a b -> arr [a] [b]
+(<$$>) arr = spawn arr
+
 (<$$$>) :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
 (<$$$>) arr as = runArrow (spawn arr) as
 
