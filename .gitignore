@@ -20,3 +20,5 @@ cabal.sandbox.config
 *.iml
 
 .idea/
+
+*.eventlog
