@@ -24,7 +24,7 @@ toPar arr = [arr]
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
 (<||||>) = (++)
 
-(<$$$>) :: (ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
+(<$$$>) :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
 (<$$$>) arr as = runArrow (spawn arr) as
 
 class (Monad m) => MonadUnwrap m where
@@ -42,9 +42,5 @@ instance (MonadUnwrap m) => ArrowRun (Kleisli m) where
 class (Arrow arr) => ParallelSpawn arr where
     spawn :: (NFData b) => Parrow arr a b -> arr [a] [b]
 
---default implementation without threading
-instance (ArrowRun arr) => ParallelSpawn arr where
-    spawn fs = arr $ zipWith runArrow fs
-
-parMap :: (ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
+parMap :: (ParallelSpawn arr, ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
 parMap fn as = runArrow (spawn (replicate (length as) fn)) as

@@ -30,4 +30,3 @@ spawn' f x = do y <- spawnP (f x)
 
 instance ParallelSpawn (->) where
     spawn fs = \as -> runPar $ sequence (zipWith (\f a -> f a) (map spawn' fs) as)
-
