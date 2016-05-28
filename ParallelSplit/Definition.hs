@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 module ParallelSplit.Definition where
 
 import Control.Arrow
@@ -8,24 +7,6 @@ import Control.Parallel.Strategies
 
 import Data.Monoid
 import Data.List.Split
-
-type Parrow arr a b = [arr a b]
-
-(...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c
-(...) parr arr = map (>>> arr) parr
-
-(....) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
-(....) f g = zipWith (>>>) f g
-
-toPar :: (Arrow arr) => arr a b -> Parrow arr a b
-toPar arr = [arr]
-(<|||>) :: (Arrow arr) => Parrow arr a b -> arr a b -> Parrow arr a b
-(<|||>) fs g = fs ++ [g]
-(<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
-(<||||>) = (++)
-
-(<$$$>) :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
-(<$$$>) arr as = runArrow (spawn arr) as
 
 class (Monad m) => MonadUnwrap m where
     unwrap :: m a -> a
@@ -39,11 +20,39 @@ instance ArrowRun (->) where
 instance (MonadUnwrap m) => ArrowRun (Kleisli m) where
     runArrow (Kleisli f) a = unwrap $ f a
 
+-- now for the Parrow stuff
+
+type Parrow arr a b = [arr a b]
+
 class (Arrow arr) => ParallelSpawn arr where
     spawn :: (NFData b) => Parrow arr a b -> arr [a] [b]
 
+-- some sugar
+
+(...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c
+(...) parr arr = map (>>> arr) parr
+
+(....) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
+(....) f g = zipWith (>>>) f g
+
+-- minor stuff, remove this?
+
+toPar :: (Arrow arr) => arr a b -> Parrow arr a b
+toPar = return
+(<|||>) :: (Arrow arr) => Parrow arr a b -> arr a b -> Parrow arr a b
+(<|||>) fs g = fs ++ [g]
+(<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
+(<||||>) = (++)
+
+-- merge a computation, this is basically a parallel zipWith
+
+(<$$$>) :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
+(<$$$>) arr as = runArrow (spawn arr) as
+
+-- some skeletons
+
 parZipWith :: (ParallelSpawn arr, ArrowRun arr, NFData b) => Parrow arr a b -> [a] -> [b]
-parZipWith fs as = runArrow (spawn fs) as
+parZipWith = (<$$$>)
 
 parMap :: (ParallelSpawn arr, ArrowRun arr, NFData b) => arr a b -> [a] -> [b]
 parMap fn as = parZipWith (replicate (length as) fn) as
