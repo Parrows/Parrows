@@ -1,50 +1,22 @@
 module ParallelSplit.ParMonad where
 
 import ParallelSplit.Definition
-import Control.Monad.Par (runPar, spawn_, get)
+import Control.Monad.Par
 import Control.Parallel.Strategies
 import Data.List.Split
+import Control.Monad
+import Control.Arrow
 
--- do we use spawn or spawnP here?
--- how does the strictness concern us here?
+spawn' f x = do y <- spawnP (f x)
+                get y
 
-{-instance ParallelSplit ParKleisli where
-    (<||>) f g = P $ \a -> PR $ runPar $ do y1 <- spawn_ (return (evalKleisli f a))
-                                            y2 <- spawn_ (return (evalKleisli g a))
-                                            b  <- get y1
-                                            c  <- get y2
-                                            return (b, c)
-    (<&&>) (P f) mergefn = P $ \a -> let (PR bc) = f a
-                                     in PR $ uncurry mergefn bc
-    (<|||>) f g = P $ \(a, c) -> PR $ runPar $ do y1 <- spawn_ (return (evalKleisli f a))
-                                                  y2 <- spawn_ (return (evalKleisli g c))
-                                                  b  <- get y1
-                                                  d  <- get y2
-                                                  return (b, d)
-    (<&&&>) (P f) mergefn = P $ \ac -> let (PR bd) = f ac
-                                       in PR $ uncurry mergefn bd
--}
-instance ParallelSplit (->) where
-    (<||>) f g = \a -> runPar $ do y1 <- spawn_ (return (f a))
-                                   y2 <- spawn_ (return (g a))
-                                   b  <- get y1
-                                   c  <- get y2
-                                   return (b, c)
-    (<&&>) f mergefn = \a -> let bc = f a
-                             in uncurry mergefn bc
-    (<|||>) f g = \(a, c) -> runPar $ do y1 <- spawn_ (return (f a))
-                                         y2 <- spawn_ (return (g c))
-                                         b  <- get y1
-                                         d  <- get y2
-                                         return (b, d)
-    (<&&&>) f mergefn = \ac -> let bd = f ac
-                               in uncurry mergefn bd
+parZipWith' :: (ArrowRun arr, NFData b) => [arr a b] -> arr [a] (Par [b])
+parZipWith' fs = arr $ \as -> do
+                                 ibs <- zipWithM (\f a -> Control.Monad.Par.spawn $ return ((runArrow f a))) fs as
+                                 mapM get ibs
 
-unwrapKleisli :: ParKleisli a b -> a -> ParRes b
-unwrapKleisli (P f) = f
+instance ParallelSpawn (->) where
+    spawn fs = \as -> runPar $ parZipWith' fs as
 
-unwrapParRes :: ParRes a -> a
-unwrapParRes (PR a) = a
-
-evalKleisli :: ParKleisli a b -> a -> b
-evalKleisli fn a = unwrapParRes $ unwrapKleisli fn a
+instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
+    spawn fs = arr $ \as -> runPar $ parZipWith' (map runArrow fs) as

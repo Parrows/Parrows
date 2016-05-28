@@ -1,6 +1,6 @@
 module NewDC where
 
-import ParallelSplit.Multicore
+import ParallelSplit.ParMonad
 import ParallelSplit.Definition
 import Control.Parallel.Strategies hiding (parMap)
 import Data.List
@@ -9,7 +9,7 @@ import Control.DeepSeq (rnf)
 import Debug.Trace
 
 parMap' :: (NFData b) => (a -> b) -> [a] -> [b]
-parMap' f as = trace (show (length as)) using (parMap num_cores f as) rpar
+parMap' f as = parMap f as
 
 -- old Eden code below, has Trans context removed, but needs NFData context. added
 

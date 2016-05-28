@@ -32,10 +32,10 @@ rows matrix = reverse $ go (dimY matrix - 1) matrix
 matrixP :: Matrix -> Matrix -> Matrix
 matrixP x y
     | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ parMap 4 sum (zipWith (*) <$> rows x <*> y)
+    | otherwise = chunksOf (dimX y) $ parMap sum (zipWith (*) <$> rows x <*> y)
 
 testMatrix :: Matrix
-testMatrix = replicate 1500 [1..1500]
+testMatrix = replicate 100 [1..100]
 
 main :: IO ()
 main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
