@@ -11,5 +11,5 @@ import Control.Arrow
 instance ParallelSpawn (->) where
     spawn fs = \as -> zipWith ($) fs as `using` parList rdeepseq
 
-instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
-    spawn fs = arr $ \as -> spawn (map runArrow fs) as
+--instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
+--    spawn fs = arr $ \as -> spawn (map runArrow fs) as

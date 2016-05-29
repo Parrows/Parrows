@@ -1,3 +1,4 @@
+{-# LANGUAGE Arrows, FlexibleInstances #-}
 module ParallelSplit.Definition where
 
 import Control.Arrow
@@ -10,7 +11,7 @@ import Data.List.Split
 type Parrow arr a b = [arr a b]
 
 class (Arrow arr) => ParallelSpawn arr where
-    spawn :: (NFData b) => Parrow arr a b -> arr [a] [b]
+    spawn :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
 -- some sugar
 
@@ -31,27 +32,26 @@ toPar = return
 
 -- merge a computation, this is basically a parallel zipWith
 
-(<$$>) :: (ParallelSpawn arr, NFData b) => Parrow arr a b -> arr [a] [b]
+(<$$>) :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
 (<$$>) = spawn
 
 -- some skeletons
 
 parEval :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
-parEval = arr (<$$>)
+parEval = (<$$>)
 
 {-
 parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (a, b) c -> [a] -> (arr [b] [c])
 parZipWith fn as = arr $ \bs -> app (_, bs)
 -}
 
-len :: (Arrow arr) => arr [a] Int
-len = arr $ length
+--parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
+--parMap = (arr $ \(fn, as) ->
+--                let fns = replicate (length as) fn
+--                in (spawn fns, as)) >>> app
 
-rep :: (ArrowApply arr) => arr (Int, (arr a b)) (Parrow arr a b)
-rep = arr $ \(l, fn) -> app (app (arr replicate, l), fn)
 
---arr (app (app (arr replicate, app (arr length, [1])), (+1)))
-
---arr (app (app (arr replicate, app (arr length, as)), fn))
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
-parMap = arr $ \(fn, as) -> app (app (parEval, app (rep, ((app (len, as), arr fn)) ) ), as)
+parMap = (arr $ \(fn, as) ->
+                let fns = replicate (length as) fn
+                in (fns, as)) >>> (first parEval) >>> app
