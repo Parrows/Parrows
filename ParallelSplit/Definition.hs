@@ -13,6 +13,12 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     spawn :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
+class (Monad m) => MonadUnwrap m where
+    unwrap :: m a -> a
+
+instance (NFData b, MonadUnwrap m) => (NFData (m b)) where
+    rnf mon = rnf (unwrap mon)
+
 -- some sugar
 
 (...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c

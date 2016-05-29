@@ -19,4 +19,4 @@ instance ParallelSpawn (->) where
     spawn fs = \as -> runPar $ parEval' fs as
 
 --instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
---    spawn fs = arr $ \as -> runPar $ parEval' (map runArrow fs) as
+--    spawn = (arr $ \fs -> Kleisli $ \as -> runPar $ parEval' (map unwrap fs) as)
