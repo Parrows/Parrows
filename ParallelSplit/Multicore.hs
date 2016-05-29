@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 module ParallelSplit.Multicore where
 
 import ParallelSplit.Definition

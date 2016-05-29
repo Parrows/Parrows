@@ -1,4 +1,4 @@
-{-# LANGUAGE Arrows, FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module ParallelSplit.Definition where
 
 import Control.Arrow
