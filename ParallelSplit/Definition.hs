@@ -52,6 +52,4 @@ parZipWith fn as = arr $ \bs -> app (_, bs)
 
 
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
-parMap = (arr $ \(fn, as) ->
-                let fns = replicate (length as) fn
-                in (fns, as)) >>> (first parEval) >>> app
+parMap = (arr $ \(fn, as) -> (replicate (length as) fn, as)) >>> (first parEval) >>> app
