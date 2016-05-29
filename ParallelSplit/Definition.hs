@@ -6,6 +6,7 @@ import Control.Category
 
 import Data.Monoid
 import Data.List.Split
+import Data.List
 
 type Parrow arr a b = [arr a b]
 
@@ -23,7 +24,12 @@ class (Monad m) => MonadUnwrap m where
 (....) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
 (....) f g = zipWith (>>>) f g
 
--- minor stuff, remove this?
+-- behaves like <*> on lists and combines them with (....)
+
+(<*....>) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
+(<*....>) fs gs = concat $ zipWith (....) (repeat fs) (permutations gs)
+
+-- minor stuff, remove this? these are basically just operations on lists
 
 toPar :: (Arrow arr) => arr a b -> Parrow arr a b
 toPar = return
@@ -31,8 +37,6 @@ toPar = return
 (<|||>) fs g = fs ++ [g]
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
 (<||||>) = (++)
-
--- merge a computation, this is basically a parallel zipWith
 
 (<$$>) :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
 (<$$>) = spawn
