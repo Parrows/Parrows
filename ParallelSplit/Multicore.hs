@@ -13,4 +13,4 @@ instance ParallelSpawn (->) where
     spawn fs = \as -> zipWith ($) fs as `using` parList rdeepseq
 
 instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
-    spawn = (arr $ \fs -> Kleisli $ \as -> sequence (zipWith (\f a -> runKleisli f a) fs as `using` parList rdeepseq))
+    spawn = (arr $ \fs -> Kleisli $ \as -> sequence (map return (zipWith (\f a -> unwrap (runKleisli f a)) fs as `using` parList rdeepseq)))

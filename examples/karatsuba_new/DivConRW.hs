@@ -97,7 +97,7 @@ divConRW depth _ trivial solve split combine x
  where children = 
 	if depth>0 then
 	    -- parallel
-	    combine x $ parMap (divConRW (depth-1) 0 trivial solve split combine) (split x)
+	    combine x $ parMap ((divConRW (depth-1) 0 trivial solve split combine), (split x))
 	else
 	    -- sequential weiter
 	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)

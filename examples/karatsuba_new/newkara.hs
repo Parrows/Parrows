@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS -cpp #-}
 module Main where
 -- import Eden
@@ -135,7 +136,7 @@ sumSeqS (is1,b1) (is2,b2)
  | b1==b2 = (sumSeq is1 is2,b1)
  | mayor is1 is2 = (resSeq is1 is2,b1)
  | otherwise = (resSeq is2 is1,b2)
- where mayor a b = True  -- To do: Cambiar representación para no 
+ where mayor a b = True  -- To do: Cambiar representaciï¿½n para no 
                          --        necesitar reverse en las comparaciones?
 
 resSeqS is1S (is2,b2) = sumSeqS is1S (is2,not b2)

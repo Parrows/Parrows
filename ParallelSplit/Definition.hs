@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
 module ParallelSplit.Definition where
 
 import Control.Arrow
@@ -15,9 +14,6 @@ class (Arrow arr) => ParallelSpawn arr where
 
 class (Monad m) => MonadUnwrap m where
     unwrap :: m a -> a
-
-instance (NFData b, MonadUnwrap m) => (NFData (m b)) where
-    rnf mon = rnf (unwrap mon)
 
 -- some sugar
 
