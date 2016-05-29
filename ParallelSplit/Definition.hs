@@ -42,16 +42,8 @@ toPar = return
 parEval :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
 parEval = (<$$>)
 
-{-
-parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (a, b) c -> [a] -> (arr [b] [c])
-parZipWith fn as = arr $ \bs -> app (_, bs)
--}
-
---parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
---parMap = (arr $ \(fn, as) ->
---                let fns = replicate (length as) fn
---                in (spawn fns, as)) >>> app
-
+parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (arr (a, b) c, ([a], [b])) [c]
+parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
 parMap = (first $ arr repeat) >>> (first parEval) >>> app
