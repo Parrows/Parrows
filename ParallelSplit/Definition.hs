@@ -13,7 +13,7 @@ import Data.List
 type Parrow arr a b = [arr a b]
 
 class (Arrow arr) => ParallelSpawn arr where
-    spawn :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
+    parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
 class (Monad m) => MonadUnwrap m where
     unwrap :: m a -> a
@@ -39,11 +39,6 @@ toPar = return
 (<|||>) fs g = fs ++ [g]
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
 (<||||>) = (++)
-
--- evaluate N functions with the same types in parallel
-
-parEvalN :: (ParallelSpawn arr, NFData b) => arr (Parrow arr a b) (arr [a] [b])
-parEvalN = spawn
 
 -- evaluate two functions with different types in parallel
 

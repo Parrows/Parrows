@@ -16,7 +16,7 @@ parEval' fs = arr $ \as -> do
                                  mapM get ibs
 
 instance ParallelSpawn (->) where
-    spawn fs = \as -> runPar $ parEval' fs as
+    parEvalN fs = \as -> runPar $ parEval' fs as
 
 --instance (MonadUnwrap m) => ParallelSpawn (Kleisli m) where
 --    spawn = (arr $ \fs -> Kleisli $ \as -> runPar $ parEval' (map unwrap fs) as)
