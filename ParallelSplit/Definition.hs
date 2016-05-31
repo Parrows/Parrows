@@ -15,8 +15,23 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
+-- is this needed?
+
 class (Monad m) => MonadUnwrap m where
     unwrap :: m a -> a
+
+-- is this needed? probably because of the same reason as MonadUnwrap is needed
+-- in order to lift an arrow to a map we need to know about the internals (see Kleisli))
+-- also this is the same requirement that ParallelSplit needs to be a class as we cannot
+
+class (Arrow arr) => MappableArrow arr where
+    toMap :: arr (arr a b) (arr [a] [b])
+
+instance MappableArrow (->) where
+    toMap f = \as -> map f as
+
+instance (MonadUnwrap m) => MappableArrow (Kleisli m) where
+    toMap = Kleisli $ \(Kleisli f) -> return (Kleisli $ \as -> return (map (\a -> unwrap $ f a) as))
 
 -- some sugar
 
@@ -41,6 +56,18 @@ toPar = return
 (<||||>) = (++)
 
 -- evaluate two functions with different types in parallel
+
+--thing :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr [arr [a] [b]] (arr [[a]] [[b]])
+--thing = (arr $ \fchunks -> ((arr $ zipWith (,) fchunks) >>> _))
+
+--parEvalNLazy :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
+--parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
+--               (first $ (arr $ map (\x -> arr $ parEvalN x))) >>>
+--               (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
+--               (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> _)
+
+
+--               (arr $ \(fchunks, chunkSize) -> arr ($)) >>> _
 
 parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
 parEval2 = (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
