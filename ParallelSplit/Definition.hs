@@ -60,11 +60,14 @@ toPar = return
 --thing :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr [arr [a] [b]] (arr [[a]] [[b]])
 --thing = (arr $ \fchunks -> ((arr $ zipWith (,) fchunks) >>> _))
 
---parEvalNLazy :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
---parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
---               (first $ (arr $ map (\x -> arr $ parEvalN x))) >>>
---               (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
---               (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> _)
+parEvalNLazy :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
+parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
+               (first $ (arr $ map (\x -> (parEvalN, x))) >>> listApp) >>>
+               (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
+               (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> (arr $ zipWith (,) fchunks) >>> listApp >>> (arr $ concat) )
+               where
+                   listApp :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr) => arr [(arr a b, a)] [b]
+                   listApp = (arr $ \fn -> ((toMap, app), fn)) >>> (first $ app) >>> app
 
 
 --               (arr $ \(fchunks, chunkSize) -> arr ($)) >>> _
