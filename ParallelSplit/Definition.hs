@@ -57,9 +57,6 @@ toPar = return
 
 -- evaluate two functions with different types in parallel
 
---thing :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr [arr [a] [b]] (arr [[a]] [[b]])
---thing = (arr $ \fchunks -> ((arr $ zipWith (,) fchunks) >>> _))
-
 parEvalNLazy :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
 parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
                (first $ (arr $ map (\x -> (parEvalN, x))) >>> listApp) >>>
@@ -68,9 +65,6 @@ parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>
                where
                    listApp :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr) => arr [(arr a b, a)] [b]
                    listApp = (arr $ \fn -> ((toMap, app), fn)) >>> (first $ app) >>> app
-
-
---               (arr $ \(fchunks, chunkSize) -> arr ($)) >>> _
 
 parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
 parEval2 = (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
