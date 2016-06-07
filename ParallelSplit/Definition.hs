@@ -7,6 +7,7 @@ import Control.Category
 import Control.Monad
 
 import Data.Monoid
+import Data.Maybe
 import Data.List.Split
 import Data.List
 
@@ -41,6 +42,12 @@ instance (MonadUnwrap m) => MappableArrow (Kleisli m) where
 (....) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
 (....) f g = zipWith (>>>) f g
 
+-- takes a and produces and arrow that maps from b to (a, b)
+-- utility function for usage of parMap etc.
+-- someArrow >>> (tup $ arrow) >>> parMap
+tup :: (Arrow arr) => a -> arr b (a, b)
+tup a = arr $ \b -> (a, b)
+
 -- behaves like <*> on lists and combines them with (....)
 
 (<*....>) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
@@ -69,10 +76,8 @@ parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>
 parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
 parEval2 = (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
          (arr $ \(f, g) -> replicate 2 (first f >>> second g)) >>> parEvalN >>>
-         (arr $ \f -> (arr $ \(a, c) -> (f, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (uwrap (fst (comb !! 0)), uwrap (snd (comb !! 1)))))
+         (arr $ \f -> (arr $ \(a, c) -> (f, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1)))))
          where
-             uwrap (Just x) = x
-             uwrap (Nothing) = error "unexpected Nothing"
              arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
              arrMaybe fn = (arr $ go) >>> app
                  where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
