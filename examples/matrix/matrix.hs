@@ -39,8 +39,14 @@ matrixP x y
 instance MonadUnwrap Maybe where
     unwrap = fromJust
 
+-- hacky
+matrixPKleisli :: Kleisli (Maybe) (Matrix, Matrix) Vector
+matrixPKleisli = (Kleisli $ (\(x, y) -> Just (zipWith (*) <$> rows x <*> y)))>>>
+                 (tup (arr sum)) >>> parMap
+
 testMatrix :: Matrix
-testMatrix = replicate 100 [1..100]
+testMatrix = replicate 1000 [1..100]
 
 main :: IO ()
-main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
+--main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
+main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))
