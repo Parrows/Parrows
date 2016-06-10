@@ -3,6 +3,8 @@
 import ParallelSplit.Definition
 import ParallelSplit.Multicore
 import Data.List.Split
+import Data.Maybe
+import Control.Arrow
 
 type Scalar = Float
 type Vector = [Scalar]
@@ -32,7 +34,10 @@ rows matrix = reverse $ go (dimY matrix - 1) matrix
 matrixP :: Matrix -> Matrix -> Matrix
 matrixP x y
     | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ parMap sum (zipWith (*) <$> rows x <*> y)
+    | otherwise = chunksOf (dimX y) $ parMap (sum, (zipWith (*) <$> rows x <*> y))
+
+instance MonadUnwrap Maybe where
+    unwrap = fromJust
 
 testMatrix :: Matrix
 testMatrix = replicate 100 [1..100]
