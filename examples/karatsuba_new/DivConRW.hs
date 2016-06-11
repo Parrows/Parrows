@@ -22,8 +22,9 @@ import Control.Parallel.Strategies (parList,using,NFData)
 import Control.Parallel.Strategies (rdeepseq,Strategy)
 
 import ParallelSplit.Definition
-import ParallelSplit.ParMonad
---import ParallelSplit.Multicore
+--import ParallelSplit.ParMonad
+import Control.Arrow
+import ParallelSplit.Multicore
 
 -- import Eden
 -- import RW 
@@ -37,6 +38,7 @@ import ParallelSplit.ParMonad
 import Data.List
 import System.IO.Unsafe
 import Control.Monad
+import Data.Maybe
 -- import Observe 
 
 rnf :: NFData a => Strategy a
@@ -90,6 +92,17 @@ divConRW depth nrTasks trivial solve split combine x
 
 --parMap f xs = map f xs `using` parList rnf
 
+instance MonadUnwrap Maybe where
+    unwrap = fromJust
+
+parMapHack :: (NFData b) => (a -> b) -> [a] -> [b]
+parMapHack f as = fromJust (runKleisli (hack f) as)
+    where hack :: (NFData b) => (a -> b) -> Kleisli Maybe [a] [b]
+          hack f = ((tup (arr f)) >>> parMap)
+
+parMapF :: (NFData b) => (a -> b) -> [a] -> [b]
+parMapF = curry parMap
+
 divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x 
  | trivial x = solve x
@@ -97,7 +110,7 @@ divConRW depth _ trivial solve split combine x
  where children = 
 	if depth>0 then
 	    -- parallel
-	    combine x $ parMap ((divConRW (depth-1) 0 trivial solve split combine), (split x))
+	    combine x $ parMapHack (divConRW (depth-1) 0 trivial solve split combine) (split x)
 	else
 	    -- sequential weiter
 	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)

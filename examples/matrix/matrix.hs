@@ -45,8 +45,8 @@ matrixPKleisli = (Kleisli $ (\(x, y) -> Just (zipWith (*) <$> rows x <*> y)))>>>
                  (tup (arr sum)) >>> parMap
 
 testMatrix :: Matrix
-testMatrix = replicate 1000 [1..100]
+testMatrix = replicate 1000 [1..1000]
 
 main :: IO ()
---main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
-main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))
+main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
+--main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))
