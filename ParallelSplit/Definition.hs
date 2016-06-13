@@ -16,10 +16,8 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
--- is this needed?
-
-class (Monad m) => MonadUnwrap m where
-    unwrap :: m a -> a
+class (Monad m) => MonadStrict m where
+    strict :: (NFData a) => m a -> m a
 
 -- is this needed? probably because of the same reason as MonadUnwrap is needed
 -- in order to lift an arrow to a map we need to know about the internals (see Kleisli))
@@ -31,8 +29,8 @@ class (Arrow arr) => MappableArrow arr where
 instance MappableArrow (->) where
     toMap f = \as -> map f as
 
-instance (MonadUnwrap m) => MappableArrow (Kleisli m) where
-    toMap = Kleisli $ \(Kleisli f) -> return (Kleisli $ \as -> return (map (\a -> unwrap $ f a) as))
+instance (Monad m) => MappableArrow (Kleisli m) where
+    toMap = Kleisli $ \(Kleisli f) -> return (Kleisli $ \as -> sequence (map (\a -> f a) as))
 
 -- some sugar
 
