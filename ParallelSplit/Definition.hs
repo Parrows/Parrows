@@ -16,12 +16,20 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
-class (Monad m) => MonadStrict m where
-    strict :: (NFData a) => m a -> m a
+makeStrict :: (NFData a, Monad m) => a -> m a
+makeStrict a = rnf a `seq` return a
 
 -- is this needed? probably because of the same reason as MonadUnwrap is needed
 -- in order to lift an arrow to a map we need to know about the internals (see Kleisli))
 -- also this is the same requirement that ParallelSplit needs to be a class as we cannot
+
+--tm :: (Arrow arr) => arr (arr a b) (arr [a] [b])
+--tm = (arr $ \f -> (arr $ \as -> (repeat f, as)) >>> _ )
+
+--fn :: (ArrowApply arr) => arr ([arr a b], [a]) [b]
+--fn = arr $ f where
+--    f (_, []) = []
+--    f (f:fs, a:as) = (app (f, a)) : f (fs, as)
 
 class (Arrow arr) => MappableArrow arr where
     toMap :: arr (arr a b) (arr [a] [b])
