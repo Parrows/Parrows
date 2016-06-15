@@ -19,26 +19,15 @@ class (Arrow arr) => ParallelSpawn arr where
 makeStrict :: (NFData a, Monad m) => a -> m a
 makeStrict a = rnf a `seq` return a
 
--- is this needed? probably because of the same reason as MonadUnwrap is needed
--- in order to lift an arrow to a map we need to know about the internals (see Kleisli))
--- also this is the same requirement that ParallelSplit needs to be a class as we cannot
+-- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
+mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
+mapA f = arr listcase >>>
+         arr (const []) ||| (f *** mapA f >>> arr (uncurry (:)))
+         where listcase [] = Left ()
+               listcase (x:xs) = Right (x,xs)
 
---tm :: (Arrow arr) => arr (arr a b) (arr [a] [b])
---tm = (arr $ \f -> (arr $ \as -> (repeat f, as)) >>> _ )
-
---fn :: (ArrowApply arr) => arr ([arr a b], [a]) [b]
---fn = arr $ f where
---    f (_, []) = []
---    f (f:fs, a:as) = (app (f, a)) : f (fs, as)
-
-class (Arrow arr) => MappableArrow arr where
-    toMap :: arr (arr a b) (arr [a] [b])
-
-instance MappableArrow (->) where
-    toMap f = \as -> map f as
-
-instance (Monad m) => MappableArrow (Kleisli m) where
-    toMap = Kleisli $ \(Kleisli f) -> return (Kleisli $ \as -> sequence (map (\a -> f a) as))
+listApp :: (ArrowChoice arr, ArrowApply arr) => arr [(arr a b, a)] [b]
+listApp = (arr $ \fn -> (mapA app, fn)) >>> app
 
 -- some sugar
 
@@ -70,14 +59,11 @@ toPar = return
 
 -- evaluate two functions with different types in parallel
 
-parEvalNLazy :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
+parEvalNLazy :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
 parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
                (first $ (arr $ map (\x -> (parEvalN, x))) >>> listApp) >>>
                (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
                (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> (arr $ zipWith (,) fchunks) >>> listApp >>> (arr $ concat) )
-               where
-                   listApp :: (ParallelSpawn arr, MappableArrow arr, ArrowApply arr) => arr [(arr a b, a)] [b]
-                   listApp = (arr $ \fn -> ((toMap, app), fn)) >>> (first $ app) >>> app
 
 parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
 parEval2 = (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
