@@ -16,9 +16,6 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
-makeStrict :: (NFData a, Monad m) => a -> m a
-makeStrict a = rnf a `seq` return a
-
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapA f = arr listcase >>>
