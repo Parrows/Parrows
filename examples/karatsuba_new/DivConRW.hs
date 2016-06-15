@@ -92,8 +92,6 @@ divConRW depth nrTasks trivial solve split combine x
 
 --parMap f xs = map f xs `using` parList rnf
 
-instance MonadUnwrap Maybe where
-    unwrap = fromJust
 
 parMapHack :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapHack f as = fromJust (runKleisli (hack f) as)
