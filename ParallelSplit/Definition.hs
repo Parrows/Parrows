@@ -17,14 +17,17 @@ class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
-mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
-mapA f = arr listcase >>>
-         arr (const []) ||| (f *** mapA f >>> arr (uncurry (:)))
+mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
+mapArr f = arr listcase >>>
+         arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
          where listcase [] = Left ()
                listcase (x:xs) = Right (x,xs)
 
+zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
+zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
+
 listApp :: (ArrowChoice arr, ArrowApply arr) => arr [(arr a b, a)] [b]
-listApp = (arr $ \fn -> (mapA app, fn)) >>> app
+listApp = (arr $ \fn -> (mapArr app, fn)) >>> app
 
 -- some sugar
 
