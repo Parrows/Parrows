@@ -21,10 +21,10 @@ import Control.Parallel (pseq)
 import Control.Parallel.Strategies (parList,using,NFData)  
 import Control.Parallel.Strategies (rdeepseq,Strategy)
 
-import ParallelSplit.Definition
 --import ParallelSplit.ParMonad
 import Control.Arrow
-import ParallelSplit.Multicore
+import Parrows.Definition
+import Parrows.Multicore
 
 -- import Eden
 -- import RW 

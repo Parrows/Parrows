@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module ParallelSplit.ParMonad where
+module Parrows.ParMonad where
 
-import ParallelSplit.Definition
+import Parrows.Definition
 import Control.Monad.Par
 import Control.Arrow
 

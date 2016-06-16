@@ -1,4 +1,4 @@
-module ParallelSplit.Definition where
+module Parrows.Definition where
 
 import Control.Arrow
 import Control.DeepSeq

@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module ParallelSplit.Multicore where
+module Parrows.Multicore where
 
-import ParallelSplit.Definition
+import Parrows.Definition
 
 import Control.Parallel
 import Control.Parallel.Strategies

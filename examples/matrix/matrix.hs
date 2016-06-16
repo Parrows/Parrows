@@ -1,7 +1,7 @@
 -- Matrix Multiplication is a parMap
 
-import ParallelSplit.Definition
-import ParallelSplit.Multicore
+import Parrows.Definition
+import Parrows.Multicore
 import Data.List.Split
 import Data.Maybe
 import Control.Arrow
