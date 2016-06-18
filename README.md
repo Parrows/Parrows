@@ -43,6 +43,19 @@ parMap:
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
 ```
 
+Syntactic Sugar and Utilities
+-----------------------------
+
+tup:
+
+```haskell
+-- takes a and produces and arrow that maps from b to (a, b)
+-- utility function for usage of parMap etc.
+-- someArrow >>> (tup $ arrow) >>> parMap
+tup :: (Arrow arr) => a -> arr b (a, b)
+tup a = arr $ \b -> (a, b)
+```
+
 
 Currently supported modes:
 -------------------------
