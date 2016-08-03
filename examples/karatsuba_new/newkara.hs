@@ -5,34 +5,56 @@ module Main where
 import System.Environment
 -- import DivConN
 import DivConRW hiding (rnf)
+import Criterion.Main
 
 import Control.DeepSeq
 import Prelude hiding (seq) -- exported in DC
 
-usage = "I need 4 parameters! version(0-dc,1-dcTickets,2-dcMW,3-dcFarm), parallel depth, " 
-	++ "no. of digits (for number 1 and 2)"
+usage = "I need 3 parameters!, parallel depth, "
+    ++ "no. of digits (for number 1 and 2)"
 
-main = do args <- getArgs
-	  if length args < 4 
-	   then putStrLn usage
-	   else 
-            let i1'  = read i1
-                i2' = read i2
-                d'  = read d
-                t'  = read t
-                is  = concat (repeat [1..9])
-                mi1 = take i1' is
-                mi2 = take i2' is
-                result = karat t' d' mi1 mi2
-	        (t:d:i1:i2:_) = args
-             in rnf result 
-		   `seq` 
-#ifdef CHECK 
-		         print ((fromMyInteger (fromD result)) 
-				      == (fromMyInteger mi1)*(fromMyInteger mi2))
-#else 
-                         print "done" 
-#endif
+fib :: Int -> Int
+fib 0 = 0
+fib 1 = 1
+fib n = fib (n-1) + fib (n-2)
+
+main = let
+       i1' = read "800"
+       i2' = read "800"
+       d'  = read "4"
+       is  = concat (repeat [1..9])
+       mi1 = take i1' is
+       mi2 = take i2' is
+       tmp = karat 2 mi1 mi2
+       tmpSeq = karat (-1) mi1 mi2
+       in
+           defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
+                                            bench "seq" $ whnf tmpSeq 0,
+                                            bench "par" $ whnf tmp d'
+                                       ]
+                        ]
+
+{-main = do
+           args <- getArgs
+           if length args < 3
+           then putStrLn usage
+           else
+                let
+                    i1' = read i1
+                    i2' = read i2
+                    d'  = read d
+                    is  = concat (repeat [1..9])
+                    mi1 = take i1' is
+                    mi2 = take i2' is
+                    (d:i1:i2:_) = args
+                    tmp = karat 2 mi1 mi2
+                in
+                defaultMain [
+                    bgroup ("karat " ++ d ++ ", " ++ i1 ++ ", " ++ i2) [ bench "par" $ whnf tmp d',
+                    bench "seq" $ whnf tmp 0
+                ]]
+-}
+
 
 fromMyInteger :: MyInteger -> Integer
 fromMyInteger [] = 0
@@ -62,14 +84,16 @@ base::Int
 base = 10   -- To do: Meter dentro del tipo?      
 
 
-karat :: Int -> Int -> MyInteger -> MyInteger -> D MyInteger
+karat :: Int -> MyInteger -> MyInteger -> Int -> D MyInteger
 -- karat 0 depth is1 is2 = dcN_c 3 depth trivial solve split combine (D (is1,is2))
 -- karat 1 depth is1 is2 = dcNTickets_c 3 tickets trivial solve split combine seqDC 
 --			             (D (is1,is2))
 --  where tickets = [2..noPe]
 --	seqDC x = if trivial x then solve x else combine x (map seqDC (split x))
-karat 2 depth is1 is2 = divConRW 3 depth trivial solve split combine (D (is1,is2))
+karat 2 is1 is2 depth = divConRW 3 depth trivial solve split combine (D (is1,is2))
+karat (-1) is1 is2 depth = divConRW 0 depth trivial solve split combine (D (is1,is2))
 -- karat 3 depth is1 is2 = divConFarm depth trivial solve split combine (D (is1,is2))
+--
 
 karat _ _ _ _ = D [] -- error...
 

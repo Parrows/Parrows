@@ -53,6 +53,9 @@ zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
 listApp :: (ArrowChoice arr, ArrowApply arr) => arr [(arr a b, a)] [b]
 listApp = (arr $ \fn -> (mapArr app, fn)) >>> app
 
+listsApp :: (ArrowChoice arr, ArrowApply arr) => arr ([arr a b], [a]) [b]
+listsApp = (arr $ \(fs, as) -> zipWith (,) fs as) >>> listApp
+
 -- some sugar
 
 (...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c
@@ -68,7 +71,6 @@ tup :: (Arrow arr) => a -> arr b (a, b)
 tup a = arr $ \b -> (a, b)
 
 -- behaves like <*> on lists and combines them with (....)
-
 (<*....>) :: (Arrow arr) => Parrow arr a b -> Parrow arr b c -> Parrow arr a c
 (<*....>) fs gs = concat $ zipWith (....) (repeat fs) (permutations gs)
 
@@ -81,28 +83,54 @@ toPar = return
 (<||||>) :: (Arrow arr) => Parrow arr a b -> Parrow arr a b -> Parrow arr a b
 (<||||>) = (++)
 
--- evaluate two functions with different types in parallel
-
+-- spawns the first n arrows to be evaluated in parallel. this works for infinite lists
+-- of arrows as well (think: parEvalNLazy (map (*) [1..], 10) [2..])
 parEvalNLazy :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
-parEvalNLazy = (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
+parEvalNLazy = -- chunk the functions
+               (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
+               -- feed the function chunks into parEvalN
                (first $ (arr $ map (\x -> (parEvalN, x))) >>> listApp) >>>
+               -- chunk the input accordingly
                (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
+               -- evaluate the function chunks in parallel and concat the input to a single list again
                (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> (arr $ zipWith (,) fchunks) >>> listApp >>> (arr $ concat) )
 
+-- evaluate two functions with different types in parallel
 parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
-parEval2 = (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
-         (arr $ \(f, g) -> replicate 2 (first f >>> second g)) >>> parEvalN >>>
-         (arr $ \f -> (arr $ \(a, c) -> (f, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1)))))
-         where
-             arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
-             arrMaybe fn = (arr $ go) >>> app
-                 where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
-                       go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
+parEval2 = -- lift the functions to "maybe evaluated" functions
+           -- so that if they are passed a Nothing they don't compute anything
+           (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
+           -- make a list of two of these functions evaluated after each other
+           (arr $ \(f, g) -> replicate 2 (first f >>> second g)) >>> parEvalN >>>
+           -- feed each function the real value and one Nothing for the function they don't have to compute
+           -- and combine them back to a tuple
+           (arr $ \f -> (arr $ \(a, c) -> (f, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1)))))
+           where
+               arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
+               arrMaybe fn = (arr $ go) >>> app
+                   where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
+                         go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
 
 -- some skeletons
 
 parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (arr (a, b) c, ([a], [b])) [c]
 parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 
+-- same as parZipWith but with the same difference as parMapChunky has compared to parMap
+parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (arr (a, b) c, ([a], [b], Int)) [c]
+parZipWithChunky = (second $ arr $ (as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
+
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
 parMap = (first $ arr repeat) >>> (first parEvalN) >>> app
+
+-- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
+-- evaluated on the same thread
+parMapChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (arr a b, ([a], Int)) [b]
+parMapChunky =  -- chunk the input
+                (second $ arr $ \(as, chunkSize) -> (chunksOf chunkSize as)) >>>
+                -- inside of a chunk, behave sequentially
+                (first $ arr mapArr) >>> (first $ arr repeat) >>>
+                -- transform the map-chunks into a parallel function and apply it
+                (first $ parEvalN) >>> app >>>
+                -- [[b]] --> [b]
+                (arr concat)

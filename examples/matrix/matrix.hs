@@ -30,6 +30,9 @@ import Data.List.Split
 import Data.Maybe
 import Control.Arrow
 
+import Criterion.Main
+import Control.DeepSeq
+
 type Scalar = Float
 type Vector = [Scalar]
 type Matrix = [Vector]
@@ -58,7 +61,12 @@ rows matrix = reverse $ go (dimY matrix - 1) matrix
 matrixP :: Matrix -> Matrix -> Matrix
 matrixP x y
     | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ parMap (sum, (zipWith (*) <$> rows x <*> y))
+    | otherwise = chunksOf (dimX y) $ parMapChunky (sum, ((zipWith (*) <$> rows x <*> y), 20))
+
+matrixPSeq :: Matrix -> Matrix -> Matrix
+matrixPSeq x y
+    | dimX x /= dimY y = error "dimX x not equal to dimY y"
+    | otherwise = chunksOf (dimX y) $ (uncurry map) (sum, (zipWith (*) <$> rows x <*> y))
 
 -- hacky
 matrixPKleisli :: Kleisli (Maybe) (Matrix, Matrix) Vector
@@ -69,5 +77,13 @@ testMatrix :: Matrix
 testMatrix = replicate 1000 [1..1000]
 
 main :: IO ()
-main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
+main = let matrixPar = matrixP testMatrix
+           matrixSeq matrix = length $ matrixPSeq testMatrix matrix
+       in
+        defaultMain [ bgroup ("matrixP") [
+                                    bench "par" $ whnf matrixPar testMatrix,
+                                    bench "seq" $ whnf matrixSeq testMatrix
+                               ]
+                    ]
+--main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
 --main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))
