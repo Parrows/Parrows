@@ -19,6 +19,10 @@ cabal.sandbox.config
 
 *.iml
 
+*.kdev4
+
+Parrows.cabal
+
 .idea/
 
 *.eventlog
