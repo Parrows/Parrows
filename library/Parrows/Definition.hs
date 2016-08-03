@@ -117,8 +117,8 @@ parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (arr (a, b) c
 parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 
 -- same as parZipWith but with the same difference as parMapChunky has compared to parMap
-parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (arr (a, b) c, ([a], [b], Int)) [c]
-parZipWithChunky = (second $ arr $ (as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
+parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData c) => arr (arr (a, b) c, ([a], [b], Int)) [c]
+parZipWithChunky = (second $ arr $ \(as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
 
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
 parMap = (first $ arr repeat) >>> (first parEvalN) >>> app

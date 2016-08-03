@@ -1,0 +1,62 @@
+# This YAML file describes your package. Stack will automatically generate a
+# Cabal file when you run `stack build`. See the hpack website for help with
+# this file: <https://github.com/sol/hpack>.
+benchmarks:
+  Parrows-benchmarks:
+    dependencies:
+    - base
+    - Parrows
+    - criterion
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: benchmark
+category: Other
+description: Multithreaded evaluation using Arrows
+executables:
+  Parrows:
+    dependencies:
+    - base
+    - Parrows
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: executable
+extra-source-files:
+- CHANGELOG.md
+- LICENSE.md
+- package.yaml
+- README.md
+- stack.yaml
+ghc-options: -Wall
+github: githubuser/Parrows
+library:
+  dependencies:
+  - base
+  - deepseq
+  - monad-par
+  - parallel
+  - split
+  source-dirs: library
+license: MIT
+maintainer: Martin Braun
+name: Parrows
+synopsis: Multithreaded evaluation using Arrows
+tests:
+  Parrows-test-suite:
+    dependencies:
+    - base
+    - Parrows
+    - tasty
+    - tasty-hspec
+    ghc-options:
+    - -rtsopts
+    - -threaded
+    - -with-rtsopts=-N
+    main: Main.hs
+    source-dirs: test-suite
+version: '0.1.0.0'

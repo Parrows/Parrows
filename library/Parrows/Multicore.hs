@@ -1,3 +1,4 @@
+{-
 The MIT License (MIT)
 
 Copyright (c) 2016 Martin Braun
@@ -20,3 +21,16 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
+module Parrows.Multicore where
+
+import Parrows.Definition
+
+import Control.Parallel.Strategies
+import Control.Arrow
+
+-- TODO: express this with listsApp
+
+instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
+    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
