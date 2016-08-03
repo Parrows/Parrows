@@ -20,6 +20,7 @@ cabal.sandbox.config
 *.iml
 
 *.kdev4
+.kdev/
 
 Parrows.cabal
 
