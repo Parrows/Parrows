@@ -24,7 +24,7 @@ import Control.Parallel.Strategies (rdeepseq,Strategy)
 --import ParallelSplit.ParMonad
 import Control.Arrow
 import Parrows.Definition
-import Parrows.Multicore
+import Parrows.ParMonad
 
 -- import Eden
 -- import RW 

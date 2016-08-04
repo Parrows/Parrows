@@ -61,7 +61,7 @@ rows matrix = reverse $ go (dimY matrix - 1) matrix
 matrixP :: Matrix -> Matrix -> Matrix
 matrixP x y
     | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ parMapChunky (sum, ((zipWith (*) <$> rows x <*> y), 5))
+    | otherwise = chunksOf (dimX y) $ parMapChunky (sum, ((zipWith (*) <$> rows x <*> y), 50))
 
 matrixPSeq :: Matrix -> Matrix -> Matrix
 matrixPSeq x y
@@ -74,16 +74,18 @@ matrixPKleisli = (Kleisli $ (\(x, y) -> Just (zipWith (*) <$> rows x <*> y)))>>>
                  (tup (arr sum)) >>> parMap
 
 testMatrix :: Matrix
-testMatrix = replicate 10 [1..10]
+testMatrix = replicate 100 [1..100]
 
 main :: IO ()
-main = let matrixPar = matrixP testMatrix
+{--main = let matrixPar = matrixP testMatrix
            matrixSeq matrix = length $ matrixPSeq testMatrix matrix
        in
         defaultMain [ bgroup ("matrixP") [
                                     bench "par" $ whnf matrixPar testMatrix,
-                                    bench "seq" $ whnf matrixSeq testMatrix
+                                    bench "seq" $ nf matrixSeq testMatrix
                                ]
                     ]
+                    -}
+main = print $ length (matrixP testMatrix testMatrix)
 --main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
 --main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))

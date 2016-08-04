@@ -13,11 +13,6 @@ import Prelude hiding (seq) -- exported in DC
 usage = "I need 3 parameters!, parallel depth, "
     ++ "no. of digits (for number 1 and 2)"
 
-fib :: Int -> Int
-fib 0 = 0
-fib 1 = 1
-fib n = fib (n-1) + fib (n-2)
-
 main = let
        i1' = read "800"
        i2' = read "800"
@@ -28,11 +23,12 @@ main = let
        tmp = karat 2 mi1 mi2
        tmpSeq = karat (-1) mi1 mi2
        in
-           defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
+           print $ length (fromD (tmp d'))
+           {-defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
                                             bench "seq" $ whnf tmpSeq 0,
                                             bench "par" $ whnf tmp d'
                                        ]
-                        ]
+                        ]-}
 
 {-main = do
            args <- getArgs
