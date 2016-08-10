@@ -14,8 +14,8 @@ usage = "I need 3 parameters!, parallel depth, "
     ++ "no. of digits (for number 1 and 2)"
 
 main = let
-       i1' = read "800"
-       i2' = read "800"
+       i1' = read "8000"
+       i2' = read "8000"
        d'  = read "4"
        is  = concat (repeat [1..9])
        mi1 = take i1' is
@@ -23,12 +23,12 @@ main = let
        tmp = karat 2 mi1 mi2
        tmpSeq = karat (-1) mi1 mi2
        in
-           print $ length (fromD (tmp d'))
-           {-defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
-                                            bench "seq" $ whnf tmpSeq 0,
-                                            bench "par" $ whnf tmp d'
+           --print $ length (fromD (tmp d'))
+           defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
+                                            bench "seq" $ nf tmpSeq 0,
+                                            bench "par" $ nf tmp d'
                                        ]
-                        ]-}
+                        ]
 
 {-main = do
            args <- getArgs
@@ -86,7 +86,7 @@ karat :: Int -> MyInteger -> MyInteger -> Int -> D MyInteger
 --			             (D (is1,is2))
 --  where tickets = [2..noPe]
 --	seqDC x = if trivial x then solve x else combine x (map seqDC (split x))
-karat 2 is1 is2 depth = divConRW 3 depth trivial solve split combine (D (is1,is2))
+karat 2 is1 is2 depth = divConRW 2 depth trivial solve split combine (D (is1,is2))
 karat (-1) is1 is2 depth = divConRW 0 depth trivial solve split combine (D (is1,is2))
 -- karat 3 depth is1 is2 = divConFarm depth trivial solve split combine (D (is1,is2))
 --
