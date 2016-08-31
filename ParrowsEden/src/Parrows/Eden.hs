@@ -22,15 +22,18 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-module Parrows.Multicore where
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, ScopedTypeVariables, Rank2Types #-}
+module Parrows.Eden where
 
 import Parrows.Definition
 
 import Control.Parallel.Strategies
 import Control.Arrow
 
--- TODO: express this with listsApp (Note to self: why?)
+import Control.Parallel.Eden
 
-instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
-    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
+instance ParallelSpawn (->) where
+    parEvalN fs as = spawn (map process fs) as
+
+--instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
+--    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))

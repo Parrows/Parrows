@@ -22,6 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
+{-# LANGUAGE CPP #-}
 module Parrows.Definition where
 
 import Control.Arrow
@@ -35,10 +36,19 @@ import Data.Maybe
 import Data.List.Split
 import Data.List
 
+#ifdef EDEN_GHC
+import Control.Parallel.Eden
+#define NFDat2(a, b) Trans a, Trans b
+#define NFDat3(a, b, c) Trans a, Trans b, Trans c
+#else
+#define NFDat2(a, b) NFData b
+#define NFDat3(a, b, c) NFData c
+#endif
+
 type Parrow arr a b = [arr a b]
 
 class (Arrow arr) => ParallelSpawn arr where
-    parEvalN :: (NFData b) => arr (Parrow arr a b) (arr [a] [b])
+    parEvalN :: (NFDat2(a, b)) => arr (Parrow arr a b) (arr [a] [b])
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
@@ -85,7 +95,7 @@ toPar = return
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists
 -- of arrows as well (think: parEvalNLazy (map (*) [1..], 10) [2..])
-parEvalNLazy :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (Parrow arr a b, Int) (arr [a] [b])
+parEvalNLazy :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat2(a, b)) => arr (Parrow arr a b, Int) (arr [a] [b])
 parEvalNLazy = -- chunk the functions
                (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
                -- feed the function chunks into parEvalN
@@ -96,7 +106,7 @@ parEvalNLazy = -- chunk the functions
                (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> (arr $ zipWith (,) fchunks) >>> listApp >>> (arr $ concat) )
 
 -- evaluate two functions with different types in parallel
-parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFData b, NFData d) => arr (arr a b, arr c d) (arr (a, c) (b, d))
+parEval2 :: (ParallelSpawn arr, ArrowApply arr, NFDat2(a, b), NFDat2(c, d)) => arr (arr a b, arr c d) (arr (a, c) (b, d))
 parEval2 = -- lift the functions to "maybe evaluated" functions
            -- so that if they are passed a Nothing they don't compute anything
            (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
@@ -113,19 +123,19 @@ parEval2 = -- lift the functions to "maybe evaluated" functions
 
 -- some skeletons
 
-parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFData c) => arr (arr (a, b) c, ([a], [b])) [c]
+parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFDat3(a, b, c)) => arr (arr (a, b) c, ([a], [b])) [c]
 parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 
 -- same as parZipWith but with the same difference as parMapChunky has compared to parMap
-parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData c) => arr (arr (a, b) c, ([a], [b], Int)) [c]
+parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat3(a, b, c)) => arr (arr (a, b) c, ([a], [b], Int)) [c]
 parZipWithChunky = (second $ arr $ \(as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
 
-parMap :: (ParallelSpawn arr, ArrowApply arr, NFData b) => arr (arr a b, [a]) [b]
+parMap :: (ParallelSpawn arr, ArrowApply arr, NFDat2(a, b)) => arr (arr a b, [a]) [b]
 parMap = (first $ arr repeat) >>> (first parEvalN) >>> app
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
-parMapChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFData b) => arr (arr a b, ([a], Int)) [b]
+parMapChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat2(a, b)) => arr (arr a b, ([a], Int)) [b]
 parMapChunky =  -- chunk the input
                 (second $ arr $ \(as, chunkSize) -> (chunksOf chunkSize as)) >>>
                 -- inside of a chunk, behave sequentially

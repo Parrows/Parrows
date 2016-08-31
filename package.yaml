@@ -33,7 +33,7 @@ extra-source-files:
 - README.md
 - stack.yaml
 ghc-options: -Wall
-github: githubuser/Parrows
+github: s4ke/Parrows
 library:
   dependencies:
   - base
