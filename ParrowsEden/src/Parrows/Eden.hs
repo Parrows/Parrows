@@ -32,8 +32,16 @@ import Control.Arrow
 
 import Control.Parallel.Eden
 
+--instance (Monad m) => EdenArrow (Kleisli m) where
+
 instance ParallelSpawn (->) where
     parEvalN fs as = spawn (map process fs) as
+
+spawnKleisli :: (Monad m, Trans a, Trans (m b)) => [Kleisli m a b] -> [a] -> m [b]
+spawnKleisli fs as = sequence (spawn (map (\(Kleisli f) -> process f) fs) as)
+
+--instance ParallelSpawn (Kleisli m) where
+--    parEvalN = Kleisli $ \fs -> ((Kleisli $ \as -> (spawn (map process (map (\(Kleisli f) -> f) fs)) as)))
 
 --instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
 --    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
