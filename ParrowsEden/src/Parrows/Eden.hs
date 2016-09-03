@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, ScopedTypeVariables, Rank2Types #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, ScopedTypeVariables, Rank2Types, MultiParamTypeClasses #-}
 module Parrows.Eden where
 
 import Parrows.Definition
@@ -32,13 +32,18 @@ import Control.Arrow
 
 import Control.Parallel.Eden
 
---instance (Monad m) => EdenArrow (Kleisli m) where
+class EdenArrow arr a b where
+    spawnArrow :: arr ([arr a b], [a]) [b]
 
 instance ParallelSpawn (->) where
     parEvalN fs as = spawn (map process fs) as
 
-spawnKleisli :: (Monad m, Trans a, Trans (m b)) => [Kleisli m a b] -> [a] -> m [b]
-spawnKleisli fs as = sequence (spawn (map (\(Kleisli f) -> process f) fs) as)
+instance (Trans a, Trans b) => EdenArrow (->) a b where
+    spawnArrow (fs, as) = spawn (map process fs) as
+
+instance (Trans a, Trans b, Monad m, Trans (m b)) => EdenArrow (Kleisli m) a b where
+    spawnArrow = Kleisli $ \(fs,as) -> sequence (spawn (map (\(Kleisli f) -> process f) fs) as)
+
 
 --instance ParallelSpawn (Kleisli m) where
 --    parEvalN = Kleisli $ \fs -> ((Kleisli $ \as -> (spawn (map process (map (\(Kleisli f) -> f) fs)) as)))
