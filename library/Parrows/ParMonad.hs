@@ -42,3 +42,6 @@ instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
 
 instance SyntacticSugar (->) where
     f |***| g = parEval2 (f, g)
+
+instance (Monad m) => SyntacticSugar (Kleisli m) where
+    f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app

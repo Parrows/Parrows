@@ -77,6 +77,9 @@ instance ParallelSpawn (->) where
 instance SyntacticSugar (->) where
     f |***| g = parEval2 (f, g)
 
+--instance (Monad m) => SyntacticSugar (Kleisli m) where
+--    f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app
+
 --instance (ShrinkableMonad m) => ParallelSpawn (Kleisli m) where
 --    parEvalN = arr $ \fs -> ((arr $ \as -> ((map (\x -> x >>> shrinkArr) fs), as)) >>> spawnArrow >>> (mapArr growArr))
 
