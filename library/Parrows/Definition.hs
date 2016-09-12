@@ -50,8 +50,20 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFDat2(a, b)) => arr (Parrow arr a b) (arr [a] [b])
 
+-- class that allows us to have synactic sugar for parallelism
+-- this is needed because our ParallelSpawn class (and all the utilities listed below)
+-- work with arrows instead of functions to combine the arrows.
+-- but in some cases it might be more convenient to combine
+-- the arrows with operators instead of using arrows
+
 class (ParallelSpawn arr) => SyntacticSugar arr where
     (|***|) :: (NFDat2(a, b), NFDat2(c, d)) => arr a b -> arr c d -> arr (a, c) (b, d)
+
+-- evaluate the given functions in parallel and then wrap them into an Arrow that supports
+-- syntactic sugar for parallelism
+
+parr :: (SyntacticSugar arr, NFDat2(a, b), NFDat2(c, d)) => (a -> b) -> (c -> d) -> arr (a, c) (b, d)
+parr f g = (arr f) |***| (arr g)
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
@@ -69,7 +81,7 @@ listApp = (arr $ \fn -> (mapArr app, fn)) >>> app
 listsApp :: (ArrowChoice arr, ArrowApply arr) => arr ([arr a b], [a]) [b]
 listsApp = (arr $ \(fs, as) -> zipWith (,) fs as) >>> listApp
 
--- some sugar
+-- some really basic sugar
 
 (...) :: (Arrow arr) => Parrow arr a b -> arr b c -> Parrow arr a c
 (...) parr arr = map (>>> arr) parr
