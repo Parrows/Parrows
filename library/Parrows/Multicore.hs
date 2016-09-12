@@ -34,3 +34,6 @@ import Control.Arrow
 
 instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
     parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
+
+instance SyntacticSugar (->) where
+    f |***| g = parEval2 (f, g)

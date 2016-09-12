@@ -39,3 +39,6 @@ parEval' = (arr $ \fas ->
 
 instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
     parEvalN = (arr $ \fs -> ((arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar))
+
+instance SyntacticSugar (->) where
+    f |***| g = parEval2 (f, g)

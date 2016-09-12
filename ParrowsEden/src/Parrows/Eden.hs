@@ -74,6 +74,9 @@ instance (Trans a, Trans b, Monad m, Trans (m b)) => EdenArrow (Kleisli m) a b w
 instance ParallelSpawn (->) where
     parEvalN fs as = spawn (map process fs) as
 
+instance SyntacticSugar (->) where
+    f |***| g = parEval2 (f, g)
+
 --instance (ShrinkableMonad m) => ParallelSpawn (Kleisli m) where
 --    parEvalN = arr $ \fs -> ((arr $ \as -> ((map (\x -> x >>> shrinkArr) fs), as)) >>> spawnArrow >>> (mapArr growArr))
 

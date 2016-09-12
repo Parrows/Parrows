@@ -50,6 +50,9 @@ type Parrow arr a b = [arr a b]
 class (Arrow arr) => ParallelSpawn arr where
     parEvalN :: (NFDat2(a, b)) => arr (Parrow arr a b) (arr [a] [b])
 
+class (ParallelSpawn arr) => SyntacticSugar arr where
+    (|***|) :: (NFDat2(a, b), NFDat2(c, d)) => arr a b -> arr c d -> arr (a, c) (b, d)
+
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f = arr listcase >>>
