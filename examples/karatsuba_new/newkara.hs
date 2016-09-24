@@ -25,8 +25,7 @@ main = let
        in
            --print $ length (fromD (tmp d'))
            defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
-                                            bench "seq" $ nf tmpSeq 0,
-                                            bench "par" $ whnf tmp d'
+                                            bench "par" $ nf tmp d'
                                        ]
                         ]
 

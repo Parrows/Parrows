@@ -99,17 +99,14 @@ parMapHack f as = fromJust (runKleisli (hack f) as)
     where hack :: (NFData b) => (a -> b) -> Kleisli Maybe [a] [b]
           hack f = ((tup (arr f)) >>> parMap)
 
-parMapF :: (NFData b) => (a -> b) -> [a] -> [b]
-parMapF fn as = parEvalN (repeat fn) as
-
 parMapFOrig :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapFOrig = curry parMap
 
 parMapFChunky :: (NFData b) => (a -> b) -> [a] -> [b]
-parMapFChunky fs as = parMapChunky (fs, (as, 2))
+parMapFChunky fs as = parMapChunkyStream ((fs, 2) , (as, 20))
 
 parMapFChunkyNew :: (NFData b) => (a -> b) -> [a] -> [b]
-parMapFChunkyNew f as = concat (parMapFOrig (map f) (chunksOf 3 as))
+parMapFChunkyNew f as = concat (parMapFOrig (map f) (chunksOf 100 as))
 
 divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x
@@ -118,7 +115,7 @@ divConRW depth _ trivial solve split combine x
  where children =
 	if depth>0 then
 	    -- parallel (dont go down with the depth)
-	    combine x $ parMapF (divConRW (depth) 0 trivial solve split combine) (split x)
+	    combine x $ parMapFChunky (divConRW (depth) 0 trivial solve split combine) (split x)
 	else
 	    -- sequential weiter
 	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)

@@ -145,8 +145,24 @@ parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat3(a, b, c)) => arr (arr (a, b) c, ([a], [b], Int)) [c]
 parZipWithChunky = (second $ arr $ \(as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
 
+parZipWithChunkyStream :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat3(a, b, c)) => arr ((arr (a, b) c, Int), ([a], [b], Int)) [c]
+parZipWithChunkyStream = (second $ arr $ \(as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunkyStream
+
 parMap :: (ParallelSpawn arr, ArrowApply arr, NFDat2(a, b)) => arr (arr a b, [a]) [b]
 parMap = (first $ arr repeat) >>> (first parEvalN) >>> app
+
+parMapStream :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat2(a, b)) => arr ((arr a b, Int), [a]) [b]
+parMapStream = (first $ (arr $ \(fs, chunkSize) -> (repeat fs, chunkSize))) >>> (first parEvalNLazy) >>> app
+
+parMapChunkyStream :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat2(a, b)) => arr ((arr a b, Int), ([a], Int)) [b]
+parMapChunkyStream = -- chunk the input
+                     (second $ arr $ \(as, chunkSize) -> (chunksOf chunkSize as)) >>>
+                     -- inside of a chunk, behave sequentially
+                     (first $ arr $ \(f, chunkSize) -> (repeat (mapArr f), chunkSize)) >>>
+                     -- transform the map-chunks into a parallel function and apply it
+                     (first $ parEvalNLazy) >>> app >>>
+                     -- [[b]] --> [b]
+                     (arr concat)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
