@@ -141,6 +141,9 @@ parEval2 = -- lift the functions to "maybe evaluated" functions
 parZipWith :: (ParallelSpawn arr, ArrowApply arr, NFDat3(a, b, c)) => arr (arr (a, b) c, ([a], [b])) [c]
 parZipWith = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMap
 
+parZipWithStream :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat3(a, b, c)) => arr ((arr (a, b) c, Int), ([a], [b])) [c]
+parZipWithStream = (second $ arr $ \(as, bs) ->  zipWith (,) as bs) >>> parMapStream
+
 -- same as parZipWith but with the same difference as parMapChunky has compared to parMap
 parZipWithChunky :: (ParallelSpawn arr, ArrowChoice arr, ArrowApply arr, NFDat3(a, b, c)) => arr (arr (a, b) c, ([a], [b], Int)) [c]
 parZipWithChunky = (second $ arr $ \(as, bs, chunkSize) -> (zipWith (,) as bs, chunkSize)) >>> parMapChunky
