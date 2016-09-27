@@ -32,7 +32,7 @@ import Control.Arrow
 
 -- TODO: express this with listsApp (Note to self: why?)
 
-instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
+instance (Arrow arr, ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
     parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
 
 instance SyntacticSugar (->) where
