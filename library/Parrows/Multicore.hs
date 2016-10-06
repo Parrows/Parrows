@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
 module Parrows.Multicore where
 
 import Parrows.Definition
@@ -32,11 +32,11 @@ import Control.Arrow
 
 -- TODO: express this with listsApp (Note to self: why?)
 
-instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr a b where
     parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
 
-instance SyntacticSugar (->) where
+instance (NFData b, NFData d) => SyntacticSugar (->) a b c d where
     f |***| g = parEval2 (f, g)
 
-instance (Monad m) => SyntacticSugar (Kleisli m) where
+instance (Monad m, NFData b, NFData d) => SyntacticSugar (Kleisli m) a b c d where
     f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app

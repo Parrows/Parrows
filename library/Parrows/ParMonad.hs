@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
 module Parrows.ParMonad where
 
 import Parrows.Definition
@@ -37,11 +37,11 @@ parEval' = (arr $ \fas ->
                     (zipWithArrM (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
             app >>> arr (>>= \ibs -> mapM get ibs)
 
-instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
+instance (ArrowApply arr, ArrowChoice arr, NFData b) => ParallelSpawn arr a b where
     parEvalN = (arr $ \fs -> ((arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar))
 
-instance SyntacticSugar (->) where
+instance (NFData b, NFData d) => SyntacticSugar (->) a b c d where
     f |***| g = parEval2 (f, g)
 
-instance (Monad m) => SyntacticSugar (Kleisli m) where
+instance (Monad m, NFData b, NFData d) => SyntacticSugar (Kleisli m) a b c d where
     f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app
