@@ -32,56 +32,13 @@ import Control.Arrow
 
 import Control.Parallel.Eden
 
--- Shrink Wrapping
-
-data ShrinkedMonad a = ShrinkedMonad a deriving (Show, Eq, Read)
-
-instance (NFData a) => NFData (ShrinkedMonad a) where
-    rnf (ShrinkedMonad a) = rnf a
-
-instance (Trans a) => Trans (ShrinkedMonad a)
-
-instance Monad ShrinkedMonad where
-     (ShrinkedMonad a) >>= f = f a
-     return = ShrinkedMonad
-
-class (Monad m) => ShrinkableMonad m where
-    shrink :: m a -> ShrinkedMonad a
-    grow :: ShrinkedMonad a -> m a
-
-instance ShrinkableMonad ShrinkedMonad where
-    shrink = id
-    grow = id
-
-shrinkArr :: (ShrinkableMonad m, Arrow arr) => arr (m a) (ShrinkedMonad a)
-shrinkArr = arr shrink
-growArr :: (ShrinkableMonad m, Arrow arr) => arr (ShrinkedMonad a) (m a)
-growArr = arr grow
-
--- end of Shrink Wrapping
-
-class EdenArrow arr a b where
-    spawnArrow :: arr ([arr a b], [a]) [b]
-
-instance (Trans a, Trans b) => EdenArrow (->) a b where
-    spawnArrow (fs, as) = spawn (map process fs) as
-
-instance (Trans a, Trans b, Monad m, Trans (m b)) => EdenArrow (Kleisli m) a b where
-    spawnArrow = Kleisli $ \(fs,as) -> sequence (spawn (map (\(Kleisli f) -> process f) fs) as)
-
 -- ParallelSpawn Instances
 
-instance ParallelSpawn (->) where
+instance (Trans a, Trans b) => ParallelSpawn (->) a b where
     parEvalN fs as = spawn (map process fs) as
 
-instance SyntacticSugar (->) where
+instance (Monad m, Trans a, Trans b, Trans (m b)) => ParallelSpawn (Kleisli m) a b where
+    parEvalN = (Kleisli $ \fs -> return (Kleisli $ \as -> sequence (parEvalN (map (\(Kleisli f) -> f) fs) as)))
+
+instance (Trans a, Trans b, Trans c, Trans d) => SyntacticSugar (->) a b c d where
     f |***| g = parEval2 (f, g)
-
---instance (Monad m) => SyntacticSugar (Kleisli m) where
---    f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app
-
---instance (ShrinkableMonad m) => ParallelSpawn (Kleisli m) where
---    parEvalN = arr $ \fs -> ((arr $ \as -> ((map (\x -> x >>> shrinkArr) fs), as)) >>> spawnArrow >>> (mapArr growArr))
-
---instance (ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr where
---    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
