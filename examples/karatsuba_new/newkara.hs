@@ -24,10 +24,12 @@ main = let
        tmpSeq = karat (-1) mi1 mi2
        in
            --print $ length (fromD (tmp d'))
-           defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
-                                            bench "par" $ nf tmp d'
-                                       ]
-                        ]
+           --defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
+           --                                 bench "par" $ nf tmp d'
+           --                            ]
+           --             ]
+		   --print $ ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth")
+		   print $ length (fromD (tmp d'))
 
 {-main = do
            args <- getArgs
