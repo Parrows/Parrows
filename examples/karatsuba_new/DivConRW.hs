@@ -106,6 +106,9 @@ parMapFOrig = curry P.parMap
 parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapFMulticore = M.parMap rdeepseq
 
+farmChunkF :: (NFData b) => (a -> b) -> [a] -> [b]
+farmChunkF fs as = P.farmChunk ((fs, 10), (as, 4))
+
 divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x
  | trivial x = solve x
@@ -113,7 +116,7 @@ divConRW depth _ trivial solve split combine x
  where children =
 	if depth>0 then
 	    -- parallel (dont go down with the depth)
-	    combine x $ parMapFOrig (divConRW (depth) 0 trivial solve split combine) (split x)
+	    combine x $ farmChunkF (divConRW (depth) 0 trivial solve split combine) (split x)
 	else
 	    -- sequential weiter
 	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)

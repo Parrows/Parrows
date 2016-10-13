@@ -5,7 +5,6 @@ module Main where
 import System.Environment
 -- import DivConN
 import DivConRW hiding (rnf)
-import Criterion.Main
 
 import Control.DeepSeq
 import Prelude hiding (seq) -- exported in DC
