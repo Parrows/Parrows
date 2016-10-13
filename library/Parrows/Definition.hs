@@ -27,7 +27,7 @@ module Parrows.Definition where
 
 import Control.Arrow
 import Control.DeepSeq
-import Control.Category
+import Control.Category hiding ((.))
 
 import Control.Monad
 
@@ -159,22 +159,38 @@ parMapStream = (first $ (arr $ \(fs, chunkSize) -> (repeat fs, chunkSize))) >>> 
 
 parMapChunkyStream :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr ((arr a b, Int), ([a], Int)) [b]
 parMapChunkyStream = -- chunk the input
-                     (second $ arr $ \(as, chunkSize) -> (chunksOf chunkSize as)) >>>
+                     (second $ arr $ \(as, chunkSize) -> (unshuffle chunkSize as)) >>>
                      -- inside of a chunk, behave sequentially
                      (first $ arr $ \(f, chunkSize) -> (repeat (mapArr f), chunkSize)) >>>
                      -- transform the map-chunks into a parallel function and apply it
                      (first $ parEvalNLazy) >>> app >>>
                      -- [[b]] --> [b]
-                     (arr concat)
+                     (arr shuffle)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
 parMapChunky :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr (arr a b, ([a], Int)) [b]
 parMapChunky =  -- chunk the input
-                (second $ arr $ \(as, chunkSize) -> (chunksOf chunkSize as)) >>>
+                (second $ arr $ \(as, chunkSize) -> (unshuffle chunkSize as)) >>>
                 -- inside of a chunk, behave sequentially
                 (first $ arr mapArr) >>> (first $ arr repeat) >>>
                 -- transform the map-chunks into a parallel function and apply it
                 (first $ parEvalN) >>> app >>>
                 -- [[b]] --> [b]
-                (arr concat)
+                (arr shuffle)
+				
+-- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)
+unshuffle :: Int      -- ^number of sublists
+             -> [a]   -- ^input list
+             -> [[a]] -- ^distributed output
+unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
+
+takeEach :: Int -> [a] -> [a] 
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
+
+
+-- | Simple shuffling - inverse to round robin distribution
+shuffle :: [[a]]  -- ^ sublists
+           -> [a] -- ^ shuffled sublists
+shuffle = concat . transpose
