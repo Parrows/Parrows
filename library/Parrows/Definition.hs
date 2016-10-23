@@ -36,19 +36,15 @@ import Data.Maybe
 import Data.List.Split
 import Data.List
 
-#ifdef EDEN_GHC
-import Control.Parallel.Eden
-#define NFDat2(a, b) Trans a, Trans b
-#define NFDat3(a, b, c) Trans a, Trans b, Trans c
-#else
-#define NFDat2(a, b) NFData b
-#define NFDat3(a, b, c) NFData c
-#endif
-
 type Parrow arr a b = [arr a b]
 type NumCores = Int
 type ChunkSize = Int
 
+-- idea: change this to arr (Parrow arr a b) (arr [[a]] [[b]])
+-- This way we can fit the GPU stuff in here
+-- In order to have the same functionality as before we should expose
+-- arr (Parrow arr a b) (arr [a] [b])
+-- again, right?
 class (Arrow arr) => ParallelSpawn arr a b where
     parEvalN :: arr (Parrow arr a b) (arr [a] [b])
 
