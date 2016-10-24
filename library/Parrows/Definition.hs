@@ -136,17 +136,18 @@ parEval2 = -- lift the functions to "maybe evaluated" functions
 						 
 -- some skeletons
 
-parMap :: (ParallelSpawn arr a b, ArrowApply arr) => arr (arr a b, [a]) [b]
-parMap = (first $ arr repeat) >>> (first parEvalN) >>> app
+parMap :: (ParallelSpawn arr a b, ArrowApply arr) => arr (arr a b) (arr [a] [b])
+parMap = arr $ \f -> (arr $ \as -> (repeat f, as)) >>> (first parEvalN) >>> app
 
-parMapStream :: (ParallelSpawn arr a b, ArrowChoice arr, ArrowApply arr) => arr ((arr a b, ChunkSize), [a]) [b]
-parMapStream = (first $ (arr $ \(fs, chunkSize) -> (repeat fs, chunkSize))) >>> (first parEvalNLazy) >>> app
+parMapStream :: (ParallelSpawn arr a b, ArrowChoice arr, ArrowApply arr) => arr (arr a b, ChunkSize) (arr [a] [b])
+parMapStream = arr $ \(f, chunkSize) -> (arr $ \as -> ((repeat f, chunkSize), as)) >>> (first parEvalNLazy) >>> app
 
-farmChunk :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr ((arr a b, ChunkSize), ([a], NumCores)) [b]
+farmChunk :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr (arr a b, ChunkSize, NumCores) (arr [a] [b])
 farmChunk = -- chunk the input
-                     (second $ arr $ \(as, numCores) -> (unshuffle numCores as)) >>>
+            arr $ \(f, chunkSize, numCores) ->
+                     (arr $ \as -> (f, unshuffle numCores as)) >>>
                      -- inside of a chunk, behave sequentially
-                     (first $ arr $ \(f, chunkSize) -> (repeat (mapArr f), chunkSize)) >>>
+                     (first $ arr $ \f -> (repeat (mapArr f), chunkSize)) >>>
                      -- transform the map-chunks into a parallel function and apply it
                      (first $ parEvalNLazy) >>> app >>>
                      -- [[b]] --> [b]
@@ -154,9 +155,10 @@ farmChunk = -- chunk the input
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
-farm :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr (arr a b, ([a], NumCores)) [b]
+farm :: (ParallelSpawn arr a b, ParallelSpawn arr [a] [b], ArrowChoice arr, ArrowApply arr) => arr (arr a b, NumCores) (arr [a] [b])
 farm =  -- chunk the input
-                (second $ arr $ \(as, numCores) -> (unshuffle numCores as)) >>>
+        arr $ \(f, numCores) ->
+                (arr $ \as -> (f, unshuffle numCores as)) >>>
                 -- inside of a chunk, behave sequentially
                 (first $ arr mapArr) >>> (first $ arr repeat) >>>
                 -- transform the map-chunks into a parallel function and apply it
