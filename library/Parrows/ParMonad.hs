@@ -38,10 +38,4 @@ parEval' = (arr $ \fas ->
             app >>> arr (>>= \ibs -> mapM get ibs)
 
 instance (ArrowApply arr, ArrowChoice arr, NFData b) => ParallelSpawn arr a b where
-    parEvalN = (arr $ \fs -> ((arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar))
-
-instance (NFData b, NFData d) => SyntacticSugar (->) a b c d where
-    f |***| g = parEval2 (f, g)
-
-instance (Monad m, NFData b, NFData d) => SyntacticSugar (Kleisli m) a b c d where
-    f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app
+    parEvalN fs = ((arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar)

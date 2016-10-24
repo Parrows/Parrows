@@ -33,10 +33,4 @@ import Control.Arrow
 -- TODO: express this with listsApp (Note to self: why?)
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr a b where
-    parEvalN = arr $ \fs -> ((arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq))
-
-instance (NFData b, NFData d) => SyntacticSugar (->) a b c d where
-    f |***| g = parEval2 (f, g)
-
-instance (Monad m, NFData b, NFData d) => SyntacticSugar (Kleisli m) a b c d where
-    f |***| g = (arr $ \ac -> ((parEval2, (f, g)), ac)) >>> (first $ app) >>> app
+    parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq)
