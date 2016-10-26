@@ -106,16 +106,14 @@ parEvalNLazy fs chunkSize =
 
 -- evaluate two functions with different types in parallel
 parEval2 :: (ParallelSpawn arr a b, ParallelSpawn arr (Maybe a, Maybe c) (Maybe b, Maybe d), ArrowApply arr) => arr a b -> arr c d -> (arr (a, c) (b, d))
-parEval2 = curry $
-           -- lift the functions to "maybe evaluated" functions
+parEval2 f g = -- lift the functions to "maybe evaluated" functions
            -- so that if they are passed a Nothing they don't compute anything
-           (arr $ \(f, g) -> (arrMaybe f, arrMaybe g)) >>>
-           -- make a list of two of these functions evaluated after each other
-           (arr $ \(f, g) -> replicate 2 (first f >>> second g)) >>> parEvalN >>>
+           -- then, make a list of two of these functions evaluated after each other,
            -- feed each function the real value and one Nothing for the function they don't have to compute
            -- and combine them back to a tuple
-           (arr $ \f -> (arr $ \(a, c) -> (f, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1)))))
+           (arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
            where
+               f_g = parEvalN (replicate 2 (first (arrMaybe f) >>> second (arrMaybe g)))
                arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
                arrMaybe fn = (arr $ go) >>> app
                    where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
