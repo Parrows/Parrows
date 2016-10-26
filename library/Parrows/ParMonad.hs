@@ -38,4 +38,4 @@ parEval' = (arr $ \fas ->
             app >>> arr (>>= \ibs -> mapM get ibs)
 
 instance (ArrowApply arr, ArrowChoice arr, NFData b) => ParallelSpawn arr a b where
-    parEvalN fs = ((arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar)
+    parEvalN fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar

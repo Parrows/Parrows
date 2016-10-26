@@ -38,7 +38,4 @@ instance (Trans a, Trans b) => ParallelSpawn (->) a b where
     parEvalN fs as = spawn (map process fs) as
 
 instance (Monad m, Trans a, Trans b, Trans (m b)) => ParallelSpawn (Kleisli m) a b where
-    parEvalN = (Kleisli $ \fs -> return (Kleisli $ \as -> sequence (parEvalN (map (\(Kleisli f) -> f) fs) as)))
-
-instance (Trans a, Trans b, Trans c, Trans d) => SyntacticSugar (->) a b c d where
-    f |***| g = parEval2 (f, g)
+    parEvalN fs = (Kleisli $ \as -> sequence (parEvalN (map (\(Kleisli f) -> f) fs) as))

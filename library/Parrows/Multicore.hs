@@ -30,7 +30,5 @@ import Parrows.Definition
 import Control.Parallel.Strategies
 import Control.Arrow
 
--- TODO: express this with listsApp (Note to self: why?)
-
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ParallelSpawn arr a b where
     parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> bs `using` parList rdeepseq)
