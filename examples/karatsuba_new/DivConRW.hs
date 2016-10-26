@@ -94,20 +94,14 @@ divConRW depth nrTasks trivial solve split combine x
 
 --parMap f xs = map f xs `using` parList rnf
 
-
-parMapHack :: (NFData b) => (a -> b) -> [a] -> [b]
-parMapHack f as = fromJust (runKleisli (hack f) as)
-    where hack :: (NFData b) => (a -> b) -> Kleisli Maybe [a] [b]
-          hack f = ((tup (arr f)) >>> P.parMap)
-
 parMapFOrig :: (NFData b) => (a -> b) -> [a] -> [b]
-parMapFOrig = curry P.parMap
+parMapFOrig = P.parMap
 
 parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapFMulticore = M.parMap rdeepseq
 
 farmChunkF :: (NFData b) => (a -> b) -> [a] -> [b]
-farmChunkF fs as = P.farmChunk ((fs, 10), (as, 4))
+farmChunkF fs as = P.farmChunk fs 10 4 as
 
 divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x

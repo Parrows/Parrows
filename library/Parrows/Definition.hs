@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleContexts #-}
 module Parrows.Definition where
 
 import Control.Arrow
@@ -45,7 +45,7 @@ type ChunkSize = Int
 -- arr (Parrow arr a b) (arr [a] [b])
 -- again, right?
 class (Arrow arr) => ParallelSpawn arr a b where
-    parEvalN :: [arr a b] -> (arr [a] [b])
+    parEvalN :: [arr a b] -> arr [a] [b]
 
 -- class that allows us to have synactic sugar for parallelism
 -- this is needed because our ParallelSpawn class (and all the utilities listed below)
@@ -53,14 +53,8 @@ class (Arrow arr) => ParallelSpawn arr a b where
 -- but in some cases it might be more convenient to combine
 -- the arrows with operators instead of using arrows
 
-class (ParallelSpawn arr a b, ParallelSpawn arr c d) => SyntacticSugar arr a b c d where
-    (|***|) :: arr a b -> arr c d -> arr (a, c) (b, d)
-
--- evaluate the given functions in parallel and then wrap them into an Arrow that supports
--- syntactic sugar for parallelism
-
-parr :: (SyntacticSugar arr a b c d) => (a -> b) -> (c -> d) -> arr (a, c) (b, d)
-parr f g = (arr f) |***| (arr g)
+(|***|) :: (ParallelSpawn arr a b, ParallelSpawn arr (Maybe a, Maybe c) (Maybe b, Maybe d), ArrowApply arr) => arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) = parEval2
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
@@ -101,17 +95,14 @@ toPar = return
 
 --TODO: un-arrow these (the start doesn't need to be an arrow)
 
--- spawns the first n arrows to be evaluated in parallel. this works for infinite lists
--- of arrows as well (think: parEvalNLazy (map (*) [1..], 10) [2..])
+-- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
 parEvalNLazy :: (ParallelSpawn arr a b, ArrowChoice arr, ArrowApply arr) => [arr a b] -> ChunkSize -> (arr [a] [b])
-parEvalNLazy = curry $ -- chunk the functions
-               (arr $ \(fs, chunkSize) -> (chunksOf chunkSize fs, chunkSize)) >>>
-               -- feed the function chunks into parEvalN
-               (first $ (arr $ map (\x -> (parEvalN, x))) >>> listApp) >>>
-               -- chunk the input accordingly
-               (second $ (arr $ \chunkSize -> (arr $ chunksOf chunkSize))) >>>
+parEvalNLazy fs chunkSize =
                -- evaluate the function chunks in parallel and concat the input to a single list again
-               (arr $ \(fchunks, achunkfn) -> (arr $ \as -> (achunkfn, as)) >>> app >>> (arr $ zipWith (,) fchunks) >>> listApp >>> (arr $ concat))
+               (arr $ \as -> zipWith (,) fchunks (chunksOf chunkSize as)) >>> listApp >>> (arr $ concat)
+               where
+                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
+                fchunks = map (\x -> parEvalN x) $ chunksOf chunkSize fs
 
 -- evaluate two functions with different types in parallel
 parEval2 :: (ParallelSpawn arr a b, ParallelSpawn arr (Maybe a, Maybe c) (Maybe b, Maybe d), ArrowApply arr) => arr a b -> arr c d -> (arr (a, c) (b, d))
