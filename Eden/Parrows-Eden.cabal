@@ -4,7 +4,7 @@
 
 -- modified file from ../Parrows.cabal
 
-name:           Parrows
+name:           Parrows-Eden
 version:        0.1.0.0
 synopsis:       Multithreaded evaluation using Arrows
 description:    Multithreaded evaluation using Arrows
@@ -27,13 +27,12 @@ source-repository head
 
 library
   hs-source-dirs:
-      ../library
+      ../Definition/library
       src
   ghc-options: -Wall -DEDEN_GHC
   build-depends:
       base
     , deepseq
-    , monad-par
     , parallel
     , split
     , edenmodules
