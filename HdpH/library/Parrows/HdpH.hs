@@ -29,7 +29,7 @@ import Parrows.Definition
 import Control.Arrow
 
 {-
-import Control.Monad.Par
+import Control.Monad.Parc
 
 zipWithArrM :: (Arrow arr, ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
 zipWithArrM f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
