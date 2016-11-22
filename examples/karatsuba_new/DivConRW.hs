@@ -25,7 +25,9 @@ import Control.Parallel.Strategies (rdeepseq,Strategy)
 --import ParallelSplit.ParMonad
 import Control.Arrow
 import Parrows.Definition as P
-import Parrows.Multicore
+import Parrows.Eden
+
+import Control.Parallel.Eden (Trans)
 
 -- import Eden
 -- import RW 
@@ -94,16 +96,16 @@ divConRW depth nrTasks trivial solve split combine x
 
 --parMap f xs = map f xs `using` parList rnf
 
-parMapFOrig :: (NFData b) => (a -> b) -> [a] -> [b]
+parMapFOrig :: (Trans a, Trans b, NFData b) => (a -> b) -> [a] -> [b]
 parMapFOrig = P.parMap
 
 parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapFMulticore = M.parMap rdeepseq
 
-farmChunkF :: (NFData b) => (a -> b) -> [a] -> [b]
+farmChunkF :: (Trans a, Trans b, NFData b) => (a -> b) -> [a] -> [b]
 farmChunkF fs as = P.farmChunk fs 10 4 as
 
-divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
+divConRW :: (Trans a, Trans b, NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x
  | trivial x = solve x
  | otherwise = children

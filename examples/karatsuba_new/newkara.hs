@@ -8,6 +8,7 @@ import DivConRW hiding (rnf)
 
 import Control.DeepSeq
 import Prelude hiding (seq) -- exported in DC
+import Control.Parallel.Eden (Trans)
 
 usage = "I need 3 parameters!, parallel depth, "
     ++ "no. of digits (for number 1 and 2)"
@@ -65,7 +66,7 @@ fromMyInteger (i:is) = (fromIntegral i) + (fromIntegral base)*(fromMyInteger is)
 data D a = D a deriving Show
 instance NFData a => NFData (D a) where
     rnf (D a) = rnf a
--- instance Trans a => Trans (D a)
+instance Trans a => Trans (D a)
 
 fromD (D x) = x
 

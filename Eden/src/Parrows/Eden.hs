@@ -32,10 +32,10 @@ import Control.Arrow
 
 import Control.Parallel.Eden
 
--- ParallelSpawn Instances
+-- ArrowParallel Instances
 
-instance (Trans a, Trans b) => ParallelSpawn (->) a b where
+instance (Trans a, Trans b) => ArrowParallel (->) a b where
     parEvalN fs as = spawn (map process fs) as
 
-instance (Monad m, Trans a, Trans b, Trans (m b)) => ParallelSpawn (Kleisli m) a b where
+instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b where
     parEvalN fs = (Kleisli $ \as -> sequence (parEvalN (map (\(Kleisli f) -> f) fs) as))

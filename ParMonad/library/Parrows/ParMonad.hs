@@ -37,5 +37,5 @@ parEval' = (arr $ \fas ->
                     (zipWithArrM (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
             app >>> arr (>>= \ibs -> mapM get ibs)
 
-instance (ArrowApply arr, ArrowChoice arr, NFData b) => ParallelSpawn arr a b where
+instance (ArrowApply arr, ArrowChoice arr, NFData b) => ArrowParallel arr a b where
     parEvalN fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar
