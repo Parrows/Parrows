@@ -28,18 +28,13 @@ module Parrows.HdpH where
 import Parrows.Definition
 import Control.Arrow
 
-{-
-import Control.Monad.Parc
+import Data.Maybe
 
-zipWithArrM :: (Arrow arr, ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
-zipWithArrM f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
+import Control.DeepSeq
+import Control.Parallel.HdpH
+import Control.Parallel.HdpH.Strategies
 
-parEval' :: (ArrowApply arr, ArrowChoice arr, NFData b) => arr ([arr a b], [a]) (Par [b])
-parEval' = (arr $ \fas ->
-                    (zipWithArrM (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
-            app >>> arr (>>= \ibs -> mapM get ibs)
+import System.IO.Unsafe (unsafePerformIO)
 
-instance (ArrowApply arr, ArrowChoice arr, NFData b) => ParallelSpawn arr a b where
-    parEvalN fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar
-
-    -}
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b where
+    parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> fromJust $ unsafePerformIO $ runParIO defaultRTSConf (bs `using` (evalList rdeepseq)))

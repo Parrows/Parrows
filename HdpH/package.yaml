@@ -13,6 +13,7 @@ library:
   - base
   - hdph
   - Parrows
+  - deepseq
   source-dirs: library
 license: MIT
 maintainer: Martin Braun
