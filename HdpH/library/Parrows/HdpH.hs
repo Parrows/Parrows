@@ -37,4 +37,8 @@ import Control.Parallel.HdpH.Strategies
 import System.IO.Unsafe (unsafePerformIO)
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b where
-    parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> fromJust $ unsafePerformIO $ runParIO defaultRTSConf (bs `using` (evalList rdeepseq)))
+    parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> fromJust' $ unsafePerformIO $ runParIO defaultRTSConf (bs `using` (evalList rdeepseq)))
+        where fromJust' :: Maybe [b] -> [b]
+              -- just to make sure that this doesn't throw an error
+              fromJust' Nothing = []
+              fromJust' bs = fromJust bs
