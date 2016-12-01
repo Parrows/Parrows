@@ -30,14 +30,38 @@ import Control.Arrow
 
 import Data.Maybe
 
+import Control.Applicative
+import Control.Monad
+
 import Control.DeepSeq
 import Control.Parallel.HdpH
 import Control.Parallel.HdpH.Strategies
 
 import System.IO.Unsafe (unsafePerformIO)
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b where
-    parEvalN fs = (arr $ \as -> zipWith (,) fs as) >>> listApp >>> (arr $ \bs -> fromJust' $ unsafePerformIO $ runParIO defaultRTSConf (bs `using` (evalList rdeepseq)))
+data WithConf a = WithConf {
+    conf :: RTSConf,
+    val :: a
+}
+
+configure :: RTSConf -> [a] -> [WithConf a]
+configure conf as = map (\a -> WithConf {conf = conf, val = a}) as
+
+setVal :: WithConf a -> b -> WithConf b
+setVal orig b = WithConf { conf = conf orig, val = b }
+
+setConf :: WithConf a -> RTSConf -> WithConf a
+setConf orig conf = WithConf { conf = conf, val = val orig }
+
+getConf :: [WithConf a] -> RTSConf
+getConf [] = defaultRTSConf
+getConf (x:xs) = conf x
+
+withConf :: (Arrow arr) => arr a b -> arr (WithConf a) b
+withConf f = (arr $ val) >>> f
+
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr (WithConf a) b where
+    parEvalN fs = (arr $ \as -> (zipWith (,) fs as, getConf as)) >>> (first $ listApp) >>> (arr $ \(bs, conf) -> fromJust' $ unsafePerformIO $ runParIO conf (bs `using` (evalList rdeepseq)))
         where fromJust' :: Maybe [b] -> [b]
               -- just to make sure that this doesn't throw an error
               fromJust' Nothing = []
