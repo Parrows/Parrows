@@ -41,6 +41,11 @@ import System.IO.Unsafe (unsafePerformIO)
 
 instance Config RTSConf where
 
+-- this will probably not work yet...
+-- we have to implement it with the higher level strategies of HdpH now
+
+-- TODO: check whether it is okay that we spawn "exponentially"
+
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b RTSConf where
     parEvalN conf fs = (arr $ \as -> (zipWith (,) fs as)) >>> listApp >>> (arr $ \bs -> fromJust' $ unsafePerformIO $ runParIO conf (bs `using` (evalList rdeepseq)))
         where fromJust' :: Maybe [b] -> [b]
