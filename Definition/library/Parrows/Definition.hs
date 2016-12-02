@@ -45,12 +45,6 @@ instance Config () where
 class (Arrow arr, Config conf) => ArrowParallel arr a b conf where
     parEvalN :: conf -> [arr a b] -> arr [a] [b]
 
--- class that allows us to have syntactic sugar for parallelism
--- this is needed because our ArrowParallel class (and all the utilities listed below)
--- work with arrows instead of functions to combine the arrows.
--- but in some cases it might be more convenient to combine
--- the arrows with operators instead of using arrows
-
 -- parallel versions of (***) and (&&&)
 
 (|***|) :: (ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) (), ArrowApply arr) => arr a b -> arr c d -> arr (a, c) (b, d)
