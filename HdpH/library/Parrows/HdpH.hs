@@ -46,8 +46,14 @@ instance Config RTSConf where
 
 -- TODO: check whether it is okay that we spawn "exponentially"
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b RTSConf where
-    parEvalN conf fs = (arr $ \as -> (zipWith (,) fs as)) >>> listApp >>> (arr $ \bs -> fromJust' $ unsafePerformIO $ runParIO conf (bs `using` (evalList rdeepseq)))
+instance (ForceCC b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b RTSConf where
+    parEvalN conf fs = (arr $ \as -> (zipWith (,) fs as)) >>> listApp >>>
+                        (arr $ map toClosure) >>>
+                        (arr $ flip using $ (parClosureList forceCC)) >>>
+                        (arr $ runParIO conf) >>>
+                        (arr $ unsafePerformIO) >>>
+                        (arr $ fromJust) >>>
+                        (arr $ map unClosure)
         where fromJust' :: Maybe [b] -> [b]
               -- just to make sure that this doesn't throw an error
               fromJust' Nothing = []
