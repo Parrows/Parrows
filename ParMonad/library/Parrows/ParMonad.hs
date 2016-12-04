@@ -32,7 +32,7 @@ import Control.Arrow
 zipWithArrM :: (Arrow arr, ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
 zipWithArrM f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
 
-instance (Config conf, ArrowApply arr, ArrowChoice arr, NFData b) => ArrowParallel arr a b conf where
+instance (ArrowApply arr, ArrowChoice arr, NFData b) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar
                   where
                     parEval' :: (ArrowApply arr, ArrowChoice arr, NFData b) => arr ([arr a b], [a]) (Par [b])

@@ -39,17 +39,12 @@ import Control.Parallel.HdpH.Strategies
 
 import System.IO.Unsafe (unsafePerformIO)
 
-instance Config RTSConf where
-
--- this will probably not work yet...
--- we have to implement it with the higher level strategies of HdpH now
-
 -- TODO: check whether it is okay that we spawn "exponentially"
 
 instance (ForceCC b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b RTSConf where
     parEvalN conf fs = (arr $ \as -> (zipWith (,) fs as)) >>> listApp >>>
                         (arr $ map toClosure) >>>
-                        (arr $ flip using $ (parClosureList forceCC)) >>>
+                        (arr $ flip using $ parClosureList forceCC) >>>
                         (arr $ runParIO conf) >>>
                         (arr $ unsafePerformIO) >>>
                         (arr $ fromJust) >>>

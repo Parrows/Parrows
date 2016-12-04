@@ -34,8 +34,8 @@ import Control.Parallel.Eden
 
 -- ArrowParallel Instances
 
-instance (Config conf, Trans a, Trans b) => ArrowParallel (->) a b conf where
+instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
     parEvalN _ fs as = spawn (map process fs) as
 
-instance (Config conf, Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
+instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
     parEvalN conf fs = (Kleisli $ \as -> sequence (parEvalN conf (map (\(Kleisli f) -> f) fs) as))

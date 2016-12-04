@@ -39,10 +39,7 @@ import Data.List
 type NumCores = Int
 type ChunkSize = Int
 
-class Config a where
-instance Config () where
-
-class (Arrow arr, Config conf) => ArrowParallel arr a b conf where
+class Arrow arr => ArrowParallel arr a b conf where
     parEvalN :: conf -> [arr a b] -> arr [a] [b]
 
 -- parallel versions of (***) and (&&&)
@@ -91,7 +88,7 @@ toPar = return
 (<||||>) = (++)
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
-parEvalNLazy :: (Config conf, ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
 parEvalNLazy conf fs chunkSize =
                -- evaluate the function chunks in parallel and concat the input to a single list again
                (arr $ \as -> zipWith (,) fchunks (chunksOf chunkSize as)) >>> listApp >>> (arr $ concat)
@@ -100,7 +97,7 @@ parEvalNLazy conf fs chunkSize =
                 fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
 
 -- evaluate two functions with different types in parallel
-parEval2 :: (Config conf, ArrowParallel arr a b conf, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf, ArrowApply arr) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
+parEval2 :: (ArrowParallel arr a b conf, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf, ArrowApply arr) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
            -- so that if they are passed a Nothing they don't compute anything
            -- then, make a list of two of these functions evaluated after each other,
@@ -116,20 +113,20 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
 						 
 -- some skeletons
 
-parMap :: (Config conf, ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
+parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
 parMap conf f = (arr $ \as -> (parEvalN conf (repeat f), as)) >>> app
 
-parMapStream :: (Config conf, ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> (arr [a] [b])
+parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> (arr [a] [b])
 parMapStream conf f chunkSize = (arr $ \as -> (parEvalNLazy conf (repeat f) chunkSize, as)) >>> app
 
-farmChunk :: (Config conf, ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> NumCores -> (arr [a] [b])
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> NumCores -> (arr [a] [b])
 farmChunk conf f chunkSize numCores = -- chunk the input, inside of a chunk, behave sequentially,
                                  -- transform the map-chunks into a parallel function and apply it, then concat them together
                                  (arr $ \as -> (parEvalNLazy conf (repeat (mapArr f)) chunkSize, unshuffle numCores as)) >>> app >>> (arr shuffle)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
-farm :: (Config conf, ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> NumCores -> (arr [a] [b])
+farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> NumCores -> (arr [a] [b])
 farm conf f numCores =  -- chunk the input
                 (arr $ \as -> (f, unshuffle numCores as)) >>>
                 -- inside of a chunk, behave sequentially, transform the map-chunks into a parallel function and apply it
