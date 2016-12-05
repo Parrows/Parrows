@@ -63,7 +63,7 @@ instance (ToClosure b, HdpHConf conf, HdpHStrategy conf b, ArrowApply arr, Arrow
                         (arr $ flip using $ strategy conf) >>>
                         (arr $ runParIO $ rtsConf conf) >>>
                         (arr $ unsafePerformIO) >>>
-                        (arr $ fromJust) >>>
+                        (arr $ fromJust') >>>
                         (arr $ map unClosure)
         where fromJust' :: Maybe [b] -> [b]
               -- just to make sure that this doesn't throw an error
