@@ -13,12 +13,27 @@ import Control.DeepSeq
 
 import Control.Monad
 import Data.Serialize
+
+import System.Environment (getArgs)
+import System.IO (stdout, stderr, hSetBuffering, BufferMode(..))
+
+
 import Control.Parallel.HdpH.Closure
 import Control.Parallel.HdpH hiding (put, get)
 import Control.Parallel.HdpH.Strategies
 
 import Prelude hiding (seq) -- exported in DC
 --import Control.Parallel.Eden (Trans)
+
+-- parse runtime system config options; abort if there is an error
+parseOpts :: [String] -> IO (RTSConf, [String])
+parseOpts args = do
+  either_conf <- updateConf args defaultRTSConf
+  case either_conf of
+    Left err_msg                 -> error $ "parseOpts: " ++ err_msg
+    Right (conf, remaining_args) -> return (conf, remaining_args)
+
+
 
 usage = "I need 3 parameters!, parallel depth, "
     ++ "no. of digits (for number 1 and 2)"
@@ -30,16 +45,22 @@ main = let
        is  = concat (repeat [1..9])
        mi1 = take i1' is
        mi2 = take i2' is
-       tmp = karat 2 mi1 mi2
-       tmpSeq = karat (-1) mi1 mi2
-       in
+       tmp conf = karat conf 2 mi1 mi2
+       tmpSeq conf = karat conf (-1) mi1 mi2
+       in do 
+          hSetBuffering stdout LineBuffering
+  	  hSetBuffering stderr LineBuffering
+  	  opts_args <- getArgs
+          print opts_args
+          (conf, args) <- parseOpts opts_args 
+          print $ length (fromD (tmp conf d'))
+
            --print $ length (fromD (tmp d'))
            --defaultMain [ bgroup ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth") [
            --                                 bench "par" $ nf tmp d'
            --                            ]
            --             ]
 		   --print $ ((show i1') ++ ", " ++ (show i2') ++ ", " ++ (show d') ++ " depth")
-		   print $ length (fromD (tmp d'))
 
 {-main = do
            args <- getArgs
@@ -104,18 +125,18 @@ base::Int
 base = 10   -- To do: Meter dentro del tipo?      
 
 
-karat :: Int -> MyInteger -> MyInteger -> Int -> D MyInteger
+karat :: RTSConf -> Int -> MyInteger -> MyInteger -> Int -> D MyInteger
 -- karat 0 depth is1 is2 = dcN_c 3 depth trivial solve split combine (D (is1,is2))
 -- karat 1 depth is1 is2 = dcNTickets_c 3 tickets trivial solve split combine seqDC 
 --			             (D (is1,is2))
 --  where tickets = [2..noPe]
 --	seqDC x = if trivial x then solve x else combine x (map seqDC (split x))
-karat 2 is1 is2 depth = divConRW 2 depth trivial solve split combine (D (is1,is2))
-karat (-1) is1 is2 depth = divConRW 0 depth trivial solve split combine (D (is1,is2))
+karat  conf 2 is1 is2 depth = divConRW conf 2 depth trivial solve split combine (D (is1,is2))
+karat conf (-1) is1 is2 depth = divConRW conf 0 depth trivial solve split combine (D (is1,is2))
 -- karat 3 depth is1 is2 = divConFarm depth trivial solve split combine (D (is1,is2))
 --
 
-karat _ _ _ _ = D [] -- error...
+karat conf _ _ _ _ = D [] -- error...
 
 trivial  (D(is1,is2)) = lmin <= 10
  where lmin = min (length is1) (length is2)

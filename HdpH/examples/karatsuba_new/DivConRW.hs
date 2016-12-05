@@ -105,20 +105,20 @@ divConRW depth nrTasks trivial solve split combine x
 --parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 --parMapFMulticore = M.parMap rdeepseq
 
-farmChunkF :: (ForceCC [b], ForceCC b, NFData b) => (a -> b) -> [a] -> [b]
-farmChunkF fs as = P.farmChunk defaultRTSConf fs 10 4 as
+farmChunkF :: (ForceCC [b], ForceCC b, NFData b) => RTSConf -> (a -> b) -> [a] -> [b]
+farmChunkF conf fs as = P.farmChunk conf fs 10 4 as
 
-divConRW :: (ForceCC [b], ForceCC b, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
-divConRW depth _ trivial solve split combine x
+divConRW :: (ForceCC [b], ForceCC b, NFData b) => RTSConf -> Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
+divConRW conf depth _ trivial solve split combine x
  | trivial x = solve x
  | otherwise = children
  where children =
 	if depth>0 then
 	    -- parallel (dont go down with the depth)
-	    combine x $ farmChunkF (divConRW (depth) 0 trivial solve split combine) (split x)
+	    combine x $ farmChunkF conf (divConRW conf (depth) 0 trivial solve split combine) (split x)
 	else
 	    -- sequential weiter
-	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)
+	    combine x $ map (divConRW conf (depth-1) 0 trivial solve split combine) (split x)
             
 {-
 mwDM :: (Trans a, Trans b) => 
