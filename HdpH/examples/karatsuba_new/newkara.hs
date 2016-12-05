@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE BangPatterns #-}
 {-# OPTIONS -cpp #-}
 module Main where
 -- import Eden
@@ -7,6 +10,13 @@ import System.Environment
 import DivConRW hiding (rnf)
 
 import Control.DeepSeq
+
+import Control.Monad
+import Data.Serialize
+import Control.Parallel.HdpH.Closure
+import Control.Parallel.HdpH hiding (put, get)
+import Control.Parallel.HdpH.Strategies
+
 import Prelude hiding (seq) -- exported in DC
 --import Control.Parallel.Eden (Trans)
 
@@ -62,10 +72,23 @@ fromMyInteger (i:is) = (fromIntegral i) + (fromIntegral base)*(fromMyInteger is)
 
 
 #if !(defined STREAM)
+
 -- HAAACK!
 data D a = D a deriving Show
 instance NFData a => NFData (D a) where
     rnf (D a) = rnf a
+instance Serialize a => Serialize (D a) where
+    put (D a) = put a
+    get       = liftM D get
+
+instance ToClosure [Int] where locToClosure = $(here)
+instance ToClosure [D MyInteger] where locToClosure = $(here)
+instance ToClosure a => ToClosure (D a) where locToClosure = $(here)
+    
+instance ForceCC MyInteger where locForceCC = $(here)
+instance ForceCC [D MyInteger] where locForceCC = $(here)
+instance ForceCC a => ForceCC (D a) where locForceCC = $(here)
+    
 --instance Trans a => Trans (D a)
 
 fromD (D x) = x
