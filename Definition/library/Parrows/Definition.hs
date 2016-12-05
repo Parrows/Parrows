@@ -50,6 +50,14 @@ class Arrow arr => ArrowParallel arr a b conf where
 (|&&&|) :: (ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) (), ArrowApply arr) => arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> (f |***| g)
 
+(|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
+(|>>>|) f g = zipWith (>>>) f g
+
+-- [arr a a] ->
+
+--tmp :: [arr a b] -> [a] -> arr () [b]
+--tmp fs as = (arr $ \_ -> (parEvalN fs, as))
+
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f = arr listcase >>>
@@ -71,12 +79,9 @@ listsApp = (arr $ \(fs, as) -> zipWith (,) fs as) >>> listApp
 (...) :: (Arrow arr) => [arr a b] -> arr b c -> [arr a c]
 (...) parr arr = map (>>> arr) parr
 
-(....) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(....) f g = zipWith (>>>) f g
-
--- behaves like <*> on lists and combines them with (....)
-(<*....>) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(<*....>) fs gs = concat $ zipWith (....) (repeat fs) (permutations gs)
+-- behaves like <*> on lists and combines them with (|>>>|)
+(|<*>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
+(|<*>|) fs gs = concat $ zipWith (|>>>|) (repeat fs) (permutations gs)
 
 -- minor stuff, remove this? these are basically just operations on lists
 

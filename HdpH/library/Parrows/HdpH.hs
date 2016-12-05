@@ -57,6 +57,8 @@ class HdpHStrategy conf b where
 instance (ForceCC b) => HdpHStrategy RTSConf b where
     strategy _ = parClosureList forceCC
 
+-- FIXME: don't evaluate before toClosure...
+
 instance (ToClosure b, HdpHConf conf, HdpHStrategy conf b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN conf fs = (arr $ zipWith (,) fs) >>> listApp >>>
                         (arr $ map toClosure) >>>
