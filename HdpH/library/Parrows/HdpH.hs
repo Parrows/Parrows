@@ -41,11 +41,27 @@ import System.IO.Unsafe (unsafePerformIO)
 
 -- TODO: check whether it is okay that we spawn "exponentially"
 
-instance (ForceCC b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b RTSConf where
-    parEvalN conf fs = (arr $ \as -> (zipWith (,) fs as)) >>> listApp >>>
+-- class to extract the RTSConf out of conf
+class HdpHConf conf where
+    rtsConf :: conf -> RTSConf
+
+-- obvious default instance
+instance HdpHConf RTSConf where
+    rtsConf = id
+
+-- class to extract the Strategy out of the conf
+class HdpHStrategy conf b where
+    strategy :: conf -> Strategy [Closure b]
+
+-- default implementation for basic RTSConf, uses (parClosureList forceCC) as the strategy
+instance (ForceCC b) => HdpHStrategy RTSConf b where
+    strategy _ = parClosureList forceCC
+
+instance (ToClosure b, HdpHConf conf, HdpHStrategy conf b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
+    parEvalN conf fs = (arr $ zipWith (,) fs) >>> listApp >>>
                         (arr $ map toClosure) >>>
-                        (arr $ flip using $ parClosureList forceCC) >>>
-                        (arr $ runParIO conf) >>>
+                        (arr $ flip using $ strategy conf) >>>
+                        (arr $ runParIO $ rtsConf conf) >>>
                         (arr $ unsafePerformIO) >>>
                         (arr $ fromJust) >>>
                         (arr $ map unClosure)

@@ -38,4 +38,4 @@ instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
     parEvalN _ fs as = spawn (map process fs) as
 
 instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
-    parEvalN conf fs = (Kleisli $ \as -> sequence (parEvalN conf (map (\(Kleisli f) -> f) fs) as))
+    parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)
