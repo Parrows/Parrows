@@ -28,7 +28,6 @@ dist/*
 *.kdev4
 .kdev/
 
-Parrows.cabal
 
 .idea/
 
