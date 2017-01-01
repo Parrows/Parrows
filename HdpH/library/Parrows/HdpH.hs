@@ -22,11 +22,14 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses #-}
 module Parrows.HdpH where
 
 import Parrows.Definition
+import Control.Category
 import Control.Arrow
+
+import Prelude hiding (id)
 
 import Data.Maybe
 
@@ -51,23 +54,29 @@ instance HdpHConf RTSConf where
 
 -- class to extract the Strategy out of the conf
 class HdpHStrategy conf b where
-    strategy :: conf -> Strategy [Closure b]
+    strategy :: conf -> Closure (Strategy (Closure b))
 
--- default implementation for basic RTSConf, uses (parClosureList forceCC) as the strategy
+-- default implementation for basic RTSConf, uses forceCC as the strategy
 instance (ForceCC b) => HdpHStrategy RTSConf b where
-    strategy _ = parClosureList forceCC
+    strategy _ = forceCC
 
 -- FIXME: don't evaluate before toClosure...
 
-instance (ToClosure b, HdpHConf conf, HdpHStrategy conf b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN conf fs = (arr $ zipWith (,) fs) >>> listApp >>>
-                        (arr $ map toClosure) >>>
-                        (arr $ flip using $ strategy conf) >>>
-                        (arr $ runParIO $ rtsConf conf) >>>
-                        (arr $ unsafePerformIO) >>>
-                        (arr $ fromJust') >>>
-                        (arr $ map unClosure)
-        where fromJust' :: Maybe [b] -> [b]
-              -- just to make sure that this doesn't throw an error
-              fromJust' Nothing = []
-              fromJust' bs = fromJust bs
+data ToClosure (a -> b) => ClosureArrow a b = ClosureArrow { closure :: Closure (a -> b) }
+
+runClosureArrow :: ToClosure (a -> b) => ClosureArrow a b -> Closure a -> Closure b
+runClosureArrow f = apC (closure f)
+
+instance (HdpHConf conf, HdpHStrategy conf b, ToClosure (a -> b), ToClosure a) => ArrowParallel (->) a b conf where
+     parEvalN conf fs as = fromJust' $ unsafePerformIO $ runParIO (rtsConf conf) $
+                 do clo_bs <- f clo_as `using` parClosureList (strategy conf)
+                    return $ map unClosure clo_bs
+                             where f = zipWith apC $ map toClosure fs
+                                   clo_as = map toClosure as
+                                   fromJust' :: Maybe [b] -> [b]
+                                   -- just to make sure that this doesn't throw an error
+                                   fromJust' Nothing = []
+                                   fromJust' bs = fromJust bs
+
+instance (HdpHConf conf, HdpHStrategy conf (m b), ToClosure a, ToClosure (a -> m b), Monad m) => ArrowParallel (Kleisli m) a b conf where
+    parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)
