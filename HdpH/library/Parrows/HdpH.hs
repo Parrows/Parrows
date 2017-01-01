@@ -60,12 +60,7 @@ class HdpHStrategy conf b where
 instance (ForceCC b) => HdpHStrategy RTSConf b where
     strategy _ = forceCC
 
--- FIXME: don't evaluate before toClosure...
-
 data ToClosure (a -> b) => ClosureArrow a b = ClosureArrow { closure :: Closure (a -> b) }
-
-runClosureArrow :: ToClosure (a -> b) => ClosureArrow a b -> Closure a -> Closure b
-runClosureArrow f = apC (closure f)
 
 instance (HdpHConf conf, HdpHStrategy conf b, ToClosure (a -> b), ToClosure a) => ArrowParallel (->) a b conf where
      parEvalN conf fs as = fromJust' $ unsafePerformIO $ runParIO (rtsConf conf) $
