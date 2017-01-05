@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 
-name:           Parrows-HdpH
+name:           Parrows-Closure
 version:        0.1.0.0
 synopsis:       Multithreaded evaluation using Arrows
 description:    Multithreaded evaluation using Arrows
@@ -28,15 +28,9 @@ library
   ghc-options: -Wall
   build-depends:
       base
-    , hdph
     , hdph-closure
-    , Parrows
-    , Parrows-Closure
-    , deepseq
-    , packman
     , binary
     , bytestring
   exposed-modules:
-      Parrows.HdpH
-      Parrows.HdpH.Serialize
+      Parrows.HdpH.Closure
   default-language: Haskell2010

@@ -26,10 +26,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.HdpH where
 
 import Parrows.Definition
-import Control.Category
+import Parrows.HdpH.Serialize
+import Parrows.HdpH.Closure
 import Control.Arrow
-
-import Prelude hiding (id)
 
 import Data.Maybe
 
@@ -38,7 +37,10 @@ import Control.Monad
 
 import Control.DeepSeq
 import Control.Parallel.HdpH
+import Control.Parallel.HdpH.Closure
 import Control.Parallel.HdpH.Strategies
+
+import Data.ByteString.Lazy (ByteString)
 
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -48,7 +50,7 @@ import System.IO.Unsafe (unsafePerformIO)
 class HdpHConf conf where
     rtsConf :: conf -> RTSConf
 
--- obvious default instance
+-- obvious instance for RTSConf
 instance HdpHConf RTSConf where
     rtsConf = id
 
@@ -60,9 +62,11 @@ class HdpHStrategy conf b where
 instance (ForceCC b) => HdpHStrategy RTSConf b where
     strategy _ = forceCC
 
-data ToClosure (a -> b) => ClosureArrow a b = ClosureArrow { closure :: Closure (a -> b) }
+instance SerializeConf RTSConf where
 
-instance (HdpHConf conf, HdpHStrategy conf b, ToClosure (a -> b), ToClosure a) => ArrowParallel (->) a b conf where
+-- Closure ByteString --> ByteString
+
+instance (SerializeConf conf, HdpHConf conf, HdpHStrategy conf b, ToClosure b) => ArrowParallel (->) a b conf where
      parEvalN conf fs as = fromJust' $ unsafePerformIO $ runParIO (rtsConf conf) $
                  do clo_bs <- f clo_as `using` parClosureList (strategy conf)
                     return $ map unClosure clo_bs
@@ -72,6 +76,3 @@ instance (HdpHConf conf, HdpHStrategy conf b, ToClosure (a -> b), ToClosure a) =
                                    -- just to make sure that this doesn't throw an error
                                    fromJust' Nothing = []
                                    fromJust' bs = fromJust bs
-
-instance (HdpHConf conf, HdpHStrategy conf (m b), ToClosure a, ToClosure (a -> m b), Monad m) => ArrowParallel (Kleisli m) a b conf where
-    parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)

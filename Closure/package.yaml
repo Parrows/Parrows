@@ -11,17 +11,12 @@ github: s4ke/Parrows
 library:
   dependencies:
   - base
-  - hdph
   - hdph-closure
-  - Parrows
-  - Parrows-Closure
-  - deepseq
-  - packman
   - binary
   - bytestring
   source-dirs: library
 license: MIT
 maintainer: Martin Braun
-name: Parrows-HdpH
+name: Parrows-Closure
 synopsis: Multithreaded evaluation using Arrows
 version: '0.1.0.0'
