@@ -1,0 +1,47 @@
+\section{Arrows}
+
+John Hughes defined the Arrow typeclass as follows\citHughes:
+\begin{lstlisting}[frame=htrbl, caption={Arrow definition}]
+class Arrow a where
+	arr :: (b -> c) -> a b c
+	(>>>) :: a b c -> a c d -> a b d
+	first :: a b c -> a (b,d) (c,d)
+\end{lstlisting}
+\lstinline{arr :: (b -> c) -> a b c} is used to lift an ordinary function to an Arrow type. This can be thought of as analogous to the monadic \lstinline{return}. The \lstinline{>>>} operator, in a similar way, is analogous to the monadic composition operator \lstinline{>>=}. Ant lastly, the \lstinline{first} operator, which takes the input arrow from b to c and converts it into an arrow on pairs with the second argument untouched, is also needed for actual useful code as without it, we wouldn't have a way to save input across arrows.
+\\\\
+The most prominent instances of this interface are regular functions, \lstinline{(->)}
+\begin{lstlisting}[frame=htrbl, caption={Arrow instance for \lstinline{(->)}}]
+instance Arrow (->) where
+arr f = f
+f >>> g = g . f
+first f = \(b, d) -> (f b, d) 
+\end{lstlisting}
+and the Kleisli type.
+\begin{lstlisting}[frame=htrbl, caption={Arrow instance for \lstinline{(->)}}]
+instance Arrow (Kleisli m) where
+arr f = Kleisli $ return . f
+f >>> g = Kleisli $ \b -> f b >>= g
+first f = Kleisli $ \(b,d) -> f b >>= \c -> return (c,d)
+\end{lstlisting}
+With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \lstinline{first}, called \lstinline{second},
+\begin{lstlisting}[frame=htrbl]
+second :: Arrow a => a b c -> a (d, b) (d, c)
+second f = arr swap >>> first f >>> arr swap
+	where swap (x, y) = (y, x)
+\end{lstlisting}
+the *** combinator which combines first and second to handle two inputs in one arrow,
+\begin{lstlisting}[frame=htrbl]
+(***) :: Arrow a => a b c -> a d e -> a (b, d) (c, e)
+f *** g = first f >>> second g
+\end{lstlisting}
+and the \&\&\& combinator that constructs an arrow which outputs 2 different values like ***, but takes only one input.
+\begin{lstlisting}[frame=htrbl]
+(&&&) :: Arrow a => a b c -> a b d -> a b (c, d)
+f &&& g = arr (\b -> (b, b)) >>> (f *** g)
+\end{lstlisting}
+A short example given by Hughes on how to use this is \lstinline{add} over arrows:
+\begin{lstlisting}[frame=htrbl, caption={add over Arrows}]
+add :: Arrow a => a b Int -> a b Int -> a b Int
+add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
+\end{lstlisting}
+The benefit of this interface is now that any type which is shown to be an Arrow can no be used in conjunction with this newly created \lstinline{add} combinator. Even though this example is quite simple, the power of the \lstinline{Arrow} interface immediately is clear: If a type is an \lstinline{Arrow}, it can immediately used together with every library that works on \lstinline{Arrows}. With \lstinline{Monads} this type of extensibility is not possible.
