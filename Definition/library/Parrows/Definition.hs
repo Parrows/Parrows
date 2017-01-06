@@ -27,7 +27,6 @@ module Parrows.Definition where
 
 import Control.Arrow
 import Control.DeepSeq
-import Control.Category hiding ((.))
 
 import Control.Monad
 
@@ -51,7 +50,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> (f |***| g)
 
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(|>>>|) f g = zipWith (>>>) f g
+(|>>>|) = zipWith (>>>)
 
 -- [arr a a] ->
 
@@ -68,11 +67,8 @@ mapArr f = arr listcase >>>
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
 
-listApp :: (ArrowChoice arr, ArrowApply arr) => arr [(arr a b, a)] [b]
-listApp = (arr $ \fn -> (mapArr app, fn)) >>> app
-
-listsApp :: (ArrowChoice arr, ArrowApply arr) => arr ([arr a b], [a]) [b]
-listsApp = (arr $ \(fs, as) -> zipWith (,) fs as) >>> listApp
+listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
+listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 
 -- some really basic sugar
 
@@ -96,7 +92,7 @@ toPar = return
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
 parEvalNLazy conf fs chunkSize =
                -- evaluate the function chunks in parallel and concat the input to a single list again
-               (arr $ \as -> zipWith (,) fchunks (chunksOf chunkSize as)) >>> listApp >>> (arr $ concat)
+               (arr $ chunksOf chunkSize) >>> listApp fchunks >>> (arr $ concat)
                where
                 -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                 fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
