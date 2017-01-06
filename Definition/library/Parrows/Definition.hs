@@ -91,10 +91,10 @@ toPar = return
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
 parEvalNLazy conf fs chunkSize =
+               -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                -- evaluate the function chunks in parallel and concat the input to a single list again
                (arr $ chunksOf chunkSize) >>> listApp fchunks >>> (arr $ concat)
                where
-                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                 fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
 
 -- evaluate two functions with different types in parallel

@@ -29,13 +29,12 @@ import Parrows.Definition
 import Control.Monad.Par
 import Control.Arrow
 
-zipWithArrM :: (Arrow arr, ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
-zipWithArrM f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
-
-instance (ArrowApply arr, ArrowChoice arr, NFData b) => ArrowParallel arr a b conf where
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar
                   where
-                    parEval' :: (ArrowApply arr, ArrowChoice arr, NFData b) => arr ([arr a b], [a]) (Par [b])
+                    parEval' :: (NFData b, ArrowApply arr, ArrowChoice arr) => arr ([arr a b], [a]) (Par [b])
                     parEval' = (arr $ \fas ->
-                                        (zipWithArrM (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
+                                        (zipWithArrA (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
                                 app >>> arr (>>= \ibs -> mapM get ibs)
+                    zipWithArrA :: (ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
+                    zipWithArrA f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
