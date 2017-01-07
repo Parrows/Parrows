@@ -112,7 +112,7 @@ divConRW depth _ trivial solve split combine x
  where children =
 	if depth>0 then
 	    -- parallel (dont go down with the depth)
-	    combine x $ farmChunkF (divConRW (depth) 0 trivial solve split combine) (split x)
+	    combine x $ farmChunkF (divConRW (depth - 1) 0 trivial solve split combine) (split x)
 	else
 	    -- sequential weiter
 	    combine x $ map (divConRW (depth-1) 0 trivial solve split combine) (split x)

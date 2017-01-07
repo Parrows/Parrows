@@ -120,6 +120,8 @@ parMap conf f = (arr $ \as -> (parEvalN conf (repeat f), as)) >>> app
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> (arr [a] [b])
 parMapStream conf f chunkSize = (arr $ \as -> (parEvalNLazy conf (repeat f) chunkSize, as)) >>> app
 
+-- TODO: parMapStreamChunk
+
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> NumCores -> (arr [a] [b])
 farmChunk conf f chunkSize numCores = -- chunk the input, inside of a chunk, behave sequentially,
                                  -- transform the map-chunks into a parallel function and apply it, then concat them together

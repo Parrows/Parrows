@@ -27,14 +27,14 @@ module Parrows.ParMonad where
 
 import Parrows.Definition
 import Control.Monad.Par
+--import Control.Monad.Par.Scheds.Trace
 import Control.Arrow
 
+import Control.DeepSeq
+
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = (arr $ \as -> (parEval', (fs, as))) >>> app >>> arr runPar
-                  where
-                    parEval' :: (NFData b, ArrowApply arr, ArrowChoice arr) => arr ([arr a b], [a]) (Par [b])
-                    parEval' = (arr $ \fas ->
-                                        (zipWithArrA (app >>> arr return >>> arr Control.Monad.Par.spawn), fas)) >>>
-                                app >>> arr (>>= \ibs -> mapM get ibs)
-                    zipWithArrA :: (ArrowApply arr, ArrowChoice arr, Applicative m) => (arr (a, b) (m c)) -> arr ([a], [b]) (m [c])
-                    zipWithArrA f = (arr $ \abs -> (zipWithArr f, abs)) >>> app >>> arr sequenceA
+    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
+                    zipWithArr (app >>> arr spawnP) >>>
+                    arr sequenceA >>>
+                    arr (>>= mapM get) >>>
+                    arr runPar
