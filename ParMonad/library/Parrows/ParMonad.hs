@@ -27,10 +27,7 @@ module Parrows.ParMonad where
 
 import Parrows.Definition
 import Control.Monad.Par
---import Control.Monad.Par.Scheds.Trace
 import Control.Arrow
-
-import Control.DeepSeq
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
