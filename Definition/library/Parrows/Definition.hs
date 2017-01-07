@@ -47,15 +47,10 @@ class Arrow arr => ArrowParallel arr a b conf where
 (|***|) = parEval2 ()
 
 (|&&&|) :: (ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) (), ArrowApply arr) => arr a b -> arr a c -> arr a (b, c)
-(|&&&|) f g = (arr $ \a -> (a, a)) >>> (f |***| g)
+(|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
-
--- [arr a a] ->
-
---tmp :: [arr a b] -> [a] -> arr () [b]
---tmp fs as = (arr $ \_ -> (parEvalN fs, as))
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
