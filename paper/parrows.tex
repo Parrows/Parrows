@@ -1,0 +1,68 @@
+\section{Parallel Arrows}
+We have seen what Arrows are, so we can take a look at how they can be used to define a general interface not just to computation, but to \textbf{parallel computation} as well, next.
+\\\\
+In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [a -> b] -> [a] -> [b]
+\end{lstlisting}
+Translating this into arrow terms gives us a new operator \code{parEvalN} that lifts a list of arrows \code{[arr a b]} to an parallel arrow \code{arr [a] [b]} (This combinator is similar to listApp from \ref{utilfns}, which does no parallel evaluation of \code{[arr a b]}).
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [arr a b] -> arr [a] [b]
+\end{lstlisting}
+As the implementation may a) differ depending on the type of arrow and b) we want this to be an interface for different backends with, we introduce the new typeclass \code{ArrowParallel}.
+\begin{lstlisting}[frame=htrbl]
+class Arrow arr => ArrowParallel arr a b where
+	parEvalN :: [arr a b] -> arr [a] [b]
+\end{lstlisting}
+As computation in some parallel Haskells involves additional configuration parameters giving info about the environment, we also introduce an additional \code{conf} parameter to the function which can be of different type for each backend, so we add it to the type signature of our class as well.
+\begin{lstlisting}[frame=htrbl]
+class Arrow arr => ArrowParallel arr a b conf where
+	parEvalN :: conf -> [arr a b] -> arr [a] [b]
+\end{lstlisting}
+Note that we don't require the conf parameter in every implementation. If it is not needed, we allow the \code{conf} type parameter to be of any type and don't even evaluate it by blanking it in the type signature of the implemented \code{parEvalN}.
+
+\subsection{Multicore Haskell}
+The Multicore Haskell implementation of this class is straightforward using listApp from \ref{utilfns} combined with the \code{using} operator from Multicore Haskell.
+\begin{lstlisting}[frame=htrbl]
+instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
+	ArrowParallel arr a b conf where
+		parEvalN _ fs = listApp fs >>> (arr $ flip using $ parList rdeepseq)
+\end{lstlisting}
+We hardcode the \code{parList rdeepseq} strategy here as in this context it is the only one making sense as we usually want the output list to be fully evaluated to its normal form.
+
+\subsection{ParMonad}
+The ParMonad implementation makes use of Haskells laziness and ParMonad's \code{spawnP :: a -> Par (IVar a)} function which forks away the computation of a value and returns an IVar containing the result in the Par monad.
+\\\\
+We therefore apply each function to its corresponding input value with \code{app} and then fork the computation away with \code{arr spawnP} inside a \code{zipWithArr} call. This yields a list \code{[Par (IVar b)]}, which we then convert into \code{Par [IVar b]} with \code{arr sequenceA}. In order to wait for the computation to finish, we map over the \code{IVar}s inside the ParMonad with \code{arr (>>= mapM get)}. The result of this operation is a \code{Par [b]} from which we can finally remove the monad again by running \code{arr runPar} to get our output of \code{[b]}.
+\begin{lstlisting}[frame=htrbl]
+instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
+	ArrowParallel arr a b conf where
+		parEvalN _ fs = 
+			(arr $ \as -> (fs, as)) >>>
+			zipWithArr (app >>> arr spawnP) >>>
+			arr sequenceA >>>
+			arr (>>= mapM get) >>>
+			arr runPar
+\end{lstlisting}
+
+\subsection{Eden}
+For the Multicore and ParMonad implementation we could use general implementations that just required the ArrowApply and ArrowChoice interface. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While this could be "fixed" by introducing a typeclass like
+\begin{lstlisting}[frame=htrbl]
+class (Arrow arr) => ArrowUnwrap arr where
+	arr a b -> (a -> b)
+\end{lstlisting}
+we don't do this in this paper, as this seems too hacky. For now, we just implement \code{ArrowParallel} for normal functions
+\begin{lstlisting}[frame=htrbl]
+instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
+parEvalN _ fs as = spawnF fs as
+\end{lstlisting}
+and the Kleisli type.
+\begin{lstlisting}[frame=htrbl]
+instance (Monad m, Trans a, Trans b, Trans (m b)) =>
+	ArrowParallel (Kleisli m) a b conf where
+parEvalN conf fs =
+	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
+	(Kleisli $ sequence)
+\end{lstlisting}
+
+\subsection{HdpH}

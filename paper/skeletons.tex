@@ -1,0 +1,79 @@
+\section{Skeletons}
+With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some basic parallel skeletons.
+
+\subsection{parEvalNLazy}
+\code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{(arr \$ chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp}. The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
+\begin{lstlisting}[frame=htrbl]
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
+	conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
+parEvalNLazy conf fs chunkSize =
+	(arr $ chunksOf chunkSize) >>>
+	listApp fchunks >>>
+	arr concat
+	where
+		fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
+\end{lstlisting}
+
+\subsection{parEval2}
+
+-- lift the functions to "maybe evaluated" functions
+-- so that if they are passed a Nothing they don't compute anything
+-- then, make a list of two of these functions evaluated after each other,
+-- feed each function the real value and one Nothing for the function they don't have to compute
+-- and combine them back to a tuple
+
+\begin{lstlisting}[frame=htrbl]
+arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
+arrMaybe fn = (arr $ go) >>> app
+	where 
+		go Nothing = (arr $ \Nothing -> Nothing, Nothing)
+		go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
+\end{lstlisting}
+
+\begin{lstlisting}[frame=htrbl]
+-- evaluate two functions with different types in parallel
+parEval2 :: (ArrowParallel arr a b conf,
+	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
+	ArrowApply arr) =>
+	conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
+parEval2 conf f g =
+	(arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>>
+	app >>>
+	(arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
+where
+	f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
+\end{lstlisting}
+
+\subsection{parMap}
+
+\begin{lstlisting}[frame=htrbl]
+parMap :: (ArrowParallel arr a b conf, ArrowApply arr) =>
+	conf -> (arr a b) -> (arr [a] [b])
+parMap conf f = (arr $ \as -> (parEvalN conf (repeat f), as)) >>> app
+\end{lstlisting}
+
+\subsection{parMapStream}
+
+\begin{lstlisting}[frame=htrbl]
+parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
+	conf -> arr a b -> ChunkSize -> arr [a] [b]
+parMapStream conf f chunkSize =
+	(arr $ \as -> (parEvalNLazy conf (repeat f) chunkSize, as)) >>> app
+\end{lstlisting}
+
+\subsection{farm}
+
+\begin{lstlisting}[frame=htrbl]
+farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
+	ArrowChoice arr, ArrowApply arr) =>
+	conf -> arr a b -> NumCores -> arr [a] [b]
+farm conf f numCores =  -- chunk the input and create a function that
+	-- inside of a chunk, behaves sequentially, transforms the map-chunks into a parallel function
+	(arr $ \as -> (parEvalN conf $ repeat $ mapArr f, unshuffle numCores as)) >>>
+	-- and then apply that function to the chunked input
+	app >>>
+	-- [[b]] --> [b]
+	(arr shuffle)
+\end{lstlisting}
+
+\subsection{farmChunk}
