@@ -62,7 +62,7 @@ parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 parMapFMulticore = M.parMap rdeepseq
 
 farmChunkF :: (NFData b) => (a -> b) -> [a] -> [b]
-farmChunkF fs as = P.farmChunk () fs 10 4 as
+farmChunkF fs as = P.farmChunk () 10 4 fs as
 
 divConRW :: (NFData a, NFData b) => Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW depth _ trivial solve split combine x

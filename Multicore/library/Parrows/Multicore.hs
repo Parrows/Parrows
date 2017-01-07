@@ -31,4 +31,4 @@ import Control.Parallel.Strategies
 import Control.Arrow
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = listApp fs >>> (arr $ flip using $ parList rdeepseq)
+    parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)

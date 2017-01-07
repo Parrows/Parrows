@@ -89,13 +89,15 @@ toPar = return
 (<||||>) = (++)
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
-parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
-parEvalNLazy conf fs chunkSize =
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf  -> ChunkSize -> [arr a b] -> (arr [a] [b])
+parEvalNLazy conf chunkSize fs =
                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                -- evaluate the function chunks in parallel and concat the input to a single list again
-               (arr $ chunksOf chunkSize) >>> listApp fchunks >>> (arr $ concat)
+               arr (chunksOf chunkSize) >>>
+               listApp fchunks >>>
+               arr concat
                where
-                fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
+                fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 
 -- evaluate two functions with different types in parallel
 parEval2 :: (ArrowParallel arr a b conf, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf, ArrowApply arr) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
@@ -104,7 +106,9 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
            -- then, make a list of two of these functions evaluated after each other,
            -- feed each function the real value and one Nothing for the function they don't have to compute
            -- and combine them back to a tuple
-           (arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>> app >>> (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
+           (arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>>
+           app >>>
+           (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
            where
                f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
                arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
@@ -115,27 +119,36 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
 -- some skeletons
 
 parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
-parMap conf f = (arr $ \as -> (parEvalN conf (repeat f), as)) >>> app
+parMap conf f = (arr $ \as -> (f, as)) >>>
+                (first $ arr repeat >>> arr (parEvalN conf)) >>>
+                app
 
-parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> (arr [a] [b])
-parMapStream conf f chunkSize = (arr $ \as -> (parEvalNLazy conf (repeat f) chunkSize, as)) >>> app
-
--- TODO: parMapStreamChunk
-
-farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> ChunkSize -> NumCores -> (arr [a] [b])
-farmChunk conf f chunkSize numCores = -- chunk the input, inside of a chunk, behave sequentially,
-                                 -- transform the map-chunks into a parallel function and apply it, then concat them together
-                                 (arr $ \as -> (parEvalNLazy conf (repeat (mapArr f)) chunkSize, unshuffle numCores as)) >>> app >>> (arr shuffle)
+parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
+parMapStream conf chunkSize f = (arr $ \as -> (f, as)) >>>
+                                (first $ arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
+                                app
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
-farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> arr a b -> NumCores -> (arr [a] [b])
-farm conf f numCores =  -- chunk the input
-                (arr $ \as -> (f, unshuffle numCores as)) >>>
-                -- inside of a chunk, behave sequentially, transform the map-chunks into a parallel function and apply it
-                (first $ arr mapArr) >>> (first $ (arr $ \f -> parEvalN conf (repeat f))) >>> app >>>
+farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> NumCores -> arr a b -> arr [a] [b]
+farm conf numCores f =  -- chunk the input and create a function that
+                -- inside of a chunk, behaves sequentially, transforms the map-chunks into a parallel function
+                (arr $ \as -> (f, as)) >>>
+                (first $ arr mapArr >>> arr repeat >>> arr (parEvalN conf)) >>>
+                (second $ arr (unshuffle numCores)) >>>
+                -- and then apply that function to the chunked input
+                app >>>
                 -- [[b]] --> [b]
-                (arr shuffle)
+                arr shuffle
+
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
+farmChunk conf chunkSize numCores f = -- chunk the input, inside of a chunk, behave sequentially,
+                                 -- transform the map-chunks into a parallel function and apply it, then concat them together
+                                 (arr $ \as -> (f, as)) >>>
+                                 (first $ arr mapArr >>> arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
+                                 (second $ arr (unshuffle numCores)) >>>
+                                 app >>>
+                                 arr shuffle
 				
 -- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)
 unshuffle :: Int      -- ^number of sublists
