@@ -34,8 +34,14 @@ import Control.Parallel.Eden
 
 -- ArrowParallel Instances
 
+-- FIXME: will this work with (spawnF id bs) with already "computed" bs
+-- so that we can write a uniform instance that doesn't require
+-- the weird unwrapping of the Kleisli type?
+-- Probably not, because we would end up computing the values while
+-- sending them over the network, right?
+
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-    parEvalN _ fs as = spawn (map process fs) as
+    parEvalN _ fs as = spawnF fs as
 
 instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
     parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)
