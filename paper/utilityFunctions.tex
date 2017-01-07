@@ -5,11 +5,12 @@ The map combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]}
 \begin{lstlisting}[frame=htrbl]
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
-mapArr f = arr listcase >>>
-			arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
-			where
-				listcase [] = Left ()
-				listcase (x:xs) = Right (x,xs)
+mapArr f =
+	arr listcase >>>
+	arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
+	where
+		listcase [] = Left ()
+		listcase (x:xs) = Right (x,xs)
 \end{lstlisting}
 and zipWith lift any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
 \begin{lstlisting}[frame=htrbl]

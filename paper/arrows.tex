@@ -12,16 +12,16 @@ class Arrow a where
 The most prominent instances of this interface are regular functions, \lstinline{(->)}
 \begin{lstlisting}[frame=htrbl]
 instance Arrow (->) where
-arr f = f
-f >>> g = g . f
-first f = \(b, d) -> (f b, d) 
+	arr f = f
+	f >>> g = g . f
+	first f = \(b, d) -> (f b, d) 
 \end{lstlisting}
 and the Kleisli type.
 \begin{lstlisting}[frame=htrbl]
 instance Arrow (Kleisli m) where
-arr f = Kleisli $ return . f
-f >>> g = Kleisli $ \b -> f b >>= g
-first f = Kleisli $ \(b,d) -> f b >>= \c -> return (c,d)
+	arr f = Kleisli $ return . f
+	f >>> g = Kleisli $ \b -> f b >>= g
+	first f = Kleisli $ \(b,d) -> f b >>= \c -> return (c,d)
 \end{lstlisting}
 With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \lstinline{first}, called \lstinline{second},
 \begin{lstlisting}[frame=htrbl]
