@@ -5,23 +5,17 @@ With the \code{ArrowParallel} typeclass in place and implemented, we can now imp
 \code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{(arr \$ chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp}. The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
-	conf -> [arr a b] -> ChunkSize -> (arr [a] [b])
-parEvalNLazy conf fs chunkSize =
-	(arr $ chunksOf chunkSize) >>>
+	conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
+parEvalNLazy conf chunkSize fs =
+	arr (chunksOf chunkSize) >>>
 	listApp fchunks >>>
 	arr concat
 	where
-		fchunks = map (\x -> parEvalN conf x) $ chunksOf chunkSize fs
+		fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 \end{lstlisting}
 
 \subsection{parEval2}
-
--- lift the functions to "maybe evaluated" functions
--- so that if they are passed a Nothing they don't compute anything
--- then, make a list of two of these functions evaluated after each other,
--- feed each function the real value and one Nothing for the function they don't have to compute
--- and combine them back to a tuple
-
+We have only talked about parallelizing the computation of arrows of the same type up until now. But sometimes we want to paralellize inhomogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
 \begin{lstlisting}[frame=htrbl]
 arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
 arrMaybe fn = (arr $ go) >>> app
@@ -29,9 +23,8 @@ arrMaybe fn = (arr $ go) >>> app
 		go Nothing = (arr $ \Nothing -> Nothing, Nothing)
 		go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
 \end{lstlisting}
-
+With this, we can now easily write \code{parEval2} which combines two arrows \code{arr a b} and \code{arr c d} into a new parallel arrow \code{arr (a, c) (b, d)}. We start by converting both arrows with \code{arrMaybe}, combining them with \code{***} into a new arrow \code{arr (Maybe a, Maybe c) (Maybe b, Maybe d)}. This is then replicated twice and fed into parEvalN to get a \code{arr [(Maybe a, Maybe c)] [(Maybe b, Maybe d)]}. We can then apply this arrow to the input \code{[(Just a, Nothing), (Nothing, Just c)]} and then extract the resulting values with \code{fromJust} and the \code{!!} operator on lists in the last step.
 \begin{lstlisting}[frame=htrbl]
--- evaluate two functions with different types in parallel
 parEval2 :: (ArrowParallel arr a b conf,
 	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
 	ArrowApply arr) =>
@@ -45,35 +38,74 @@ where
 \end{lstlisting}
 
 \subsection{parMap}
-
+\code{parMap} is probably the most common skeleton for parallel programs. We can implement it with \code{ArrowParallel} by repeating an arrow \code{arr a b} and then passing it into \code{parEvalN} to get an arrow \code{arr [a] [b]}. 
+Just like \code{parEvalN}, \code{parMap} is 100 \% strict.
 \begin{lstlisting}[frame=htrbl]
 parMap :: (ArrowParallel arr a b conf, ArrowApply arr) =>
 	conf -> (arr a b) -> (arr [a] [b])
-parMap conf f = (arr $ \as -> (parEvalN conf (repeat f), as)) >>> app
+parMap conf f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr repeat >>>
+		arr (parEvalN conf)) >>>
+	app
 \end{lstlisting}
 
 \subsection{parMapStream}
-
+As \code{parMap} is 100\% strict it has the same restrictions as \code{parEvalN} compared to \code{parEvalNLazy}. So it makes sense to also have a \code{parMapStream} which behaves like \code{parMap}, but uses \code{parEvalNLazy} instead of \code{parEvalN}.
 \begin{lstlisting}[frame=htrbl]
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
-	conf -> arr a b -> ChunkSize -> arr [a] [b]
-parMapStream conf f chunkSize =
-	(arr $ \as -> (parEvalNLazy conf (repeat f) chunkSize, as)) >>> app
+	conf -> ChunkSize -> arr a b -> arr [a] [b]
+parMapStream conf chunkSize f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr repeat >>>
+		arr (parEvalNLazy conf chunkSize)) >>>
+	app
 \end{lstlisting}
 
 \subsection{farm}
-
+\code{parMap} spawns every single computation in a new thread (at least for the instances of ArrowParallel we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores > actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{lstlisting}[frame=htrbl]
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
-	conf -> arr a b -> NumCores -> arr [a] [b]
-farm conf f numCores =  -- chunk the input and create a function that
-	-- inside of a chunk, behaves sequentially, transforms the map-chunks into a parallel function
-	(arr $ \as -> (parEvalN conf $ repeat $ mapArr f, unshuffle numCores as)) >>>
-	-- and then apply that function to the chunked input
+	conf -> NumCores -> arr a b -> arr [a] [b]
+farm conf numCores f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr mapArr >>> arr repeat >>>
+		arr (parEvalN conf)) >>>
+	(second $ arr (unshuffle numCores)) >>>
 	app >>>
-	-- [[b]] --> [b]
-	(arr shuffle)
+	arr shuffle
 \end{lstlisting}
+The definition of \code{unshuffle} is
+\begin{lstlisting}[frame=htrbl]
+unshuffle :: Int
+	-> [a]
+	-> [[a]]
+unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
+\end{lstlisting}
+, while \code{shuffle} is defined as:
+\begin{lstlisting}[frame=htrbl]
+shuffle :: [[a]]
+	-> [a]
+shuffle = concat . transpose
+\end{lstlisting}
+These were taken from Eden's source code.
+\\
+\fixme{Do we want a farm that works on a list of arrows as well?}
+\\
+\fixme{For this we just have to replace the mapArr with zipWithArr}
 
 \subsection{farmChunk}
+As \code{farm} is basically just \code{parMap} with a different work distribution, it is, again, 100\% strict. So we define \code{farmChunk} which uses \code{parEvalNLazy} instead of \code{parEvalN} like this:
+\begin{lstlisting}[frame=htrbl]
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
+	ArrowChoice arr, ArrowApply arr) =>
+	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
+farmChunk conf chunkSize numCores f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr mapArr >>> arr repeat >>>
+		arr (parEvalNLazy conf chunkSize)) >>>
+	(second $ arr (unshuffle numCores)) >>>
+	app >>>
+	arr shuffle
+\end{lstlisting}

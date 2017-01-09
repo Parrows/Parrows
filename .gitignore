@@ -32,3 +32,8 @@ dist/*
 .idea/
 
 *.eventlog
+
+*.log
+*.synctex.gz
+*.toc
+*.out

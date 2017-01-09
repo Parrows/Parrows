@@ -26,7 +26,7 @@ The Multicore Haskell implementation of this class is straightforward using list
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b conf where
-		parEvalN _ fs = listApp fs >>> (arr $ flip using $ parList rdeepseq)
+		parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
 \end{lstlisting}
 We hardcode the \code{parList rdeepseq} strategy here as in this context it is the only one making sense as we usually want the output list to be fully evaluated to its normal form.
 
