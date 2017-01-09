@@ -118,27 +118,25 @@ parMap conf f = (arr $ \as -> (f, as)) >>>
                 (first $ arr repeat >>> arr (parEvalN conf)) >>>
                 app
 
+-- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
+-- evaluated on the same thread
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
 parMapStream conf chunkSize f = (arr $ \as -> (f, as)) >>>
                                 (first $ arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
                                 app
 
--- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
--- evaluated on the same thread
+-- similar to parMapStream, but divides the input list by the given number
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> NumCores -> arr a b -> arr [a] [b]
-farm conf numCores f =  -- chunk the input and create a function that
-                -- inside of a chunk, behaves sequentially, transforms the map-chunks into a parallel function
+farm conf numCores f =
                 (arr $ \as -> (f, as)) >>>
                 (first $ arr mapArr >>> arr repeat >>> arr (parEvalN conf)) >>>
                 (second $ arr (unshuffle numCores)) >>>
-                -- and then apply that function to the chunked input
                 app >>>
-                -- [[b]] --> [b]
                 arr shuffle
 
+-- farmChunk and parMapStream combined. divide the input list and inside work in chunks
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
-farmChunk conf chunkSize numCores f = -- chunk the input, inside of a chunk, behave sequentially,
-                                 -- transform the map-chunks into a parallel function and apply it, then concat them together
+farmChunk conf chunkSize numCores f =
                                  (arr $ \as -> (f, as)) >>>
                                  (first $ arr mapArr >>> arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
                                  (second $ arr (unshuffle numCores)) >>>
