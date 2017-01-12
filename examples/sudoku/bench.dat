@@ -1,0 +1,41 @@
+#Core i7-3970X CPU @ 3.5GHz
+#runsPerConfig: 100
+sudoku17.1000.txt
+sudoku1 1.338
+sudoku2 .857
+sudoku3 .195
+sudoku4 .204
+sudoku-par4 .527
+parrows-sudoku-parmap .197
+parrows-sudoku-parmapstream .188
+parrows-sudoku-farm .213
+parrows-sudoku-farmChunk .215
+
+
+
+sudoku17.16000.txt
+sudoku1 21.324
+sudoku2 11.179
+sudoku3 10.570
+sudoku4 11.383
+sudoku-par4 2.936
+parrows-sudoku-parmap 2.860
+parrows-sudoku-parmapstream 2.755
+parrows-sudoku-farm 3.148
+parrows-sudoku-farmChunk 3.218
+
+
+
+sudoku17.49151.txt
+sudoku1 60.931
+sudoku2 32.873
+sudoku3 49.046
+sudoku4 53.977
+sudoku-par4 8.679
+parrows-sudoku-parmap 8.969
+parrows-sudoku-parmapstream 8.776
+parrows-sudoku-farm 10.151
+parrows-sudoku-farmChunk 10.038
+
+
+

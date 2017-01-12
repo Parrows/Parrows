@@ -1,6 +1,10 @@
 \documentclass{article}
 \usepackage{tikz}
 
+\usepackage{filecontents}
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{statistics}
+
 \usepackage[utf8]{inputenc}
 \usepackage{color}
 \usepackage{hyperref}
@@ -31,9 +35,7 @@
 	morecomment=[l]\%,
 }
 
-\newcommand{\cit}[2]{\footnote{#1, see~\cite{#2}}}
-
-\newcommand{\citHughes}{\cit{John Hughes, Generalising Monads to Arrows}{hughes_arrows_98}}
+\newcommand{\citHughes}{\cite{hughes_arrows_98}}
 
 \newcommand{\code}[1]{\lstinline{#1}}
 

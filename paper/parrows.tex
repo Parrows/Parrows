@@ -1,25 +1,25 @@
 \section{Parallel Arrows}
-We have seen what Arrows are, so we can take a look at how they can be used to define a general interface not just to computation, but to \textbf{parallel computation} as well, next.
-\\\\
+We have seen what Arrows are and how they can be seen as a general interface to computation. In the following section we will discuss how Arrows can also be seen as a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
+\subsection{The ArrowParallel interface}
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
-Translating this into arrow terms gives us a new operator \code{parEvalN} that lifts a list of arrows \code{[arr a b]} to an parallel arrow \code{arr [a] [b]} (This combinator is similar to listApp from \ref{utilfns}, which does no parallel evaluation of \code{[arr a b]}).
+Translating this into arrow terms gives us a new operator \code{parEvalN} that lifts a list of arrows \code{[arr a b]} to a parallel arrow \code{arr [a] [b]} (This combinator is similar to our utility function listApp, but does parallel instead of serial evaluation).
 \begin{lstlisting}[frame=htrbl]
-parEvalN :: [arr a b] -> arr [a] [b]
+parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 \end{lstlisting}
-As the implementation may a) differ depending on the type of arrow and b) we want this to be an interface for different backends with, we introduce the new typeclass \code{ArrowParallel}.
+With this definition of \code{parEvalN}, parallel execution can be looked at as yet another arrow combinator. But as the implementation may differ depending on the actuall type of the arrow \code{arr} and we want this to be an interface for different backends, we have to introduce the new typeclass \code{ArrowParallel} to host this combinator.
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b where
 	parEvalN :: [arr a b] -> arr [a] [b]
 \end{lstlisting}
-As computation in some parallel Haskells involves additional configuration parameters giving info about the environment, we also introduce an additional \code{conf} parameter to the function which can be of different type for each backend, so we add it to the type signature of our class as well.
+Sometimes parallel Haskells require additional configuration parameters for information about the execution environment. This is why we also introduce an additional \code{conf} parameter to the function. We also do not want \code{conf} to be of a fixed type, as the configuration parameters can differ for different instances of \code{ArrowParallel}, so we add it to the type signature of the typeclass as well.
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{lstlisting}
-Note that we don't require the conf parameter in every implementation. If it is not needed, we allow the \code{conf} type parameter to be of any type and don't even evaluate it by blanking it in the type signature of the implemented \code{parEvalN}.
+We don't require the conf parameter in every implementation. If it is not needed, we usually want to allow the \code{conf} type parameter to be of any type and don't even evaluate it by blanking it in the type signature of the implemented \code{parEvalN} as we will see in the implementation sections.
 
 \subsection{Multicore Haskell}
 The Multicore Haskell implementation of this class is straightforward using listApp from \ref{utilfns} combined with the \code{using} operator from Multicore Haskell.
@@ -46,7 +46,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{lstlisting}
 
 \subsection{Eden}
-For the Multicore and ParMonad implementation we could use general implementations that just required the ArrowApply and ArrowChoice interface. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While this could be "fixed" by introducing a typeclass like
+For the Multicore and ParMonad implementation we could use general implementations that just required the \code{ArrowApply} and \code{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass like
 \begin{lstlisting}[frame=htrbl]
 class (Arrow arr) => ArrowUnwrap arr where
 	arr a b -> (a -> b)
@@ -66,3 +66,12 @@ parEvalN conf fs =
 \end{lstlisting}
 
 \subsection{HdpH}
+
+\subsection{Benefits of parallel Arrows}
+We have seen that we can wrap parallel Haskells inside of the \code{ArrowParallel} interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
+\begin{itemize}
+	\item \textbf{Arrow API benefits}:
+	With the \code{ArrowParallel} typeclass we do not lose any benefits of using arrows as \code{parEvalN} is just yet another arrow combinator. The resulting arrow can be used in the same way its serial version can be used. This is a big advantage of this approach, especially compared to the monad solutions as all arrow combinators will continue to work instead of requiring special ones for each parallel monad.
+	\item \textbf{Abstraction}:
+	With the \code{ArrowParallel} typeclass, we abstracted all parallel implementation logic away from the business logic. This gives us the beautiful situation of being able to write our code against the interface the typeclass gives us without being bound to any parallel Haskell. So as an example, during development, we can run the code on the simple Multicore version and afterwards deploy it on a cluster using an Eden built, by just swapping out the actual \code{ArrowParallel} instance.
+\end{itemize}

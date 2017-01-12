@@ -17,7 +17,7 @@ and zipWith lift any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) 
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{lstlisting}
-These two combinators make use of the \code{ArrowChoice} typeclass, which allows us to use the \code{|||} combinator, which takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
+These two combinators make use of the \code{ArrowChoice} typeclass, which allows us to use the \code{|||} combinator. It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
 \begin{lstlisting}[frame=htrbl]
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{lstlisting}
@@ -26,7 +26,4 @@ With the zipWithArr combinator we can also write a combinator \code{listApp}, wh
 listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 \end{lstlisting}
-This combinator also makes use of the ArrowApply typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
-\\
-\fixme{Do we need the exact definition of ArrowChoice here?}
-
+This combinator also makes use of the \code{ArrowApply} typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.

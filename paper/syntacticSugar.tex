@@ -5,7 +5,7 @@ We start with \code{|>>>|}, which is basically \code{>>>} on lists of arrows.
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
 \end{lstlisting}
-For the basic Arrow case, we have the \code{***} combinator which allows us to combine two arrows \code{arr a b} and \code{arr c d} into an arrow \code{arr (a, c) (b, d)} which does both computations at once. This can easily be lifted into a parallel computation with \code{parEval2}, but requires a backend which has a implementation that does not require any configuration (hence the \code{()} as the conf parameter in the following code snippet).
+For basic arrows, we have the \code{***} combinator which allows us to combine two arrows \code{arr a b} and \code{arr c d} into an arrow \code{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version with \code{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \code{()} as the conf parameter in the following code snippet).
 \begin{lstlisting}[frame=htrbl]
 (|***|) :: (ArrowParallel arr a b (),
 	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) (),
