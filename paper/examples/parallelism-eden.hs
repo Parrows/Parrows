@@ -26,7 +26,7 @@ module Main where
 
 import Control.Parallel.Eden
 
-parallel :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
-parallel fs as = spawnF fs as
+parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = spawnF fs as
 
-main = do print $ parallel [(*2), (+1)] [1::Int, 2]
+main = do print $ parEvalN [(*2), (+1)] [1::Int, 2]

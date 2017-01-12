@@ -26,7 +26,7 @@ module Main where
 
 import Control.Parallel.Strategies
 
-parallel :: (NFData b) => [a -> b] -> [a] -> [b]
-parallel fs as = zipWith ($) fs as `using` parList rdeepseq
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
 
-main = do print $ parallel [(*2), (+1)] [1::Int, 2]
+main = do print $ parEvalN [(*2), (+1)] [1::Int, 2]

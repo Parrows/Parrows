@@ -26,7 +26,7 @@ module Main where
 
 import Control.Monad.Par
 
-parallel :: (NFData b) => [a -> b] -> [a] -> [b]
-parallel fs as = runPar $ (sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = runPar $ (sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 
-main = do print $ parallel [(*2), (+1)] [1::Int, 2]
+main = do print $ parEvalN [(*2), (+1)] [1::Int, 2]
