@@ -22,25 +22,11 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
-module Parrows.Eden where
-
-import Parrows.Definition
-
-import Control.Arrow
+module Main where
 
 import Control.Parallel.Eden
 
--- ArrowParallel Instances
+parallel :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+parallel fs as = spawnF fs as
 
--- FIXME: will this work with (spawnF id bs) with already "computed" bs
--- so that we can write a uniform instance that doesn't require
--- the weird unwrapping of the Kleisli type?
--- Probably not, because we would end up computing the values while
--- sending them over the network, right?
-
-instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-    parEvalN _ fs as = spawnF fs as
-
-instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
-    parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)
+main = do print $ parallel [(*2), (+1)] [1::Int, 2]
