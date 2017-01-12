@@ -15,7 +15,7 @@ parEvalNLazy conf chunkSize fs =
 \end{lstlisting}
 
 \subsection{parEval2}
-We have only talked about parallelizing the computation of arrows of the same type up until now. But sometimes we want to paralellize inhomogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
+We have only talked about parallelizing the computation of arrows of the same type up until now. But sometimes we want to paralellize heterogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
 \begin{lstlisting}[frame=htrbl]
 arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
 arrMaybe fn = (arr $ go) >>> app
@@ -63,7 +63,7 @@ parMapStream conf chunkSize f =
 \end{lstlisting}
 
 \subsection{farm}
-\code{parMap} spawns every single computation in a new thread (at least for the instances of ArrowParallel we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores > actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
+\code{parMap} spawns every single computation in a new thread (at least for the instances of ArrowParallel we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores is greater than actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{lstlisting}[frame=htrbl]
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
@@ -89,11 +89,7 @@ shuffle :: [[a]]
 	-> [a]
 shuffle = concat . transpose
 \end{lstlisting}
-These were taken from Eden's source code.
-\\
-\fixme{Do we want a farm that works on a list of arrows as well?}
-\\
-\fixme{For this we just have to replace the mapArr with zipWithArr}
+(These were taken from Eden's source code.)
 
 \subsection{farmChunk}
 As \code{farm} is basically just \code{parMap} with a different work distribution, it is, again, 100\% strict. So we define \code{farmChunk} which uses \code{parEvalNLazy} instead of \code{parEvalN} like this:
