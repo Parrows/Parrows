@@ -1,9 +1,24 @@
 \section{Short introduction to parallel Haskells}
+There are already several ways write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
 \subsection{Multicore Haskell}
 
+\begin{lstlisting}[frame=htrbl]
+parallel :: (NFData b) => [a -> b] -> [a] -> [b]
+parallel fs as = zipWith ($) fs as `using` parList rdeepseq
+\end{lstlisting}
+
 \subsection{ParMonad}
+
+\begin{lstlisting}[frame=htrbl]
+parallel :: (NFData b) => [a -> b] -> [a] -> [b]
+parallel fs as = runPar $ 
+	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+\end{lstlisting}
 
 \subsection{Eden}
 
-\subsection{HdpH}
+\begin{lstlisting}[frame=htrbl]
+parallel :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+parallel fs as = spawnF fs as
+\end{lstlisting}
