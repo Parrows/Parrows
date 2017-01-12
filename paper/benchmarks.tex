@@ -1,7 +1,7 @@
 \section{Benchmarks}
 To check performance of our new parallel arrow API, we conducted some benchmarks. These are based on a sudoku solver from the examples for Simon Marlows book "Parallel and Concurrent Programming in Haskell" which can be found on his GitHub \cite{marlow_parconc}. The results are displayed in the following graphs which are ordered by problem size.
 \\\\
-The Benchmarks were run on a Core i7-3970X CPU @ 3.5GHz with 6 cores and 12 threads. All versions were run 100 times. The resulting running-times were then averaged.
+The Benchmarks were run on a Core i7-3970X CPU @ 3.5GHz with 6 cores and 12 threads. For sake of comparability with Simon Marlow's parallel version which uses the ParMonad, we use the ParMonad backend for the parallel arrow versions as well.
 \\
 \begin{tikzpicture}
 \begin{axis}[

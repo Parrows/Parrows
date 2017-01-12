@@ -1,7 +1,7 @@
 \section{Parallel Arrows}
 We have seen what Arrows are and how they can be seen as a general interface to computation. In the following section we will discuss how Arrows can also be seen as a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
-\subsection{The ArrowParallel interface}
-In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
+\subsection{The ArrowParallel typeclass}
+As we have seen earlier, in its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -64,8 +64,6 @@ parEvalN conf fs =
 	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
 	(Kleisli $ sequence)
 \end{lstlisting}
-
-\subsection{HdpH}
 
 \subsection{Benefits of parallel Arrows}
 We have seen that we can wrap parallel Haskells inside of the \code{ArrowParallel} interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
