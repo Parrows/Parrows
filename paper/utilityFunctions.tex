@@ -26,4 +26,4 @@ With the zipWithArr combinator we can also write a combinator \code{listApp}, wh
 listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 \end{lstlisting}
-This combinator also makes use of the ArrowApply typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
+This combinator also makes use of the \code{ArrowApply} typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.

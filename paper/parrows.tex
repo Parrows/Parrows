@@ -46,7 +46,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{lstlisting}
 
 \subsection{Eden}
-For the Multicore and ParMonad implementation we could use general implementations that just required the ArrowApply and ArrowChoice interface. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While this could be "fixed" by introducing a typeclass like
+For the Multicore and ParMonad implementation we could use general implementations that just required the \code{ArrowApply} and \code{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass like
 \begin{lstlisting}[frame=htrbl]
 class (Arrow arr) => ArrowUnwrap arr where
 	arr a b -> (a -> b)

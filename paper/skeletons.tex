@@ -63,7 +63,7 @@ parMapStream conf chunkSize f =
 \end{lstlisting}
 
 \subsection{farm}
-\code{parMap} spawns every single computation in a new thread (at least for the instances of ArrowParallel we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores is greater than actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
+\code{parMap} spawns every single computation in a new thread (at least for the instances of \code{ArrowParallel} we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores is greater than actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{lstlisting}[frame=htrbl]
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
