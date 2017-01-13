@@ -89,7 +89,7 @@ shuffle :: [[a]]
 	-> [a]
 shuffle = concat . transpose
 \end{lstlisting}
-(These were taken from Eden's source code.)
+(These were taken from Eden's source code. \cite{eden_skel_shuffle})
 
 \subsection{farmChunk}
 As \code{farm} is basically just \code{parMap} with a different work distribution, it is, again, 100\% strict. So we define \code{farmChunk} which uses \code{parEvalNLazy} instead of \code{parEvalN} like this:

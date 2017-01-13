@@ -1,9 +1,8 @@
 \section{Utility Functions}\label{utilfns}
 Before we go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: map and zipWith on arrows.
 \\
-The map combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]},
+The map combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows},
 \begin{lstlisting}[frame=htrbl]
--- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f =
 	arr listcase >>>
