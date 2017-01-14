@@ -8,6 +8,8 @@ import frege.control.Second
 import frege.control.CombineIn
 import frege.control.Tensor
 
+import frege.control.arrow.Kleisli
+
 -- start code copied from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
 
 class Arrow a => ArrowChoice a where
@@ -50,4 +52,12 @@ class Arrow a => ArrowChoice a where
 class Arrow a => ArrowApply a where
     app :: a (a b c, b) c
 
+instance (Monad m) => ArrowChoice (Kleisli m) where
+    left f = f +++ arr id
+    right f = arr id +++ f
+    f +++ g = (f >>> arr Left) ||| (g >>> arr Right)
+    Kleisli f ||| Kleisli g = Kleisli (either f g)
+
+instance (Monad m) => ArrowApply (Kleisli m) where
+    app = Kleisli (\(Kleisli f, x) -> f x)
 -- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
