@@ -1,0 +1,24 @@
+package com.github.s4ke.parrows.frege.ArrowUtils where
+
+import frege.control.Arrow
+import frege.control.Category
+import frege.control.Semigroupoid
+import frege.control.First
+import frege.control.Second
+import frege.control.CombineIn
+import frege.control.Tensor
+
+import com.github.s4ke.parrows.frege.ArrowExt
+
+-- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
+mapArr :: (ArrowChoice arr) => arr a b -> arr [a] [b]
+mapArr f = arr listcase >>>
+         arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
+         where listcase [] = Left ()
+               listcase (x:xs) = Right (x,xs)
+
+zipWithArr :: (ArrowChoice arr, ArrowApply arr) => arr (a, b) c -> arr ([a], [b]) [c]
+zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
+
+listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
+listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app

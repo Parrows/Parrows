@@ -1,0 +1,53 @@
+package com.github.s4ke.parrows.frege.ArrowExt where
+
+import frege.control.Arrow
+import frege.control.Category
+import frege.control.Semigroupoid
+import frege.control.First
+import frege.control.Second
+import frege.control.CombineIn
+import frege.control.Tensor
+
+-- start code copied from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
+
+class Arrow a => ArrowChoice a where
+
+    -- | Feed marked inputs through the argument arrow, passing the
+    --   rest through unchanged to the output.
+    left :: a b c -> a (Either b d) (Either c d)
+
+    -- | A mirror image of 'left'.
+    --
+    --   The default definition may be overridden with a more efficient
+    --   version if desired.
+    right :: a b c -> a (Either d b) (Either d c)
+    right f = arr mirror >>> left f >>> arr mirror
+      where
+        mirror :: Either x y -> Either y x
+        mirror (Left x) = Right x
+        mirror (Right y) = Left y
+
+    -- | Split the input between the two argument arrows, retagging
+    --   and merging their outputs.
+    --   Note that this is in general not a functor.
+    --
+    --   The default definition may be overridden with a more efficient
+    --   version if desired.
+    (+++) :: a b c -> a b' c' -> a (Either b b') (Either c c')
+    f +++ g = left f >>> right g
+
+    -- | Fanin: Split the input between the two argument arrows and
+    --   merge their outputs.
+    --
+    --   The default definition may be overridden with a more efficient
+    --   version if desired.
+    (|||) :: a b d -> a c d -> a (Either b c) d
+    f ||| g = f +++ g >>> arr untag
+      where
+        untag (Left x) = x
+        untag (Right y) = y
+
+class Arrow a => ArrowApply a where
+    app :: a (a b c, b) c
+
+-- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
