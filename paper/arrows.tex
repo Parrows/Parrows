@@ -1,13 +1,12 @@
 \section{Arrows}
-
-John Hughes defined the arrow typeclass as follows\citHughes:
+Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. Furthermore, he defined the arrow typeclass as follows:
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr where
 	arr :: (a -> b) -> arr a b
 	(>>>) :: arr a b -> arr b c -> arr a c
 	first :: arr a b -> arr (a,c) (b,c)
 \end{lstlisting}
-\lstinline{arr} is used to lift an ordinary function to an arrow type. This can be thought of as analogous to the monadic \lstinline{return}. The \lstinline{>>>} operator, in a similar way, is analogous to the monadic composition operator \lstinline{>>=}. Ant lastly, the \lstinline{first} operator, which takes the input arrow from b to c and converts it into an arrow on pairs with the second argument untouched, is also needed for actual useful code as without it, we wouldn't have a way to save input across arrows.
+\lstinline{arr} is used to lift an ordinary function to an arrow type. This can be thought of as analogous to the monadic \lstinline{return}. The \lstinline{>>>} operator, in a similar way, is analogous to the monadic composition operator \lstinline{>>=} and combines two arrows \code{arr a b} and \code{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \code{arr a c}. And lastly, the \lstinline{first} operator, which takes the input arrow from b to c and converts it into an arrow on pairs with the second argument untouched, is also needed for actual useful code as without it, we wouldn't have a way to save input across arrows.
 \\\\
 The most prominent instances of this interface are regular functions \lstinline{(->)},
 \begin{lstlisting}[frame=htrbl]
