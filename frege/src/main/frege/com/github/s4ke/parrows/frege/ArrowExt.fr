@@ -71,11 +71,11 @@ class Arrow a => ArrowApply a where
     app' :: ArrowApply' a b c
 
 instance ArrowApply (->) where
-    app' = AA { app = xapp}
+    app' = AA { app = xapp }
        where xapp (f, b) = f b
 
 instance (Monad m) => ArrowApply (Kleisli m) where
-    app' = AA { app = xapp}
+    app' = AA { app = xapp }
        where xapp = Kleisli (\(Kleisli f, x) -> f x)
 
 app :: ArrowApply a => a (a b c, b) c
