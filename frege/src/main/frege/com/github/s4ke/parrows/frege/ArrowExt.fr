@@ -58,6 +58,15 @@ instance (Monad m) => ArrowChoice (Kleisli m) where
     f +++ g = (f >>> arr Left) ||| (g >>> arr Right)
     Kleisli f ||| Kleisli g = Kleisli (either f g)
 
+instance ArrowChoice (->) where
+    left f = f +++ id
+    right f = id +++ f
+    f +++ g = (Left . f) ||| (Right . g)
+    (|||) = either
+
 instance (Monad m) => ArrowApply (Kleisli m) where
     app = Kleisli (\(Kleisli f, x) -> f x)
+
+instance ArrowApply (->) where
+    app (f, b) = f b
 -- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr

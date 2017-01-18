@@ -1,5 +1,5 @@
 \section{Arrows}
-Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. Furthermore, he defined the arrow typeclass as follows:
+Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr where
 	arr :: (a -> b) -> arr a b
