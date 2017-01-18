@@ -49,9 +49,6 @@ class Arrow a => ArrowChoice a where
         untag (Left x) = x
         untag (Right y) = y
 
-class Arrow a => ArrowApply a where
-    app :: a (a b c, b) c
-
 instance (Monad m) => ArrowChoice (Kleisli m) where
     left f = f +++ arr id
     right f = arr id +++ f
@@ -64,9 +61,23 @@ instance ArrowChoice (->) where
     f +++ g = (Left . f) ||| (Right . g)
     (|||) = either
 
-instance (Monad m) => ArrowApply (Kleisli m) where
-    app = Kleisli (\(Kleisli f, x) -> f x)
+-- This workaround is needed
+-- because of the compiler error described in:
+-- https://github.com/Frege/frege/issues/323
+data ArrowApply' a b c = AA { app :: a (a b c, b) c }
+
+class Arrow a => ArrowApply a where
+    app' :: ArrowApply' a b c
 
 instance ArrowApply (->) where
-    app (f, b) = f b
+    app' = AA { app = xapp}
+       where xapp (f, b) = f b
+
+instance (Monad m) => ArrowApply (Kleisli m) where
+    app' = AA { app = xapp}
+       where xapp = Kleisli (\(Kleisli f, x) -> f x)
+
+app :: ArrowApply a => a (a b c, b) c
+app = app'.app
+
 -- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
