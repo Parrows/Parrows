@@ -60,6 +60,7 @@ instance ArrowChoice (->) where
     right f = id +++ f
     f +++ g = (Left . f) ||| (Right . g)
     (|||) = either
+-- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
 
 -- This workaround is needed
 -- because of the compiler error described in:
@@ -79,5 +80,3 @@ instance (Monad m) => ArrowApply (Kleisli m) where
 
 app :: ArrowApply a => a (a b c, b) c
 app = app'.app
-
--- end code from https://github.com/Frege/frege/blob/master/contrib/dgronau/arrow/Arrow.fr
