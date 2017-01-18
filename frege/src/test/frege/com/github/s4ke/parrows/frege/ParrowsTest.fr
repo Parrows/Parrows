@@ -1,0 +1,8 @@
+module com.github.s4ke.parrows.frege.ParrowsTest where
+
+import com.github.s4ke.parrows.frege.Parrows
+import frege.test.QuickCheck
+
+equalToMap :: [Int] -> Property
+equalToMap xs = property (parMap (+1) xs == map (+1) xs)
+

@@ -19,15 +19,13 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-        
      maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
      maven { url "http://repo.maven.apache.org/maven2" }
 }
+
 dependencies {
-    compile group: 'org.frege-lang', name: 'frege', version:'3.24-7.30'
-    testCompile group: 'org.frege-lang', name: 'frege-repl-core', version:'1.4-SNAPSHOT'
-    testCompile group: 'org.testng', name: 'testng', version:'6.9.4'
-    testCompile group: 'com.google.truth', name: 'truth', version:'0.27'
+    compile group: 'org.frege-lang', name: 'frege', version:'3.24-7.100'
+    compile group: 'org.frege-lang', name: 'frege-repl-core', version:'1.4-SNAPSHOT'
 }
 
 
