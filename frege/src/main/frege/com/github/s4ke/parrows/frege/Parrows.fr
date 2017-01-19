@@ -47,6 +47,10 @@ import Data.List
 
 import frege.lib.ForkJoin
 
+infixr 3 `|***|`
+infixr 3 `|&&&|`
+infixr 3 `|>>>|`
+
 class (Arrow arr) => ArrowParallel arr where
     parEvalN :: [arr a b] -> arr [a] [b]
 
@@ -57,8 +61,9 @@ instance (Monad m) => ArrowParallel (Kleisli m) where
 
 instance ArrowParallel (->) where
     parEvalN (f:fs) (x:xs) = parOp (:) (f x) (parEvalN fs xs)
-    parEvalN [] [] = []
-    parEvalN _ _ = error "length of fs did not match length of list xs"
+    parEvalN [f] [x] = [f x]
+    parEvalN _ [] = []
+    parEvalN [] _ = error "length of fs did not match length of list xs"
 
 -- parallel versions of (***) and (&&&)
 (|***|) :: (ArrowParallel arr, ArrowApply arr) => arr a b -> arr c d -> arr (a, c) (b, d)
