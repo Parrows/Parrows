@@ -37,3 +37,5 @@ dist/*
 *.synctex.gz
 *.toc
 *.out
+*.bbl
+*.blg
