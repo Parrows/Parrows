@@ -1,45 +1,53 @@
 \section{Benchmarks}
-To check performance of our new parallel arrow API, we conducted some benchmarks. These are based on a sudoku solver from the examples for Simon Marlows book "Parallel and Concurrent Programming in Haskell" which can be found on his GitHub \cite{marlow_parconc}. The results are displayed in the following graphs which are ordered by problem size.
+To check the performance of our new parallel arrow API, we conducted some benchmarks. These are based on a sudoku solver from the examples for Simon Marlows book "Parallel and Concurrent Programming in Haskell" which can be found on his GitHub \cite{marlow_parconc}. The results are displayed in the following graphs which are ordered by problem size.
 \\\\
 The Benchmarks were run on a Core i7-3970X CPU @ 3.5GHz with 6 cores and 12 threads. For sake of comparability with Simon Marlow's parallel version which uses the ParMonad, we use the ParMonad backend for the parallel arrow versions as well.
-\\
-\begin{tikzpicture}
-\begin{axis}[
-xbar, xmin=0,
-width=12cm, height=7cm, enlarge y limits=0.5,
-xlabel={avg. seconds run on sudoku17.1000.txt (100 runs)},
-symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
-ytick=data,
-nodes near coords, nodes near coords align={horizontal},
-]
-\addplot coordinates {(.215,parrows-sudoku-farmChunk) (.213,parrows-sudoku-farm) (.188,parrows-sudoku-parmapstream) (.197,parrows-sudoku-parmap) (.527,parmonad-sudoku-parmap) (1.338,sudoku-sequential)};
-\end{axis}
-\end{tikzpicture}
+\\\\
+\framebox{
+	\begin{tikzpicture}[thick, scale=0.7]
+	\begin{axis}[
+	xbar, xmin=0,
+	width=12cm, height=7cm, enlarge y limits=0.5,
+	xlabel={avg. seconds run on sudoku17.1000.txt (100 runs)},
+	symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
+	ytick=data,
+	nodes near coords, nodes near coords align={horizontal},
+	]
+	\addplot coordinates {(.215,parrows-sudoku-farmChunk) (.213,parrows-sudoku-farm) (.188,parrows-sudoku-parmapstream) (.197,parrows-sudoku-parmap) (.527,parmonad-sudoku-parmap) (1.338,sudoku-sequential)};
+	\end{axis}
+	\end{tikzpicture}
+}
+\\\\
 \textit{Note: the bad result for parmonad-sudoku-parmap seems to be a artefact as it performs much better in the other benchmarks}
 \\\\
-\begin{tikzpicture}
-\begin{axis}[
-xbar, xmin=0,
-width=12cm, height=7cm, enlarge y limits=0.5,
-xlabel={avg. seconds run on sudoku17.16000.txt (100 runs)},
-symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
-ytick=data,
-nodes near coords, nodes near coords align={horizontal},
-]
-\addplot coordinates {(3.218,parrows-sudoku-farmChunk) (3.148,parrows-sudoku-farm) (2.755,parrows-sudoku-parmapstream) (2.860,parrows-sudoku-parmap) (2.936,parmonad-sudoku-parmap) (21.324,sudoku-sequential)};
-\end{axis}
-\end{tikzpicture}
-\begin{tikzpicture}
-\begin{axis}[
-xbar, xmin=0,
-width=12cm, height=7cm, enlarge y limits=0.5,
-xlabel={avg. seconds run on sudoku17.49151.txt (100 runs)},
-symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
-ytick=data,
-nodes near coords, nodes near coords align={horizontal},
-]
-\addplot coordinates {(10.038,parrows-sudoku-farmChunk) (10.151,parrows-sudoku-farm) (8.776,parrows-sudoku-parmapstream) (8.969,parrows-sudoku-parmap) (8.679,parmonad-sudoku-parmap) (60.931,sudoku-sequential)};
-\end{axis}
-\end{tikzpicture}
+\framebox{
+	\begin{tikzpicture}[thick, scale=0.7]
+	\begin{axis}[
+	xbar, xmin=0,
+	width=12cm, height=7cm, enlarge y limits=0.5,
+	xlabel={avg. seconds run on sudoku17.16000.txt (100 runs)},
+	symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
+	ytick=data,
+	nodes near coords, nodes near coords align={horizontal},
+	]
+	\addplot coordinates {(3.218,parrows-sudoku-farmChunk) (3.148,parrows-sudoku-farm) (2.755,parrows-sudoku-parmapstream) (2.860,parrows-sudoku-parmap) (2.936,parmonad-sudoku-parmap) (21.324,sudoku-sequential)};
+	\end{axis}
+	\end{tikzpicture}
+}
 \\\\
-As we can see, the parallel arrow versions of the program all have around the same speedup as the ParMonad based version. This means that using the \code{ArrowParallel} typeclass doesn't add any real overhead. Also, the slightly worse results for "parrows-sudoku-farm" and "parrows-sudoku-farmChunk" can be explained by either imperfect parameters or by the fact that the benchmarks do not really require the scheduling introduced by the skeletons which in this case introduces unnecessary overhead. This would probably look different if the benchmark would use e.g. a divide and conquer approach to solve the sudoku puzzles.
+\framebox{
+	\begin{tikzpicture}[thick, scale=0.7]
+	\begin{axis}[
+	xbar, xmin=0,
+	width=12cm, height=7cm, enlarge y limits=0.5,
+	xlabel={avg. seconds run on sudoku17.49151.txt (100 runs)},
+	symbolic y coords={parrows-sudoku-farmChunk, parrows-sudoku-farm, parrows-sudoku-parmapstream, parrows-sudoku-parmap, parmonad-sudoku-parmap, sudoku-sequential},
+	ytick=data,
+	nodes near coords, nodes near coords align={horizontal},
+	]
+	\addplot coordinates {(10.038,parrows-sudoku-farmChunk) (10.151,parrows-sudoku-farm) (8.776,parrows-sudoku-parmapstream) (8.969,parrows-sudoku-parmap) (8.679,parmonad-sudoku-parmap) (60.931,sudoku-sequential)};
+	\end{axis}
+	\end{tikzpicture}
+}
+\\\\
+As we can see, the parallel arrow versions of the program all have around the same speedup as the ParMonad based version. This means that using the \code{ArrowParallel} typeclass doesn't add any real notable overhead. Also, the slightly worse results for "parrows-sudoku-farm" and "parrows-sudoku-farmChunk" can be explained by either imperfect parameters or by the fact that the benchmarks do not really require the scheduling introduced by the skeletons which in this case introduces unnecessary overhead. This would probably look different if the benchmark would use e.g. a divide and conquer approach to solve the sudoku puzzles.

@@ -3,6 +3,32 @@ module com.github.s4ke.parrows.frege.ParrowsTest where
 import com.github.s4ke.parrows.frege.Parrows
 import frege.test.QuickCheck
 
-equalToMap :: [Int] -> Property
-equalToMap xs = property (parMap (+1) xs == map (+1) xs)
+import frege.control.Tensor
+import frege.control.CombineIn
 
+testParEvalN :: Property
+testParEvalN = property (\xs -> parEvalN (repeat (+1)) xs == map (+1) xs)
+
+--testParEvalNLazy :: Property
+--testParEvalNLazy = property (\xs -> parEvalNLazy 10 (repeat (+1)) xs == map (+1) xs)
+
+testParEval2 :: Property
+testParEval2 = property (\x -> parEval2 (+1) (*2) x == ((+1) *** (*2)) x)
+
+testParEval2Alias :: Property
+testParEval2Alias = property (\x -> ((+1) |***| (*2)) x == ((+1) *** (*2)) x)
+
+testAndAndAnd :: Property
+testAndAndAnd = property (\x -> ((+1) |&&&| (*2)) x == ((+1) &&& (*2)) x)
+
+parMapEqualToMap :: Property
+parMapEqualToMap = property (\xs -> parMap (+1) xs == map (+1) xs)
+
+--parMapStreamEqualToMap :: Property
+--parMapStreamEqualToMap = property (\xs -> parMapStream 2 (+1) xs == map (+1) xs)
+
+--farmEqualToMap :: Property
+--farmEqualToMap = property (\xs -> farm 10 (+1) xs == map (+1) xs)
+
+--farmChunkEqualToMap :: Property
+--farmChunkEqualToMap = property (\xs -> farmChunk 10 10 (+1) xs == map (+1) xs)
