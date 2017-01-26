@@ -1,0 +1,108 @@
+\section{Skeletons}
+With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some basic parallel skeletons.
+
+\subsection{parEvalNLazy}
+\begin{lstlisting}[frame=htrbl]
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
+	conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
+parEvalNLazy conf chunkSize fs =
+	arr (chunksOf chunkSize) >>>
+	listApp fchunks >>>
+	arr concat
+	where
+		fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
+\end{lstlisting}
+\frbreak
+
+\subsection{parEval2}
+\begin{lstlisting}[frame=htrbl]
+arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
+arrMaybe fn = (arr $ go) >>> app
+	where 
+		go Nothing = (arr $ \Nothing -> Nothing, Nothing)
+		go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
+\end{lstlisting}
+\frbreak
+
+\begin{lstlisting}[frame=htrbl]
+parEval2 :: (ArrowParallel arr a b conf,
+	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
+	ArrowApply arr) =>
+	conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
+parEval2 conf f g =
+	(arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>>
+	app >>>
+	(arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
+where
+	f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
+\end{lstlisting}
+
+\frbreak
+\subsection{parMap}
+\begin{lstlisting}[frame=htrbl]
+parMap :: (ArrowParallel arr a b conf, ArrowApply arr) =>
+	conf -> (arr a b) -> (arr [a] [b])
+parMap conf f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr repeat >>>
+		arr (parEvalN conf)) >>>
+	app
+\end{lstlisting}
+
+\frbreak
+
+\subsection{parMapStream}
+\begin{lstlisting}[frame=htrbl]
+parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
+	conf -> ChunkSize -> arr a b -> arr [a] [b]
+parMapStream conf chunkSize f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr repeat >>>
+		arr (parEvalNLazy conf chunkSize)) >>>
+	app
+\end{lstlisting}
+
+\frbreak
+\subsection{farm}
+\begin{lstlisting}[frame=htrbl]
+farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
+	ArrowChoice arr, ArrowApply arr) =>
+	conf -> NumCores -> arr a b -> arr [a] [b]
+farm conf numCores f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr mapArr >>> arr repeat >>>
+		arr (parEvalN conf)) >>>
+	(second $ arr (unshuffle numCores)) >>>
+	app >>>
+	arr shuffle
+\end{lstlisting}
+The definition of \code{unshuffle} is
+\begin{lstlisting}[frame=htrbl]
+unshuffle :: Int
+	-> [a]
+	-> [[a]]
+unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
+\end{lstlisting}
+, while \code{shuffle} is defined as:
+\begin{lstlisting}[frame=htrbl]
+shuffle :: [[a]]
+	-> [a]
+shuffle = concat . transpose
+\end{lstlisting}
+(These were taken from Eden's source code. \cite{eden_skel_shuffle})
+
+\frbreak
+
+\subsection{farmChunk}
+\begin{lstlisting}[frame=htrbl]
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
+	ArrowChoice arr, ArrowApply arr) =>
+	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
+farmChunk conf chunkSize numCores f =
+	(arr $ \as -> (f, as)) >>>
+	(first $ arr mapArr >>> arr repeat >>>
+		arr (parEvalNLazy conf chunkSize)) >>>
+	(second $ arr (unshuffle numCores)) >>>
+	app >>>
+	arr shuffle
+\end{lstlisting}

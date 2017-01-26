@@ -1,0 +1,21 @@
+\section{Syntactic Sugar}
+\begin{lstlisting}[frame=htrbl]
+(|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
+(|>>>|) = zipWith (>>>)
+\end{lstlisting}
+
+\begin{lstlisting}[frame=htrbl]
+(|***|) :: (ArrowParallel arr a b (),
+	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) (),
+	ArrowApply arr) =>
+	arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) = parEval2 ()
+\end{lstlisting}
+
+\begin{lstlisting}[frame=htrbl]
+(|&&&|) :: (ArrowParallel arr a b (),
+	ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) (),
+	ArrowApply arr) =>
+	arr a b -> arr a c -> arr a (b, c)
+(|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
+\end{lstlisting}
