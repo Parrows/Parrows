@@ -1,0 +1,34 @@
+\section{Utility Functions}\label{utilfns}
+\subsection{mapArr}
+The mapArr combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows},
+\begin{lstlisting}[frame=htrbl]
+mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
+mapArr f =
+	arr listcase >>>
+	arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
+	where
+		listcase [] = Left ()
+		listcase (x:xs) = Right (x,xs)
+\end{lstlisting}
+with
+\begin{lstlisting}[frame=htrbl]
+(|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
+\end{lstlisting}
+%It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
+\frbreak
+
+\subsection{zipWithArr}
+zipWithArr lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
+\begin{lstlisting}[frame=htrbl]
+zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
+zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
+\end{lstlisting}
+\frbreak
+
+\subsection{listApp}
+\begin{lstlisting}[frame=htrbl]
+listApp :: (ArrowChoice arr, ArrowApply arr) =>
+	[arr a b] -> arr [a] [b]
+listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
+\end{lstlisting}
+This combinator also makes use of the \code{ArrowApply} typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.

@@ -1,0 +1,30 @@
+\section{Introduction to parallel Haskells}
+
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [a -> b] -> [a] -> [b]
+\end{lstlisting}
+
+\frbreak
+
+\subsection{Multicore Haskell}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
+\end{lstlisting}
+
+\frbreak
+
+\subsection{ParMonad}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = runPar $ 
+(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+\end{lstlisting}
+
+\frbreak
+
+\subsection{Eden}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = spawnF fs as
+\end{lstlisting}

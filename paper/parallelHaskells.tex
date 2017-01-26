@@ -5,6 +5,7 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
+We will now implement \code{parEvalN} with the different parallel Haskells.
 
 \subsection{Multicore Haskell}
 Multicore Haskell \cite{multicore_hackage} is the GHC native way to do parallel processing. It ships with parallel evaluation strategies for several types which can be applied with \code{using :: a -> Strategy a -> a}. For \code{parEvalN} this means that we can just apply the list of functions \code{[a -> b]} to the list of inputs \code{[a]} by zipping them with the application operator \code{\$}. This lazy list \code{[b]} is then forcibly evaluated in parallel with the strategy \code{Strategy [b]} by the \code{using} operator. This strategy can be constructed with \code{parList :: Strategy a -> Strategy [a]} and \code{rdeepseq :: NFData a => Strategy a}.

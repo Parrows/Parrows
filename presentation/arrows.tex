@@ -1,0 +1,56 @@
+\section{Arrows}
+
+\subsection{Arrow Definition}
+\begin{lstlisting}[frame=htrbl]
+class Arrow arr where
+	arr :: (a -> b) -> arr a b
+	(>>>) :: arr a b -> arr b c -> arr a c
+	first :: arr a b -> arr (a,c) (b,c)
+\end{lstlisting}
+
+\frbreak
+
+\subsection{Arrow instances}
+Functions \lstinline{(->)} are arrows:
+\begin{lstlisting}[frame=htrbl]
+instance Arrow (->) where
+arr f = f
+f >>> g = g . f
+first f = \(a, c) -> (f a, c) 
+\end{lstlisting}
+\frbreak
+The Kleisli type
+\begin{lstlisting}[frame=htrbl]
+data Kleisli m a b = Kleisli { run :: a -> m b }
+\end{lstlisting}
+as well:
+\begin{lstlisting}[frame=htrbl]
+instance Monad m => Arrow (Kleisli m) where
+arr f = Kleisli $ return . f
+f >>> g = Kleisli $ \a -> f a >>= g
+first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
+\end{lstlisting}
+
+\frbreak
+\subsection{Combinators}
+\begin{lstlisting}[frame=htrbl]
+second :: Arrow arr => arr a b -> arr (c, a) (c, b)
+second f = arr swap >>> first f >>> arr swap
+where swap (x, y) = (y, x)
+\end{lstlisting}
+\begin{lstlisting}[frame=htrbl]
+(***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
+f *** g = first f >>> second g
+\end{lstlisting}
+\begin{lstlisting}[frame=htrbl]
+(&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
+f &&& g = arr (\a -> (a, a)) >>> (f *** g)
+\end{lstlisting}
+\frbreak
+
+\subsection{Arrow usage Example}
+\begin{lstlisting}[frame=htrbl]
+add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
+add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
+\end{lstlisting}
+\frbreak

@@ -15,9 +15,13 @@ instance Arrow (->) where
 	f >>> g = g . f
 	first f = \(a, c) -> (f a, c) 
 \end{lstlisting}
-and the Kleisli type.
+and the Kleisli type
 \begin{lstlisting}[frame=htrbl]
-instance Arrow (Kleisli m) where
+data Kleisli m a b = Kleisli { run :: a -> m b }
+\end{lstlisting}
+as well:
+\begin{lstlisting}[frame=htrbl]
+instance Monad m => Arrow (Kleisli m) where
 	arr f = Kleisli $ return . f
 	f >>> g = Kleisli $ \a -> f a >>= g
 	first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
