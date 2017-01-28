@@ -1,0 +1,37 @@
+\section{Functional Programming 101}
+\subsection{Functions}
+~\\
+\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[frame=htrbl, language=java]
+public static int fib(int x) {
+	if (x<=0)
+		return 0;
+	else if (x==1)
+		return 1;
+	else
+		return fib(x-2) + fib(x-1);
+}
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{lstlisting}[frame=htrbl]
+fib :: Int -> Int
+fib x
+	| x <= 0 = 0
+	| x == 1 = 0
+	| otherwise = 
+		(fib (x - 2))
+			+ (fib (x - 1))
+\end{lstlisting}
+\end{minipage}
+
+- Functional programming equally powerful as imperative programming
+
+- focused on the "what?" instead of the "how?"
+
+$\Rightarrow$ more concise $\Rightarrow$ easier to reason about
+
+- based on Lambda Calculus
+
+\frbreak

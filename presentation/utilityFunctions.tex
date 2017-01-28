@@ -17,18 +17,17 @@ with
 %It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
 \frbreak
 
-\subsection{zipWithArr}
-zipWithArr lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
+\subsection{zipWithArr \& listApp}
+zipWithArr lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}:
 \begin{lstlisting}[frame=htrbl]
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
-zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
+zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>>
+	mapArr f
 \end{lstlisting}
-\frbreak
-
-\subsection{listApp}
+listApp converts a list of arrows \code{[arr a b]} to a new arrow \code{arr [a] [b]}:
 \begin{lstlisting}[frame=htrbl]
 listApp :: (ArrowChoice arr, ArrowApply arr) =>
 	[arr a b] -> arr [a] [b]
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 \end{lstlisting}
-This combinator also makes use of the \code{ArrowApply} typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
+with the \code{ArrowApply} that defines \code{app :: arr (arr a b, a) c}.

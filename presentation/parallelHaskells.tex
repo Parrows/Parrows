@@ -1,5 +1,5 @@
 \section{Introduction to parallel Haskells}
-
+In general, Parallelism can be looked at as:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -11,6 +11,13 @@ parEvalN :: [a -> b] -> [a] -> [b]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
 \end{lstlisting}
+with
+\\~\\
+\code{zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]}
+\code{using :: a -> Strategy a -> a}\\
+\code{parList :: Strategy a -> Strategy [a]}\\
+\code{rdeepseq :: NFData a =>Strategy a}
+
 
 \frbreak
 

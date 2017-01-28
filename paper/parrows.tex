@@ -69,7 +69,7 @@ parEvalN conf fs =
 We have seen that we can wrap parallel Haskells inside of the \code{ArrowParallel} interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
 \begin{itemize}
 	\item \textbf{Arrow API benefits}:
-	With the \code{ArrowParallel} typeclass we do not lose any benefits of using arrows as \code{parEvalN} is just yet another arrow combinator. The resulting arrow can be used in the same way its serial version can be used. This is a big advantage of this approach, especially compared to the monad solutions as all arrow combinators will continue to work instead of requiring special ones for each parallel monad.
+	With the \code{ArrowParallel} typeclass we do not lose any benefits of using arrows as \code{parEvalN} is just yet another arrow combinator. The resulting arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the monad solutions as we do not introduce any new types. We can just "plug" in parallel parts into our sequential programs without having to change anything.
 	\item \textbf{Abstraction}:
 	With the \code{ArrowParallel} typeclass, we abstracted all parallel implementation logic away from the business logic. This gives us the beautiful situation of being able to write our code against the interface the typeclass gives us without being bound to any parallel Haskell. So as an example, during development, we can run the code on the simple Multicore version and afterwards deploy it on a cluster by converting it into an Eden version, by just swapping out the actual \code{ArrowParallel} instance.
 \end{itemize}
