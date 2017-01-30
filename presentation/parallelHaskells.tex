@@ -1,12 +1,25 @@
-\section{Introduction to parallel Haskells}
+\section{Parallel Arrows}
+\subsection{Introduction to Parallelism}
+\begin{frame}[fragile]
 In general, Parallelism can be looked at as:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
 
-\frbreak
+Roadmap:
+\begin{itemize}
+\item Implement using existing Haskells
+\begin{itemize}
+\item Multicore
+\item ParMonad
+\item Eden
+\end{itemize}
+\item Generalize to Arrows
+\item Profit
+\end{itemize}
+\end{frame}
 
-\subsection{Multicore Haskell}
+\begin{frame}[fragile]{Multicore Haskell}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
@@ -17,21 +30,20 @@ with
 \code{using :: a -> Strategy a -> a}\\
 \code{parList :: Strategy a -> Strategy [a]}\\
 \code{rdeepseq :: NFData a =>Strategy a}
+\end{frame}
 
-
-\frbreak
-
-\subsection{ParMonad}
+\begin{frame}[fragile]{ParMonad}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 (sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{lstlisting}
+\vfill
+\end{frame}
 
-\frbreak
-
-\subsection{Eden}
+\begin{frame}[fragile]{Eden}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = spawnF fs as
 \end{lstlisting}
+\end{frame}

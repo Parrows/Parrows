@@ -1,7 +1,10 @@
-\section{Skeletons}
+\section{Usability}
+\subsection{Skeletons}
+\begin{frame}[fragile]
 With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some basic parallel skeletons.
+\end{frame}
 
-\subsection{parEvalNLazy}
+\begin{frame}[fragile]{parEvalNLazy}
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
@@ -12,9 +15,9 @@ parEvalNLazy conf chunkSize fs =
 	where
 		fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 \end{lstlisting}
-\frbreak
+\end{frame}
 
-\subsection{parEval2}
+\begin{frame}[fragile]{parEval2}
 \begin{lstlisting}[frame=htrbl]
 arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
 arrMaybe fn = (arr $ go) >>> app
@@ -22,8 +25,9 @@ arrMaybe fn = (arr $ go) >>> app
 		go Nothing = (arr $ \Nothing -> Nothing, Nothing)
 		go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
 \end{lstlisting}
-\frbreak
+\end{frame}
 
+\begin{frame}[fragile]{parEval2 cnt.}
 \begin{lstlisting}[frame=htrbl]
 parEval2 :: (ArrowParallel arr a b conf,
 	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
@@ -36,9 +40,9 @@ parEval2 conf f g =
 where
 	f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
 \end{lstlisting}
+\end{frame}
 
-\frbreak
-\subsection{parMap}
+\begin{frame}[fragile]{parMap}
 \begin{lstlisting}[frame=htrbl]
 parMap :: (ArrowParallel arr a b conf, ArrowApply arr) =>
 	conf -> (arr a b) -> (arr [a] [b])
@@ -48,10 +52,9 @@ parMap conf f =
 		arr (parEvalN conf)) >>>
 	app
 \end{lstlisting}
+\end{frame}
 
-\frbreak
-
-\subsection{parMapStream}
+\begin{frame}[fragile]{parMapStream}
 \begin{lstlisting}[frame=htrbl]
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> arr a b -> arr [a] [b]
@@ -61,9 +64,9 @@ parMapStream conf chunkSize f =
 		arr (parEvalNLazy conf chunkSize)) >>>
 	app
 \end{lstlisting}
+\end{frame}
 
-\frbreak
-\subsection{farm}
+\begin{frame}[fragile]{farm}
 \begin{lstlisting}[frame=htrbl]
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
@@ -90,10 +93,9 @@ shuffle :: [[a]]
 shuffle = concat . transpose
 \end{lstlisting}
 (These were taken from Eden's source code. \cite{eden_skel_shuffle})
+\end{frame}
 
-\frbreak
-
-\subsection{farmChunk}
+\begin{frame}[fragile]{farmChunk}
 \begin{lstlisting}[frame=htrbl]
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
@@ -106,3 +108,4 @@ farmChunk conf chunkSize numCores f =
 	app >>>
 	arr shuffle
 \end{lstlisting}
+\end{frame}

@@ -1,4 +1,5 @@
-\section{Syntactic Sugar}
+\subsection{Syntactic Sugar}
+\begin{frame}[fragile]
 \begin{lstlisting}[frame=htrbl]
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
@@ -19,3 +20,4 @@
 	arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 \end{lstlisting}
+\end{frame}

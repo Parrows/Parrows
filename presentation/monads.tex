@@ -1,5 +1,5 @@
 \subsection{Monads}
-
+\begin{frame}[fragile]{Monad Definition}
 \begin{lstlisting}[frame=htrbl]
 class Monad m where
 	(>>=) :: m a -> (a -> m b) -> m b
@@ -16,8 +16,9 @@ instance Monad Maybe where
 
 $\Rightarrow$ composable computation descriptions
 
-\frbreak
+\end{frame}
 
+\begin{frame}[fragile]{Monad Usage}
 With monadic functions like
 \begin{lstlisting}[frame=htrbl]
 func :: Int -> Maybe Int
@@ -30,3 +31,4 @@ we can compose computations:
 complicatedFunc :: Int -> Maybe Int
 complicatedFunc x = (return x) >>= func >>= ...
 \end{lstlisting}
+\end{frame}

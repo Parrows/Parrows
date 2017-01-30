@@ -1,5 +1,5 @@
 \documentclass{beamer}
-\usetheme{Berlin}
+\usetheme{Darmstadt}
 
 \usepackage{tikz}
 
@@ -55,13 +55,29 @@
 
 \newcommand{\fixme}[1]{\colorbox{red}{#1}}
 
+\newcommand{\centeredHeadline}[1]{
+\begin{tikzpicture}[overlay, remember picture]
+\node[anchor=center] at (current page.center) {
+	#1
+};
+\end{tikzpicture}
+}
+
+\setcounter{tocdepth}{2}
+\AtBeginSection{\begin{frame} 
+\tableofcontents[currentsection]
+\end{frame}}
 \begin{document}
+	\begin{frame}
+		\tableofcontents
+	\end{frame}
 	\include{functionalprogramming}
 	\include{monads}
 	\include{arrows}
 	\include{parallelHaskells}
-	\include{utilityFunctions}
 	\include{parrows}
+	\include{utilityFunctions}
+	\include{parrowsImpl}
 	\include{skeletons}
 	\include{syntacticSugar}
 	\include{benchmarks}

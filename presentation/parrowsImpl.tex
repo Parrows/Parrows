@@ -1,0 +1,43 @@
+\subsection{ArrowParallel Implementations}
+\begin{frame}[fragile]{Multicore}
+\begin{lstlisting}[frame=htrbl]
+instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
+	ArrowParallel arr a b conf where
+		parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{lstlisting}[frame=htrbl]
+instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
+	ArrowParallel arr a b conf where
+		parEvalN _ fs = 
+			(arr $ \as -> (fs, as)) >>>
+			zipWithArr (app >>> arr spawnP) >>>
+			arr sequenceA >>>
+			arr (>>= mapM get) >>>
+			arr runPar
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Eden}
+\begin{lstlisting}[frame=htrbl]
+instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
+parEvalN _ fs as = spawnF fs as
+\end{lstlisting}
+and the Kleisli type.
+\begin{lstlisting}[frame=htrbl]
+instance (Monad m, Trans a, Trans b, Trans (m b)) =>
+	ArrowParallel (Kleisli m) a b conf where
+parEvalN conf fs =
+	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
+	(Kleisli $ sequence)
+\end{lstlisting}
+
+
+\begin{lstlisting}[frame=htrbl]
+class (Arrow arr) => ArrowUnwrap arr where
+arr a b -> (a -> b)
+\end{lstlisting}
+
+\end{frame}

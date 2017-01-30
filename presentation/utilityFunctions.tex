@@ -1,5 +1,5 @@
-\section{Utility Functions}\label{utilfns}
-\subsection{mapArr}
+\subsection{Utility Functions}\label{utilfns}
+\begin{frame}[fragile]{mapArr}
 The mapArr combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows},
 \begin{lstlisting}[frame=htrbl]
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
@@ -15,9 +15,9 @@ with
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{lstlisting}
 %It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
-\frbreak
+\end{frame}
 
-\subsection{zipWithArr \& listApp}
+\begin{frame}[fragile]{zipWithArr \& listApp}
 zipWithArr lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}:
 \begin{lstlisting}[frame=htrbl]
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
@@ -31,3 +31,4 @@ listApp :: (ArrowChoice arr, ArrowApply arr) =>
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 \end{lstlisting}
 with the \code{ArrowApply} that defines \code{app :: arr (arr a b, a) c}.
+\end{frame}

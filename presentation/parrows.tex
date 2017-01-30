@@ -1,5 +1,7 @@
-\section{Parallel Arrows}
-\subsection{The ArrowParallel typeclass}
+\subsection{Generalization to Arrows}
+
+
+\begin{frame}[fragile]{The ArrowParallel typeclass}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -7,8 +9,6 @@ parEvalN :: [a -> b] -> [a] -> [b]
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 \end{lstlisting}
-
-\frbreak
 
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b where
@@ -19,50 +19,4 @@ class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{lstlisting}
 
-\frbreak
-
-\subsection{Multicore Haskell}
-\begin{lstlisting}[frame=htrbl]
-instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
-	ArrowParallel arr a b conf where
-		parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
-\end{lstlisting}
-
-\frbreak
-\subsection{ParMonad}
-\begin{lstlisting}[frame=htrbl]
-instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
-	ArrowParallel arr a b conf where
-		parEvalN _ fs = 
-			(arr $ \as -> (fs, as)) >>>
-			zipWithArr (app >>> arr spawnP) >>>
-			arr sequenceA >>>
-			arr (>>= mapM get) >>>
-			arr runPar
-\end{lstlisting}
-
-\frbreak
-\subsection{Eden}
-\begin{lstlisting}[frame=htrbl]
-instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-parEvalN _ fs as = spawnF fs as
-\end{lstlisting}
-and the Kleisli type.
-\begin{lstlisting}[frame=htrbl]
-instance (Monad m, Trans a, Trans b, Trans (m b)) =>
-	ArrowParallel (Kleisli m) a b conf where
-parEvalN conf fs =
-	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
-	(Kleisli $ sequence)
-\end{lstlisting}
-
-
-\begin{lstlisting}[frame=htrbl]
-class (Arrow arr) => ArrowUnwrap arr where
-arr a b -> (a -> b)
-\end{lstlisting}
-
-\frbreak
-
-\subsection{Benefits of parallel Arrows}
-
+\end{frame}
