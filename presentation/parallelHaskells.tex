@@ -44,7 +44,24 @@ parEvalN fs as = runPar $
 	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{lstlisting}
 \begin{center}
-\includegraphics[scale=0.4]{images/parEvalNParMonad}
+\includegraphics[scale=0.4]{images/parEvalNParMonad1}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = runPar $ 
+	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+\end{lstlisting}
+\begin{center}
+	\includegraphics[scale=0.4]{images/parEvalNParMonad2}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{center}
+	\includegraphics[scale=0.4]{images/parEvalNParMonad}
 \end{center}
 \end{frame}
 
@@ -53,7 +70,7 @@ parEvalN fs as = runPar $
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = spawnF fs as
 \end{lstlisting}
-with
-\\~\\
-\code{spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]}
+\begin{center}
+\includegraphics[scale=0.4]{images/parEvalNEden}
+\end{center}
 \end{frame}
