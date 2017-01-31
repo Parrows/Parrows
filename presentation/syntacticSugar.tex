@@ -1,5 +1,5 @@
 \subsection{Syntactic Sugar}
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Parallel Operators (1)}
 \begin{lstlisting}[frame=htrbl]
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
@@ -21,7 +21,7 @@ On all Elements:\\~\\
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Parallel Operators (2)}
 \begin{lstlisting}[frame=htrbl]
 (|&&&|) :: (Arrow arr, ...) =>
 	arr a b -> arr a c -> arr a (b, c)
@@ -34,7 +34,7 @@ On all Elements:\\~\\
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Parallelism as an operator}
+\begin{frame}[fragile]{Parallelism made easy}
 Parallel Evaluation made easy:
 \begin{lstlisting}[frame=htrbl]
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
