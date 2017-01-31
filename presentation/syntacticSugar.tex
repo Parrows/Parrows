@@ -4,18 +4,34 @@
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
 \end{lstlisting}
+\begin{center}
+On all Elements:\\~\\
+\includegraphics[scale=0.5]{images/compose}
+\end{center}
 
 \begin{lstlisting}[frame=htrbl]
 (|***|) :: (Arrow arr, ...) =>
 	arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 \end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.5]{images/starstarstar}
+\hspace{2em}
+\includegraphics[scale=0.5]{images/parEval2}
+\end{center}
+\end{frame}
 
+\begin{frame}[fragile]
 \begin{lstlisting}[frame=htrbl]
 (|&&&|) :: (Arrow arr, ...) =>
 	arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 \end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.5]{images/dollardollardollar}
+\hspace{2em}
+\includegraphics[scale=0.5]{images/pardollardollardollar}
+\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Parallelism as an operator}
@@ -26,5 +42,7 @@ add f g = (f |&&&| g) >>> arr (\(u, v) -> u + v)
 \end{lstlisting}
 \begin{center}
 	\includegraphics[scale=0.6]{images/addA-comb}
+	\hspace{2em}
+	\includegraphics[scale=0.5]{images/parAddA}
 \end{center}
 \end{frame}

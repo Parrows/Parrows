@@ -5,7 +5,14 @@ In general, Parallelism can be looked at as:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
-
+\begin{center}
+\includegraphics[scale=0.5]{images/parEvalN}
+\end{center}
+\end{frame}
+\begin{frame}[fragile]
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [a -> b] -> [a] -> [b]
+\end{lstlisting}
 Roadmap:
 \begin{itemize}
 \item Implement using existing Haskells
@@ -25,13 +32,9 @@ Roadmap:
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
 \end{lstlisting}
-with
-\\~\\
-\code{zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]}
-\code{(\$) :: (a -> b) -> a -> b}\\
-\code{using :: a -> Strategy a -> a}\\
-\code{parList :: Strategy a -> Strategy [a]}\\
-\code{rdeepseq :: NFData a =>Strategy a}
+\begin{center}
+	\includegraphics[scale=0.5]{images/parEvalNMulticore}
+\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{ParMonad}
@@ -40,17 +43,9 @@ parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{lstlisting}
-with
-\\~\\
-\code{runPar :: Par a -> a}\\
-\code{(\$) :: (a -> b) -> a -> b}\\
-\code{sequence :: (Monad m) => [m a] -> m [a]}\\
-\code{map :: (a -> b) -> [a] -> [b]}\\
-\code{spawnP :: NFData a => a -> Par (IVar a)}\\
-\code{zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]}\\
-\code{(>>=) :: m a -> (a -> m b) -> m b}\\
-\code{mapM :: Monad m => (a -> m b) -> [a] -> m [b]}\\
-\code{get :: IVar a -> Par a}
+\begin{center}
+\includegraphics[scale=0.4]{images/parEvalNParMonad}
+\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Eden}
