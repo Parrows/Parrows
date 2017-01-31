@@ -18,8 +18,8 @@
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Back to our Example...}
-Arrow usage example:
+\begin{frame}[fragile]{Parallelism as an operator}
+Parallel Evaluation made easy:
 \begin{lstlisting}[frame=htrbl]
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
 add f g = (f |&&&| g) >>> arr (\(u, v) -> u + v)

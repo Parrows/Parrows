@@ -1,36 +1,31 @@
 \section{Usability}
 \subsection{Skeletons}
-\begin{frame}[fragile]{parEvalNLazy}
+\begin{frame}[fragile]{Skeletons... (1)}
+parEvalN, but \textbf{chunky}:
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
 \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{parEval2}
+parallel evaluation of \textbf{different typed functions}:
 \begin{lstlisting}[frame=htrbl]
 parEval2 :: conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 \end{lstlisting}
 \end{frame}
-
-\begin{frame}[fragile]{parMap}
+\begin{frame}[fragile]{Skeletons... (2)}
+map, but in parallel:
 \begin{lstlisting}[frame=htrbl]
 parMap :: conf -> (arr a b) -> (arr [a] [b])
 \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{parMapStream}
+parMap, but \textbf{chunky}:
 \begin{lstlisting}[frame=htrbl]
 parMapStream :: conf -> ChunkSize -> arr a b -> arr [a] [b]
 \end{lstlisting}
 \end{frame}
-
-\begin{frame}[fragile]{farm}
+\begin{frame}[fragile]{Skeletons... (3)}
+parMap, but with \textbf{workload distribution}:
 \begin{lstlisting}[frame=htrbl]
 farm :: conf -> NumCores -> arr a b -> arr [a] [b]
 \end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]{farmChunk}
+farm, but \textbf{chunky}:
 \begin{lstlisting}[frame=htrbl]
 farmChunk ::
 	conf -> ChunkSize -> NumCores -> arr a b-> arr [a] [b]
