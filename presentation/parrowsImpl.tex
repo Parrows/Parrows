@@ -3,8 +3,19 @@
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b conf where
-		parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
+		parEvalN _ fs = listApp fs >>>
+			arr (flip using $ parList rdeepseq)
 \end{lstlisting}
+with
+\\~\\
+\code{listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]}\\
+\code{(>>>) :: arr a b -> arr b c -> arr a c}\\
+\code{arr :: Arrow arr => (a -> b) -> arr a b}\\
+\code{flip :: (a -> b -> c) -> b -> a -> c}\\
+\code{using :: a -> Strategy a -> a}\\
+\code{(\$) :: (a -> b) -> a -> b}\\
+\code{parList :: Strategy a -> Strategy [a]}\\
+\code{rdeepseq :: NFData a => Strategy a}
 \end{frame}
 
 \begin{frame}[fragile]{ParMonad}
@@ -14,30 +25,63 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 		parEvalN _ fs = 
 			(arr $ \as -> (fs, as)) >>>
 			zipWithArr (app >>> arr spawnP) >>>
-			arr sequenceA >>>
+			arr sequence >>>
 			arr (>>= mapM get) >>>
 			arr runPar
 \end{lstlisting}
+with
+\\~\\
+\code{arr :: Arrow arr => (a -> b) -> arr a b}\\
+\code{zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]}\\
+\code{app :: ArrowApply arr => (arr a b, a) b}\\
+\code{spawnP :: NFData a => a -> Par (IVar a)}\\
+\code{sequence :: (Monad m) => [m a] -> m [a]}\\
+\code{(>>=) :: m a -> (a -> m b) -> m b}\\
+\code{mapM :: Monad m => (a -> m b) -> [a] -> m [b]}\\
+\code{get :: IVar a -> Par a}\\
+\code{runPar :: Par a -> a}
 \end{frame}
 
-\begin{frame}[fragile]{Eden}
+\begin{frame}[fragile]{Eden (1)}
+For Eden we need separate implementations, for Functions:
 \begin{lstlisting}[frame=htrbl]
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-parEvalN _ fs as = spawnF fs as
+	parEvalN _ fs as = spawnF fs as
 \end{lstlisting}
-and the Kleisli type.
+with
+\\~\\
+\code{spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]}
+\end{frame}
+
+\begin{frame}[fragile]{Eden (2)}
+and the Kleisli type:
 \begin{lstlisting}[frame=htrbl]
 instance (Monad m, Trans a, Trans b, Trans (m b)) =>
-	ArrowParallel (Kleisli m) a b conf where
+ArrowParallel (Kleisli m) a b conf where
 parEvalN conf fs =
 	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
 	(Kleisli $ sequence)
 \end{lstlisting}
+with
+\\~\\
+\code{arr :: (Arrow arr) => (a -> b) -> arr a b}\\
+\code{map :: (a -> b) -> [a] -> [b]}\\
+\code{sequence :: (Monad m) => [m a] -> m [a]}
+\end{frame}
 
-
+\begin{frame}[fragile]{Eden (3)}
+This is because of \code{spawnF}'s signature:
+\begin{lstlisting}[frame=htrbl]
+spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+\end{lstlisting}
+and \code{app}'s signature:
+\begin{lstlisting}[frame=htrbl]
+app :: (ArrowApply arr) => arr (arr a b, a) b
+\end{lstlisting}
+\pause
+Hacky alternative:
 \begin{lstlisting}[frame=htrbl]
 class (Arrow arr) => ArrowUnwrap arr where
-arr a b -> (a -> b)
+	arr a b -> (a -> b)
 \end{lstlisting}
-
 \end{frame}

@@ -2,18 +2,20 @@
 
 
 \begin{frame}[fragile]{The ArrowParallel typeclass}
+Now, let's generalize:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
-
+\pause
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 \end{lstlisting}
-
+\pause
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b where
 	parEvalN :: [arr a b] -> arr [a] [b]
 \end{lstlisting}
+\pause
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]

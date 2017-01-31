@@ -6,18 +6,22 @@
 \end{lstlisting}
 
 \begin{lstlisting}[frame=htrbl]
-(|***|) :: (ArrowParallel arr a b (),
-	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) (),
-	ArrowApply arr) =>
+(|***|) :: (Arrow arr, ...) =>
 	arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 \end{lstlisting}
 
 \begin{lstlisting}[frame=htrbl]
-(|&&&|) :: (ArrowParallel arr a b (),
-	ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) (),
-	ArrowApply arr) =>
+(|&&&|) :: (Arrow arr, ...) =>
 	arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Back to our Example...}
+Arrow usage example:
+\begin{lstlisting}[frame=htrbl]
+add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
+add f g = (f |&&&| g) >>> arr (\(u, v) -> u + v)
 \end{lstlisting}
 \end{frame}

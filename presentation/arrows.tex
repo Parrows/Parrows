@@ -13,9 +13,9 @@ class Arrow arr where
 Functions \lstinline{(->)} are arrows:
 \begin{lstlisting}[frame=htrbl]
 instance Arrow (->) where
-arr f = f
-f >>> g = g . f
-first f = \(a, c) -> (f a, c)
+	arr f = f
+	f >>> g = g . f
+	first f = \(a, c) -> (f a, c)
 \end{lstlisting}
 \end{frame}
 
@@ -27,13 +27,13 @@ data Kleisli m a b = Kleisli { run :: a -> m b }
 is also an arrow:
 \begin{lstlisting}[frame=htrbl]
 instance Monad m => Arrow (Kleisli m) where
-arr f = Kleisli $ return . f
-f >>> g = Kleisli $ \a -> f a >>= g
-first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
+	arr f = Kleisli $ return . f
+	f >>> g = Kleisli $ \a -> f a >>= g
+	first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Combinators \& Arrow Example}
+\begin{frame}[fragile]{Combinators}
 Some Combinators:
 \begin{lstlisting}[frame=htrbl]
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -45,13 +45,15 @@ second f = arr swap >>> first f >>> arr swap
 f *** g = first f >>> second g
 \end{lstlisting}
 \begin{lstlisting}[frame=htrbl]
-(&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
+(&&&) :: Arrow arr => arr a b -> arr a c -> arr a (b, c)
 f &&& g = arr (\a -> (a, a)) >>> (f *** g)
 \end{lstlisting}
+\end{frame}
 
-Arrow usage example:
-\begin{lstlisting}[frame=htrbl]
-add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
-add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
-\end{lstlisting}
+\begin{frame}[fragile]{Arrow Example}
+	Arrow usage example:
+	\begin{lstlisting}[frame=htrbl]
+	add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
+	add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
+	\end{lstlisting}
 \end{frame}
