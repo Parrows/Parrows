@@ -17,7 +17,7 @@ parEval2 :: conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 \end{center}
 \end{frame}
 \begin{frame}[fragile]{Skeletons... (2)}
-map, but in  parallel:
+map, but in \textbf{parallel}:
 \begin{lstlisting}[frame=htrbl]
 parMap :: conf -> (arr a b) -> (arr [a] [b])
 \end{lstlisting}

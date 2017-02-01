@@ -44,7 +44,7 @@ This is because of \code{spawnF}'s
 \begin{lstlisting}[frame=htrbl]
 spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 \end{lstlisting}
-and \code{app}'s signature:
+and \code{app}'s signature
 \begin{lstlisting}[frame=htrbl]
 app :: (ArrowApply arr) => arr (arr a b, a) b
 \end{lstlisting}

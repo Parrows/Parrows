@@ -1,5 +1,5 @@
 \framebox{
-	\begin{tikzpicture}[thick, scale=0.7]
+	\begin{tikzpicture}[thick, scale=0.65]
 	\begin{axis}[
 	xbar, xmin=0,
 	width=12cm, height=7cm, enlarge y limits=0.5,

@@ -1,7 +1,7 @@
 \subsection{Syntactic Sugar}
 \begin{frame}[fragile]{Parallel Operators (1)}
 \begin{lstlisting}[frame=htrbl]
-(|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
+(|>>>|) :: [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
 \end{lstlisting}
 \begin{center}
@@ -10,8 +10,7 @@ On all Elements:\\~\\
 \end{center}
 
 \begin{lstlisting}[frame=htrbl]
-(|***|) :: (Arrow arr, ...) =>
-	arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) :: arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 \end{lstlisting}
 \begin{center}
@@ -23,8 +22,7 @@ On all Elements:\\~\\
 
 \begin{frame}[fragile]{Parallel Operators (2)}
 \begin{lstlisting}[frame=htrbl]
-(|&&&|) :: (Arrow arr, ...) =>
-	arr a b -> arr a c -> arr a (b, c)
+(|&&&|) :: arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 \end{lstlisting}
 \begin{center}
