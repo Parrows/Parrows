@@ -3,14 +3,14 @@
 \begin{frame}[fragile]{Skeletons... (1)}
 parEvalN, but \textbf{chunky}:
 \begin{lstlisting}[frame=htrbl]
-parEvalNLazy :: conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
+parEvalNLazy :: conf -> ChunkSize -> [arr a b] -> arr [a] [b]
 \end{lstlisting}
 \begin{center}
 \includegraphics[scale=0.5]{images/parEvalNLazy}
 \end{center}
 parallel evaluation of \textbf{different typed functions}:
 \begin{lstlisting}[frame=htrbl]
-parEval2 :: conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
+parEval2 :: conf -> arr a b -> arr c d -> arr (a, c) (b, d)
 \end{lstlisting}
 \begin{center}
 \includegraphics[scale=0.5]{images/parEval2}
@@ -19,7 +19,7 @@ parEval2 :: conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 \begin{frame}[fragile]{Skeletons... (2)}
 map, but in \textbf{parallel}:
 \begin{lstlisting}[frame=htrbl]
-parMap :: conf -> (arr a b) -> (arr [a] [b])
+parMap :: conf -> arr a b -> arr [a] [b]
 \end{lstlisting}
 \begin{center}
 \includegraphics[scale=0.5]{images/parMap}
