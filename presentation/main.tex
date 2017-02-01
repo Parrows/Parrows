@@ -64,11 +64,32 @@
 \end{tikzpicture}
 }
 
+\title{Building a Parallel Haskell based on Arrows}
+\author{Martin Braun}
+\date{February 2, 2017}
+
 \setcounter{tocdepth}{2}
 \AtBeginSection{\begin{frame} 
 \tableofcontents[currentsection]
 \end{frame}}
 \begin{document}
+	\begin{frame}[fragile]
+		\centering
+		\vspace{2cm}
+		{\huge\bfseries Building a Parallel Haskell based on Arrows\par}
+		\vspace{0.5cm}
+		{\Large\itshape Martin Braun\par}
+		\vspace{0.5cm}
+		\vfill
+		Großes Masterprojekt\par
+		Universität Bayreuth\par
+		Supervisor:	Dr. Oleg Lobachev
+		
+		\vfill
+		
+		% Bottom of the page
+		{\large February 2, 2017\par}
+	\end{frame}
 	\begin{frame}
 		\tableofcontents
 	\end{frame}
@@ -82,6 +103,8 @@
 	\include{skeletons}
 	\include{syntacticSugar}
 	\include{benchmarks}
-	\frbreak
 	\bibliography{../paper/references}
+	\setcounter{tocdepth}{-1}
+	\include{lastpage}
+	\setcounter{tocdepth}{2}
 \end{document}
