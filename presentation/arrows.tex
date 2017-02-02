@@ -58,18 +58,18 @@ instance Monad m => Arrow (Kleisli m) where
 
 \begin{frame}[fragile]{Combinators}
 \begin{lstlisting}[frame=htrbl]
-(&&&) :: arr a b -> arr a c -> arr a (b, c)
-f &&& g = arr (\a -> (a, a)) >>> (f *** g)
-\end{lstlisting}
-\begin{center}
-	\includegraphics[scale=0.6]{images/dollardollardollar}
-\end{center}
-\begin{lstlisting}[frame=htrbl]
 (***) :: arr a b -> arr c d ->	arr (a, c) (b, d)
 f *** g = first f >>> second g
 \end{lstlisting}
 \begin{center}
 	\includegraphics[scale=0.6]{images/starstarstar}
+\end{center}
+\begin{lstlisting}[frame=htrbl]
+(&&&) :: arr a b -> arr a c -> arr a (b, c)
+f &&& g = arr (\a -> (a, a)) >>> (f *** g)
+\end{lstlisting}
+\begin{center}
+	\includegraphics[scale=0.6]{images/dollardollardollar}
 \end{center}
 \end{frame}
 

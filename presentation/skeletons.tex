@@ -24,31 +24,28 @@ parMap :: conf -> arr a b -> arr [a] [b]
 \begin{center}
 \includegraphics[scale=0.5]{images/parMap}
 \end{center}
-%parMap, but \textbf{chunky}:
-%\begin{lstlisting}[frame=htrbl]
-%parMapStream :: conf -> ChunkSize -> arr a b -> arr [a] [b]
-%\end{lstlisting}
-%\begin{center}
-%\includegraphics[scale=0.5]{images/parMapStream}
-%\end{center}
+parMap, but \textbf{chunky}:
+\begin{lstlisting}[frame=htrbl]
+parMapStream :: conf -> ChunkSize -> arr a b -> arr [a] [b]
+\end{lstlisting}
 \begin{center}
-	and others...
+\includegraphics[scale=0.5]{images/parMapStream}
 \end{center}
 \end{frame}
-%\begin{frame}[fragile]{Skeletons... (3)}
-%parMap, but with \textbf{workload distribution}:
-%\begin{lstlisting}[frame=htrbl]
-%farm :: conf -> NumCores -> arr a b -> arr [a] [b]
-%\end{lstlisting}
-%\begin{center}
-%\includegraphics[scale=0.5]{images/farm}
-%\end{center}
-%farm, but \textbf{chunky}:
-%\begin{lstlisting}[frame=htrbl]
-%farmChunk ::
-%	conf -> ChunkSize -> NumCores -> arr a b-> arr [a] [b]
-%\end{lstlisting}
-%\begin{center}
-%\includegraphics[scale=0.5]{images/farmChunk}
-%\end{center}
-%\end{frame}
+\begin{frame}[fragile]{Skeletons... (3)}
+parMap, but with \textbf{workload distribution}:
+\begin{lstlisting}[frame=htrbl]
+farm :: conf -> NumCores -> arr a b -> arr [a] [b]
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.5]{images/farm}
+\end{center}
+farm, but \textbf{chunky}:
+\begin{lstlisting}[frame=htrbl]
+farmChunk ::
+	conf -> ChunkSize -> NumCores -> arr a b-> arr [a] [b]
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.5]{images/farmChunk}
+\end{center}
+\end{frame}
