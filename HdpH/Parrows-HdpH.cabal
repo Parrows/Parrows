@@ -31,12 +31,10 @@ library
     , hdph
     , hdph-closure
     , Parrows
-    , Parrows-Closure
     , deepseq
     , packman
     , binary
     , bytestring
   exposed-modules:
       Parrows.HdpH
-      Parrows.HdpH.Serialize
   default-language: Haskell2010

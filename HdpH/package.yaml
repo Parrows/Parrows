@@ -14,7 +14,6 @@ library:
   - hdph
   - hdph-closure
   - Parrows
-  - Parrows-Closure
   - deepseq
   - packman
   - binary

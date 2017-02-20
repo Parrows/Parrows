@@ -2,7 +2,6 @@ flags: {}
 extra-package-dbs: []
 packages:
 - ../Definition
-- ../Closure
 - location:
     git: https://github.com/s4ke/HdpH.git
     commit: b5b269b8ba0e0f35a08d69fd8a01564649fb0caa

@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types #-}
 module Parrows.Eden where
 
 import Parrows.Definition
@@ -30,6 +30,20 @@ import Parrows.Definition
 import Control.Arrow
 
 import Control.Parallel.Eden
+
+
+class IV iv a where
+    putInternal :: a -> iv a
+    getInternal :: iv a -> a
+
+data RemoteData a = RD { rd :: RD a }
+
+instance (Trans a) => IV RemoteData a where
+    putInternal a = RD { rd = release a }
+    getInternal = fetch . rd
+
+fork :: (Trans a, Trans b) => [a -> b] -> [a] -> [RemoteData b]
+fork fs = map (putInternal .) fs
 
 -- ArrowParallel Instances
 

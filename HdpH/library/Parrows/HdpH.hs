@@ -26,8 +26,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.HdpH where
 
 import Parrows.Definition
-import Parrows.HdpH.Serialize
-import Parrows.HdpH.Closure
 import Control.Arrow
 
 import Data.Maybe
@@ -40,7 +38,12 @@ import Control.Parallel.HdpH
 import Control.Parallel.HdpH.Closure
 import Control.Parallel.HdpH.Strategies
 
-import Data.ByteString.Lazy (ByteString)
+import Data.Binary(encode, decode)
+import Data.ByteString.Lazy(ByteString)
+import Data.Typeable
+
+import GHC.Packing.Core
+import GHC.Packing.Type
 
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -62,17 +65,38 @@ class HdpHStrategy conf b where
 instance (ForceCC b) => HdpHStrategy RTSConf b where
     strategy _ = forceCC
 
-instance SerializeConf RTSConf where
+-- | default buffer size used by trySerialize
+defaultBufSize :: Int
+defaultBufSize = 10 * 2^20 -- 10 MB
 
--- Closure ByteString --> ByteString
+class SerializeConf conf where
+    serializeBufSize :: conf -> Int
+    serializeBufSize _ = defaultBufSize
 
-instance (SerializeConf conf, HdpHConf conf, HdpHStrategy conf b, ToClosure b) => ArrowParallel (->) a b conf where
+instance SerializeConf RTSConf
+
+instance ToClosure ByteString where
+-- FIXME: actual implementation
+
+parClosureListSerialized :: (Typeable b, ToClosure b, SerializeConf conf) => conf -> [a -> b] -> Closure (Strategy (Closure b)) -> Strategy [Closure (ByteString)]
+-- ignore the [a -> b] argument. this is just here to we have the proper type
+parClosureListSerialized conf _ clo_strat xs = mapM (sparkClosure clo_strat) deserialized >>=
+                              mapM get >>=
+                              mapM (return . toClosure . encode . unsafePerformIO . (flip trySerializeWith $ serializeBufSize conf) . unClosure)
+                              where
+                                deserialized = map (toClosure . unsafePerformIO . deserialize . decode . unClosure) xs
+
+instance (SerializeConf conf, HdpHConf conf, HdpHStrategy conf b, Typeable b, ToClosure b) => ArrowParallel (->) a b conf where
      parEvalN conf fs as = fromJust' $ unsafePerformIO $ runParIO (rtsConf conf) $
-                 do clo_bs <- f clo_as `using` parClosureList (strategy conf)
-                    return $ map unClosure clo_bs
-                             where f = zipWith apC $ map toClosure fs
-                                   clo_as = map toClosure as
-                                   fromJust' :: Maybe [b] -> [b]
+                 -- apply the functions to the inputs, serialize the not yet computed state so that we can send this over the network
+                 -- and put it into a [Closure (ByteString)], this is then fully evaluated with parClosureListSerialized
+                 -- but stays a [Closure (ByteString)]
+                 do clo_bs_evaluated <- map (toClosure . encode . unsafePerformIO . (flip trySerializeWith $ serializeBufSize conf)) (zipWith ($) fs as)
+                                        `using`
+                                        parClosureListSerialized conf fs (strategy conf)
+                    -- decode [Closure (ByteString)] to [b]
+                    return $ map (unsafePerformIO . deserialize . decode . unClosure) clo_bs_evaluated
+                             where fromJust' :: Maybe [b] -> [b]
                                    -- just to make sure that this doesn't throw an error
                                    fromJust' Nothing = []
                                    fromJust' bs = fromJust bs
