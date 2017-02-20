@@ -1,0 +1,76 @@
+\section{Parallel Arrows}
+\subsection{Introduction to Parallelism}
+\begin{frame}[fragile]
+In general, Parallelism can be looked at as:
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [a -> b] -> [a] -> [b]
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.5]{images/parEvalN}
+\end{center}
+\end{frame}
+\begin{frame}[fragile]
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: [a -> b] -> [a] -> [b]
+\end{lstlisting}
+Roadmap:
+\begin{itemize}
+\item Implement using existing Haskells
+\begin{itemize}
+\item Multicore
+\item ParMonad
+\item Eden
+\end{itemize}
+\item Generalize to Arrows
+\item Adapt Implementations
+\item Profit
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Multicore Haskell}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
+\end{lstlisting}
+\begin{center}
+	\includegraphics[scale=0.5]{images/parEvalNMulticore}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = runPar $ 
+	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.4]{images/parEvalNParMonad1}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = runPar $ 
+	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+\end{lstlisting}
+\begin{center}
+	\includegraphics[scale=0.4]{images/parEvalNParMonad2}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{ParMonad}
+\begin{center}
+	\includegraphics[scale=0.4]{images/parEvalNParMonad}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Eden}
+\begin{lstlisting}[frame=htrbl]
+parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
+parEvalN fs as = spawnF fs as
+\end{lstlisting}
+\begin{center}
+\includegraphics[scale=0.4]{images/parEvalNEden}
+\end{center}
+\end{frame}

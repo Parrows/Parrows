@@ -1,5 +1,5 @@
 \section{Arrows}
-Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. Furthermore, he defined the arrow typeclass as follows:
+Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr where
 	arr :: (a -> b) -> arr a b
@@ -15,9 +15,13 @@ instance Arrow (->) where
 	f >>> g = g . f
 	first f = \(a, c) -> (f a, c) 
 \end{lstlisting}
-and the Kleisli type.
+and the Kleisli type
 \begin{lstlisting}[frame=htrbl]
-instance Arrow (Kleisli m) where
+data Kleisli m a b = Kleisli { run :: a -> m b }
+\end{lstlisting}
+as well:
+\begin{lstlisting}[frame=htrbl]
+instance Monad m => Arrow (Kleisli m) where
 	arr f = Kleisli $ return . f
 	f >>> g = Kleisli $ \a -> f a >>= g
 	first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
@@ -43,6 +47,6 @@ A short example given by Hughes on how to use this is \lstinline{add} over arrow
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
 add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 \end{lstlisting}
-The benefit of using the \code{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \lstinline{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can immediately used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
+The benefit of using the \code{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \lstinline{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
 \\\\
-\textit{Note: In the definitions Hughes gave in his paper, the notation \code{a b c} for an arrow from \code{b} to \code{c} is used. We use the equivalent definition \code{arr a b} for an arrow from \code{a} to \code{b} instead, to make it easier to find the arrow type in type signatures. We kept the original notation \code{a b c} for this section to not change too much from Hughes' original definitions.}
+\textit{Note: In the definitions Hughes gave in his paper, the notation \code{a b c} for an arrow from \code{b} to \code{c} is used. We use the equivalent definition \code{arr a b} for an arrow from \code{a} to \code{b} instead, to make it easier to find the arrow type in type signatures.}

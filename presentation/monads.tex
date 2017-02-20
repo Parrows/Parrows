@@ -1,0 +1,34 @@
+\subsection{Monads}
+\begin{frame}[fragile]{Monad Definition}
+\begin{lstlisting}[frame=htrbl]
+class Monad m where
+	(>>=) :: m a -> (a -> m b) -> m b
+	return :: a -> m a
+\end{lstlisting}
+
+Similar to Java's Optional, we have \code{Maybe a}:
+\begin{lstlisting}[frame=htrbl]
+instance Monad Maybe where
+	(Just a) >>= f = f a
+	Nothing >>= _ = Nothing
+	return a = Just a
+\end{lstlisting}
+
+$\Rightarrow$ composable computation descriptions
+
+\end{frame}
+
+\begin{frame}[fragile]{Monad Usage}
+With monadic functions like
+\begin{lstlisting}[frame=htrbl]
+func :: Int -> Maybe Int
+func x
+	| x < 0 = Nothing
+	| otherwise = Just (x * 2)
+\end{lstlisting}
+we can compose computations:
+\begin{lstlisting}[frame=htrbl]
+complicatedFunc :: Int -> Maybe Int
+complicatedFunc x = (return x) >>= func >>= ...
+\end{lstlisting}
+\end{frame}

@@ -1,0 +1,37 @@
+
+plugins {
+    id "org.frege-lang" version "0.8"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'com.github.s4ke'
+version = '0.1.0.0'
+
+description = """parrows-frege"""
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile group: 'org.frege-lang', name: 'frege', version:'3.24-7.100'
+    compile group: 'org.frege-lang', name: 'frege-repl-core', version:'1.4-SNAPSHOT'
+}
+
+
+compileFrege {
+    target = 1.7
+}
+compileTestFrege {
+    target = 1.7
+}

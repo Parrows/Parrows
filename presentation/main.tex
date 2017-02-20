@@ -1,0 +1,111 @@
+\documentclass{beamer}
+\usetheme{Darmstadt}
+
+\usepackage{tikz}
+
+\usepackage{filecontents}
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{statistics}
+\usepackage{graphicx}
+
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{hyperref}
+
+\bibliographystyle{unsrtnat}
+\usepackage[sort&compress,square]{natbib}
+
+\usepackage{csquotes}
+
+% für Listings
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, keywordstyle=\color{black}\bfseries, stringstyle=\ttfamily,showstringspaces=false,basicstyle=\footnotesize,captionpos=b}
+\lstset{
+	frame=none,
+	xleftmargin=2pt,
+	stepnumber=1,
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\ttfamily\tiny\color[gray]{0.3},
+	belowcaptionskip=\bigskipamount,
+	captionpos=b,
+	escapeinside={*'}{'*},
+	language=haskell,
+	tabsize=2,
+	emphstyle={\bf},
+	commentstyle=\it,
+	stringstyle=\mdseries\rmfamily,
+	showspaces=false,
+	keywordstyle=\bfseries\rmfamily,
+	columns=flexible,
+	basicstyle=\small\sffamily,
+	showstringspaces=false,
+	morecomment=[l]\%,
+}
+
+\newcommand{\frbreak}{
+	\vfill
+	\framebreak
+}
+
+\renewcommand{\cite}[1]{\citep{#1}}
+
+\newcommand{\citHughes}{\citep{HughesArrows}}
+
+\newcommand{\code}[1]{\lstinline{#1}}
+
+\newcommand{\fixme}[1]{\colorbox{red}{#1}}
+
+\newcommand{\centeredHeadline}[1]{
+\begin{tikzpicture}[overlay, remember picture]
+\node[anchor=center] at (current page.center) {
+	#1
+};
+\end{tikzpicture}
+}
+
+\title{Building a Parallel Haskell based on Arrows}
+\author{Martin Braun}
+\date{February 2, 2017}
+
+\setcounter{tocdepth}{2}
+\AtBeginSection{\begin{frame} 
+\tableofcontents[currentsection]
+\end{frame}}
+\begin{document}
+	\begin{frame}[fragile]
+		\centering
+		\vspace{0.75cm}
+		{\huge\bfseries Building a Parallel Haskell based on Arrows\par}
+		\vspace{0.5cm}
+		{\Large\itshape Martin Braun\par}
+		\vspace{0.5cm}
+		\vfill
+		Großes Masterprojekt\par
+		Universität Bayreuth\par
+		Supervisor:	Dr. Oleg Lobachev
+		
+		\vfill
+		
+		% Bottom of the page
+		{\large February 2, 2017\par}
+	\end{frame}
+	\begin{frame}
+		\tableofcontents
+	\end{frame}
+	\include{functionalprogramming}
+	%\include{monads}
+	\include{arrows}
+	\include{parallelHaskells}
+	\include{parrows}
+	%\include{utilityFunctions}
+	\include{parrowsImpl}
+	\include{skeletons}
+	\include{syntacticSugar}
+	\include{benchmarks}
+	\AtBeginSection{}
+	\bibliography{../paper/references}
+	\section{Further Notes}
+	\include{profit}
+	\include{lastpage}
+\end{document}

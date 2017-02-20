@@ -1,0 +1,21 @@
+\subsection{Utility Functions}\label{utilfns}
+\begin{frame}[fragile]{mapArr, zipWithArr, listApp}
+From \cite{programming_with_arrows}, we have:
+\begin{lstlisting}[frame=htrbl]
+mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
+\end{lstlisting}
+
+zipWithArr lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}:
+\begin{lstlisting}[frame=htrbl]
+zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
+zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>>
+	mapArr f
+\end{lstlisting}
+listApp converts a list of arrows \code{[arr a b]} to a new arrow \code{arr [a] [b]}:
+\begin{lstlisting}[frame=htrbl]
+listApp :: (ArrowChoice arr, ArrowApply arr) =>
+	[arr a b] -> arr [a] [b]
+listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
+\end{lstlisting}
+with the \code{ArrowApply} that defines \code{app :: arr (arr a b, a) c}.
+\end{frame}

@@ -1,5 +1,5 @@
 \section{Syntactic Sugar}
-To make using our new API a bit easier, we also introduce some syntactic sugar.
+To make our new API easier to use, we also introduce some syntactic sugar.
 We start with \code{|>>>|}, which is basically \code{>>>} on lists of arrows.
 \begin{lstlisting}[frame=htrbl]
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
