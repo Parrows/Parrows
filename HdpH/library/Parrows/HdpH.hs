@@ -78,6 +78,11 @@ instance SerializeConf RTSConf
 instance ToClosure ByteString where
 -- FIXME: actual implementation
 
+-- FIXME: this does not run in parallel, yet
+-- we probably need to change this so we don't rely on the input strategy
+-- but instead make the user specify a Closure (Strategy (Closure ByteString))
+-- for this we have to change the strategy function in the HdpHStrategy typeclass
+-- so we can pass it the proper type to deserialize the ByteString from
 parClosureListSerialized :: (Typeable b, ToClosure b, SerializeConf conf) => conf -> [a -> b] -> Closure (Strategy (Closure b)) -> Strategy [Closure (ByteString)]
 -- ignore the [a -> b] argument. this is just here to we have the proper type
 parClosureListSerialized conf _ clo_strat xs = mapM (sparkClosure clo_strat) deserialized >>=
