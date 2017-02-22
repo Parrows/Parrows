@@ -1,4 +1,4 @@
--- This file has been generated from package.yaml by hpack version 0.14.0.
+-- This file has been generated from package.yaml by hpack version 0.15.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -29,7 +29,6 @@ library
   build-depends:
       base
     , hdph
-    , hdph-closure
     , Parrows
     , deepseq
     , packman

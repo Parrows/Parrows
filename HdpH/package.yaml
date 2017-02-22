@@ -12,7 +12,6 @@ library:
   dependencies:
   - base
   - hdph
-  - hdph-closure
   - Parrows
   - deepseq
   - packman
