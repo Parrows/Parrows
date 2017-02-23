@@ -35,9 +35,9 @@ import Data.Maybe
 import Data.List.Split
 import Data.List
 
-infixr 3 `|***|`
-infixr 3 `|&&&|`
-infixr 3 `|>>>|`
+--infixr 3 `|***|`
+--infixr 3 `|&&&|`
+--infixr 3 `|>>>|`
 
 type NumCores = Int
 type ChunkSize = Int

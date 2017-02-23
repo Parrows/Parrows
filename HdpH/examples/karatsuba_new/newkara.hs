@@ -18,7 +18,6 @@ import System.Environment (getArgs)
 import System.IO (stdout, stderr, hSetBuffering, BufferMode(..))
 
 
-import Control.Parallel.HdpH.Closure
 import Control.Parallel.HdpH hiding (put, get)
 import Control.Parallel.HdpH.Strategies
 
@@ -102,14 +101,7 @@ instance Serialize a => Serialize (D a) where
     put (D a) = put a
     get       = liftM D get
 
-instance ToClosure [Int] where locToClosure = $(here)
-instance ToClosure [D MyInteger] where locToClosure = $(here)
-instance ToClosure a => ToClosure (D a) where locToClosure = $(here)
-    
-instance ForceCC MyInteger where locForceCC = $(here)
-instance ForceCC [D MyInteger] where locForceCC = $(here)
-instance ForceCC a => ForceCC (D a) where locForceCC = $(here)
-    
+   
 --instance Trans a => Trans (D a)
 
 fromD (D x) = x

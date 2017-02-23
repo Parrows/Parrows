@@ -31,6 +31,7 @@ import Control.Parallel.HdpH.Strategies
 import Control.Arrow
 import Parrows.Definition as P
 import Parrows.HdpH
+import Data.Typeable
 
 -- import Eden
 -- import RW 
@@ -105,10 +106,10 @@ divConRW depth nrTasks trivial solve split combine x
 --parMapFMulticore :: (NFData b) => (a -> b) -> [a] -> [b]
 --parMapFMulticore = M.parMap rdeepseq
 
-farmChunkF :: (ForceCC [b], ForceCC b, NFData b) => RTSConf -> (a -> b) -> [a] -> [b]
-farmChunkF conf fs as = P.farmChunk conf fs 10 4 as
+farmChunkF :: (Typeable b, NFData b) => RTSConf -> (a -> b) -> [a] -> [b]
+farmChunkF conf fs as = P.farmChunk conf 10 4 fs as
 
-divConRW :: (ForceCC [b], ForceCC b, NFData b) => RTSConf -> Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
+divConRW :: (Typeable b, NFData b) => RTSConf -> Int -> Int -> (a->Bool) -> (a->b) -> (a->[a]) -> (a->[b]->b) -> a -> b
 divConRW conf depth _ trivial solve split combine x
  | trivial x = solve x
  | otherwise = children
