@@ -24,7 +24,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
 -- Matrix Multiplication is a parMap
 
-{-# LANGUAGE TemplateHaskell #-}
 
 import Prelude
 
@@ -39,10 +38,9 @@ import Control.Arrow
 import System.Environment (getArgs)
 import System.IO (stdout, stderr, hSetBuffering, BufferMode(..))
 
+import Control.Parallel.HdpH
+
 import Data.Serialize
-import Control.Parallel.HdpH.Closure
-import Control.Parallel.HdpH hiding (put, get)
-import Control.Parallel.HdpH.Strategies hiding (parMap)
 
 --import Criterion.Main
 import Control.DeepSeq
@@ -50,9 +48,6 @@ import Control.DeepSeq
 type Scalar = Float 
 type Vector = [Scalar]
 type Matrix = [Vector]
-
-instance ToClosure Float where locToClosure = $(here)
-instance ForceCC Float where locForceCC = $(here)
 
 dimX :: Matrix -> Int
 dimX = length
@@ -98,9 +93,6 @@ testMatrix = replicate 100 [1..100]
                     ]
                     -}
 
--- Empty splice; TH hack to make all environment abstractions visible.
-$(return [])
-
 
 -- parse runtime system config options; abort if there is an error
 parseOpts :: [String] -> IO (RTSConf, [String])
@@ -120,7 +112,6 @@ main = do
   opts_args <- getArgs
   print opts_args
   (conf, args) <- parseOpts opts_args 
-  print conf
   print $ length (matrixP conf testMatrix testMatrix)
 --main = print ("done" ++ (show (length (matrixP testMatrix testMatrix))))
 --main = print ("done" ++ (show (length (fromJust (runKleisli matrixPKleisli (testMatrix, testMatrix))))))
