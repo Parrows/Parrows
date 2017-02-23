@@ -4,7 +4,7 @@ packages:
 - ../Definition
 - location:
     git: https://github.com/s4ke/HdpH
-    commit: 6263798e3d3a2b83f4d5ad463c45c2698d446245
+    commit: 49d791ab3858ee4a553fbc827f5a1e098ddaee98
   subdirs:
   - hdph
   extra-dep: true
