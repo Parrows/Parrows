@@ -31,7 +31,7 @@ import Control.Arrow
 
 import Control.Parallel.Eden
 
-
+{-
 class IV iv a where
     putInternal :: a -> iv a
     getInternal :: iv a -> a
@@ -44,6 +44,7 @@ instance (Trans a) => IV RemoteData a where
 
 fork :: (Trans a, Trans b) => [a -> b] -> [a] -> [RemoteData b]
 fork fs = map (putInternal .) fs
+-}
 
 -- ArrowParallel Instances
 
