@@ -34,7 +34,7 @@ import Control.Parallel.Eden
 
 data RemoteData a = RD { rd :: RD a }
 instance NFData (RemoteData a)
-instance Trans (RemoteData b)
+instance Trans (RemoteData a)
 
 instance (Trans a) => Future RemoteData a where
     put a = RD { rd = release a }
