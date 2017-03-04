@@ -22,30 +22,31 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types, FunctionalDependencies #-}
 module Parrows.Eden where
 
 import Parrows.Definition
+import Parrows.Futures
 
 import Control.Arrow
 
 import Control.Parallel.Eden
 
-{-
-class IV iv a where
-    putInternal :: a -> iv a
-    getInternal :: iv a -> a
-
 data RemoteData a = RD { rd :: RD a }
+instance NFData (RemoteData a)
+instance Trans (RemoteData b)
 
-instance (Trans a) => IV RemoteData a where
-    putInternal a = RD { rd = release a }
-    getInternal = fetch . rd
+instance (Trans a) => Future RemoteData a where
+    put a = RD { rd = release a }
+    get = fetch . rd
 
-fork :: (Trans a, Trans b) => [a -> b] -> [a] -> [RemoteData b]
-fork fs = map (putInternal .) fs
--}
+instance (Trans b, ArrowParallel arr a (RemoteData b) conf) => ArrowParallelFut arr a b conf RemoteData where
 
+--test whether this works in a distributed environment
+test :: [Int]
+test = map get tmp
+    where
+        tmp = (parEvalNFut () [(+1),(*3)] [1,2])
 -- ArrowParallel Instances
 
 -- FIXME: will this work with (spawnF id bs) with already "computed" bs
