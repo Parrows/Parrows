@@ -28,10 +28,9 @@ module Parrows.Futures where
 import Control.Arrow
 import Parrows.Definition
 
-class Future fut a where
+class Future fut a | a -> fut where
     put :: a -> fut a
     get :: fut a -> a
 
-class (ArrowParallel arr a (fut b) conf, Future fut b) => ArrowParallelFut arr a b conf fut | a -> fut where
-    parEvalNFut :: conf -> [arr a b] -> arr [a] [fut b]
-    parEvalNFut conf fs = parEvalN conf ((map (>>> (arr put)) fs))
+parEvalNFut :: (ArrowParallel arr a (fut b) conf, Future fut b) => conf -> [arr a b] -> arr [a] [fut b]
+parEvalNFut conf fs = parEvalN conf ((map (>>> (arr put)) fs))

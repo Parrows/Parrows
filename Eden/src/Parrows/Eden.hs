@@ -40,8 +40,6 @@ instance (Trans a) => Future RemoteData a where
     put a = RD { rd = release a }
     get = fetch . rd
 
-instance (Trans b, ArrowParallel arr a (RemoteData b) conf) => ArrowParallelFut arr a b conf RemoteData where
-
 --test whether this works in a distributed environment
 test :: [Int]
 test = map get tmp
