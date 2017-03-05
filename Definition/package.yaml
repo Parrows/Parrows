@@ -13,7 +13,7 @@ library:
   - base
   - deepseq
   - split
-  source-dirs: library
+  source-dirs: src/main
 license: MIT
 maintainer: Martin Braun
 name: Parrows

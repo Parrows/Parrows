@@ -17,7 +17,7 @@ library:
   - packman
   - binary
   - bytestring
-  source-dirs: library
+  source-dirs: src/main
 license: MIT
 maintainer: Martin Braun
 name: Parrows-HdpH

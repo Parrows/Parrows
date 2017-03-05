@@ -28,15 +28,15 @@ source-repository head
 Test-Suite spec
     Type:                 exitcode-stdio-1.0
     Default-Language:     Haskell2010
-    Hs-Source-Dirs:       tests
-                          ../Definition/library
-                          src
+    Hs-Source-Dirs:       src/test
+                          ../Definition/src/main
+                          src/main
     Ghc-Options:          -Wall -parmpi
     Main-Is:              Spec.hs
     Build-Depends:        base
                         , hspec
                         , QuickCheck
-                        ,base
+                        , base
                         , deepseq
                         , parallel
                         , split
@@ -44,9 +44,9 @@ Test-Suite spec
 
 library
   hs-source-dirs:
-      ../Definition/library
-      src
-  ghc-options: -Wall -DEDEN_GHC
+      ../Definition/src/main
+      src/main
+  ghc-options: -Wall
   build-depends:
       base
     , deepseq

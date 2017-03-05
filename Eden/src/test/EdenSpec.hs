@@ -3,7 +3,7 @@ module EdenSpec (spec) where
 
 import Parrows.Definition
 import Parrows.Future
-import Parrows.Eden
+import Parrows.Eden()
 
 import Test.Hspec
 import Test.Hspec.QuickCheck
@@ -32,11 +32,19 @@ parEvalNSpec = describe "Basic Parrow Functionality Eden" $ do
 pipeSpec :: Spec
 pipeSpec = describe "Pipe Test" $ do
     prop "Pipe 4 times (+1)" $ pipeTest
+    prop "Pipe (Future) 4 times (+1)" $ pipeFutureTest
       where
+         replicated :: [Int -> Int]
+         replicated = map (+) [1..4]
+
+         expectedValue :: Int -> Int
+         expectedValue x = foldl (flip ($)) x replicated
+
          pipeTest :: Int -> Bool
-         pipeTest x = (get (pipe () replicated (put x))) == x + 4
-             where
-                 replicated = replicate 4 (+1)
+         pipeTest x = pipe () replicated x == expectedValue x
+
+         pipeFutureTest :: Int -> Bool
+         pipeFutureTest x = (get (pipeFut () replicated (put x))) == expectedValue x
 
 mapSpec :: Spec
 mapSpec = describe "mapTest" $ do

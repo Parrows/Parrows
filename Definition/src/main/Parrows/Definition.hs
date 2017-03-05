@@ -114,7 +114,7 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
                arrMaybe fn = (arr $ go) >>> app
                    where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
                          go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
-						 
+
 -- some skeletons
 
 parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
@@ -146,14 +146,14 @@ farmChunk conf chunkSize numCores f =
                                  (second $ arr (unshuffle numCores)) >>>
                                  app >>>
                                  arr shuffle
-				
+
 -- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)
 unshuffle :: Int      -- ^number of sublists
              -> [a]   -- ^input list
              -> [[a]] -- ^distributed output
 unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
 
-takeEach :: Int -> [a] -> [a] 
+takeEach :: Int -> [a] -> [a]
 takeEach n [] = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 

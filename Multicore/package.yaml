@@ -15,7 +15,7 @@ library:
   - parallel
   - split
   - Parrows
-  source-dirs: library
+  source-dirs: src/main
 license: MIT
 maintainer: Martin Braun
 name: Parrows-Multicore
