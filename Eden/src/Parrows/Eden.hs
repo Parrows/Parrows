@@ -41,11 +41,6 @@ instance (Trans a) => Future RemoteData a where
     put a = RD { rd = release a }
     get = fetch . rd
 
---test whether this works in a distributed environment
-test :: [Int]
-test = map get tmp
-    where
-        tmp = (parEvalNFut () [(+1),(*3)] [put 1, put 2])
 -- ArrowParallel Instances
 
 -- FIXME: will this work with (spawnF id bs) with already "computed" bs

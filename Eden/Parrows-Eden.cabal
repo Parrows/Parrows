@@ -25,6 +25,23 @@ source-repository head
   type: git
   location: https://github.com/s4ke/Parrows
 
+Test-Suite spec
+    Type:                 exitcode-stdio-1.0
+    Default-Language:     Haskell2010
+    Hs-Source-Dirs:       tests
+                          ../Definition/library
+                          src
+    Ghc-Options:          -Wall -parmpi
+    Main-Is:              Spec.hs
+    Build-Depends:        base
+                        , hspec
+                        , QuickCheck
+                        ,base
+                        , deepseq
+                        , parallel
+                        , split
+                        , edenmodules
+
 library
   hs-source-dirs:
       ../Definition/library
