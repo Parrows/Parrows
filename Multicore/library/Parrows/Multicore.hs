@@ -26,9 +26,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.Multicore where
 
 import Parrows.Definition
+import Parrows.Future
 
 import Control.Parallel.Strategies
 import Control.Arrow
+import Control.DeepSeq
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
+
+data BasicFuture a = BF { val :: a }
+instance (NFData a) => NFData (BasicFuture a) where
+    rnf bf = rnf $ val bf
+
+instance (NFData a) => Future BasicFuture a where
+    put a = BF { val = a }
+    get = val

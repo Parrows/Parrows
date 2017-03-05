@@ -26,12 +26,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.ParMonad where
 
 import Parrows.Definition
+import Parrows.Future
 import Control.Monad.Par
 import Control.Arrow
+import Control.DeepSeq
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
                     zipWithArr (app >>> arr spawnP) >>>
                     arr sequenceA >>>
-                    arr (>>= mapM get) >>>
+                    arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
+
+data BasicFuture a = BF { val :: a }
+instance (NFData a) => NFData (BasicFuture a) where
+    rnf bf = rnf $ val bf
+
+instance (NFData a) => Future BasicFuture a where
+    put a = BF { val = a }
+    get = val

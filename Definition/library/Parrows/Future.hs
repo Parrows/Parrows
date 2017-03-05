@@ -23,7 +23,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
 {-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types, FunctionalDependencies #-}
-module Parrows.Futures where
+module Parrows.Future where
 
 import Control.Arrow
 import Parrows.Definition
@@ -32,5 +32,17 @@ class Future fut a | a -> fut where
     put :: a -> fut a
     get :: fut a -> a
 
-parEvalNFut :: (ArrowParallel arr a (fut b) conf, Future fut b) => conf -> [arr a b] -> arr [a] [fut b]
-parEvalNFut conf fs = parEvalN conf ((map (>>> (arr put)) fs))
+liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
+liftFut f = (arr get) >>> f >>> (arr put)
+
+parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
+parEvalNFut conf fs = parEvalN conf (map liftFut fs)
+
+pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
+pipe conf fs = (loop $ (arr $ \(a, outs) -> (outs, (parEvalNFut conf fs, lazy $ a : outs))) >>> (second $ app)) >>> arr last
+
+-- From Eden:
+
+-- | A lazy list is an infinite stream
+lazy :: [a] -> [a]
+lazy ~(x:xs) = x : lazy xs

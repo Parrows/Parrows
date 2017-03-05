@@ -26,14 +26,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.Eden where
 
 import Parrows.Definition
-import Parrows.Futures
+import Parrows.Future
 
 import Control.Arrow
 
 import Control.Parallel.Eden
 
 data RemoteData a = RD { rd :: RD a }
-instance NFData (RemoteData a)
+instance NFData (RemoteData a) where
+    rnf x = rnf $ rd x
 instance Trans (RemoteData a)
 
 instance (Trans a) => Future RemoteData a where
@@ -44,7 +45,7 @@ instance (Trans a) => Future RemoteData a where
 test :: [Int]
 test = map get tmp
     where
-        tmp = (parEvalNFut () [(+1),(*3)] [1,2])
+        tmp = (parEvalNFut () [(+1),(*3)] [put 1, put 2])
 -- ArrowParallel Instances
 
 -- FIXME: will this work with (spawnF id bs) with already "computed" bs
