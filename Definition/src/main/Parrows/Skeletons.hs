@@ -39,6 +39,21 @@ pipe conf fs = unliftFut $ pipeFut conf fs
 pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
 pipeFut conf fs = (loop $ (arr $ \(a, outs) -> (outs, (parEvalNFut conf fs, lazy $ a : outs))) >>> second app) >>> arr last
 
+--ring :: (ArrowLoop arr, ArrowApply arr, Future fut i, Future fut o, Future fut r) =>
+--    conf ->
+--    arr (i, r) (o, r) ->
+--    arr [i] [o]
+--ring conf f = (loop $ (arr $ \(is, os) -> (is, (parMap () conf (toFut f), _)) ) >>> second app) >>> arr unzip
+
+toFut :: (Arrow arr, Future fut r) =>
+        (arr (i, r) (o, r))              -- ^ ring process function
+        -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
+toFut f = (second $ arr get) >>> f >>> (second $ arr put)
+
+rightRotate    :: [a] -> [a]
+rightRotate [] =  []
+rightRotate xs =  last xs : init xs
+
 -- From Eden:
 
 -- | A lazy list is an infinite stream
