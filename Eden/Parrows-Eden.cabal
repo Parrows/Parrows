@@ -56,5 +56,6 @@ library
   exposed-modules:
       Parrows.Definition
       Parrows.Skeletons
+      Parrows.Future
       Parrows.Eden
   default-language: Haskell2010
