@@ -4,6 +4,7 @@ module EdenSpec (spec) where
 import Parrows.Definition
 import Parrows.Skeletons
 import Parrows.Eden()
+import Parrows.Future
 
 import Test.Hspec
 import Test.Hspec.QuickCheck

@@ -37,7 +37,11 @@ pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, 
 pipe conf fs = unliftFut $ pipeFut conf fs
 
 pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
-pipeFut conf fs = (loop $ (arr $ \(a, outs) -> (outs, (parEvalNFut conf fs, lazy $ a : outs))) >>> second app) >>> arr last
+pipeFut conf fs = resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut conf fs) >>> arr last
+
+-- util for the infinite resolve fix place recursion with ArrowLoop(s)
+resolve :: (ArrowApply arr, ArrowLoop arr) => arr (a, b) c -> arr c b -> arr a b
+resolve transform f = loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>> second (second app >>> app)
 
 --ring :: (ArrowLoop arr, ArrowApply arr, Future fut i, Future fut o, Future fut r) =>
 --    conf ->
