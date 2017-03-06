@@ -22,18 +22,25 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types, FunctionalDependencies #-}
-module Parrows.Future where
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types #-}
+module Parrows.Skeletons where
 
 import Control.Arrow
+
 import Parrows.Definition
+import Parrows.Future
 
-class Future fut a | a -> fut where
-    put :: a -> fut a
-    get :: fut a -> a
+parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
+parEvalNFut conf fs = parEvalN conf $ map liftFut fs
 
-liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
-liftFut f = arr get >>> f >>> arr put
+pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
+pipe conf fs = unliftFut $ pipeFut conf fs
 
-unliftFut :: (Arrow arr, Future fut a, Future fut b) => arr (fut a) (fut b) -> arr a b
-unliftFut f = arr put >>> f >>> arr get
+pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
+pipeFut conf fs = (loop $ (arr $ \(a, outs) -> (outs, (parEvalNFut conf fs, lazy $ a : outs))) >>> second app) >>> arr last
+
+-- From Eden:
+
+-- | A lazy list is an infinite stream
+lazy :: [a] -> [a]
+lazy ~(x:xs) = x : lazy xs
