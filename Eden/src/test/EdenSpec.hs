@@ -47,6 +47,20 @@ pipeSpec = describe "Pipe Test" $ do
          pipeFutureTest :: Int -> Bool
          pipeFutureTest x = (get (pipeFut () replicated (put x))) == expectedValue x
 
+ringSpec :: Spec
+ringSpec = describe "Ring Test" $ do
+    prop "" $ ringTest
+      where
+        values :: Int -> [Int]
+        values cnt = take cnt $ [1..]
+
+        ringTest :: Int -> Bool
+        ringTest cnt = (ring () (\(x,y) -> (y, x+1)) (values cnt) ) == (rightRotate $ map (+1) (values cnt))
+
+        rightRotate    :: [a] -> [a]
+        rightRotate [] =  []
+        rightRotate xs =  last xs : init xs
+
 mapSpec :: Spec
 mapSpec = describe "mapTest" $ do
     prop "parMap" $ parMapTest $ parMap ()

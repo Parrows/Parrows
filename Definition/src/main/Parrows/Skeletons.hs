@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, Rank2Types #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses, Rank2Types #-}
 module Parrows.Skeletons where
 
 import Control.Arrow
@@ -38,16 +38,16 @@ pipe conf fs = unliftFut $ pipeFut conf fs
 
 pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
 pipeFut conf fs = resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut conf fs) >>> arr last
+    where
+        -- util for the infinite resolve fix place recursion with ArrowLoop(s)
+        resolve :: (ArrowApply arr, ArrowLoop arr) => arr (a, b) c -> arr c b -> arr a b
+        resolve transform f = loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>> second (second app >>> app)
 
--- util for the infinite resolve fix place recursion with ArrowLoop(s)
-resolve :: (ArrowApply arr, ArrowLoop arr) => arr (a, b) c -> arr c b -> arr a b
-resolve transform f = loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>> second (second app >>> app)
-
---ring :: (ArrowLoop arr, ArrowApply arr, Future fut i, Future fut o, Future fut r) =>
---    conf ->
---    arr (i, r) (o, r) ->
---    arr [i] [o]
---ring conf f = (loop $ (arr $ \(is, os) -> (is, (parMap () conf (toFut f), _)) ) >>> second app) >>> arr unzip
+ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, (ArrowParallel arr (i, fut r) (o, fut r) conf)) =>
+    conf ->
+    arr (i, r) (o, r) ->
+    arr [i] [o]
+ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> parMap conf (toFut f) >>> arr unzip
 
 toFut :: (Arrow arr, Future fut r) =>
         (arr (i, r) (o, r))              -- ^ ring process function

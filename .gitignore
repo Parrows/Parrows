@@ -28,6 +28,8 @@ dist/*
 *.kdev4
 .kdev/
 
+*.parevents
+
 
 .idea/
 
