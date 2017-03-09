@@ -49,13 +49,6 @@ ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, (ArrowParallel arr (i, fut
     arr [i] [o]
 ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
 
-
-ringSimple :: (ArrowLoop arr, ArrowApply arr, Future fut r, (ArrowParallel arr (i, fut r) (o, fut r) conf)) =>
-               conf
-               -> arr (i, r) (o,r) -- ^ ring process function
-               -> arr [i] [o]      -- ^ input output mapping
-ringSimple conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
-
 toFut :: (Arrow arr, Future fut r) =>
         (arr (i, r) (o, r))              -- ^ ring process function
         -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
