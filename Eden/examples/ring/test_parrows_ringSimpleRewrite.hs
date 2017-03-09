@@ -1,9 +1,12 @@
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
 module Main where
 
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Skeletons
 import Parrows.Eden
+
+import Control.Arrow
 
 import Control.Parallel.Eden
 
@@ -14,10 +17,11 @@ import Control.Parallel.Eden
 -- | Simple ring skeleton (tutorial version)
 -- using remote data for providing direct inter-ring communication
 -- without input distribution and output combination
-ringSimple      :: (Trans o, Trans i, Trans r) => (i -> r -> (o,r))  -- ^ ring process function
-               -> [i] -> [o]      -- ^ input output mapping
-ringSimple f is =  os
-  where
-    (os,ringOuts)  = unzip (parMap () (toFut $ uncurry f) (zip is $ lazy $ rightRotate ringOuts))
+ringSimple' :: (Trans r, ArrowLoop arr, ArrowApply arr, Future RemoteData r, (ArrowParallel arr (i, RemoteData r) (o, RemoteData r) conf)) =>
+               conf
+               -> arr (i, r) (o,r) -- ^ ring process function
+               -> arr [i] [o]      -- ^ input output mapping
+ringSimple' conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
 
-main = print $ ringSimple (\x y -> (y, x+1)) ([1..3]::[Int])
+
+main = print $ ringSimple' () (\(x, y) -> (y, x+1)) ([1..3]::[Int])
