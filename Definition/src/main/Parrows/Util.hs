@@ -41,6 +41,13 @@ mapArr f = arr listcase >>>
          where listcase [] = Left ()
                listcase (x:xs) = Right (x,xs)
 
+-- fold on Arrows inspired by mapArr
+foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
+foldlArr f b = arr listcase >>>
+             arr (const b) ||| (first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
+             where listcase [] = Left []
+                   listcase (x:xs) = Right (x,xs)
+
 -- From Eden:
 
 -- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)

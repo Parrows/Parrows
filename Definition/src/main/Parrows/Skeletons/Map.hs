@@ -30,6 +30,8 @@ import Control.Arrow
 import Parrows.Definition
 import Parrows.Util
 
+import Data.List.Split
+
 -- some map skeletons
 
 parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
@@ -61,3 +63,8 @@ farmChunk conf chunkSize numCores f =
                                  (second $ arr (unshuffle numCores)) >>>
                                  app >>>
                                  arr shuffle
+
+mapReducel :: (ArrowParallel arr [a] c conf, ArrowApply arr, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (c, b) c -> c -> arr [a] [c]
+mapReducel conf chunkSize mapfn foldfn neutral =
+                                   (arr $ chunksOf chunkSize) >>>
+                                   parMap conf (mapArr mapfn >>> foldlArr foldfn neutral)

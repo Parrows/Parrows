@@ -38,6 +38,9 @@ import Parrows.Skeletons.Map
 pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut $ pipeFut conf fs
 
+-- FIXME: does this really need arrowloop?
+-- FIXME: this could probably be expressed
+-- FIXME: similarly to mapArr or foldlArr in the Util module
 pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
 pipeFut conf fs = resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut conf fs) >>> arr last
     where
