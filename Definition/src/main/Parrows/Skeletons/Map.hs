@@ -64,7 +64,11 @@ farmChunk conf chunkSize numCores f =
                                  app >>>
                                  arr shuffle
 
-mapReducel :: (ArrowParallel arr [a] c conf, ArrowApply arr, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (c, b) c -> c -> arr [a] [c]
-mapReducel conf chunkSize mapfn foldfn neutral =
+-- this does not completely adhere to Google's definition of Map Reduce as it
+-- the mapping function does not allow for "reordering" of the output
+-- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
+parMapReduceDirect :: (ArrowParallel arr [a] b conf, ArrowApply arr, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (b, b) b -> b -> arr [a] b
+parMapReduceDirect conf chunkSize mapfn foldfn neutral =
                                    (arr $ chunksOf chunkSize) >>>
-                                   parMap conf (mapArr mapfn >>> foldlArr foldfn neutral)
+                                   parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
+                                   (foldlArr foldfn neutral)
