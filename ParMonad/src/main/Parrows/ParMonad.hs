@@ -27,6 +27,8 @@ module Parrows.ParMonad where
 
 import Parrows.Definition
 import Parrows.Future
+import Parrows.Util
+
 import Control.Monad.Par
 import Control.Arrow
 import Control.DeepSeq

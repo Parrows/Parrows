@@ -2,7 +2,8 @@
 module EdenSpec (spec) where
 
 import Parrows.Definition
-import Parrows.Skeletons
+import Parrows.Skeletons.Topology
+import Parrows.Skeletons.Map
 import Parrows.Eden()
 import Parrows.Future
 

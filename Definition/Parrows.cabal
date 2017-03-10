@@ -1,4 +1,4 @@
--- This file has been generated from package.yaml by hpack version 0.14.0.
+-- This file has been generated from package.yaml by hpack version 0.15.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -33,5 +33,7 @@ library
   exposed-modules:
       Parrows.Definition
       Parrows.Future
-      Parrows.Skeletons
+      Parrows.Skeletons.Map
+      Parrows.Skeletons.Topology
+      Parrows.Util
   default-language: Haskell2010

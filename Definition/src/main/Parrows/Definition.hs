@@ -25,6 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleContexts #-}
 module Parrows.Definition where
 
+import Parrows.Util
+
 import Control.Arrow
 import Control.DeepSeq
 
@@ -55,19 +57,6 @@ class Arrow arr => ArrowParallel arr a b conf where
 
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
 (|>>>|) = zipWith (>>>)
-
--- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
-mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
-mapArr f = arr listcase >>>
-         arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
-         where listcase [] = Left ()
-               listcase (x:xs) = Right (x,xs)
-
-zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
-zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
-
-listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
-listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 
 -- some really basic sugar
 
@@ -114,51 +103,3 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
                arrMaybe fn = (arr $ go) >>> app
                    where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
                          go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
-
--- some skeletons
-
-parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
-parMap conf f = (arr $ \as -> (f, as)) >>>
-                (first $ arr repeat >>> arr (parEvalN conf)) >>>
-                app
-
--- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
--- evaluated on the same thread
-parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
-parMapStream conf chunkSize f = (arr $ \as -> (f, as)) >>>
-                                (first $ arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
-                                app
-
--- similar to parMapStream, but divides the input list by the given number
-farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> NumCores -> arr a b -> arr [a] [b]
-farm conf numCores f =
-                (arr $ \as -> (f, as)) >>>
-                (first $ arr mapArr >>> arr repeat >>> arr (parEvalN conf)) >>>
-                (second $ arr (unshuffle numCores)) >>>
-                app >>>
-                arr shuffle
-
--- farmChunk and parMapStream combined. divide the input list and inside work in chunks
-farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
-farmChunk conf chunkSize numCores f =
-                                 (arr $ \as -> (f, as)) >>>
-                                 (first $ arr mapArr >>> arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
-                                 (second $ arr (unshuffle numCores)) >>>
-                                 app >>>
-                                 arr shuffle
-
--- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)
-unshuffle :: Int      -- ^number of sublists
-             -> [a]   -- ^input list
-             -> [[a]] -- ^distributed output
-unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
-
-takeEach :: Int -> [a] -> [a]
-takeEach n [] = []
-takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
-
-
--- | Simple shuffling - inverse to round robin distribution
-shuffle :: [[a]]  -- ^ sublists
-           -> [a] -- ^ shuffled sublists
-shuffle = concat . transpose

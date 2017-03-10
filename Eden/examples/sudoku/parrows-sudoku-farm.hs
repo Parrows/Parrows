@@ -4,6 +4,7 @@ import Control.Exception
 import System.Environment
 import Data.Maybe
 import Parrows.Definition
+import Parrows.Skeletons.Map
 import Parrows.ParMonad
 import Control.DeepSeq
 

@@ -3,7 +3,7 @@ module Main where
 
 import Parrows.Definition
 import Parrows.Future
-import Parrows.Skeletons
+import Parrows.Topology
 import Parrows.Eden
 
 import Control.Arrow

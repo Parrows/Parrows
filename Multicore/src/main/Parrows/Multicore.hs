@@ -27,6 +27,7 @@ module Parrows.Multicore where
 
 import Parrows.Definition
 import Parrows.Future
+import Parrows.Util
 
 import Control.Parallel.Strategies
 import Control.Arrow

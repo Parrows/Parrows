@@ -23,15 +23,17 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
 {-# LANGUAGE FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
-module Parrows.Skeletons where
+module Parrows.Skeletons.Topology where
 
 import Control.Arrow
 
 import Parrows.Definition
 import Parrows.Future
+import Parrows.Util
 
-parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
-parEvalNFut conf fs = parEvalN conf $ map liftFut fs
+import Parrows.Skeletons.Map
+
+-- Ports of Control.Parallel.Eden.Topology to Parrows:
 
 pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut $ pipeFut conf fs
@@ -49,17 +51,13 @@ ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, (ArrowParallel arr (i, fut
     arr [i] [o]
 ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
 
+-- similar to Eden's toRD
 toFut :: (Arrow arr, Future fut r) =>
         (arr (i, r) (o, r))              -- ^ ring process function
         -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
+-- from Eden:
 rightRotate    :: [a] -> [a]
 rightRotate [] =  []
 rightRotate xs =  last xs : init xs
-
--- From Eden:
-
--- | A lazy list is an infinite stream
-lazy :: [a] -> [a]
-lazy ~(x:xs) = x : lazy xs

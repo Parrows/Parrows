@@ -28,7 +28,7 @@ module Main where
 
 import Parrows.Definition
 import Parrows.Eden
-import Parrows.Skeletons
+import Parrows.Skeletons.Topology
 import Parrows.Future
 
 import Control.Arrow

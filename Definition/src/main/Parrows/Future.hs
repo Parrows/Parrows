@@ -37,3 +37,6 @@ liftFut f = arr get >>> f >>> arr put
 
 unliftFut :: (Arrow arr, Future fut a, Future fut b) => arr (fut a) (fut b) -> arr a b
 unliftFut f = arr put >>> f >>> arr get
+
+parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
+parEvalNFut conf fs = parEvalN conf $ map liftFut fs
