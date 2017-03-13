@@ -60,6 +60,32 @@ toFut :: (Arrow arr, Future fut r) =>
         -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
+
+torus :: (ArrowLoop arr,
+            ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
+            ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
+            Future fut [a], Future fut [b]) =>
+         conf ->
+         arr (c, [a], [b]) (d, [a], [b]) -- ^ node function
+         -> arr [[c]] [[d]]                -- ^ input-output mapping
+torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
+                        arr (\ ~(inss, (inssA, inssB)) -> zipWith3 zip3 inss (lazy inssA) (lazy inssB)) >>>
+                        parEvalNM conf (repeat (repeat (ptorus f))) >>>
+                        arr (map unzip3) >>> arr unzip3 >>> arr threetotwo
+
+ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
+          arr (c, [a], [b]) (d, [a], [b]) ->
+          arr (c, fut [a], fut [b]) (d, fut [a], fut [b])
+ptorus f = arr (\ ~(c, fas, fbs) -> (c, get fas, get fbs)) >>> f >>> arr (\ ~(c, as, bs) -> (c, put as, put bs))
+
+
+threetotwo :: (a, b, c) -> (a, (b, c))
+threetotwo ~(a, b, c) = (a, (b, c))
+
+twotothree :: (a, (b, c)) -> (a, b, c)
+twotothree ~(a, (b, c)) = (a, b, c)
+
+
 -- from Eden:
 rightRotate    :: [a] -> [a]
 rightRotate [] =  []
