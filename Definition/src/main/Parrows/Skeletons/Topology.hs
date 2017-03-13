@@ -71,7 +71,7 @@ torus :: (ArrowLoop arr,
 torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
                         arr (\ ~(inss, (inssA, inssB)) -> zipWith3 zip3 inss (lazy inssA) (lazy inssB)) >>>
                         parEvalNM conf (repeat (repeat (ptorus f))) >>>
-                        arr (map unzip3) >>> arr unzip3 >>> arr threetotwo
+                        arr (map unzip3) >>> arr unzip3 >>> threetotwo
 
 ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
           arr (c, [a], [b]) (d, [a], [b]) ->
@@ -79,14 +79,14 @@ ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
 ptorus f = arr (\ ~(c, fas, fbs) -> (c, get fas, get fbs)) >>> f >>> arr (\ ~(c, as, bs) -> (c, put as, put bs))
 
 
-threetotwo :: (a, b, c) -> (a, (b, c))
-threetotwo ~(a, b, c) = (a, (b, c))
+threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
+threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 
-twotothree :: (a, (b, c)) -> (a, b, c)
-twotothree ~(a, (b, c)) = (a, b, c)
+twotothree :: (Arrow arr) => arr (a, (b, c)) (a, b, c)
+twotothree = arr $ \ ~(a, (b, c)) -> (a, b, c)
 
 
--- from Eden:
-rightRotate    :: [a] -> [a]
-rightRotate [] =  []
-rightRotate xs =  last xs : init xs
+-- from Eden, ported to Arrows:
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case list of [] -> []
+                                          xs -> last xs : init xs
