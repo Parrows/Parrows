@@ -51,8 +51,8 @@ matAdd x y
 nodefunction :: Int                         -- torus dimension
     -> ((Matrix, Matrix), [Matrix], [Matrix]) -- process input
     -> ([Matrix], [Matrix], [Matrix])       -- process output
-nodefunction n ((bA, bB), rows, cols )
-    = ([bSum], bA:nextAs , bB:nextBs )
+nodefunction n ((bA, bB), rows, cols)
+    = ([bSum], bA:nextAs , bB:nextBs)
     where bSum = foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
           nextAs = take (n-1) rows
           nextBs = take (n-1) cols
@@ -62,4 +62,4 @@ testMatrix = replicate 10 [1..10]
 
 main = print $ (rnf val) `seq` val
     where
-        val = torus () (nodefunction 8) [[(testMatrix, testMatrix)]]
+        val = torus () (nodefunction 8) [[(testMatrix, testMatrix), (testMatrix, testMatrix)]]
