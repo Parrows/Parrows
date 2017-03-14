@@ -1,4 +1,3 @@
--- EdenParallelSpec
 module EdenSpec (spec) where
 
 import Parrows.Definition
@@ -13,8 +12,11 @@ import Test.Hspec.QuickCheck
 spec :: Spec
 spec = do
     parEvalNSpec
+    parEvalNMSpec
     pipeSpec
+    ringSpec
     mapSpec
+    mapReduceSpec
 
 parEvalNSpec :: Spec
 parEvalNSpec = describe "Basic Parrow Functionality Eden" $ do
@@ -30,6 +32,13 @@ parEvalNSpec = describe "Basic Parrow Functionality Eden" $ do
 
         parEvalNFutInt :: [Int] -> Bool
         parEvalNFutInt xs = (map (get) $ parEvalNFut () (repeat (+1)) (map put xs)) == map (+1) xs
+
+parEvalNMSpec :: Spec
+parEvalNMSpec = describe "parEvalNM Test" $ do
+    prop "Basic parEvalNMTest (+1 matrix)" $ basicParEvalNM
+      where
+        basicParEvalNM :: [[Int]] -> Bool
+        basicParEvalNM xs =  parEvalNM () (repeat (repeat (+1))) xs == map (map (+1)) xs
 
 pipeSpec :: Spec
 pipeSpec = describe "Pipe Test" $ do
@@ -71,3 +80,10 @@ mapSpec = describe "mapTest" $ do
       where
           parMapTest :: ((Int -> Int) -> ([Int] -> [Int])) -> [Int] -> Bool
           parMapTest skel xs = skel (+1) xs == map (+1) xs
+
+mapReduceSpec :: Spec
+mapReduceSpec = describe "parMapReduceDirect Test" $
+    prop "Basic parMapReduceDirect Test" $ parMapReduceDirectTest
+      where
+        parMapReduceDirectTest :: [Int] -> Bool
+        parMapReduceDirectTest xs = (parMapReduceDirect () 4 (+1) (uncurry (*)) 0 xs) == (foldl (*) 0 $ map (+1) xs)

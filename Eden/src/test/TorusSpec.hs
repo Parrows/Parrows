@@ -1,9 +1,13 @@
-module Main where
+module TorusSpec (spec) where
+
+import Test.Hspec
+import Test.Hspec.QuickCheck
+
 
 import Parrows.Definition
 import Parrows.Future
-import Control.Parallel.Eden.Topology
---import Parrows.Skeletons.Topology
+import Control.Parallel.Eden.Topology as E
+import Parrows.Skeletons.Topology as P
 import Parrows.Eden
 import Data.List
 
@@ -12,6 +16,20 @@ import Data.Functor
 import Data.List.Split
 
 import Control.DeepSeq
+
+spec :: Spec
+spec = do
+    torusSpec
+
+torusSpec :: Spec
+torusSpec = describe "torus Test" $ do
+    prop "Basic Torus Test" $ torusTest
+        where
+            torusTest :: Int -> Bool
+            torusTest len = (P.torus () (nodefunction 8) [[(matrix, matrix)]]) == (E.torus (\ x y z -> nodefunction 8 (x, y, z)) $ [[(matrix, matrix)]])
+                where
+                    matrix = replicate len [1..len]
+
 
 type Vector = [Int]
 type Matrix = [Vector]
@@ -60,8 +78,3 @@ nodefunction n ((bA, bB), rows, cols )
 
 testMatrix :: Matrix
 testMatrix = replicate 10 [1..10]
-
---main = print $ torus () (nodefunction 8) [[(testMatrix, testMatrix)]]
-main = print $ (rnf val) `seq` val
-    where
-        val = torus (\ x y z -> nodefunction 8 (x, y, z)) $ [[(testMatrix, testMatrix)]]

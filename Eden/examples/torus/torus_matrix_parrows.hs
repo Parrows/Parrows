@@ -6,6 +6,8 @@ import Parrows.Skeletons.Topology
 import Parrows.Eden
 import Data.List
 
+import Control.DeepSeq
+
 import Control.Applicative
 import Data.Functor
 import Data.List.Split
@@ -58,4 +60,6 @@ nodefunction n ((bA, bB), rows, cols )
 testMatrix :: Matrix
 testMatrix = replicate 10 [1..10]
 
-main = print $ torus () (nodefunction 8) [[(testMatrix, testMatrix)]]
+main = print $ (rnf val) `seq` val
+    where
+        val = torus () (nodefunction 8) [[(testMatrix, testMatrix)]]

@@ -41,6 +41,7 @@ Test-Suite spec
                         , parallel
                         , split
                         , edenmodules
+                        , edenskel
 
 library
   hs-source-dirs:

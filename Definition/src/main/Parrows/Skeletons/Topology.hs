@@ -63,7 +63,7 @@ toFut :: (Arrow arr, Future fut r) =>
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
 
-torus :: (ArrowLoop arr,
+torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
             Future fut [a], Future fut [b]) =>
@@ -71,16 +71,12 @@ torus :: (ArrowLoop arr,
          arr (c, [a], [b]) (d, [a], [b]) -- ^ node function
          -> arr [[c]] [[d]]                -- ^ input-output mapping
 torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
-                        arr (\ ~(inss, (inssA, inssB)) -> lazyzipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
+                        arr (\ (inss, (inssA, inssB)) -> zipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
                         parEvalNM conf (repeat (repeat (ptorus f))) >>>
                         arr (map unzip3) >>> arr unzip3 >>> threetotwo
 
-lazyzipWith3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
-lazyzipWith3 f (x:xs) ~(y:ys) ~(z:zs) = f x y z : lazyzipWith3 f xs ys zs
-lazyzipWith3 _ _ _ _ = []
-
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
-lazyzip3 = lazyzipWith3 (\ x y z -> (x, y, z))
+lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
 
 ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
           arr (c, [a], [b]) (d, [a], [b]) ->

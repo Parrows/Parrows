@@ -104,5 +104,5 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
                    where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
                          go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
 
-parEvalNM :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf) => conf -> [[arr a b]] -> arr [[a]] [[b]]
-parEvalNM conf = (parEvalN conf) . (map (parEvalN conf))
+parEvalNM :: (ArrowChoice arr, ArrowApply arr, ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf) => conf -> [[arr a b]] -> arr [[a]] [[b]]
+parEvalNM conf = listApp . (map (parEvalN conf))
