@@ -34,6 +34,8 @@ import Parrows.Util
 import Parrows.Skeletons.Map
 
 -- Ports of Control.Parallel.Eden.Topology to Parrows:
+-- edenskel-2.0.0.2 and the paper:
+-- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
 pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut $ pipeFut conf fs
@@ -69,15 +71,21 @@ torus :: (ArrowLoop arr,
          arr (c, [a], [b]) (d, [a], [b]) -- ^ node function
          -> arr [[c]] [[d]]                -- ^ input-output mapping
 torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
-                        arr (\ ~(inss, (inssA, inssB)) -> zipWith3 zip3 inss (lazy inssA) (lazy inssB)) >>>
+                        arr (\ ~(inss, (inssA, inssB)) -> lazyzipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
                         parEvalNM conf (repeat (repeat (ptorus f))) >>>
                         arr (map unzip3) >>> arr unzip3 >>> threetotwo
+
+lazyzipWith3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
+lazyzipWith3 f (x:xs) ~(y:ys) ~(z:zs) = f x y z : lazyzipWith3 f xs ys zs
+lazyzipWith3 _ _ _ _ = []
+
+lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+lazyzip3 = lazyzipWith3 (\ x y z -> (x, y, z))
 
 ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
           arr (c, [a], [b]) (d, [a], [b]) ->
           arr (c, fut [a], fut [b]) (d, fut [a], fut [b])
 ptorus f = arr (\ ~(c, fas, fbs) -> (c, get fas, get fbs)) >>> f >>> arr (\ ~(c, as, bs) -> (c, put as, put bs))
-
 
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
