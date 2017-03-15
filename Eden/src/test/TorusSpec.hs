@@ -40,25 +40,22 @@ dimX = length
 dimY :: Matrix -> Int
 dimY = length . head
 
-valAt :: Int -> [a] -> a
-valAt pos [] = error $ show pos
-valAt 0 (x:_) = x
-valAt pos (_:xs) = valAt (pos - 1) xs
+--from: https://rosettacode.org/wiki/Matrix_multiplication#Haskell
+foldlZipWith::(a -> b -> c) -> (d -> c -> d) -> d -> [a] -> [b]  -> d
+foldlZipWith _ _ u [] _          = u
+foldlZipWith _ _ u _ []          = u
+foldlZipWith f g u (x:xs) (y:ys) = foldlZipWith f g (g u (f x y)) xs ys
 
-row :: Int -> Matrix -> Vector
-row y = foldr (\x' y' -> valAt y x' : y') []
+foldl1ZipWith::(a -> b -> c) -> (c -> c -> c) -> [a] -> [b] -> c
+foldl1ZipWith _ _ [] _          = error "First list is empty"
+foldl1ZipWith _ _ _ []          = error "Second list is empty"
+foldl1ZipWith f g (x:xs) (y:ys) = foldlZipWith f g (f x y) xs ys
 
-rows :: Matrix -> [Vector]
-rows matrix = reverse $ go (dimY matrix - 1) matrix
-    where
-        go _ [] = []
-        go 0 matrix = [row 0 matrix]
-        go rowNum matrix = row rowNum matrix:go (rowNum - 1) matrix
+multAdd::(a -> b -> c) -> (c -> c -> c) -> [[a]] -> [[b]] -> [[c]]
+multAdd f g xs ys = map (\us -> foldl1ZipWith (\u vs -> map (f u) vs) (zipWith g) us ys) xs
 
-matMult :: Matrix -> Matrix -> Matrix
-matMult x y
-    | dimX x /= dimY y = error "dimX x not equal to dimY y"
-    | otherwise = chunksOf (dimX y) $ map sum (zipWith (*) <$> rows x <*> y)
+matMult:: Num a => [[a]] -> [[a]] -> [[a]]
+matMult xs ys = multAdd (*) (+) xs ys
 
 matAdd :: Matrix -> Matrix -> Matrix
 matAdd x y
@@ -70,8 +67,8 @@ matAdd x y
 nodefunction :: Int                         -- torus dimension
     -> ((Matrix, Matrix), [Matrix], [Matrix]) -- process input
     -> ([Matrix], [Matrix], [Matrix])       -- process output
-nodefunction n ((bA, bB), rows, cols )
-    = ([bSum], bA:nextAs , bB:nextBs )
+nodefunction n ((bA, bB), rows, cols)
+    = ([bSum], bA:nextAs , bB:nextBs)
     where bSum = foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
           nextAs = take (n-1) rows
           nextBs = take (n-1) cols
