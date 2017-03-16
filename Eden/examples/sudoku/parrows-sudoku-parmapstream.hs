@@ -4,9 +4,11 @@ import Control.Exception
 import System.Environment
 import Data.Maybe
 import Parrows.Definition
-import Parrows.ParMonad
+import Parrows.Eden
 import Parrows.Skeletons.Map
 import Control.DeepSeq
+
+import Control.Parallel.Eden
 
 main :: IO ()
 main = do
@@ -14,5 +16,5 @@ main = do
     grids <- fmap lines $ readFile f
     print (length (filter isJust (parMapChunk (read n) solve grids)))
 
-parMapChunk :: NFData b => Int -> (a -> b) -> [a] -> [b]
+parMapChunk :: (Trans a, Trans b) => Int -> (a -> b) -> [a] -> [b]
 parMapChunk = parMapStream ()

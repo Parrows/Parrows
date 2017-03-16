@@ -62,7 +62,6 @@ toFut :: (Arrow arr, Future fut r) =>
         -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
-
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,

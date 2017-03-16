@@ -5,8 +5,10 @@ import System.Environment
 import Data.Maybe
 import Parrows.Definition
 import Parrows.Skeletons.Map
-import Parrows.ParMonad
+import Parrows.Eden
 import Control.DeepSeq
+
+import Control.Parallel.Eden
 
 main :: IO ()
 main = do
@@ -14,5 +16,5 @@ main = do
     grids <- fmap lines $ readFile f
     print (length (filter isJust (farmChunk' (read chunkSize) (read cores) solve grids)))
 
-farmChunk' :: NFData b => Int -> Int -> (a -> b) -> [a] -> [b]
+farmChunk' :: (Trans a, Trans b) => Int -> Int -> (a -> b) -> [a] -> [b]
 farmChunk' = farmChunk ()

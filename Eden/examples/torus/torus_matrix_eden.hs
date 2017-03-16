@@ -55,10 +55,22 @@ nodefunction n ((bA, bB), rows, cols)
           nextAs = take (n-1) rows
           nextBs = take (n-1) cols
 
-testMatrix :: Matrix
-testMatrix = replicate 10 [1..10]
+randoms1 :: [Int]
+randoms1 = randoms $ mkStdGen 23586
+
+randoms2 :: [Int]
+randoms2 = randoms $ mkStdGen 67123
+
+size :: Int
+size = 100
+
+aMatrix :: Matrix
+aMatrix = chunksOf size $ take (size * size) randoms1
+
+bMatrix :: Matrix
+bMatrix = chunksOf size $ take (size * size) randoms2
 
 --main = print $ torus () (nodefunction 8) [[(testMatrix, testMatrix)]]
 main = print $ (rnf val) `seq` val
     where
-        val = torus (\ x y z -> nodefunction 2 (x, y, z)) $ [[(testMatrix, testMatrix), (testMatrix, testMatrix)]]
+        val = torus (\ x y z -> nodefunction 2 (x, y, z)) $ [[(aMatrix, bMatrix), (aMatrix, bMatrix)]]

@@ -19,13 +19,17 @@
 -- LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 -- OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 -- WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.
-
+{-# LANGUAGE FlexibleInstances #-}
 module Sudoku (solve, printGrid) where
 
 import Data.List hiding (lookup)
 import Data.Array
 import Control.Monad
 import Data.Maybe
+
+import Control.Parallel.Eden
+
+instance Trans (Array Sudoku.Square [Sudoku.Digit])
 
 -- Types
 type Digit  = Char
