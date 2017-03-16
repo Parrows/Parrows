@@ -64,8 +64,11 @@ randoms1 = randoms $ mkStdGen 23586
 randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
+factor :: Int
+factor = 8
+
 n :: Int
-n = 32
+n = 32 * factor
 
 aMatrix :: Matrix
 aMatrix = chunksOf n $ take (n * n) randoms1
@@ -81,4 +84,4 @@ combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
 main = print $ (rnf val) `seq` val
     where
-        val = torus () (nodefunction 16) $ combine (splitMatrix 2 aMatrix) (splitMatrix 2 bMatrix)
+        val = torus () (nodefunction 16) $ combine (splitMatrix (2 * factor) aMatrix) (splitMatrix (2 * factor) bMatrix)
