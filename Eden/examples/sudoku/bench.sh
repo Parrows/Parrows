@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rtsOpts="+RTS -N16"
+procCount=16
 
 programs=(
     "parrows-sudoku-parmap"
@@ -25,18 +25,20 @@ puzzles=(
 # get length of an array
 programCount=${#programs[@]}
 
+benchCmds=""
+
 for puzzle in "${puzzles[@]}"
 do
-    echo ${puzzle}
     for (( i=0; i < ${programCount}; i++ ));
     do
-        progName=${programs[$i]}
-        cmd="./"${progName}" "${puzzle}" "${parameters[$i]}" "${rtsOpts}
+        for (( j=1; j <= ${procCount}; j++ ));
+        do
+            progName=${programs[$i]}
+            cmd="\"./"${progName}" "${puzzle}" "${parameters[$i]}" +RTS -N"${j}"\""
 
-        eval ${cmd}
+            benchCmds=${benchCmds}" "${cmd}
+        done
     done
-
-    echo ""
-    echo ""
-    echo ""
 done
+
+eval "bench"${benchCmds}" -o bench.html"

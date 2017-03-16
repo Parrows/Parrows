@@ -13,7 +13,7 @@ programCount=${#programs[@]}
 for (( i=0; i < ${programCount}; i++ ));
 do
     progName=${programs[$i]}
-    cmd="ghc "$progName" -parmpi -rtsopts -eventlog"
+    cmd="ghc "$progName" -parmpi -rtsopts -eventlog -O2"
     tmp=$(eval $cmd)
     echo ${tmp}
 done
