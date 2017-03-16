@@ -18,8 +18,8 @@ parameters=(
 
 puzzles=(
     "sudoku17.1000.txt"
-    "sudoku17.16000.txt"
-    "sudoku17.49151.txt"
+    #"sudoku17.16000.txt"
+    #"sudoku17.49151.txt"
 )
 
 # get length of an array
