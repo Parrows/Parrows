@@ -64,16 +64,21 @@ randoms1 = randoms $ mkStdGen 23586
 randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
-size :: Int
-size = 100
+n :: Int
+n = 32
 
 aMatrix :: Matrix
-aMatrix = chunksOf size $ take (size * size) randoms1
+aMatrix = chunksOf n $ take (n * n) randoms1
 
 bMatrix :: Matrix
-bMatrix = chunksOf size $ take (size * size) randoms2
+bMatrix = chunksOf n $ take (n * n) randoms2
 
+splitMatrix :: Int -> Matrix -> [[Matrix]]
+splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
+
+combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
+combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
 main = print $ (rnf val) `seq` val
     where
-        val = torus () (nodefunction 2) [[(aMatrix, bMatrix), (aMatrix, bMatrix)]]
+        val = torus () (nodefunction 16) $ combine (splitMatrix 2 aMatrix) (splitMatrix 2 bMatrix)
