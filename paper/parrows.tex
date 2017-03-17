@@ -1,5 +1,8 @@
 \section{Parallel Arrows}
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows can also be looked at as a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
+\begin{center}
+	\includegraphics[scale=0.7]{images/parEvalN}
+\end{center}
 \subsection{The ArrowParallel typeclass}
 As we have seen earlier, in its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
 \begin{lstlisting}[frame=htrbl]
