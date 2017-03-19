@@ -1,11 +1,33 @@
 \section{Arrows}
+\begin{center}
+	\includegraphics[]{images/arrow.png}
+\end{center}
 Arrows were introduced by Hughes \citHughes ~as a general interface for computation. An arrow \code{arr a b} can be look at as a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
+
+\begin{minipage}{\textwidth}
+\begin{minipage}{0.5\textwidth}
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr where
-	arr :: (a -> b) -> arr a b
-	(>>>) :: arr a b -> arr b c -> arr a c
-	first :: arr a b -> arr (a,c) (b,c)
+arr :: (a -> b) -> arr a b
+
+
+
+(>>>) :: arr a b -> arr b c -> arr a c
+
+
+
+
+first :: arr a b -> arr (a,c) (b,c)
 \end{lstlisting}
+\end{minipage}
+~~~~
+\begin{minipage}{0.25\textwidth}
+	~\\~\\~\\
+	\includegraphics[scale=0.6]{images/arr}~\\~\\
+	\includegraphics[scale=0.6]{images/compose}~\\~\\
+	\includegraphics[scale=0.6]{images/first}~\\~\\
+\end{minipage}
+\end{minipage}
 \lstinline{arr} is used to lift an ordinary function to an arrow type. This can be thought of as analogous to the monadic \lstinline{return}. The \lstinline{>>>} operator, in a similar way, is analogous to the monadic composition operator \lstinline{>>=} and combines two arrows \code{arr a b} and \code{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \code{arr a c}. And lastly, the \lstinline{first} operator, which takes the input arrow from b to c and converts it into an arrow on pairs with the second argument untouched, is also needed for actual useful code as without it, we wouldn't have a way to save input across arrows.
 \\\\
 The most prominent instances of this interface are regular functions \lstinline{(->)},
@@ -26,6 +48,17 @@ instance Monad m => Arrow (Kleisli m) where
 	f >>> g = Kleisli $ \a -> f a >>= g
 	first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
 \end{lstlisting}
+\begin{figure}
+	\centering
+	\begin{tabular}{cc}
+		\subcaptionbox{first\label{1}}{\includegraphics[width = 1.5in]{images/first}} &
+		\subcaptionbox{second\label{2}}{\includegraphics[width = 1.5in]{images/second}} \\
+		\subcaptionbox{(***)\label{1}}{\includegraphics[width = 1.5in]{images/starstarstar}} &
+		\subcaptionbox{(\&\&\&)\label{2}}{\includegraphics[width = 1.5in]{images/andandand}}\
+	\end{tabular}
+	\caption{syntactic sugar}
+	\label{3}
+\end{figure}
 With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \lstinline{first}, called \lstinline{second},
 \begin{lstlisting}[frame=htrbl]
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
