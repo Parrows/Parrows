@@ -69,6 +69,6 @@ farmChunk conf chunkSize numCores f =
 -- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
 parMapReduceDirect :: (ArrowParallel arr [a] b conf, ArrowApply arr, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (b, b) b -> b -> arr [a] b
 parMapReduceDirect conf chunkSize mapfn foldfn neutral =
-                                   (arr $ chunksOf chunkSize) >>>
+                                   arr (chunksOf chunkSize) >>>
                                    parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
-                                   (foldlArr foldfn neutral)
+                                   foldlArr foldfn neutral

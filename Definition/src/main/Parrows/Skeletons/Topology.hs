@@ -50,7 +50,7 @@ pipeFut conf fs = resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut con
         resolve :: (ArrowApply arr, ArrowLoop arr) => arr (a, b) c -> arr c b -> arr a b
         resolve transform f = loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>> second (second app >>> app)
 
-ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, (ArrowParallel arr (i, fut r) (o, fut r) conf)) =>
+ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
@@ -58,8 +58,8 @@ ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zi
 
 -- similar to Eden's toRD
 toFut :: (Arrow arr, Future fut r) =>
-        (arr (i, r) (o, r))              -- ^ ring process function
-        -> (arr (i, fut r) (o, fut r))   -- ^ with remote data
+        arr (i, r) (o, r) ->
+        arr (i, fut r) (o, fut r)
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
@@ -67,8 +67,8 @@ torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
             Future fut [a], Future fut [b]) =>
          conf ->
-         arr (c, [a], [b]) (d, [a], [b]) -- ^ node function
-         -> arr [[c]] [[d]]                -- ^ input-output mapping
+         arr (c, [a], [b]) (d, [a], [b]) ->
+         arr [[c]] [[d]]
 torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
                         arr (\ (inss, (inssA, inssB)) -> zipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
                         parEvalNM conf (repeat (repeat (ptorus f))) >>>
