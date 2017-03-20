@@ -13,6 +13,8 @@ import Data.List.Split
 
 import Control.DeepSeq
 
+import System.Random
+
 type Vector = [Int]
 type Matrix = [Vector]
 
@@ -61,16 +63,24 @@ randoms1 = randoms $ mkStdGen 23586
 randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
-size :: Int
-size = 100
+factor :: Int
+factor = 8
+
+n :: Int
+n = 32 * factor
 
 aMatrix :: Matrix
-aMatrix = chunksOf size $ take (size * size) randoms1
+aMatrix = chunksOf n $ take (n * n) randoms1
 
 bMatrix :: Matrix
-bMatrix = chunksOf size $ take (size * size) randoms2
+bMatrix = chunksOf n $ take (n * n) randoms2
 
---main = print $ torus () (nodefunction 8) [[(testMatrix, testMatrix)]]
+splitMatrix :: Int -> Matrix -> [[Matrix]]
+splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
+
+combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
+combine a b = zipWith (\a b -> zipWith (,) a b) a b
+
 main = print $ (rnf val) `seq` val
     where
-        val = torus (\ x y z -> nodefunction 2 (x, y, z)) $ [[(aMatrix, bMatrix), (aMatrix, bMatrix)]]
+        val = torus (\ x y z -> nodefunction 16 (x, y, z)) $ combine (splitMatrix (2 * factor) aMatrix) (splitMatrix (2 * factor) bMatrix)
