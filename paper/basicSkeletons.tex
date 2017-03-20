@@ -22,7 +22,7 @@ parEvalNLazy conf chunkSize fs =
 \begin{center}
 	\includegraphics[scale=0.7]{images/parEval2}
 \end{center}
-We have only talked about the paralellization arrows of the same type up until now. But sometimes we want to paralellize heterogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
+We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
 \begin{lstlisting}[frame=htrbl]
 arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
 arrMaybe fn = (arr $ go) >>> app

@@ -1,7 +1,7 @@
 \section{Utility Functions}\label{utilfns}
-Before we go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: map and zipWith on arrows.
+Before we go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: map, foldl and zipWith on arrows.
 \\
-The mapArr combinator, that lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows},
+The \code{mapArr} combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows}:
 \begin{lstlisting}[frame=htrbl]
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f =
@@ -11,12 +11,23 @@ mapArr f =
 		listcase [] = Left ()
 		listcase (x:xs) = Right (x,xs)
 \end{lstlisting}
-and zipWithArr, which lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
+Similarly, we can also define \code{foldlArr} that lifts any arrow \code{arr (b, a) b} with a neutral element \code{b} to \code{arr [a] b}:
+\begin{lstlisting}[frame=htrbl]
+foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
+foldlArr f b =
+	arr listcase >>>
+	arr (const b) |||
+		(first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
+	where
+		listcase [] = Left []
+		listcase (x:xs) = Right (x,xs)
+\end{lstlisting}
+Finally, with the help of \code{mapArr}, we can define zipWithArr, which lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
 \begin{lstlisting}[frame=htrbl]
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{lstlisting}
-These two combinators make use of the \code{ArrowChoice} typeclass, which allows us to use the \code{|||} combinator. It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
+These combinators make use of the \code{ArrowChoice} typeclass, which allows us to use the \code{|||} combinator. It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
 \begin{lstlisting}[frame=htrbl]
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{lstlisting}
