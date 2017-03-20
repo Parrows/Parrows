@@ -82,3 +82,15 @@ parEvalNM :: (ArrowChoice arr, ArrowApply arr, ArrowParallel arr a b conf,
 	conf -> [[arr a b]] -> arr [[a]] [[b]]
 parEvalNM conf = listApp . (map (parEvalN conf))
 \end{lstlisting}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows}
+	\caption[without Futures]{Matrix Multiplication with a torus (Parrows)}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden}
+	\caption[with Futures]{Matrix Multiplication with a torus (Eden)}
+\end{figure}
