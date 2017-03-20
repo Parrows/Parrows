@@ -62,6 +62,8 @@ toFut :: (Arrow arr, Future fut r) =>
         arr (i, fut r) (o, fut r)
 toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 
+-- apparently this does not exchange the futurs the same way Eden does it
+-- this is a bottleneck that has to be removed
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,

@@ -64,7 +64,7 @@ randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
 factor :: Int
-factor = 8
+factor = 1
 
 n :: Int
 n = 32 * factor
@@ -81,6 +81,6 @@ splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size 
 combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
 combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
-main = print $ (rnf val) `seq` val
+main = print $ length $ (rnf val) `seq` val
     where
         val = torus (\ x y z -> nodefunction 16 (x, y, z)) $ combine (splitMatrix (2 * factor) aMatrix) (splitMatrix (2 * factor) bMatrix)
