@@ -34,7 +34,7 @@ import Control.Arrow
 
 main = print $ length $ (rnf val) `seq` val
            where
-               val = (parEvalN () (replicate 16 (+1))) >>> rightRotate >>> (parEvalN () (replicate 16 (*3))) $ ([1..16]::[Int])
+               val = (parEvalN () (replicate 4 (+1))) >>> rightRotate >>> (parEvalN () (replicate 4 (*3))) $ ([1..16]::[Int])
 
 -- from Eden, ported to Arrows:
 rightRotate :: (Arrow arr) => arr [a] [a]
