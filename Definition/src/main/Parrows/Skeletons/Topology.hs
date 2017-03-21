@@ -66,6 +66,8 @@ toFut f = (second $ arr get) >>> f >>> (second $ arr put)
 -- this is a bottleneck that has to be removed
 -- this is most likely due tot he parEvalNM call !!inside!! the loop
 -- if we pull it out it should be correct
+--
+-- maybe it's the definition of parEvalNM?
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
@@ -75,7 +77,7 @@ torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
          arr [[c]] [[d]]
 torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
                         arr (\ (inss, (inssA, inssB)) -> zipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
-                        parEvalNM conf (repeat (repeat (ptorus f))) >>>
+                        arr (\x -> (arr (unshuffle $ length x), shuffle x)) >>> second (parEvalN conf (repeat (ptorus f))) >>> app >>>
                         arr (map unzip3) >>> arr unzip3 >>> threetotwo
 
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
@@ -91,7 +93,6 @@ threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 
 twotothree :: (Arrow arr) => arr (a, (b, c)) (a, b, c)
 twotothree = arr $ \ ~(a, (b, c)) -> (a, b, c)
-
 
 -- from Eden, ported to Arrows:
 rightRotate :: (Arrow arr) => arr [a] [a]

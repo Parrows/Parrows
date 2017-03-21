@@ -60,7 +60,6 @@ takeEach :: Int -> [a] -> [a]
 takeEach n [] = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 
-
 -- | Simple shuffling - inverse to round robin distribution
 shuffle :: [[a]]  -- ^ sublists
            -> [a] -- ^ shuffled sublists
@@ -69,4 +68,3 @@ shuffle = concat . transpose
 -- | A lazy list is an infinite stream
 lazy :: [a] -> [a]
 lazy ~(x:xs) = x : lazy xs
-

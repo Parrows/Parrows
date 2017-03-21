@@ -28,7 +28,6 @@ module Parrows.Definition where
 import Parrows.Util
 
 import Control.Arrow
-import Control.DeepSeq
 
 import Control.Monad
 
@@ -103,6 +102,3 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
                arrMaybe fn = (arr $ go) >>> app
                    where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
                          go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
-
-parEvalNM :: (ArrowChoice arr, ArrowApply arr, ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf) => conf -> [[arr a b]] -> arr [[a]] [[b]]
-parEvalNM conf = listApp . (map (parEvalN conf))
