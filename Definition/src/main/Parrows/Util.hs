@@ -51,20 +51,17 @@ foldlArr f b = arr listcase >>>
 -- From Eden:
 
 -- okay. (from: https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Auxiliary.html#unshuffle)
-unshuffle :: Int      -- ^number of sublists
-             -> [a]   -- ^input list
-             -> [[a]] -- ^distributed output
-unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
 
 takeEach :: Int -> [a] -> [a]
 takeEach n [] = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 
 -- | Simple shuffling - inverse to round robin distribution
-shuffle :: [[a]]  -- ^ sublists
-           -> [a] -- ^ shuffled sublists
-shuffle = concat . transpose
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
 
 -- | A lazy list is an infinite stream
-lazy :: [a] -> [a]
-lazy ~(x:xs) = x : lazy xs
+lazy :: (Arrow arr) => arr [a] [a]
+lazy = arr (\ ~(x:xs) -> x : lazy xs)

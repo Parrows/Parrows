@@ -41,7 +41,7 @@ pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 pipe conf fs = unliftFut $ pipeFut conf fs
 
 pipeFut :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
-pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> arr lazy) >>>
+pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
                         parEvalNFut conf fs)) >>>
                   arr last
 
@@ -49,29 +49,26 @@ ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, ArrowParallel arr (i, fut 
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
-ring conf f = loop (second (arr rightRotate >>> arr lazy) >>>
+ring conf f = loop (second (arr rightRotate >>> lazy) >>>
                     arr (uncurry zip) >>>
                     parMap conf (second get >>> f >>> second put) >>>
                     arr unzip)
 
--- apparently this does not exchange the futures the same way Eden does it
--- this is a bottleneck that has to be removed
--- this is most likely due tot he parEvalNM call !!inside!! the loop
--- if we pull it out it should be correct
-torus :: (ArrowLoop arr, ArrowApply arr,
+--FIXME: check whether this exchanges the futures the same way as Eden does it
+torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             Future fut [a], Future fut [b]) =>
          conf ->
          arr (c, [a], [b]) (d, [a], [b]) ->
          arr [[c]] [[d]]
--- keep this this way?
--- the partial application of zipWith3 seems a bit awkward...
-torus conf f = loop $ (arr (zipWith3 lazyzip3) >>> arr uncurry >>> arr arr) ***
-                            (arr (map rightRotate) >>> arr lazy) *** (arr rightRotate >>> arr lazy) >>>
-                        app >>>
-                        (arr length >>> arr unshuffle >>> arr arr) &&&
-                            (arr shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
+torus conf f = loop $ second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
+                        arr (uncurry3 (zipWith3 lazyzip3)) >>>
+                        (arr length >>> arr unshuffle) &&&
+                            (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
                         app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo
+
+uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
+uncurry3 f (a, (b, c)) = f a b c
 
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
