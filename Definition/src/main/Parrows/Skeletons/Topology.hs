@@ -41,19 +41,18 @@ pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 pipe conf fs = unliftFut $ pipeFut conf fs
 
 pipeFut :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
-pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> arr lazy) >>> parEvalNFut conf fs)) >>> arr last
+pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> arr lazy) >>>
+                        parEvalNFut conf fs)) >>>
+                  arr last
 
 ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
-ring conf f = loop (second (arr rightRotate >>> arr lazy) >>> arr (uncurry zip) >>> parMap conf (toFut f) >>> arr unzip)
-
--- similar to Eden's toRD
-toFut :: (Arrow arr, Future fut r) =>
-        arr (i, r) (o, r) ->
-        arr (i, fut r) (o, fut r)
-toFut f = second get >>> f >>> second put
+ring conf f = loop (second (arr rightRotate >>> arr lazy) >>>
+                    arr (uncurry zip) >>>
+                    parMap conf (second get >>> f >>> second put) >>>
+                    arr unzip)
 
 -- apparently this does not exchange the futures the same way Eden does it
 -- this is a bottleneck that has to be removed
