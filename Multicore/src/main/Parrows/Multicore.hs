@@ -41,5 +41,5 @@ instance (NFData a) => NFData (BasicFuture a) where
     rnf bf = rnf $ val bf
 
 instance (NFData a) => Future BasicFuture a where
-    put a = BF { val = a }
-    get = val
+    put = arr (\a -> BF { val = a })
+    get = arr val

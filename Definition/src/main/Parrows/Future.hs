@@ -29,14 +29,14 @@ import Control.Arrow
 import Parrows.Definition
 
 class Future fut a | a -> fut where
-    put :: a -> fut a
-    get :: fut a -> a
+    put :: (Arrow arr) => arr a (fut a)
+    get :: (Arrow arr) => arr (fut a) a
 
 liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
-liftFut f = arr get >>> f >>> arr put
+liftFut f = get >>> f >>> put
 
 unliftFut :: (Arrow arr, Future fut a, Future fut b) => arr (fut a) (fut b) -> arr a b
-unliftFut f = arr put >>> f >>> arr get
+unliftFut f = put >>> f >>> get
 
 parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
 parEvalNFut conf fs = parEvalN conf $ map liftFut fs

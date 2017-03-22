@@ -38,8 +38,8 @@ instance NFData (RemoteData a) where
 instance Trans (RemoteData a)
 
 instance (Trans a) => Future RemoteData a where
-    put a = RD { rd = release a }
-    get = fetch . rd
+    put = arr (\a -> RD { rd = release a })
+    get = arr rd >>> arr fetch
 
 -- ArrowParallel Instances
 

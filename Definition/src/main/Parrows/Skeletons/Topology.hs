@@ -60,25 +60,26 @@ ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zi
 toFut :: (Arrow arr, Future fut r) =>
         arr (i, r) (o, r) ->
         arr (i, fut r) (o, fut r)
-toFut f = (second $ arr get) >>> f >>> (second $ arr put)
+toFut f = second get >>> f >>> second put
 
 -- apparently this does not exchange the futures the same way Eden does it
 -- this is a bottleneck that has to be removed
 -- this is most likely due tot he parEvalNM call !!inside!! the loop
 -- if we pull it out it should be correct
---
--- maybe it's the definition of parEvalNM?
-torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
+torus :: (ArrowLoop arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
-            ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
             Future fut [a], Future fut [b]) =>
          conf ->
          arr (c, [a], [b]) (d, [a], [b]) ->
          arr [[c]] [[d]]
-torus conf f = loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
-                        arr (\ (inss, (inssA, inssB)) -> zipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
-                        arr (\x -> (arr (unshuffle $ length x), shuffle x)) >>> second (parEvalN conf (repeat (ptorus f))) >>> app >>>
-                        arr (map unzip3) >>> arr unzip3 >>> threetotwo
+-- keep this this way?
+-- the partial application of zipWith3 seems a bit awkward...
+torus conf f = loop $ (arr (zipWith3 lazyzip3) >>> arr uncurry >>> arr arr) ***
+                            ((arr (map rightRotate) *** arr rightRotate) >>> (arr lazy *** arr lazy)) >>>
+                        app >>>
+                        (arr length >>> arr unshuffle >>> arr arr) &&&
+                            (arr shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
+                        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo
 
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
