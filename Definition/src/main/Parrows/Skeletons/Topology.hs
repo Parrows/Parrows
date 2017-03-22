@@ -37,24 +37,17 @@ import Parrows.Skeletons.Map
 -- edenskel-2.0.0.2 and the paper:
 -- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
-pipe :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
+pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut $ pipeFut conf fs
 
--- FIXME: does this really need arrowloop?
--- FIXME: this could probably be expressed
--- FIXME: similarly to mapArr or foldlArr in the Util module
-pipeFut :: (ArrowLoop arr, ArrowApply arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
-pipeFut conf fs = resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut conf fs) >>> arr last
-    where
-        -- util for the infinite resolve fix place recursion with ArrowLoop(s)
-        resolve :: (ArrowApply arr, ArrowLoop arr) => arr (a, b) c -> arr c b -> arr a b
-        resolve transform f = loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>> second (second app >>> app)
+pipeFut :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
+pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> arr lazy) >>> parEvalNFut conf fs)) >>> arr last
 
 ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
-ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
+ring conf f = loop (second (arr rightRotate >>> arr lazy) >>> arr (uncurry zip) >>> parMap conf (toFut f) >>> arr unzip)
 
 -- similar to Eden's toRD
 toFut :: (Arrow arr, Future fut r) =>
