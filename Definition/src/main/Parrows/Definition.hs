@@ -48,10 +48,10 @@ class Arrow arr => ArrowParallel arr a b conf where
 
 -- parallel versions of (***) and (&&&)
 
-(|***|) :: (ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) (), ArrowApply arr) => arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) :: (ArrowChoice arr, ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) ()) => arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 
-(|&&&|) :: (ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) (), ArrowApply arr) => arr a b -> arr a c -> arr a (b, c)
+(|&&&|) :: (ArrowChoice arr, ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) ()) => arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 
 (|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
@@ -86,19 +86,20 @@ parEvalNLazy conf chunkSize fs =
                where
                 fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 
+-- TODO: do this with ArrowChoice instead of (Maybe, Maybe)
 -- evaluate two functions with different types in parallel
-parEval2 :: (ArrowParallel arr a b conf, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf, ArrowApply arr) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
+parEval2 :: (ArrowChoice arr, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
            -- so that if they are passed a Nothing they don't compute anything
            -- then, make a list of two of these functions evaluated after each other,
            -- feed each function the real value and one Nothing for the function they don't have to compute
            -- and combine them back to a tuple
-           (arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>>
-           app >>>
+           (arr $ \(a, c) -> ([(Just a, Nothing), (Nothing, Just c)])) >>>
+           f_g >>>
            (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
            where
                f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
-               arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
-               arrMaybe fn = (arr $ go) >>> app
-                   where go Nothing = (arr $ \Nothing -> Nothing, Nothing)
-                         go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
+               arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
+               arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)
+                   where maybeCase Nothing = Left ()
+                         maybeCase (Just val) = Right val
