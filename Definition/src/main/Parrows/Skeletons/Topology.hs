@@ -75,7 +75,7 @@ torus :: (ArrowLoop arr, ArrowApply arr,
 -- keep this this way?
 -- the partial application of zipWith3 seems a bit awkward...
 torus conf f = loop $ (arr (zipWith3 lazyzip3) >>> arr uncurry >>> arr arr) ***
-                            ((arr (map rightRotate) *** arr rightRotate) >>> (arr lazy *** arr lazy)) >>>
+                            (arr (map rightRotate) >>> arr lazy) *** (arr rightRotate >>> arr lazy) >>>
                         app >>>
                         (arr length >>> arr unshuffle >>> arr arr) &&&
                             (arr shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
