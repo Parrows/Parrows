@@ -8,7 +8,7 @@ In a distributed environment, the resulting arrow of this combinator first evalu
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
-	\caption[without Futures]{Communication without Futures}
+	\caption[without Futures]{Communication between 4 threads without Futures}
 	\label{fig:withoutFutures}
 \end{figure}
 To fix this, we have to introduce a way that enables the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \code{RD} (remote data) that enables this behaviour. But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \code{Future} typeclass:
@@ -53,10 +53,10 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get >>>) fs2)
 \end{lstlisting}
-This gives us a communication scheme as shown in figure \ref{fig:withFutures}
+In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in figure \ref{fig:withFutures}.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withFutures}
-	\caption[with Futures]{Communication with Futures}
+	\caption[with Futures]{Communication between 4 threads with Futures}
 	\label{fig:withFutures}
 \end{figure}
