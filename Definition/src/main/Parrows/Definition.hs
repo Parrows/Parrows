@@ -86,7 +86,6 @@ parEvalNLazy conf chunkSize fs =
                where
                 fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 
--- TODO: do this with ArrowChoice instead of (Maybe, Maybe)
 -- evaluate two functions with different types in parallel
 parEval2 :: (ArrowChoice arr, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
@@ -94,11 +93,12 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
            -- then, make a list of two of these functions evaluated after each other,
            -- feed each function the real value and one Nothing for the function they don't have to compute
            -- and combine them back to a tuple
-           (arr $ \(a, c) -> ([(Just a, Nothing), (Nothing, Just c)])) >>>
-           f_g >>>
-           (arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
+           (arr Just &&& arr (const Nothing)) *** ((arr (const Nothing) &&& arr Just) >>> arr return) >>>
+           arr (uncurry (:)) >>>
+           parEvalN conf (replicate 2 (arrMaybe f *** arrMaybe g)) >>>
+           arr unzip >>>
+           (arr head >>> arr fromJust) *** (arr last >>> arr fromJust)
            where
-               f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
                arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
                arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)
                    where maybeCase Nothing = Left ()
