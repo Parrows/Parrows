@@ -4,64 +4,59 @@ Even though many algorithms can be expressed by parallel maps, some problems req
 \subsection{pipe}
 
 \begin{lstlisting}[frame=htrbl]
-pipe :: (ArrowLoop arr, ArrowApply arr,
+pipe :: (ArrowLoop arr,
 	ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 	conf -> [arr a a] -> arr a a
-pipe conf fs = unliftFut $ pipeFut conf fs
+pipe conf fs = unliftFut (pipeFut conf fs)
 
-pipeFut :: (ArrowLoop arr, ArrowApply arr,
+pipeFut :: (ArrowLoop arr,
 	ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 	conf -> [arr a a] -> arr (fut a) (fut a)
 pipeFut conf fs =
-	resolve (arr $ \(a, outs) -> lazy $ a : outs) (parEvalNFut conf fs) >>>
+	loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
+		parEvalNFut conf fs)) >>>
 	arr last
-    where
-        resolve :: (ArrowApply arr, ArrowLoop arr) =>
-					arr (a, b) c -> arr c b -> arr a b
-        resolve transform f =
-					loop $ (arr $ \(a, b) -> (b, (f, (transform, (a, b))))) >>>
-					second (second app >>> app)
 \end{lstlisting}
 
 \subsection{ring}
 
 \begin{lstlisting}[frame=htrbl]
-ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, 
-ArrowParallel arr (i, fut r) (o, fut r) conf) =>
-	conf ->
-	arr (i, r) (o, r) ->
-	arr [i] [o]
-ring conf f = loop $ second (arr rightRotate >>> arr lazy) >>>
-	(arr $ uncurry zip) >>> (parMap conf (toFut $ f)) >>> arr unzip
+ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+    conf ->
+    arr (i, r) (o, r) ->
+    arr [i] [o]
+ring conf f =
+	loop (second (rightRotate >>> lazy) >>>
+    arr (uncurry zip) >>>
+    parMap conf (second get >>> f >>> second put) >>>
+    arr unzip)
 
--- similar to Eden's toRD
-toFut :: (Arrow arr, Future fut r) =>
-	arr (i, r) (o, r) ->
-	arr (i, fut r) (o, fut r)
-toFut f = (second $ arr get) >>> f >>> (second $ arr put)
-
--- from Eden:
-rightRotate    :: [a] -> [a]
-rightRotate [] =  []
-rightRotate xs =  last xs : init xs
+-- from Eden, ported to Arrows:
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case
+	list of [] -> []
+			xs -> last xs : init xs
 \end{lstlisting}
 
 \subsection{torus}
 
 \begin{lstlisting}[frame=htrbl]
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
-    ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
-    ArrowParallel arr [(c, fut [a], fut [b])] [(d, fut [a], fut [b])] conf,
-    Future fut [a], Future fut [b]) =>
-	conf ->
-	arr (c, [a], [b]) (d, [a], [b])	->
-	arr [[c]] [[d]]
+            ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
+            Future fut [a], Future fut [b]) =>
+         conf ->
+         arr (c, [a], [b]) (d, [a], [b]) ->
+         arr [[c]] [[d]]
 torus conf f =
-	loop $ second (arr (map rightRotate) *** arr rightRotate) >>>
-	arr (\ (inss, (inssA, inssB)) ->
-		zipWith3 lazyzip3 inss (lazy inssA) (lazy inssB)) >>>
-	parEvalNM conf (repeat (repeat (ptorus f))) >>>
-	arr (map unzip3) >>> arr unzip3 >>> threetotwo
+	loop (second ((mapArr rightRotate >>> lazy) ***
+			(arr rightRotate >>> lazy)) >>>
+    arr (uncurry3 (zipWith3 lazyzip3)) >>>
+    (arr length >>> arr unshuffle) &&&
+        (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
+    app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+
+uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
+uncurry3 f (a, (b, c)) = f a b c
 
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
@@ -76,11 +71,6 @@ ptorus f =
 
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
-
-parEvalNM :: (ArrowChoice arr, ArrowApply arr, ArrowParallel arr a b conf,
-	ArrowParallel arr [a] [b] conf) =>
-	conf -> [[arr a b]] -> arr [[a]] [[b]]
-parEvalNM conf = listApp . (map (parEvalN conf))
 \end{lstlisting}
 
 \begin{figure}[ht]

@@ -6,13 +6,9 @@
 \code{parMap} is probably the most common skeleton for parallel programs. We can implement it with \code{ArrowParallel} by repeating an arrow \code{arr a b} and then passing it into \code{parEvalN} to get an arrow \code{arr [a] [b]}. 
 Just like \code{parEvalN}, \code{parMap} is 100 \% strict.
 \begin{lstlisting}[frame=htrbl]
-parMap :: (ArrowParallel arr a b conf, ArrowApply arr) =>
+parMap :: (ArrowParallel arr a b conf) =>
 	conf -> (arr a b) -> (arr [a] [b])
-parMap conf f =
-	(arr $ \as -> (f, as)) >>>
-	(first $ arr repeat >>>
-		arr (parEvalN conf)) >>>
-	app
+parMap conf f = parEvalN conf (repeat f)
 \end{lstlisting}
 
 \subsection{parMapStream}
@@ -23,11 +19,7 @@ As \code{parMap} is 100\% strict it has the same restrictions as \code{parEvalN}
 \begin{lstlisting}[frame=htrbl]
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> arr a b -> arr [a] [b]
-parMapStream conf chunkSize f =
-	(arr $ \as -> (f, as)) >>>
-	(first $ arr repeat >>>
-		arr (parEvalNLazy conf chunkSize)) >>>
-	app
+parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \end{lstlisting}
 
 \subsection{farm}
@@ -36,31 +28,29 @@ parMapStream conf chunkSize f =
 \end{center}
 \code{parMap} spawns every single computation in a new thread (at least for the instances of \code{ArrowParallel} we gave in this paper). This can be quite wasteful and a \code{farm} that equally distributes the workload over \code{numCores} workers (if numCores is greater than actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{lstlisting}[frame=htrbl]
-farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
-	ArrowChoice arr, ArrowApply arr) =>
+farm :: (ArrowParallel arr a b conf,
+	ArrowParallel arr [a] [b] conf, ArrowChoice arr) =>
 	conf -> NumCores -> arr a b -> arr [a] [b]
 farm conf numCores f =
-	(arr $ \as -> (f, as)) >>>
-	(first $ arr mapArr >>> arr repeat >>>
-		arr (parEvalN conf)) >>>
-	(second $ arr (unshuffle numCores)) >>>
-	app >>>
-	arr shuffle
+	unshuffle numCores >>>
+	parEvalN conf (repeat (mapArr f)) >>>
+	shuffle
 \end{lstlisting}
 The definition of \code{unshuffle} is
 \begin{lstlisting}[frame=htrbl]
-unshuffle :: Int
-	-> [a]
-	-> [[a]]
-unshuffle n xs = [takeEach n (drop i xs) | i <- [0..n-1]]
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
+
+takeEach :: Int -> [a] -> [a]
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 \end{lstlisting}
 , while \code{shuffle} is defined as:
 \begin{lstlisting}[frame=htrbl]
-shuffle :: [[a]]
-	-> [a]
-shuffle = concat . transpose
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
 \end{lstlisting}
-(These were taken from Eden's source code. \cite{eden_skel_shuffle})
+(These were taken from Eden's source code \cite{eden_skel_shuffle} and translated into Arrows.)
 
 \subsection{farmChunk}
 \begin{center}
@@ -72,12 +62,9 @@ farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
 farmChunk conf chunkSize numCores f =
-	(arr $ \as -> (f, as)) >>>
-	(first $ arr mapArr >>> arr repeat >>>
-		arr (parEvalNLazy conf chunkSize)) >>>
-	(second $ arr (unshuffle numCores)) >>>
-	app >>>
-	arr shuffle
+	unshuffle numCores >>>
+	parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
+	shuffle
 \end{lstlisting}
 
 \subsection{parMapReduce}
