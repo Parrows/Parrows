@@ -97,7 +97,7 @@ parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
            arr (uncurry (:)) >>>
            parEvalN conf (replicate 2 (arrMaybe f *** arrMaybe g)) >>>
            arr unzip >>>
-           (arr head >>> arr fromJust) *** (arr last >>> arr fromJust)
+           (arr catMaybes >>> arr head) *** (arr catMaybes >>> arr head)
            where
                arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
                arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)

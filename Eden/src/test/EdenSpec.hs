@@ -12,7 +12,6 @@ import Test.Hspec.QuickCheck
 spec :: Spec
 spec = do
     parEvalNSpec
-    parEvalNMSpec
     pipeSpec
     ringSpec
     mapSpec
@@ -32,13 +31,6 @@ parEvalNSpec = describe "Basic Parrow Functionality Eden" $ do
 
         parEvalNFutInt :: [Int] -> Bool
         parEvalNFutInt xs = (map (get) $ parEvalNFut () (repeat (+1)) (map put xs)) == map (+1) xs
-
-parEvalNMSpec :: Spec
-parEvalNMSpec = describe "parEvalNM Test" $ do
-    prop "Basic parEvalNMTest (+1 matrix)" $ basicParEvalNM
-      where
-        basicParEvalNM :: [[Int]] -> Bool
-        basicParEvalNM xs =  parEvalNM () (repeat (repeat (+1))) xs == map (map (+1)) xs
 
 pipeSpec :: Spec
 pipeSpec = describe "Pipe Test" $ do
