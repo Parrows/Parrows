@@ -44,11 +44,15 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 
 -- similar to parMapStream, but divides the input list by the given number
 farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr) => conf -> NumCores -> arr a b -> arr [a] [b]
-farm conf numCores f = unshuffle numCores >>> parEvalN conf (repeat (mapArr f)) >>> shuffle
+farm conf numCores f = unshuffle numCores >>>
+                       parEvalN conf (repeat (mapArr f)) >>>
+                       shuffle
 
 -- farmChunk and parMapStream combined. divide the input list and inside work in chunks
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
-farmChunk conf chunkSize numCores f = unshuffle numCores >>> parEvalNLazy conf chunkSize (repeat (mapArr f)) >>> shuffle
+farmChunk conf chunkSize numCores f = unshuffle numCores >>>
+                                      parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
+                                      shuffle
 
 -- this does not completely adhere to Google's definition of Map Reduce as it
 -- the mapping function does not allow for "reordering" of the output
