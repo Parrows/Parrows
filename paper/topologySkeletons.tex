@@ -21,7 +21,8 @@ pipeFut conf fs =
 \subsection{ring}
 
 \begin{lstlisting}[frame=htrbl]
-ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+ring :: (ArrowLoop arr, Future fut r,
+	ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
