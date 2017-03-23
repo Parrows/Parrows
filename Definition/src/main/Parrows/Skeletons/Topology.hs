@@ -38,18 +38,18 @@ import Parrows.Skeletons.Map
 -- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
-pipe conf fs = unliftFut $ pipeFut conf fs
+pipe conf fs = unliftFut (pipeFut conf fs)
 
 pipeFut :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
 pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
                         parEvalNFut conf fs)) >>>
                   arr last
 
-ring :: (ArrowLoop arr, ArrowApply arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf ->
     arr (i, r) (o, r) ->
     arr [i] [o]
-ring conf f = loop (second (arr rightRotate >>> lazy) >>>
+ring conf f = loop (second (rightRotate >>> lazy) >>>
                     arr (uncurry zip) >>>
                     parMap conf (second get >>> f >>> second put) >>>
                     arr unzip)
@@ -61,11 +61,11 @@ torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
          conf ->
          arr (c, [a], [b]) (d, [a], [b]) ->
          arr [[c]] [[d]]
-torus conf f = loop $ second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
+torus conf f = loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
                         arr (uncurry3 (zipWith3 lazyzip3)) >>>
                         (arr length >>> arr unshuffle) &&&
                             (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
-                        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo
+                        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
