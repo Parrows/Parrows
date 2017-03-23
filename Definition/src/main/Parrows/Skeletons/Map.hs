@@ -34,35 +34,21 @@ import Data.List.Split
 
 -- some map skeletons
 
-parMap :: (ArrowParallel arr a b conf, ArrowApply arr) => conf -> (arr a b) -> (arr [a] [b])
-parMap conf f = (arr $ \as -> (f, as)) >>>
-                first (arr repeat >>> arr (parEvalN conf)) >>>
-                app
+parMap :: (ArrowParallel arr a b conf) => conf -> (arr a b) -> (arr [a] [b])
+parMap conf f = parEvalN conf (repeat f)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
-parMapStream conf chunkSize f = (arr $ \as -> (f, as)) >>>
-                                first (arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
-                                app
+parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 
 -- similar to parMapStream, but divides the input list by the given number
-farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> NumCores -> arr a b -> arr [a] [b]
-farm conf numCores f =
-                (arr $ \as -> (f, as)) >>>
-                first (arr mapArr >>> arr repeat >>> arr (parEvalN conf)) >>>
-                second (unshuffle numCores) >>>
-                app >>>
-                shuffle
+farm :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr) => conf -> NumCores -> arr a b -> arr [a] [b]
+farm conf numCores f = unshuffle numCores >>> parEvalN conf (repeat (mapArr f)) >>> shuffle
 
 -- farmChunk and parMapStream combined. divide the input list and inside work in chunks
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
-farmChunk conf chunkSize numCores f =
-                                 (arr $ \as -> (f, as)) >>>
-                                 first (arr mapArr >>> arr repeat >>> arr (parEvalNLazy conf chunkSize)) >>>
-                                 second (unshuffle numCores) >>>
-                                 app >>>
-                                 shuffle
+farmChunk conf chunkSize numCores f = unshuffle numCores >>> parEvalNLazy conf chunkSize (repeat (mapArr f)) >>> shuffle
 
 -- this does not completely adhere to Google's definition of Map Reduce as it
 -- the mapping function does not allow for "reordering" of the output
