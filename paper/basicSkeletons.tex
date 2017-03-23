@@ -24,22 +24,21 @@ parEvalNLazy conf chunkSize fs =
 \end{center}
 We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
 \begin{lstlisting}[frame=htrbl]
-arrMaybe :: (ArrowApply arr) => (arr a b) -> arr (Maybe a) (Maybe b)
-arrMaybe fn = (arr $ go) >>> app
-	where 
-		go Nothing = (arr $ \Nothing -> Nothing, Nothing)
-		go (Just a) = ((arr $ \(Just x) -> (fn, x)) >>> app >>> arr Just, (Just a))
+arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
+arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)
+	where maybeCase Nothing = Left ()
+			maybeCase (Just val) = Right val
 \end{lstlisting}
 With this, we can now easily write \code{parEval2} which combines two arrows \code{arr a b} and \code{arr c d} into a new parallel arrow \code{arr (a, c) (b, d)}. We start by converting both arrows with \code{arrMaybe}, combining them with \code{***} into a new arrow \code{arr (Maybe a, Maybe c) (Maybe b, Maybe d)}. This is then replicated twice and fed into parEvalN to get a \code{arr [(Maybe a, Maybe c)] [(Maybe b, Maybe d)]}. We can then apply this arrow to the input \code{[(Just a, Nothing), (Nothing, Just c)]} and then extract the resulting values with \code{fromJust} and the \code{!!} operator on lists in the last step.
 \begin{lstlisting}[frame=htrbl]
-parEval2 :: (ArrowParallel arr a b conf,
-	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
-	ArrowApply arr) =>
+parEval2 :: (ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
+	ArrowChoice arr) =>
 	conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
 parEval2 conf f g =
-	(arr $ \(a, c) -> (f_g, [(Just a, Nothing), (Nothing, Just c)])) >>>
-	app >>>
-	(arr $ \comb -> (fromJust (fst (comb !! 0)), fromJust (snd (comb !! 1))))
-where
-	f_g = parEvalN conf $ replicate 2 $ arrMaybe f *** arrMaybe g
+   (arr Just &&& arr (const Nothing)) *** 
+			((arr (const Nothing) &&& arr Just) >>> arr return) >>>
+   arr (uncurry (:)) >>>
+   parEvalN conf (replicate 2 (arrMaybe f *** arrMaybe g)) >>>
+   arr unzip >>>
+   (arr catMaybes >>> arr head) *** (arr catMaybes >>> arr head)
 \end{lstlisting}

@@ -22,7 +22,7 @@ Sometimes parallel Haskells require additional configuration parameters as infor
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{lstlisting}
-We don't require the conf parameter in every implementation. If it is not needed, we usually want to allow the \code{conf} type parameter to be of any type and don't even evaluate it by blanking it in the type signature of the implemented \code{parEvalN} as we will see in the implementation of the Multicore and the ParMonad backend.
+Note that we don't require the conf parameter in every implementation. If it is not needed, we usually want to allow the \code{conf} type parameter to be of any type and don't even evaluate it by blanking it in the type signature of the implemented \code{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
 \subsection{Multicore Haskell}
 The Multicore Haskell implementation of this class is straightforward using listApp from chapter \ref{utilfns} combined with the \code{using} operator from Multicore Haskell.
