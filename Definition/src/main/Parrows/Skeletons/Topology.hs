@@ -37,8 +37,14 @@ import Parrows.Skeletons.Map
 -- edenskel-2.0.0.2 and the paper:
 -- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
---(|>>>|) :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => arr a b -> arr b c -> arr a c
---(|>>>|) f g = lift
+(|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
+            ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
+            Future fut (([a], [b]), [c])) =>
+            arr a b -> arr b c -> arr a c
+(|>>>|) f g = arr (\a -> (([a], []), [])) >>> pipe () (replicate 2 $ unify f g) >>> arr snd >>> arr head
+    where
+        unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
+        unify f g = (mapArr f *** mapArr g) *** arr (\_ -> []) >>> arr (\((a, b), c) -> ((c, a), b))
 
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeFut conf fs)
@@ -49,9 +55,7 @@ pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
                   arr last
 
 ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
-    conf ->
-    arr (i, r) (o, r) ->
-    arr [i] [o]
+    conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f = loop (second (rightRotate >>> lazy) >>>
                     arr (uncurry zip) >>>
                     parMap conf (second get >>> f >>> second put) >>>
@@ -61,9 +65,7 @@ ring conf f = loop (second (rightRotate >>> lazy) >>>
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             Future fut [a], Future fut [b]) =>
-         conf ->
-         arr (c, [a], [b]) (d, [a], [b]) ->
-         arr [[c]] [[d]]
+         conf -> arr (c, [a], [b]) (d, [a], [b]) -> arr [[c]] [[d]]
 torus conf f = loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
                         arr (uncurry3 (zipWith3 lazyzip3)) >>>
                         (arr length >>> arr unshuffle) &&&

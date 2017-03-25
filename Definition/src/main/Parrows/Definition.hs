@@ -31,10 +31,8 @@ import Control.Arrow
 
 import Control.Monad
 
-import Data.Monoid
 import Data.Either
 import Data.List.Split
-import Data.List
 
 --infixr 3 `|***|`
 --infixr 3 `|&&&|`
