@@ -53,6 +53,11 @@ Note that extensive use of this combinator over \code{pipe} with a hand-written 
 \end{lstlisting}
 
 \subsection{ring}
+Eden's ring implementation allows a ring of functions to communicate over direct channels. We can rewrite its functionality easily again with the use of \code{loop}. In each loop we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. We have to feed the intermediary input into \code{lazy} or the evaluation would hang. The reasoning was explained by \cite{eden_cefp}:
+\begin{quotation}
+Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.
+\end{quotation}
+Next, we zip the resulting \code{([i], [fut r])} to \code{[(i, fut r)]} with \code{arr (uncurry zip)} so we can feed that into a our input arrow \code{arr (i, r) (o, r)}, which we transform into \code{arr (i, fut r) (o, fut r)} before lifting it to \code{arr [(i, fut r)] [(o, fut r)]} to get a list \code{[(o, fut r)]}. Finally we unzip this list into \code{([o], [fut r])}. Plugging this arrow \code{arr ([i], [fut r]) ([o], fut r)} into the definition of \code{loop} from earlier gives us \code{arr [i] [o]}, our ring arrow.
 \begin{center}
 	\includegraphics[scale=0.75]{images/ring}
 \end{center}
@@ -67,14 +72,20 @@ ring conf f =
     arr (uncurry zip) >>>
     parMap conf (second get >>> f >>> second put) >>>
     arr unzip)
-
--- from Eden, ported to Arrows:
+\end{lstlisting}
+with \code{rightRotate}:
+\begin{lstlisting}[frame=htrbl]
 rightRotate :: (Arrow arr) => arr [a] [a]
 rightRotate = arr $ \list -> case
 	list of [] -> []
 			xs -> last xs : init xs
 \end{lstlisting}
-
+and lazy:
+\begin{lstlisting}[frame=htrbl]			
+lazy :: (Arrow arr) => arr [a] [a]
+lazy = arr (\ ~(x:xs) -> x : lazy xs
+\end{lstlisting}
+This combinator can be used for example to calculate the shortest paths in a graph using Warshall's algorithm. Further details on this can be found in \cite{eden_cefp}.
 \subsection{torus}
 \begin{center}
 	\includegraphics[scale=0.75]{images/torus}
@@ -111,15 +122,29 @@ ptorus f =
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 \end{lstlisting}
-
+In \cite{eden_cefp}, matrix multiplication using the gentlemans algorithm was given as a example of using this skeleton. Adapting this nodefunction to our arrow API gives us:
+\begin{lstlisting}[frame=htrbl]
+nodefunction :: Int ->
+	((Matrix, Matrix), [Matrix], [Matrix]) ->
+	([Matrix], [Matrix], [Matrix])
+nodefunction n ((bA, bB), rows, cols) =
+	([bSum], bA:nextAs , bB:nextBs)
+		where bSum =
+			foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
+			nextAs = take (n-1) rows
+			nextBs = take (n-1) cols
+\end{lstlisting}
+Comparing the trace from a call using our arrow definition of the torus (fig. \ref{fig:torus_parrows_trace}) with the Eden version (fig. \ref{fig:torus_eden_trace}) shows that the behaviour of the arrow version is comparable.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[without Futures]{Matrix Multiplication with a torus (Parrows)}
+	\caption[Matrix Multiplication with a torus (Parrows)]{Matrix Multiplication with a torus (Parrows)}
+	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
-	\caption[with Futures]{Matrix Multiplication with a torus (Eden)}
+	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden)}
+	\label{fig:torus_eden_trace}
 \end{figure}
