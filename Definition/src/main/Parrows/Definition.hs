@@ -32,7 +32,7 @@ import Control.Arrow
 import Control.Monad
 
 import Data.Monoid
-import Data.Maybe
+import Data.Either
 import Data.List.Split
 import Data.List
 
@@ -48,23 +48,16 @@ class Arrow arr => ArrowParallel arr a b conf where
 
 -- parallel versions of (***) and (&&&)
 
-(|***|) :: (ArrowChoice arr, ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) ()) => arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ()) => arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 
-(|&&&|) :: (ArrowChoice arr, ArrowParallel arr a b (), ArrowParallel arr (Maybe a, Maybe a) (Maybe b, Maybe c) ()) => arr a b -> arr a c -> arr a (b, c)
+(|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) => arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
-
-(|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(|>>>|) = zipWith (>>>)
 
 -- some really basic sugar
 
 (...) :: (Arrow arr) => [arr a b] -> arr b c -> [arr a c]
 (...) parr arr = map (>>> arr) parr
-
--- behaves like <*> on lists and combines them with (|>>>|)
-(|<*>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(|<*>|) fs gs = concat $ zipWith (|>>>|) (repeat fs) (permutations gs)
 
 -- minor stuff, remove this? these are basically just operations on lists
 
@@ -87,19 +80,10 @@ parEvalNLazy conf chunkSize fs =
                 fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 
 -- evaluate two functions with different types in parallel
-parEval2 :: (ArrowChoice arr, ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf) => conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
-parEval2 conf f g = -- lift the functions to "maybe evaluated" functions
-           -- so that if they are passed a Nothing they don't compute anything
-           -- then, make a list of two of these functions evaluated after each other,
-           -- feed each function the real value and one Nothing for the function they don't have to compute
-           -- and combine them back to a tuple
-           (arr Just &&& arr (const Nothing)) *** ((arr (const Nothing) &&& arr Just) >>> arr return) >>>
+parEval2 :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) conf) => conf -> arr a b -> arr c d -> arr (a, c) (b, d)
+parEval2 conf f g =
+           arr Left *** (arr Right >>> arr return) >>>
            arr (uncurry (:)) >>>
-           parEvalN conf (replicate 2 (arrMaybe f *** arrMaybe g)) >>>
-           arr unzip >>>
-           (arr catMaybes >>> arr head) *** (arr catMaybes >>> arr head)
-           where
-               arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
-               arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)
-                   where maybeCase Nothing = Left ()
-                         maybeCase (Just val) = Right val
+           parEvalN conf (replicate 2 (f +++ g)) >>>
+           arr partitionEithers >>>
+           arr head *** arr head

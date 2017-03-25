@@ -37,6 +37,9 @@ import Parrows.Skeletons.Map
 -- edenskel-2.0.0.2 and the paper:
 -- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
+--(|>>>|) :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => arr a b -> arr b c -> arr a c
+--(|>>>|) f g = lift
+
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeFut conf fs)
 
