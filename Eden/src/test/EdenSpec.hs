@@ -41,7 +41,7 @@ parEvalSpec = describe "Basic Parrow Functionality Eden" $ do
 pipeSpec :: Spec
 pipeSpec = describe "Pipe Test" $ do
     prop "Pipe 4 times (+1)" $ pipeTest
-    prop "Pipe (Future) 4 times (+1)" $ pipeFutureTest
+    prop "Pipe (Future) 4 times (+1)" $ pipeSimpleTest
       where
          replicated :: [Int -> Int]
          replicated = map (+) [1..4]
@@ -52,8 +52,8 @@ pipeSpec = describe "Pipe Test" $ do
          pipeTest :: Int -> Bool
          pipeTest x = pipe () replicated x == expectedValue x
 
-         pipeFutureTest :: Int -> Bool
-         pipeFutureTest x = (get (pipeFut () replicated (put x))) == expectedValue x
+         pipeSimpleTest :: Int -> Bool
+         pipeSimpleTest x = pipeSimple () replicated x == expectedValue x
 
          pipeCombinatorTest :: Int -> Bool
          pipeCombinatorTest x = (((+1) |>>>| (*2)) x) == (((+1) >>> (*2)) x)

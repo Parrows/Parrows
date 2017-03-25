@@ -41,17 +41,23 @@ import Parrows.Skeletons.Map
             ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
             Future fut (([a], [b]), [c])) =>
             arr a b -> arr b c -> arr a c
-(|>>>|) f g = arr (\a -> (([a], []), [])) >>> pipe () (replicate 2 $ unify f g) >>> arr snd >>> arr head
+(|>>>|) = pipe2 ()
+
+pipe2 :: (ArrowLoop arr, ArrowChoice arr,
+            ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
+            Future fut (([a], [b]), [c])) =>
+            conf -> arr a b -> arr b c -> arr a c
+pipe2 conf f g = arr (\a -> (([a], []), [])) >>> pipe conf (replicate 2 $ unify f g) >>> arr snd >>> arr head
     where
         unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
         unify f g = (mapArr f *** mapArr g) *** arr (\_ -> []) >>> arr (\((a, b), c) -> ((c, a), b))
 
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
-pipe conf fs = unliftFut (pipeFut conf fs)
+pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 
-pipeFut :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr (fut a) (fut a)
-pipeFut conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
-                        parEvalNFut conf fs)) >>>
+pipeSimple :: (ArrowLoop arr, ArrowParallel arr a a conf) => conf -> [arr a a] -> arr a a
+pipeSimple conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
+                        parEvalN conf fs)) >>>
                   arr last
 
 ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
