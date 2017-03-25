@@ -42,7 +42,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
 
 data BasicFuture a = BF { val :: a }
 instance (NFData a) => NFData (BasicFuture a) where
-    rnf bf = rnf $ val bf
+    rnf = rnf . val
 
 instance (NFData a) => Future BasicFuture a where
     put = arr (\a -> BF { val = a })
