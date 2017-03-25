@@ -61,7 +61,7 @@ ring conf f = loop (second (rightRotate >>> lazy) >>>
                     parMap conf (second get >>> f >>> second put) >>>
                     arr unzip)
 
---FIXME: check whether this exchanges the futures the same way as Eden does it
+--TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             Future fut [a], Future fut [b]) =>

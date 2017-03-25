@@ -6,6 +6,8 @@ import Parrows.Skeletons.Map
 import Parrows.Eden()
 import Parrows.Future
 
+import Control.Arrow
+
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
@@ -52,6 +54,9 @@ pipeSpec = describe "Pipe Test" $ do
 
          pipeFutureTest :: Int -> Bool
          pipeFutureTest x = (get (pipeFut () replicated (put x))) == expectedValue x
+
+         pipeCombinatorTest :: Int -> Bool
+         pipeCombinatorTest x = (((+1) |>>>| (*2)) x) == (((+1) >>> (*2)) x)
 
 ringSpec :: Spec
 ringSpec = describe "Ring Test" $ do
