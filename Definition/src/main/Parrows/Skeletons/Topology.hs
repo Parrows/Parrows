@@ -47,36 +47,43 @@ pipe2 :: (ArrowLoop arr, ArrowChoice arr,
             ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
             Future fut (([a], [b]), [c])) =>
             conf -> arr a b -> arr b c -> arr a c
-pipe2 conf f g = arr (\a -> (([a], []), [])) >>> pipe conf (replicate 2 $ unify f g) >>> arr snd >>> arr head
+pipe2 conf f g =
+    (arr return &&& arr (const [])) &&& arr (const []) >>>
+    pipe conf (replicate 2 (unify f g)) >>>
+    arr snd >>>
+    arr head
     where
         unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
-        unify f g = (mapArr f *** mapArr g) *** arr (\_ -> []) >>> arr (\((a, b), c) -> ((c, a), b))
+        unify f g = (mapArr f *** mapArr g) *** arr (const []) >>> arr (\((a, b), c) -> ((c, a), b))
 
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 
 pipeSimple :: (ArrowLoop arr, ArrowParallel arr a a conf) => conf -> [arr a a] -> arr a a
-pipeSimple conf fs = loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
-                        parEvalN conf fs)) >>>
-                  arr last
+pipeSimple conf fs =
+    loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
+        parEvalN conf fs)) >>>
+    arr last
 
 ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
-ring conf f = loop (second (rightRotate >>> lazy) >>>
-                    arr (uncurry zip) >>>
-                    parMap conf (second get >>> f >>> second put) >>>
-                    arr unzip)
+ring conf f =
+    loop (second (rightRotate >>> lazy) >>>
+        arr (uncurry zip) >>>
+        parMap conf (second get >>> f >>> second put) >>>
+        arr unzip)
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
             Future fut [a], Future fut [b]) =>
          conf -> arr (c, [a], [b]) (d, [a], [b]) -> arr [[c]] [[d]]
-torus conf f = loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
-                        arr (uncurry3 (zipWith3 lazyzip3)) >>>
-                        (arr length >>> arr unshuffle) &&&
-                            (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
-                        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+torus conf f =
+    loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
+        arr (uncurry3 (zipWith3 lazyzip3)) >>>
+        (arr length >>> arr unshuffle) &&&
+            (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
+        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
