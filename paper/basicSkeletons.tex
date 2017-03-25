@@ -22,23 +22,17 @@ parEvalNLazy conf chunkSize fs =
 \begin{center}
 	\includegraphics[scale=0.7]{images/parEval2}
 \end{center}
-We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. For this, we introduce a helper combinator \code{arrMaybe} first, that converts an arrow \code{arr a b} to an arrow \code{arr (Maybe a) (Maybe b)}.
+We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a \code{parEval2} combinator which combines two arrows \code{arr a b} and \code{arr c d} into a new parallel arrow \code{arr (a, c) (b, d)} quite easily with the help of the \code{ArrowChoice} typeclass. The idea is to use the \code{+++} combinator which combines two arrows \code{arr a b} and \code{arr c d} and transforms them into \code{arr (Either a c) (Either b d)} to get a common arrow type that we can then feed into parEvalN.
+\\\\
+We start by transforming the \code{(a, c)} input into a 2-element list \code{[Either a c]}. Then, we feed this list into a parallel arrow constructed with \code{parEvalN} that uses \code{f +++ g}  we then feed into a 2-element parallel arrow that we created as described above. After the calculation is finished we convert the resulting \code{[Either b d]} into \code{([b] , [d])}. The two lists in this tuple contain only 1 element each by construction, so we can finally just convert the tuple to \code{(b, d)} in the last step.
 \begin{lstlisting}[frame=htrbl]
-arrMaybe :: (ArrowChoice arr) => (arr a b) -> arr (Maybe a) (Maybe b)
-arrMaybe fn = arr maybeCase >>> arr (const Nothing) ||| (fn >>> arr return)
-	where maybeCase Nothing = Left ()
-			maybeCase (Just val) = Right val
-\end{lstlisting}
-With this, we can now easily write \code{parEval2} which combines two arrows \code{arr a b} and \code{arr c d} into a new parallel arrow \code{arr (a, c) (b, d)}. We start by converting both arrows with \code{arrMaybe}, combining them with \code{***} into a new arrow \code{arr (Maybe a, Maybe c) (Maybe b, Maybe d)}. This is then replicated twice and fed into parEvalN to get a \code{arr [(Maybe a, Maybe c)] [(Maybe b, Maybe d)]}. We can then apply this arrow to the input \code{[(Just a, Nothing), (Nothing, Just c)]} and then extract the resulting values with \code{fromJust} and the \code{!!} operator on lists in the last step.
-\begin{lstlisting}[frame=htrbl]
-parEval2 :: (ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf,
-	ArrowChoice arr) =>
-	conf -> arr a b -> arr c d -> (arr (a, c) (b, d))
-parEval2 conf f g =
-   (arr Just &&& arr (const Nothing)) *** 
-			((arr (const Nothing) &&& arr Just) >>> arr return) >>>
-   arr (uncurry (:)) >>>
-   parEvalN conf (replicate 2 (arrMaybe f *** arrMaybe g)) >>>
-   arr unzip >>>
-   (arr catMaybes >>> arr head) *** (arr catMaybes >>> arr head)
+parEval2 :: (ArrowChoice arr,
+	ArrowParallel arr (Either a c) (Either b d) conf) =>
+	conf -> arr a b -> arr c d -> arr (a, c) (b, d)
+parEval2 conf f g = 
+	arr Left *** (arr Right >>> arr return) >>>
+	arr (uncurry (:)) >>>
+	parEvalN conf (replicate 2 (f +++ g)) >>>
+	arr partitionEithers >>>
+	arr head *** arr head
 \end{lstlisting}

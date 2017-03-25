@@ -1,21 +1,13 @@
 \section{Syntactic Sugar}
-To make our new API easier to use, we also introduce some syntactic sugar.
-We start with \code{|>>>|}, which is basically \code{>>>} on lists of arrows.
-\begin{lstlisting}[frame=htrbl]
-(|>>>|) :: (Arrow arr) => [arr a b] -> [arr b c] -> [arr a c]
-(|>>>|) = zipWith (>>>)
-\end{lstlisting}
 For basic arrows, we have the \code{***} combinator which allows us to combine two arrows \code{arr a b} and \code{arr c d} into an arrow \code{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version with \code{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \code{()} as the conf parameter in the following code snippet).
 \begin{lstlisting}[frame=htrbl]
-(|***|) :: (ArrowChoice arr,
-	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf) =>
+(|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ())) =>
 	arr a b -> arr c d -> arr (a, c) (b, d)
 (|***|) = parEval2 ()
 \end{lstlisting}
 With this we can analogously to the serial \code{&&&} define the parallel \code{|&&&|}.
 \begin{lstlisting}[frame=htrbl]
-(|&&&|) :: (ArrowChoice arr,
-	ArrowParallel arr (Maybe a, Maybe c) (Maybe b, Maybe d) conf) =>
+(|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) =>
 	arr a b -> arr a c -> arr a (b, c)
 (|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
 \end{lstlisting}
