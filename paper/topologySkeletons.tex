@@ -25,15 +25,15 @@ pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf,
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{lstlisting}
-Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of different types to each other.
+Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \code{arr a b} and \code{arr b c}. By wrapping these two arrows inside a common type
 \begin{lstlisting}[frame=htrbl]
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
 	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
 	Future fut (([a], [b]), [c])) =>
 	conf -> arr a b -> arr b c -> arr a c
 pipe2 conf f g = 
-	arr (\a -> (([a], []), [])) >>>
-	pipe conf (replicate 2 $ unify f g) >>>
+	(arr return &&& arr (const [])) &&& arr (const []) >>>
+	pipe conf (replicate 2 (unify f g)) >>>
 	arr snd >>>
 	arr head
 		where
@@ -53,7 +53,9 @@ Note that extensive use of this combinator over \code{pipe} with a hand-written 
 \end{lstlisting}
 
 \subsection{ring}
-
+\begin{center}
+	\includegraphics[scale=0.75]{images/ring}
+\end{center}
 \begin{lstlisting}[frame=htrbl]
 ring :: (ArrowLoop arr, Future fut r,
 	ArrowParallel arr (i, fut r) (o, fut r) conf) =>
@@ -74,7 +76,9 @@ rightRotate = arr $ \list -> case
 \end{lstlisting}
 
 \subsection{torus}
-
+\begin{center}
+	\includegraphics[scale=0.75]{images/torus}
+\end{center}
 \begin{lstlisting}[frame=htrbl]
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
@@ -110,12 +114,12 @@ threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
 	\caption[without Futures]{Matrix Multiplication with a torus (Parrows)}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
 	\caption[with Futures]{Matrix Multiplication with a torus (Eden)}
 \end{figure}
