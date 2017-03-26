@@ -45,4 +45,5 @@ dist/*
 *.nav
 *.snm
 *.dpth
+*.auxlock
 paper/main-figure0.md5
