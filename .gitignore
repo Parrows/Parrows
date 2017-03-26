@@ -44,3 +44,5 @@ dist/*
 *.blg
 *.nav
 *.snm
+*.dpth
+paper/main-figure0.md5
