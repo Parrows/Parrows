@@ -83,7 +83,8 @@ torus conf f =
         arr (uncurry3 (zipWith3 lazyzip3)) >>>
         (arr length >>> arr unshuffle) &&&
             (shuffle >>> parMap conf (ptorus f)) >>>
-        app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+        app >>>
+        arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
