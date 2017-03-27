@@ -4,7 +4,7 @@ Consider the following arbitrary, but interesting, parallel arrow combinator:
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
 \end{lstlisting}
-In a distributed environment, the resulting arrow of this combinator first evaluates all \code{[arr a b]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \code{[arr b c]} in parallel to then gather the input once again on the master node. While this could be rewritten into only one \code{parEvalN} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \code{ArrowParallel} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in figure \ref{fig:withoutFutures}. This can become a serious bottleneck in heavy threaded applications.
+In a distributed environment, the resulting arrow of this combinator first evaluates all \code{[arr a b]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \code{[arr b c]} in parallel to then gather the input once again on the master node. While this could be rewritten into only one \code{parEvalN} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \code{ArrowParallel} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in figure \ref{fig:withoutFutures}. This can become a serious bottleneck in heavy threaded applications.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
@@ -25,7 +25,7 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 \end{lstlisting}
-For ParMonad and Multicore we can use a basic dummy wrapper as we have shared memory:
+For ParMonad and Multicore we can use a basic dummy wrapper because we have shared memory in a single node:
 \begin{lstlisting}[frame=htrbl]
 data BasicFuture a = BF { val :: a }
 
@@ -37,15 +37,15 @@ To fit the \code{ArrowParallel} instances we gave earlier, we also have to give 
 We need this implementation for our \code{RemoteData} wrapper
 \begin{lstlisting}[frame=htrbl]
 instance NFData (RemoteData a) where
-    rnf x = rnf $ rd x
+    rnf = rnf . rd
 instance Trans (RemoteData a)
 \end{lstlisting}
 and the following for the \code{BasicFuture} dummy type:
 \begin{lstlisting}[frame=htrbl]
 instance (NFData a) => NFData (BasicFuture a) where
-    rnf bf = rnf $ val bf
+	rnf = rnf . val
 \end{lstlisting}
-Going back to our communication example we can use this new Future concept in order to enable direct communications between the nodes in the following way:
+Going back to our communication example we can use this Future concept in order to enable direct communications between the nodes in the following way:
 \begin{lstlisting}[frame=htrbl]
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 =
@@ -53,7 +53,7 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get >>>) fs2)
 \end{lstlisting}
-In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in figure \ref{fig:withFutures}.
+In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in the trace in fig. \ref{fig:withFutures}.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withFutures}
