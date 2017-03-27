@@ -61,8 +61,8 @@ pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 
 pipeSimple :: (ArrowLoop arr, ArrowParallel arr a a conf) => conf -> [arr a a] -> arr a a
 pipeSimple conf fs =
-    loop (arr snd &&& (arr (uncurry (:) >>> lazy) >>>
-        parEvalN conf fs)) >>>
+    loop (arr snd &&&
+        (arr (uncurry (:) >>> lazy) >>> parEvalN conf fs)) >>>
     arr last
 
 ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
