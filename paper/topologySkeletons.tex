@@ -90,39 +90,53 @@ This combinator can be used for example to calculate the shortest paths in a gra
 \begin{center}
 	\includegraphics[scale=0.75]{images/torus}
 \end{center}
+If we take the concept of a ring one dimension further, we get a torus. Every node sends ands receives data from horizontal and vertical neighbours in each communication round. This gives us . With our parallel Arrows we implement a torus combinator yet again with the help of the \code{ArrowLoop} typeclass.
+\\\\
+Inside the loop we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \code{([[fut a]], [[fut b]])} in the second argument (loop only allows for 2 arguments) of our input \code{([[c]], ([[fut a]], [[fut b]]))} and our rotation arrow becomes \code{second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))} instead of the singular rotation in the ring as we rotate \code{[[fut a]]} horizontally and \code{[[fut b]]} vertically. We once again zip the inputs for the nodefunction with \code{arr (uncurry3 zipWith3 lazyzip3)} from \code{([[c]], ([[fut a]], [[fut b]]))} to \code{[[(c, fut a, fut b)]]}, which we then feed into our parallel execution.
+\\\\
+This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \code{shuffle} all the inputs to then pass it into \code{parMap conf (ptorus f)} which yields us \code{[(d, fut a, fut b)]}. We can then unpack this shuffled list back to its original ordering by feeding this into the specific unshuffle arrow we created one step earlier with \code{arr length >>> arr unshuffle} with the use of \code{app} from the \code{ArrowApply} typeclass. Finally, we unpack this matrix \code{[[[(d, fut a, fut b)]]} with \code{arr (map unzip3) >>> arr unzip3 >>> threetotwo} to get  \code{([[d]], ([[fut a]], [[fut b]]))}.
+\\\\
+The complete definition of the \code{torus} combinator is:
 \begin{lstlisting}[frame=htrbl]
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
-            ArrowParallel arr (c, fut [a], fut [b]) (d, fut [a], fut [b]) conf,
-            Future fut [a], Future fut [b]) =>
-         conf ->
-         arr (c, [a], [b]) (d, [a], [b]) ->
-         arr [[c]] [[d]]
+	ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
+	Future fut a, Future fut b) =>
+	conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
 	loop (second ((mapArr rightRotate >>> lazy) ***
-			(arr rightRotate >>> lazy)) >>>
-    arr (uncurry3 (zipWith3 lazyzip3)) >>>
-    (arr length >>> arr unshuffle) &&&
-        (shuffle >>> parEvalN conf (repeat (ptorus f))) >>>
-    app >>> arr (map unzip3) >>> arr unzip3 >>> threetotwo)
-
+		(arr rightRotate >>> lazy)) >>>
+	arr (uncurry3 (zipWith3 lazyzip3)) >>>
+	(arr length >>> arr unshuffle) &&&
+		(shuffle >>> parMap conf (ptorus f)) >>>
+	app >>>
+	arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+\end{lstlisting}
+with uncurry3,
+\begin{lstlisting}[frame=htrbl]
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
-
+\end{lstlisting}
+lazyzip3,
+\begin{lstlisting}[frame=htrbl]
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
-
-ptorus :: (Arrow arr, Future fut [a], Future fut [b]) =>
-          arr (c, [a], [b]) (d, [a], [b]) ->
-          arr (c, fut [a], fut [b]) (d, fut [a], fut [b])
+\end{lstlisting}
+ptorus,
+\begin{lstlisting}[frame=htrbl]
+ptorus :: (Arrow arr, Future fut a, Future fut b) =>
+	arr (c, a, b) (d, a, b) ->
+	arr (c, fut a, fut b) (d, fut a, fut b)
 ptorus f =
-	arr (\ ~(c, fas, fbs) -> (c, get fas, get fbs)) >>>
+	arr (\ ~(c, a, b) -> (c, get a, get b)) >>>
 	f >>>
-	arr (\ ~(c, as, bs) -> (c, put as, put bs))
-
+	arr (\ ~(d, a, b) -> (d, put a, put b))
+\end{lstlisting}
+and threetotwo.
+\begin{lstlisting}[frame=htrbl]
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 \end{lstlisting}
-In \cite{eden_cefp}, matrix multiplication using the gentlemans algorithm was given as a example of using this skeleton. Adapting this nodefunction to our arrow API gives us:
+As an example of using this skeleton \cite{eden_cefp} gave the matrix multiplication using the gentlemans algorithm. Adapting this nodefunction to our arrow API gives us:
 \begin{lstlisting}[frame=htrbl]
 nodefunction :: Int ->
 	((Matrix, Matrix), [Matrix], [Matrix]) ->
@@ -134,7 +148,7 @@ nodefunction n ((bA, bB), rows, cols) =
 			nextAs = take (n-1) rows
 			nextBs = take (n-1) cols
 \end{lstlisting}
-Comparing the trace from a call using our arrow definition of the torus (fig. \ref{fig:torus_parrows_trace}) with the Eden version (fig. \ref{fig:torus_eden_trace}) shows that the behaviour of the arrow version is comparable.
+If we compare the trace from a call using our arrow definition of the torus (fig. \ref{fig:torus_parrows_trace}) with the Eden version (fig. \ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
