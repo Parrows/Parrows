@@ -1,12 +1,12 @@
-\section{Basic Skeletons}
+\subsection{Extending the Interface}
+\label{sec:extending-interface}
+With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some further basic parallel interface functions. These are algorithmic skeletons that, however, mostly serve as a foundation to further, more specific algorithmic skeletons.
 
-With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some basic parallel skeletons.
-
-\subsection{parEvalNLazy}
+\subsection{Lazy \code{parEvalN}}
 \begin{center}
 	\includegraphics[scale=0.7]{images/parEvalNLazy}
 \end{center}
-\code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{arr (chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp}. The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
+The function \code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{arr (chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp}. The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
@@ -14,11 +14,10 @@ parEvalNLazy conf chunkSize fs =
 	arr (chunksOf chunkSize) >>>
 	listApp fchunks >>>
 	arr concat
-	where
-		fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
-\end{lstlisting}
+	where fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
+\end{lstlisting} %$ %% formatting
 
-\subsection{parEval2}
+\subsection{Heterogenous tasks}
 \begin{center}
 	\includegraphics[scale=0.7]{images/parEval2}
 \end{center}
@@ -36,3 +35,9 @@ parEval2 conf f g =
 	arr partitionEithers >>>
 	arr head *** arr head
 \end{lstlisting}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

@@ -1,86 +1,52 @@
-\documentclass{article}
-\usepackage{tikz}
+\documentclass[a4paper]{article}
+%%%%% TODO:
+%%%%% use actual style, fix prelude to conform
+\input{prelude}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 
-\usepackage{filecontents}
-\usepackage{pgfplots, pgfplotstable}
-\usepgfplotslibrary{statistics}
-
-\usepackage[utf8]{inputenc}
-\usepackage{color}
-\usepackage{hyperref}
-
-\usepackage{subcaption}
-
-\bibliographystyle{unsrtnat}
-\usepackage[sort&compress,square,numbers]{natbib}
-
-\usepackage{csquotes}
-
-% für Listings
-\usepackage{listings}
-\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, keywordstyle=\color{black}\bfseries, stringstyle=\ttfamily,showstringspaces=false,basicstyle=\footnotesize,captionpos=b}
-\lstset{
-	frame=none,
-	xleftmargin=2pt,
-	stepnumber=1,
-	numbers=left,
-	numbersep=5pt,
-	numberstyle=\ttfamily\tiny\color[gray]{0.3},
-	belowcaptionskip=\bigskipamount,
-	captionpos=b,
-	escapeinside={*'}{'*},
-	language=haskell,
-	tabsize=2,
-	emphstyle={\bf},
-	commentstyle=\it,
-	stringstyle=\mdseries\rmfamily,
-	showspaces=false,
-	keywordstyle=\bfseries\rmfamily,
-	columns=flexible,
-	basicstyle=\small\sffamily,
-	showstringspaces=false,
-	morecomment=[l]\%,
+\title{Arrows for Parallel Computations}
+\date{\today}
+\ifthenelse{\boolean{anonymous}}{%
+\author{Submission ID xxxxxx}
+}{%
+\author{Martin Braun, Phil Trinder, and Oleg Lobachev}
+%\affiliation{University Bayreuth, Germany and Glasgow University, UK}
 }
 
-\renewcommand{\cite}[1]{\citep{#1}}
-
-\newcommand{\citHughes}{\citep{HughesArrows}}
-
-\newcommand{\code}[1]{\lstinline{#1}}
-
-\newcommand{\fixme}[1]{\colorbox{red}{#1}}
-
 \begin{document}	
-	\title{Parrows}
-	
+        \maketitle
+	%
 	\input{abstract}
-	
-	\newpage
+	%
+	%\newpage
 	\tableofcontents
-	~
-	\pagebreak
+	%\pagebreak
 	\input{motivation}
 	\input{parallelHaskells}
-	\pagebreak
-	\input{arrows}
-	\pagebreak
-	\input{utilityFunctions}
-	\pagebreak
-	\input{parrows}
-	\pagebreak
-	\input{basicSkeletons}
-	\pagebreak
-	\input{syntacticSugar}
-	\pagebreak
-	\input{futures}
-	\pagebreak
-	\input{mapSkeletons}
-	\pagebreak
-	\input{topologySkeletons}
-	\pagebreak
-	%\input{benchmarks}
 	%\pagebreak
+	\input{relwork}
+	\input{arrows}
+	%\pagebreak
+	%\pagebreak
+	\input{parrows}
+	%\pagebreak
+	\input{basicSkeletons}
+	%\pagebreak
+	\input{syntacticSugar}
+	%\pagebreak
+	\input{futures}
+	%\pagebreak
+	\input{mapSkeletons}
+	%\pagebreak
+	\input{topologySkeletons}
+	%\pagebreak
+	\input{benchmarks}
+	%%\pagebreak
 	\input{conclusion}
-	\pagebreak
-	\bibliography{references}
+	%\pagebreak
+        \bibliographystyle{abbrvnat}
+	\bibliography{references,main}
+        \appendix
+	\input{utilityFunctions}
 \end{document}

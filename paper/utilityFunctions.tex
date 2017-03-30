@@ -1,15 +1,14 @@
 \section{Utility Functions}\label{utilfns}
-Before we go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: map, foldl and zipWith on arrows.
-\\
+To be able to go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: \lstinline{map}, \lstinline{foldl} and \lstinline{zipWith} on Arrows.\olcomment{capitalisation! arrows vs. Arrows!}
+
 The \code{mapArr} combinator lifts any arrow \code{arr a b} to an arrow \code{arr [a] [b]} \cite{programming_with_arrows}:
 \begin{lstlisting}[frame=htrbl]
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f =
 	arr listcase >>>
 	arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
-	where
-		listcase [] = Left ()
-		listcase (x:xs) = Right (x,xs)
+	where listcase [] = Left ()
+	      listcase (x:xs) = Right (x,xs)
 \end{lstlisting}
 Similarly, we can also define \code{foldlArr} that lifts any arrow \code{arr (b, a) b} with a neutral element \code{b} to \code{arr [a] b}:
 \begin{lstlisting}[frame=htrbl]
@@ -18,16 +17,15 @@ foldlArr f b =
 	arr listcase >>>
 	arr (const b) |||
 		(first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
-	where
-		listcase [] = Left []
-		listcase (x:xs) = Right (x,xs)
+	where listcase [] = Left []
+	      listcase (x:xs) = Right (x,xs)
 \end{lstlisting}
-Finally, with the help of \code{mapArr}, we can define zipWithArr, which lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
+Finally, with the help of \code{mapArr}, we can define \lstinline{zipWithArr} that lifts any arrow \code{arr (a, b) c} to an arrow \code{arr ([a], [b]) [c]}.
 \begin{lstlisting}[frame=htrbl]
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
-\end{lstlisting}
-These combinators make use of the \code{ArrowChoice} typeclass, which allows us to use the \code{|||} combinator. It takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
+\end{lstlisting} %$ %% formatting
+These combinators make use of the \code{ArrowChoice} type class, it provides the \code{|||} combinator. The latter takes two arrows \code{arr a c} and \code{arr b c} and combines them into a new arrow \code{arr (Either a b) c} which pipes all \code{Left a}'s to the first arrow and all \code{Right b}'s to the second arrow.
 \begin{lstlisting}[frame=htrbl]
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{lstlisting}
@@ -35,5 +33,40 @@ With the zipWithArr combinator we can also write a combinator \code{listApp}, wh
 \begin{lstlisting}[frame=htrbl]
 listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
+\end{lstlisting}% $ %% formatting
+This combinator also makes use of the \code{ArrowApply} typeclass that allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
+
+The definition of \code{unshuffle} is
+\begin{lstlisting}[frame=htrbl]
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
+
+takeEach :: Int -> [a] -> [a]
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 \end{lstlisting}
-This combinator also makes use of the \code{ArrowApply} typeclass which allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
+while \code{shuffle} is defined as:
+\begin{lstlisting}[frame=htrbl]
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
+\end{lstlisting}
+These functions were taken from Eden skeleton source code \cite{eden_skel_shuffle} and lifted to Arrows.
+
+
+The helper functions for \code{torus} are
+\begin{lstlisting}[frame=htrbl]
+uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
+uncurry3 f (a, (b, c)) = f a b c
+
+lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
+
+threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
+threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
+\end{lstlisting} % $ %% formatting
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

@@ -1,4 +1,7 @@
 \section{Benchmarks}
+\label{sec:benchmarks}
+\olcomment{More, more benchmarks!}
+
 To check the performance of our new parallel arrow API, we conducted some benchmarks. These are based on a sudoku solver from the examples for Simon Marlows book "Parallel and Concurrent Programming in Haskell" which can be found on his GitHub \cite{marlow_parconc}. The results are displayed in the following graphs which are ordered by problem size.
 \\\\
 The Benchmarks were run on a Core i7-3970X CPU @ 3.5GHz with 6 cores and 12 threads. For sake of comparability with Simon Marlow's parallel version which uses the ParMonad, we use the ParMonad backend for the parallel arrow versions as well.
@@ -51,3 +54,9 @@ The Benchmarks were run on a Core i7-3970X CPU @ 3.5GHz with 6 cores and 12 thre
 }
 \\\\
 As we can see, the parallel arrow versions of the program all have around the same speedup as the ParMonad based version. This means that using the \code{ArrowParallel} typeclass doesn't add any real notable overhead. Also, the slightly worse results for "parrows-sudoku-farm" and "parrows-sudoku-farmChunk" can be explained by either imperfect parameters or by the fact that the benchmarks do not really require the scheduling introduced by the skeletons which in this case introduces unnecessary overhead. This would probably look different if the benchmark would use e.g. a divide and conquer approach to solve the sudoku puzzles.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

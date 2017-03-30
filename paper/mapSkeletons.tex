@@ -1,5 +1,7 @@
 \section{Map-based Skeletons}
-\subsection{parMap}
+\label{sec:map-skeletons}
+Now we have developed Parallel Arrows further enough to define some algorithmic skeletons useful to an application programmer.
+\subsection{Parallel map}
 \begin{center}
 	\includegraphics[scale=0.7]{images/parMap}
 \end{center}
@@ -11,7 +13,7 @@ parMap :: (ArrowParallel arr a b conf) =>
 parMap conf f = parEvalN conf (repeat f)
 \end{lstlisting}
 
-\subsection{parMapStream}
+\subsection{Lazy parallel map}
 \begin{center}
 	\includegraphics[scale=0.7]{images/parMapStream}
 \end{center}
@@ -22,7 +24,7 @@ parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \end{lstlisting}
 
-\subsection{farm}
+\subsection{Statically load-balancing parallel map}
 \begin{center}
 	\includegraphics[scale=0.7]{images/farm}
 \end{center}
@@ -36,21 +38,6 @@ farm conf numCores f =
 	parEvalN conf (repeat (mapArr f)) >>>
 	shuffle
 \end{lstlisting}
-The definition of \code{unshuffle} is
-\begin{lstlisting}[frame=htrbl]
-unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
-unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
-
-takeEach :: Int -> [a] -> [a]
-takeEach n [] = []
-takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
-\end{lstlisting}
-, while \code{shuffle} is defined as:
-\begin{lstlisting}[frame=htrbl]
-shuffle :: (Arrow arr) => arr [[a]] [a]
-shuffle = arr (concat . transpose)
-\end{lstlisting}
-(These were taken from Eden's source code \cite{eden_skel_shuffle} and translated into Arrows.)
 
 \subsection{farmChunk}
 \begin{center}
@@ -68,6 +55,8 @@ farmChunk conf chunkSize numCores f =
 \end{lstlisting}
 
 \subsection{parMapReduce}
+\olcomment{it appears STRANGE. are the data really left alone and noded after map and taken from there by reduce? It makes sense only is no communication through master takes place. ELSE: CUT!}
+
 -- this does not completely adhere to Google's definition of Map Reduce as it
 -- the mapping function does not allow for "reordering" of the output
 -- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
@@ -81,3 +70,9 @@ parMapReduceDirect conf chunkSize mapfn foldfn neutral =
 	parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
 	foldlArr foldfn neutral
 \end{lstlisting}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
