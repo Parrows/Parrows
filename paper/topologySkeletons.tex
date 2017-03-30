@@ -1,9 +1,10 @@
-\section{Topology Skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \code{pipe}, a \code{ring} and a \code{torus} implementation \cite{eden_cefp, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to prove that we can express such skeletons with Arrows as well.
+\section{Topological Skeletons}
+\label{sec:topology-skeletons}
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \code{pipe}, a \code{ring} and a \code{torus} implementation \cite{eden_cefp, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express such skeletons with Parallel Arrows as well.
 
-\subsection{pipe}
+\subsubsection{Parallel pipe}
 
-The parallel pipe skeleton is semantically equivalent to folding over a list \code{[arr a a]} of arrows with \code{>>>}, but does this in parallel, meaning that the arrows don't have to reside on the same thread/machine. We implement this skeleton using the \code{ArrowLoop} typeclass which gives us the \code{loop :: arr (a, b) (c, b) -> arr a c} combinator which allows us to express loop like computations. For example this
+The parallel pipe skeleton is semantically equivalent to folding over a list \code{[arr a a]} of arrows with \code{>>>}, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the \code{ArrowLoop} typeclass which gives us the \code{loop :: arr (a, b) (c, b) -> arr a c} combinator which allows us to express loop like computations. For example this
 \begin{lstlisting}[frame=htrbl]
 loop (arr (\(a, b) -> (b, a:b)))
 \end{lstlisting}
@@ -25,16 +26,17 @@ where \code{lazy} is defined as:
 lazy :: (Arrow arr) => arr [a] [a]
 lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{lstlisting}
-Note that here the use of \code{lazy} is essential as without it programs using this definition would never halt. It is there so that the calculation of the input \code{[a]} halts before passing it into \code{parEvalN}.
-\\\\
-However, using this definition directly, will result in the master node becoming a potential bottleneck in distributed environments as described in chapter \ref{futures}. Therefore, a more sophisticated version that internally uses Futures is a good idea:
+Note that here the use of \code{lazy} is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input \code{[a]} terminates before passing it into \code{parEvalN}.
+
+
+However, using this definition directly, will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures.
 \begin{lstlisting}[frame=htrbl]
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf,
 	Future fut a) =>
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{lstlisting}
-Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \code{arr a b} and \code{arr b c}. By wrapping these two arrows inside a common type
+Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \code{arr a b} and \code{arr b c}. By wrapping these two arrows inside a common type we obtain
 \begin{lstlisting}[frame=htrbl]
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
 	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
@@ -52,7 +54,7 @@ pipe2 conf f g =
 				(mapArr f *** mapArr g) *** arr (\_ -> []) >>>
 				arr (\((a, b), c) -> ((c, a), b))
 \end{lstlisting}
-Note that extensive use of this combinator over \code{pipe} with a hand-written combination data-type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \code{|>>>|} which is semantically equivalent to \code{>>>} similar to the other parallel syntactic sugar from chapter \ref{syntacticSugar}:
+Note that extensive use of this combinator over \code{pipe} with a hand-written combination data-type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \code{|>>>|} which is semantically equivalent to \code{>>>} in a similar manner to the other parallel syntactic sugar from Section~\ref{syntacticSugar}:
 \begin{lstlisting}[frame=htrbl]
 (|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
 	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
@@ -61,41 +63,45 @@ Note that extensive use of this combinator over \code{pipe} with a hand-written 
 (|>>>|) = pipe2 ()
 \end{lstlisting}
 
-\subsection{ring}
+\subsection{Ring skeleton}
 \begin{center}
 	\includegraphics[scale=0.75]{images/ring}
 \end{center}
-Eden comes with a ring skeleton implementation that allows the computation of a function \code{[i] -> [o]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \code{i -> r -> (o, r)} in which \code{r} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data). The definition is as follows \cite{eden_skel_topology}:
+Eden comes with a ring skeleton implementation that allows the computation of a function \code{[i] -> [o]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \code{i -> r -> (o, r)} in which \code{r} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data). They define it as \citep{eden_skel_topology}
 \begin{lstlisting}[frame=htrbl]
 ringSimple :: (Trans i, Trans o, Trans r) =>
    (i -> r -> (o,r))
    -> [i] -> [o]
 ringSimple f is =  os
-  where
-    (os,ringOuts) = unzip (parMap (toRD $ uncurry f)
+  where (os,ringOuts) = unzip (parMap (toRD $ uncurry f)
                                    (zip is $ lazy ringIns))
-    ringIns = rightRotate ringOuts
-\end{lstlisting}
-with toRD (to make use of remote data)
-\begin{lstlisting}[frame=htrbl]
-toRD :: (Trans i, Trans o, Trans r) =>
+        ringIns = rightRotate ringOuts
+
+toRD :: (Trans i, Trans o, Trans r) => 
         ((i,r) -> (o,r))
         -> ((i, RD r) -> (o, RD r))
 toRD  f (i, ringIn)  = (o, release ringOut)
   where (o, ringOut) = f (i, fetch ringIn)
-\end{lstlisting}
-and rightRotate:
-\begin{lstlisting}[frame=htrbl]
+
 rightRotate    :: [a] -> [a]
 rightRotate [] =  []
 rightRotate xs =  last xs : init xs
 \end{lstlisting}
-We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang. The reasoning is explained by \cite{eden_cefp}:
+%\end{lstlisting}
+%with toRD (to make use of remote data)
+%\begin{lstlisting}[frame=htrbl]
+%\end{lstlisting}
+%and rightRotate:
+%\begin{lstlisting}[frame=htrbl]
+
+
+We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \cite{eden_cefp}:
 \begin{quotation}
 Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.
 \end{quotation}
 Next, we zip the resulting \code{([i], [fut r])} to \code{[(i, fut r)]} with \code{arr (uncurry zip)} so we can feed that into a our input arrow \code{arr (i, r) (o, r)}, which we transform into \code{arr (i, fut r) (o, fut r)} before lifting it to \code{arr [(i, fut r)] [(o, fut r)]} to get a list \code{[(o, fut r)]}. Finally we unzip this list into \code{([o], [fut r])}. Plugging this arrow \code{arr ([i], [fut r]) ([o], fut r)} into the definition of \code{loop} from earlier gives us \code{arr [i] [o]}, our ring arrow.
-\\\\
+
+
 This gives us the following complete definition for the \code{ring} combinator:
 \begin{lstlisting}[frame=htrbl]
 ring :: (ArrowLoop arr, Future fut r,
@@ -112,23 +118,26 @@ ring conf f =
 with \code{rightRotate}:
 \begin{lstlisting}[frame=htrbl]
 rightRotate :: (Arrow arr) => arr [a] [a]
-rightRotate = arr $ \list -> case
-	list of [] -> []
-			xs -> last xs : init xs
-\end{lstlisting}
-and lazy:
-\begin{lstlisting}[frame=htrbl]			
-lazy :: (Arrow arr) => arr [a] [a]
-lazy = arr (\ ~(x:xs) -> x : lazy xs
-\end{lstlisting}
-This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm. Further details on this can be found in \cite{eden_cefp}.
-\subsection{torus}
+rightRotate = arr $ \list -> case list of 
+  [] -> []
+  xs -> last xs : init xs
+\end{lstlisting} %$ %% formatting
+% and lazy:
+% \begin{lstlisting}[frame=htrbl]			
+% lazy :: (Arrow arr) => arr [a] [a]
+% lazy = arr (\ ~(x:xs) -> x : lazy xs
+% \end{lstlisting}
+%% we have shown this already.
+This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm. 
+%Further details on this can be found in \cite{eden_cefp}.
+\olcomment{let's do it?}
+\subsection{Torus skeleton}
 \begin{center}
 	\includegraphics[scale=0.75]{images/torus}
 \end{center}
 If we take the concept of a ring one dimension further, we get a torus. Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
 \\\\
-In order to port this to parallel Arrows we have to use the torus combinator, yet again.
+With our parallel Arrows we implement a torus combinator yet again with the help of the \code{ArrowLoop} typeclass.
 \\\\
 Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \code{([[fut a]], [[fut b]])} in the second argument (loop only allows for 2 arguments) of our looped arrow \code{arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))} and our rotation arrow becomes \code{second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))} instead of the singular rotation in the ring as we rotate \code{[[fut a]]} horizontally and \code{[[fut b]]} vertically. Then, we once again zip the inputs for the input arrow with \code{arr (uncurry3 zipWith3 lazyzip3)} from \code{([[c]], ([[fut a]], [[fut b]]))} to \code{[[(c, fut a, fut b)]]}, which we then feed into our parallel execution.
 \\\\
@@ -149,32 +158,16 @@ torus conf f =
 	app >>>
 	arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 \end{lstlisting}
-with uncurry3,
-\begin{lstlisting}[frame=htrbl]
-uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
-uncurry3 f (a, (b, c)) = f a b c
-\end{lstlisting}
-lazyzip3,
-\begin{lstlisting}[frame=htrbl]
-lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
-lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
-\end{lstlisting}
-ptorus,
+with uncurry3, lazyzip3, and threetotwo from the Appendix, and
 \begin{lstlisting}[frame=htrbl]
 ptorus :: (Arrow arr, Future fut a, Future fut b) =>
 	arr (c, a, b) (d, a, b) ->
 	arr (c, fut a, fut b) (d, fut a, fut b)
 ptorus f =
-	arr (\ ~(c, a, b) -> (c, get a, get b)) >>>
-	f >>>
+	arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>>
 	arr (\ ~(d, a, b) -> (d, put a, put b))
 \end{lstlisting}
-and threetotwo.
-\begin{lstlisting}[frame=htrbl]
-threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
-threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
-\end{lstlisting}
-As an example of using this skeleton \cite{eden_cefp} gave the matrix multiplication using the gentlemans algorithm. Adapting this nodefunction to our arrow API gives us:
+As an example of using this skeleton \citet{eden_cefp} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Adapting this nodefunction to our Arrow API gives us:
 \begin{lstlisting}[frame=htrbl]
 nodefunction :: Int ->
 	((Matrix, Matrix), [Matrix], [Matrix]) ->
@@ -186,7 +179,7 @@ nodefunction n ((bA, bB), rows, cols) =
 			nextAs = take (n-1) rows
 			nextBs = take (n-1) cols
 \end{lstlisting}
-If we compare the trace from a call using our arrow definition of the torus (fig. \ref{fig:torus_parrows_trace}) with the Eden version (fig. \ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.
+If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.\olcomment{much more details on this!}
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
@@ -238,3 +231,9 @@ If we compare the trace from a call using our arrow definition of the torus (fig
 	\end{axis}
 	\end{tikzpicture}
 }
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
