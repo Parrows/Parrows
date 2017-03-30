@@ -109,12 +109,13 @@
 \usepackage{booktabs}
 %\usepackage{multirow}
 
-\ifpdf
-\usepackage[activate={true,nocompatibility},kerning=true,spacing=true,tracking=true]{microtype}
-\else
+%\usepackage{ifpdf} %% broken?!!
+%\ifpdf
+%\usepackage[activate={true,nocompatibility},kerning=true,spacing=true,tracking=true]{microtype}
+%\else
 %% non-pdf latex can less, let microtype itself decide
 \usepackage{microtype}
-\fi
+%\fi
 \microtypecontext{spacing=nonfrench} %% log said so
 
 %%% JFP requirements:

@@ -95,10 +95,10 @@ rightRotate xs =  last xs : init xs
 %\begin{lstlisting}[frame=htrbl]
 
 
-We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \cite{eden_cefp}:
-\begin{quotation}
-Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.
-\end{quotation}
+We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{eden_cefp}:
+%\begin{quotation}
+\enquote{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
+%\end{quotation}
 Next, we zip the resulting \code{([i], [fut r])} to \code{[(i, fut r)]} with \code{arr (uncurry zip)} so we can feed that into a our input arrow \code{arr (i, r) (o, r)}, which we transform into \code{arr (i, fut r) (o, fut r)} before lifting it to \code{arr [(i, fut r)] [(o, fut r)]} to get a list \code{[(o, fut r)]}. Finally we unzip this list into \code{([o], [fut r])}. Plugging this arrow \code{arr ([i], [fut r]) ([o], fut r)} into the definition of \code{loop} from earlier gives us \code{arr [i] [o]}, our ring arrow.
 
 
