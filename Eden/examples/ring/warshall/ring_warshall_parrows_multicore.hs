@@ -98,12 +98,14 @@ ringSimple' :: (Show r, ArrowLoop arr, ArrowApply arr, Future MVar r, (ArrowPara
             conf
             -> arr (i, r) (o,r) -- ^ ring process function
             -> arr [i] [o]      -- ^ input output mapping
-ringSimple' conf f = loop $ second (arr rightRotate >>> arr lazy) >>>
+ringSimple' conf f = (loop $ second (arr rightRotate >>> arr lazy) >>>
                             (arr $ uncurry zip) >>>
-                            (M.parMap conf (second Parrows.Future.get >>> f >>> second Parrows.Future.put))
-                            >>> arr unzip
+                            arr (trace "premap") >>>
+                            (M.parMap conf (arr (trace "preget") >>> second Parrows.Future.get >>> arr (trace "postget") >>> f >>>
+                                arr (trace "postFunction") >>> second Parrows.Future.put >>> arr (trace "postput"))) >>>
+                            arr (trace "preunzip") >>> arr unzip)
 
 --main = print $ Parrows.Future.get >>> (+1) $ Parrows.Future.put (1::Int)
 
-main = print $ ringSimple' () (\(x, y) -> (y, x+1)) ([1..3]::[Int])
+main = print $ ringSimple' () (\(x, y) -> trace (show (x)) (y, x+1)) ([1..3]::[Int])
 --main = print $ ring () (ring_iterate 0 1 1) [[]]
