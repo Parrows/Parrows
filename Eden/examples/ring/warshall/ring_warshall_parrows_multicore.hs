@@ -94,7 +94,7 @@ adjacency = [[0, 1, 2],
 -- | Simple ring skeleton (tutorial version)
 -- using remote data for providing direct inter-ring communication
 -- without input distribution and output combination
-ringSimple' :: (Show r, ArrowLoop arr, ArrowApply arr, Future MVar r, (ArrowParallel arr (i, MVar r) (o, MVar r) conf)) =>
+ringSimple' :: (Show r, ArrowChoice arr, NFData o, ArrowLoop arr, ArrowApply arr, Future MVar r, (ArrowParallel arr (i, MVar r) (o, MVar r) conf)) =>
             conf
             -> arr (i, r) (o,r) -- ^ ring process function
             -> arr [i] [o]      -- ^ input output mapping
@@ -102,8 +102,20 @@ ringSimple' conf f = (loop $ second (arr rightRotate >>> arr lazy) >>>
                             (arr $ uncurry zip) >>>
                             arr (trace "premap") >>>
                             (M.parMap conf (arr (trace "preget") >>> second Parrows.Future.get >>> arr (trace "postget") >>> f >>>
-                                arr (trace "postFunction") >>> second Parrows.Future.put >>> arr (trace "postput"))) >>>
-                            arr (trace "preunzip") >>> arr unzip)
+                                arr (trace "postFunction") >>> arr mkLazy *** Parrows.Future.put >>> arr (trace "postput"))) >>>
+                            arr (trace "preunzip") >>> arr unzip >>> first (arr (map unLazy))) >>>
+                            M.parMap conf (arr $ \a -> rnf a `seq` a)
+
+data Lazy a = Lazy a
+
+instance (NFData a) => NFData (Lazy a) where
+    rnf _ = ()
+
+mkLazy :: a -> Lazy a
+mkLazy a = Lazy a
+
+unLazy :: Lazy a -> a
+unLazy (Lazy a) = a
 
 --main = print $ Parrows.Future.get >>> (+1) $ Parrows.Future.put (1::Int)
 
