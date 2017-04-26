@@ -36,10 +36,17 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
 --instance (NFData a) => NFData (BasicFuture a) where
 --    rnf = rnf . val
 
+{-# NOINLINE putHack #-}
+putHack :: a -> MVar a
+putHack a = unsafePerformIO $ do mVar <- newEmptyMVar
+                                 print "pre fork"
+                                 forkIO (do putMVar mVar a
+                                            print "putMVar done")
+                                 print "post fork"
+                                 return mVar
+
 instance (NFData a) => Future MVar a where
-    put = (arr id &&& (arr $ \a -> unsafePerformIO $ newEmptyMVar)) >>> (arr (\(a, mvar) -> unsafePerformIO $ forkIO $
-        do  print "toast"
-            putMVar mvar a) &&& arr snd) >>> arr snd
+    put = arr putHack
     get = arr takeMVar >>> arr unsafePerformIO
 
 --instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
@@ -91,9 +98,12 @@ ringSimple' :: (Show r, ArrowLoop arr, ArrowApply arr, Future MVar r, (ArrowPara
             conf
             -> arr (i, r) (o,r) -- ^ ring process function
             -> arr [i] [o]      -- ^ input output mapping
-ringSimple' conf f = loop $ second (arr rightRotate >>> arr lazy) >>> (arr $ uncurry zip) >>> (M.parMap conf (second Parrows.Future.get >>> f >>> second Parrows.Future.put)) >>> arr unzip
+ringSimple' conf f = loop $ second (arr rightRotate >>> arr lazy) >>>
+                            (arr $ uncurry zip) >>>
+                            (M.parMap conf (second Parrows.Future.get >>> f >>> second Parrows.Future.put))
+                            >>> arr unzip
 
-main = print $ Parrows.Future.get >>> (+1) $ Parrows.Future.put (1::Int)
+--main = print $ Parrows.Future.get >>> (+1) $ Parrows.Future.put (1::Int)
 
---main = print $ deepseq val val where val = ringSimple' () (\(x, y) -> (y, x+1)) ([1..3]::[Int])
+main = print $ ringSimple' () (\(x, y) -> (y, x+1)) ([1..3]::[Int])
 --main = print $ ring () (ring_iterate 0 1 1) [[]]
