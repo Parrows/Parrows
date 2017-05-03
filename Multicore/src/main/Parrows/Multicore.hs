@@ -33,13 +33,22 @@ import Control.Parallel.Strategies
 import Control.Arrow
 import Control.DeepSeq
 
+import Control.Concurrent
+import Control.Concurrent.MVar
+import System.IO.Unsafe
+
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
 
-data BasicFuture a = BF { val :: a }
-instance (NFData a) => NFData (BasicFuture a) where
-    rnf = rnf . val
+{-# NOINLINE putHack #-}
+putHack :: a -> MVar a
+putHack a = unsafePerformIO $ do mVar <- newEmptyMVar
+                                 print "pre fork"
+                                 forkIO (do putMVar mVar a
+                                            print "putMVar done")
+                                 print "post fork"
+                                 return mVar
 
-instance (NFData a) => Future BasicFuture a where
-    put = arr (\a -> BF { val = a })
-    get = arr val
+instance (NFData a) => Future MVar a where
+    put = arr putHack
+    get = arr takeMVar >>> arr unsafePerformIO
