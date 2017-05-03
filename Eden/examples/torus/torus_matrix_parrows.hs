@@ -65,7 +65,7 @@ randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
 factor :: Int
-factor = 1
+factor = 8
 
 n :: Int
 n = 32 * factor

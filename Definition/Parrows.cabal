@@ -3,7 +3,7 @@
 -- see: https://github.com/sol/hpack
 
 name:           Parrows
-version:        0.1.0.0
+version:        0.1.0.1
 synopsis:       Multithreaded evaluation using Arrows
 description:    Multithreaded evaluation using Arrows
 category:       Other

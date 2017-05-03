@@ -80,7 +80,7 @@ ring conf f =
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (NFData d, ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
             ArrowParallel arr (c, fut a, fut b) (Lazy d, fut a, fut b) conf,
-            Future fut a, Future fut b) =>
+            Future fut a, Future fut b, ArrowParallel arr [d] [d] conf) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
     loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
@@ -90,7 +90,7 @@ torus conf f =
         app >>>
         arr (map unzip3) >>> arr unzip3 >>> threetotwo >>>
         first (mapArr (mapArr unLazy))) >>>
-    mapArr (arr id &&& arr id >>> arr (uncurry deepseq))
+    parMap conf (arr id &&& arr id >>> arr (uncurry deepseq))
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
