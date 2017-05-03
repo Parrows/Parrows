@@ -70,9 +70,6 @@ lazy = arr (\ ~(x:xs) -> x : lazy xs)
 
 data Lazy a = Lazy a
 
-instance (NFData a) => NFData (Lazy a) where
-    rnf _ = ()
-
 mkLazy :: (Arrow arr) => arr a (Lazy a)
 mkLazy = arr (\a -> Lazy a)
 

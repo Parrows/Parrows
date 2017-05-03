@@ -44,6 +44,9 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
 
+instance (NFData a) => NFData (Lazy a) where
+    rnf _ = ()
+
 {-# NOINLINE putHack #-}
 putHack :: a -> MVar a
 putHack a = unsafePerformIO $ do mVar <- newEmptyMVar

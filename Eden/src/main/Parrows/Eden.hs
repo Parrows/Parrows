@@ -27,6 +27,7 @@ module Parrows.Eden where
 
 import Parrows.Definition
 import Parrows.Future
+import Parrows.Util
 
 import Control.Arrow
 
@@ -48,6 +49,11 @@ instance (Trans a) => Future RemoteData a where
 -- the weird unwrapping of the Kleisli type?
 -- Probably not, because we would end up computing the values while
 -- sending them over the network, right?
+
+instance (Trans a) => Trans (Lazy a)
+instance (NFData a) => NFData (Lazy a) where
+    rnf x = rnf $ unLazy x
+
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
     parEvalN _ fs as = spawnF fs as

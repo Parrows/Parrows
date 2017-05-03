@@ -2,6 +2,7 @@
 
 module Main where
 
+import Parrows.Multicore
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
@@ -24,21 +25,6 @@ import Data.List.Split
 import System.Random
 
 import Debug.Trace
-
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
-                    zipWithArr (app >>> arr spawnP) >>>
-                    arr sequenceA >>>
-                    arr (>>= mapM Control.Monad.Par.get) >>>
-                    arr runPar
-
-data BasicFuture a = BF { val :: a }
-instance (NFData a) => NFData (BasicFuture a) where
-    rnf = rnf . val
-
-instance (NFData a) => Future BasicFuture a where
-    put = arr (\a -> BF { val = a })
-    get = arr val
 
 type Vector = [Int]
 type Matrix = [Vector]
@@ -89,7 +75,7 @@ randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
 factor :: Int
-factor = 1
+factor = 8
 
 n :: Int
 n = 32 * factor

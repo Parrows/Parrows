@@ -40,6 +40,9 @@ import System.IO.Unsafe
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
 
+instance (NFData a) => NFData (Lazy a) where
+    rnf _ = ()
+
 {-# NOINLINE putHack #-}
 putHack :: a -> MVar a
 putHack a = unsafePerformIO $ do mVar <- newEmptyMVar
