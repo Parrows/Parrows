@@ -28,6 +28,8 @@ import Control.Arrow
 
 import Data.List
 
+import Control.DeepSeq
+
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
 
@@ -65,3 +67,14 @@ shuffle = arr (concat . transpose)
 -- | A lazy list is an infinite stream
 lazy :: (Arrow arr) => arr [a] [a]
 lazy = arr (\ ~(x:xs) -> x : lazy xs)
+
+data Lazy a = Lazy a
+
+instance (NFData a) => NFData (Lazy a) where
+    rnf _ = ()
+
+mkLazy :: (Arrow arr) => arr a (Lazy a)
+mkLazy = arr (\a -> Lazy a)
+
+unLazy :: (Arrow arr) => arr (Lazy a) a
+unLazy = arr(\(Lazy a) -> a)

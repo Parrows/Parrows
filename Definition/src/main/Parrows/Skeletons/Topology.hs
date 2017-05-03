@@ -31,6 +31,8 @@ import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
 
+import Control.DeepSeq
+
 import Parrows.Skeletons.Map
 
 -- Ports of Control.Parallel.Eden.Topology to Parrows:
@@ -65,17 +67,19 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> parEvalN conf fs)) >>>
     arr last
 
-ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+ring :: (NFData o, ArrowChoice arr, ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (Lazy o, fut r) conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
         arr (uncurry zip) >>>
-        parMap conf (second get >>> f >>> second put) >>>
-        arr unzip)
+        parMap conf (second get >>> f >>>
+             mkLazy *** put) >>>
+        arr unzip >>> first (mapArr unLazy)) >>>
+    mapArr (arr id &&& arr id >>> arr (uncurry deepseq))
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
-torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
-            ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
+torus :: (NFData d, ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
+            ArrowParallel arr (c, fut a, fut b) (Lazy d, fut a, fut b) conf,
             Future fut a, Future fut b) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
@@ -84,7 +88,9 @@ torus conf f =
         (arr length >>> arr unshuffle) &&&
             (shuffle >>> parMap conf (ptorus f)) >>>
         app >>>
-        arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+        arr (map unzip3) >>> arr unzip3 >>> threetotwo >>>
+        first (mapArr (mapArr unLazy))) >>>
+    mapArr (arr id &&& arr id >>> arr (uncurry deepseq))
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
@@ -94,8 +100,8 @@ lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
 
 ptorus :: (Arrow arr, Future fut a, Future fut b) =>
           arr (c, a, b) (d, a, b) ->
-          arr (c, fut a, fut b) (d, fut a, fut b)
-ptorus f = arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>> arr (\ ~(d, a, b) -> (d, put a, put b))
+          arr (c, fut a, fut b) (Lazy d, fut a, fut b)
+ptorus f = arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>> arr (\ ~(d, a, b) -> (mkLazy d, put a, put b))
 
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
