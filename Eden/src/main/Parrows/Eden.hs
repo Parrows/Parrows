@@ -50,9 +50,9 @@ instance (Trans a) => Future RemoteData a where
 -- Probably not, because we would end up computing the values while
 -- sending them over the network, right?
 
-instance (Trans a) => Trans (Lazy a)
-instance (NFData a) => NFData (Lazy a) where
-    rnf x = rnf $ unLazy x
+--instance (Trans a) => Trans (Lazy a)
+--instance (NFData a) => NFData (Lazy a) where
+--    rnf x = rnf $ unLazy x
 
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where

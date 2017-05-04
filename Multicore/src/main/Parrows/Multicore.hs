@@ -37,11 +37,15 @@ import Control.Concurrent
 import Control.Concurrent.MVar
 import System.IO.Unsafe
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = listApp fs >>> arr (flip using $ parList rdeepseq)
+data Conf a = Conf (Strategy a)
 
-instance (NFData a) => NFData (Lazy a) where
-    rnf _ = ()
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+    parEvalN (Conf strat) fs = listApp fs >>> arr (flip using $ parList strat)
+
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
+    parEvalN _ fs = parEvalN (hack fs) fs where
+                                        hack :: (NFData b) => [arr a b] -> Conf b
+                                        hack _ = Conf rdeepseq
 
 {-# NOINLINE putHack #-}
 putHack :: a -> MVar a
