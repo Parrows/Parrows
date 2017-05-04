@@ -47,12 +47,13 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
 --instance (NFData a) => NFData (Lazy a) where
 --    rnf _ = ()
 
-{-# NOINLINE putHack #-}
-putHack :: a -> MVar a
-putHack a = unsafePerformIO $ do mVar <- newEmptyMVar
-                                 forkIO (putMVar mVar a)
-                                 return mVar
+{-# NOINLINE putUnsafe #-}
+putUnsafe :: a -> MVar a
+putUnsafe a = unsafePerformIO $ do
+    mVar <- newEmptyMVar
+    forkIO (putMVar mVar a)
+    return mVar
 
 instance (NFData a) => Future MVar a where
-    put = arr putHack
+    put = arr putUnsafe
     get = arr takeMVar >>> arr unsafePerformIO

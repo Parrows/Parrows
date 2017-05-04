@@ -29,6 +29,7 @@ import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
 
+import Control.Parallel
 import Control.Parallel.Strategies
 import Control.Arrow
 import Control.DeepSeq
@@ -40,19 +41,24 @@ import System.IO.Unsafe
 data Conf a = Conf (Strategy a)
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
-    parEvalN (Conf strat) fs = listApp fs >>> arr (flip using $ parList strat)
+    parEvalN (Conf strat) fs =
+        listApp fs >>>
+        arr (flip using $ parList strat) &&& arr id >>>
+        arr (uncurry pseq)
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
-    parEvalN _ fs = parEvalN (hack fs) fs where
-                                        hack :: (NFData b) => [arr a b] -> Conf b
-                                        hack _ = Conf rdeepseq
+    parEvalN _ fs = parEvalN (hack fs) fs
+                    where
+                        hack :: (NFData b) => [arr a b] -> Conf b
+                        hack _ = Conf rdeepseq
 
-{-# NOINLINE putHack #-}
-putHack :: a -> MVar a
-putHack a = unsafePerformIO $ do mVar <- newEmptyMVar
-                                 forkIO (putMVar mVar a)
-                                 return mVar
+{-# NOINLINE putUnsafe #-}
+putUnsafe :: a -> MVar a
+putUnsafe a = unsafePerformIO $ do
+    mVar <- newEmptyMVar
+    forkIO (putMVar mVar a)
+    return mVar
 
 instance (NFData a) => Future MVar a where
-    put = arr putHack
+    put = arr putUnsafe
     get = arr takeMVar >>> arr unsafePerformIO
