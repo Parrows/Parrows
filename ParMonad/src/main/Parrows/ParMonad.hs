@@ -39,10 +39,11 @@ import System.IO.Unsafe
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
-                    zipWithArr (app >>> arr spawnP) >>>
-                    arr sequenceA >>>
-                    arr (>>= mapM Control.Monad.Par.get) >>>
-                    arr runPar
+                    zipWithArr (app >>> arr spawnP &&& arr id) >>> arr unzip >>>
+                    first ( arr sequenceA >>>
+                            arr (>>= mapM Control.Monad.Par.get) >>>
+                            arr runPar)
+                    >>> arr snd
 
 --instance (NFData a) => NFData (Lazy a) where
 --    rnf _ = ()
