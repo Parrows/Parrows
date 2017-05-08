@@ -56,7 +56,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
 putUnsafe :: a -> MVar a
 putUnsafe a = unsafePerformIO $ do
     mVar <- newEmptyMVar
-    forkIO (putMVar mVar a)
+    putMVar mVar a
     return mVar
 
 instance (NFData a) => Future MVar a where

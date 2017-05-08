@@ -30,6 +30,7 @@ import Parrows.Future
 import Parrows.Util
 
 import Control.Monad.Par
+import Control.Monad.IO.Class
 import Control.Arrow
 import Control.DeepSeq
 
@@ -41,12 +42,32 @@ import GHC.Conc
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
+                    zipWithArr (app >>> arr spawnP) >>>
+                    arr sequenceA >>>
+                    arr (>>= mapM Control.Monad.Par.get) >>>
+                    arr runPar
+
+{-
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
+    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
                     zipWithArr (app >>> arr spawnP &&& arr id) >>> arr unzip >>>
                     first (arr sequenceA >>>
                            arr (>>= mapM Control.Monad.Par.get) >>>
-                           arr (>>= (\_ -> return ())) >>>
-                           arr runPar)
+                           arr (>> return (unsafePerformIO (print "test"))) >>>
+                           arr (>>= (return . rnf)) >>>
+                           arr runParIO >>> arr forkIO)
                     >>> arr (uncurry pseq)
+-}
+
+{-
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
+    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
+                    zipWithArr (app >>> arr spawnP &&& arr id) >>> arr unzip >>>
+                    first (arr sequenceA >>>
+                           arr (>>= mapM Control.Monad.Par.get) >>>
+                           arr runPar)
+                    >>> arr snd
+-}
 
 --instance (NFData a) => NFData (Lazy a) where
 --    rnf _ = ()
@@ -55,7 +76,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
 putUnsafe :: a -> MVar a
 putUnsafe a = unsafePerformIO $ do
     mVar <- newEmptyMVar
-    forkIO (putMVar mVar a)
+    putMVar mVar a
     return mVar
 
 instance (NFData a) => Future MVar a where
