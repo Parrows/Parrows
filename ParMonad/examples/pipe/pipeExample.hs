@@ -22,43 +22,27 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
-module Parrows.Multicore where
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses #-}
+
+module Main where
 
 import Parrows.Definition
+import Parrows.ParMonad
+import Parrows.Skeletons.Topology
 import Parrows.Future
-import Parrows.Util
 
-import Control.Parallel
-import Control.Parallel.Strategies
 import Control.Arrow
-import Control.DeepSeq
 
-import Control.Concurrent
-import Control.Concurrent.MVar
-import System.IO.Unsafe
+replicated :: [Int -> Int]
+replicated = map (+) [1..4]
 
-data Conf a = Conf (Strategy a)
+expectedValue :: Int -> Int
+expectedValue x = foldl (flip ($)) x replicated
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
-    parEvalN (Conf strat) fs =
-        listApp fs >>>
-        arr (withStrategy (parList strat)) &&& arr id >>>
-        arr (uncurry pseq)
+pipeTest :: Int -> Int 
+pipeTest x = pipe () replicated x
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
-    parEvalN _ fs = parEvalN (hack fs) fs
-                    where
-                        hack :: (NFData b) => [arr a b] -> Conf b
-                        hack _ = Conf rdeepseq
+main = print $ pipeTest 1 
 
-{-# NOINLINE putUnsafe #-}
-putUnsafe :: a -> MVar a
-putUnsafe a = unsafePerformIO $ do
-    mVar <- newEmptyMVar
-    putMVar mVar a
-    return mVar
 
-instance (NFData a) => Future MVar a where
-    put = arr putUnsafe
-    get = arr takeMVar >>> arr unsafePerformIO
+

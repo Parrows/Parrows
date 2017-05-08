@@ -91,7 +91,7 @@ uncurry3 f (a, (b, c)) = f a b c
 
 lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
-<z
+
 ptorus :: (Arrow arr, Future fut a, Future fut b) =>
           arr (c, a, b) (d, a, b) ->
           arr (c, fut a, fut b) (d, fut a, fut b)
