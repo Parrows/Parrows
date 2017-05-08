@@ -14,11 +14,13 @@ parEvalN :: [a -> b] -> [a] -> [b]
 We will now implement \code{parEvalN} with the different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009} is way to do parallel processing found in standard GHC.\footnote{See \url{https://hackage.haskell.org/package/parallel-3.2.1.0}.} It ships with parallel evaluation strategies for several types which can be applied with \code{using :: a -> Strategy a -> a}. For \code{parEvalN} this means that we can just apply the list of functions \code{[a -> b]} to the list of inputs \code{[a]} by zipping them with the application operator \code{\$}. This lazy list \code{[b]} is then forcibly evaluated in parallel with the strategy \code{Strategy [b]} by the \code{using} operator. This strategy can be constructed with \code{parList :: Strategy a -> Strategy [a]} and \code{rdeepseq :: NFData a => Strategy a}.
+Multicore Haskell \cite{Marlow2009} is way to do parallel processing found in standard GHC.\footnote{See \url{https://hackage.haskell.org/package/parallel-3.2.1.0}.} It ships with parallel evaluation strategies for several types which can be applied with \code{using :: a -> Strategy a -> a}. For \code{parEvalN} this means that we can just apply the list of functions \code{[a -> b]} to the list of inputs \code{[a]} by zipping them with the application operator \code{\$}. This lazy list \code{[b]} is then according to a \code{Strategy [b]} by the \code{using :: a -> Strategy a -> a} operator. This strategy can be constructed with \code{parList :: Strategy a -> Strategy [a]} and \code{rdeepseq :: NFData a => Strategy a} where the latter is a strategy which evalutes to normal form.
+\textbf{\textcolor{red}{explain usage of pseq}}
 
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
-parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
+parEvalN fs as = let bs = zipWith ($) fs as in
+	(bs `using` parList rdeepseq) `pseq` bs
 \end{lstlisting}
 \begin{center}
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
@@ -59,7 +61,7 @@ parEvalN = spawnF
 \end{center}
 
 \paragraph{Eden TraceViewer}
-To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, in parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See ..... on hackage for the last available version of Eden TraceViewer. There was an effort to implement the TraceViewer using modern web technologies \cite{traceviewer-web}.} \cite{Berthold2007a}. In the next sections we will present some \emph{traces}, the post-mortem process diagrams of Eden processes and their activity.
+To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See ..... on hackage for the last available version of Eden TraceViewer. There was an effort to implement the TraceViewer using modern web technologies \cite{traceviewer-web}.} \cite{Berthold2007a}. In the next sections we will present some \emph{traces}, the post-mortem process diagrams of Eden processes and their activity.
 
 In a trace, the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. A~trace shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for then is GC. An inactive machine where no processes are started yet, or all are already terminated, is shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes.
 

@@ -29,26 +29,28 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 \end{lstlisting}
-For ParMonad and Multicore we can use a basic dummy wrapper because we have shared memory in a single node:
+For ParMonad and Multicore we can simply use \code{MVar}s because we have shared memory in a single node:
 \begin{lstlisting}[frame=htrbl]
-data BasicFuture a = BF { val :: a }
+{-# NOINLINE putUnsafe #-}
+putUnsafe :: a -> MVar a
+putUnsafe a = unsafePerformIO $ do
+    mVar <- newEmptyMVar
+    putMVar mVar a
+    return mVar
 
-instance (NFData a) => Future BasicFuture a where
-    put = arr (\a -> BF { val = a })
-    get = arr val
+instance (NFData a) => Future MVar a where
+    put = arr putUnsafe
+    get = arr takeMVar >>> arr unsafePerformIO
 \end{lstlisting}
 To fit the \code{ArrowParallel} instances we gave earlier, we also have to give the necessary \code{NFData} and \code{Trans} instances - the latter only being needed in Eden.
-We need this implementation for our \code{RemoteData} wrapper
+We need this implementation for our \code{RemoteData} wrapper,
 \begin{lstlisting}[frame=htrbl]
 instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
 \end{lstlisting}
-and the following for the \code{BasicFuture} dummy type:
-\begin{lstlisting}[frame=htrbl]
-instance (NFData a) => NFData (BasicFuture a) where
-	rnf = rnf . val
-\end{lstlisting}
+while \code{MVar} already has a suitable NFData implementation.
+\\\\
 Going back to our communication example we can use this Future concept in order to enable direct communications between the nodes in the following way:
 \begin{lstlisting}[frame=htrbl]
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
