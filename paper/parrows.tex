@@ -41,14 +41,15 @@ data Conf a = Conf (Strategy a)
 \end{lstlisting}
 We simply unwrap the strategy out of this wrapper and get the following (configurable) \code{ArrowParallel} instance:
 \begin{lstlisting}[frame=htrbl]
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
-    parEvalN (Conf strat) fs =
-        listApp fs >>>
-        arr (withStrategy (parList strat)) &&& arr id >>>
-        arr (uncurry pseq)
+instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
+	ArrowParallel arr a b (Conf b) where
+    	parEvalN (Conf strat) fs =
+        	listApp fs >>>
+        	arr (withStrategy (parList strat)) &&& arr id >>>
+        	arr (uncurry pseq)
 \end{lstlisting}
 \subsection{ParMonad}
-The ParMonad implementation makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a => a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
+The ParMonad implementation makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
 
 
 We therefore apply each function to its corresponding input value with \code{app} and then fork the computation away with \code{arr spawnP} inside a \code{zipWithArr} call. This yields a list \code{[Par (IVar b)]}, which we then convert into \code{Par [IVar b]} with \code{arr sequenceA}. In order to wait for the computation to finish, we map over the \code{IVar}s inside the ParMonad with \code{arr (>>= mapM get)}. The result of this operation is a \code{Par [b]} from which we can finally remove the monad again by running \code{arr runPar} to get our output of \code{[b]}.
