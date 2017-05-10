@@ -80,7 +80,7 @@ randoms2 = randoms $ mkStdGen 67123
 
 toMatrix :: Int -> [Int] -> Matrix
 toMatrix cnt randoms = chunksOf n $ take (n * n) randoms
-	where n = cnt 
+        where n = cnt
 
 splitMatrix :: Int -> Matrix -> [[Matrix]]
 splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
@@ -89,13 +89,11 @@ combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
 combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
 main = do
-	 args <- getArgs
-	 let (nodeCount:problemSize:rest) = args
-	 let nodeCountVal = read nodeCount 
-	 let problemSizeVal = read problemSize
-	 let aMatrix = toMatrix problemSizeVal randoms1
-	 let bMatrix = toMatrix problemSizeVal randoms2
-	 let val = torus () (nodefunction nodeCountVal) $ combine (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix)) (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix))	
-	 print $ length $ (rnf val) `seq` val
-
-	       		
+        args <- getArgs
+        let (nodeCount:problemSize:rest) = args
+        let nodeCountVal = read nodeCount
+        let problemSizeVal = read problemSize
+        let aMatrix = toMatrix problemSizeVal randoms1
+        let bMatrix = toMatrix problemSizeVal randoms2
+        let val = torus () (nodefunction nodeCountVal) $ combine (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix)) (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix))
+        print $ length $ (rnf val) `seq` val

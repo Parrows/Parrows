@@ -1,16 +1,30 @@
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances,
+MultiParamTypeClasses #-}
+
 module Main where
 
+import Parrows.Eden
 import Parrows.Definition
 import Parrows.Future
+import Parrows.Util
 import Parrows.Skeletons.Topology
-import Parrows.Eden
 import Data.List
+
+--import GHC.Conc
+
+import Control.Arrow
+--import Control.Monad.Par
+import Control.Parallel.Strategies
+import Control.Parallel
+import Control.DeepSeq
 
 import Control.DeepSeq
 
 import Control.Applicative
 import Data.Functor
 import Data.List.Split
+
+import System.Environment
 
 import System.Random
 
@@ -64,17 +78,9 @@ randoms1 = randoms $ mkStdGen 23586
 randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
-factor :: Int
-factor = 32 
-
-n :: Int
-n = 32 * factor
-
-aMatrix :: Matrix
-aMatrix = chunksOf n $ take (n * n) randoms1
-
-bMatrix :: Matrix
-bMatrix = chunksOf n $ take (n * n) randoms2
+toMatrix :: Int -> [Int] -> Matrix
+toMatrix cnt randoms = chunksOf n $ take (n * n) randoms
+        where n = cnt
 
 splitMatrix :: Int -> Matrix -> [[Matrix]]
 splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
@@ -82,6 +88,12 @@ splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size 
 combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
 combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
-main = print $ length $ (rnf val) `seq` val
-    where
-        val = torus () (nodefunction 16) $ combine (splitMatrix (2 * factor) aMatrix) (splitMatrix (2 * factor) bMatrix)
+main = do
+        args <- getArgs
+        let (nodeCount:problemSize:rest) = args
+        let nodeCountVal = read nodeCount
+        let problemSizeVal = read problemSize
+        let aMatrix = toMatrix problemSizeVal randoms1
+        let bMatrix = toMatrix problemSizeVal randoms2
+        let val = torus () (nodefunction nodeCountVal) $ combine (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix)) (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix))
+        print $ length $ (rnf val) `seq` val
