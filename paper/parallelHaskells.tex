@@ -11,11 +11,10 @@ parEvalN :: [a -> b] -> [a] -> [b]
 \begin{center}
 	\includegraphics[scale=0.7]{images/parEvalN}
 \end{center}
-We will now implement \code{parEvalN} with the different parallel Haskells.
+Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement \code{parEvalN} with several different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009} is way to do parallel processing found in standard GHC.\footnote{See \url{https://hackage.haskell.org/package/parallel-3.2.1.0}.} It ships with parallel evaluation strategies for several types which can be applied with \code{using :: a -> Strategy a -> a}. For \code{parEvalN} this means that we can just apply the list of functions \code{[a -> b]} to the list of inputs \code{[a]} by zipping them with the application operator \code{\$}. This lazy list \code{[b]} is then according to a \code{Strategy [b]} by the \code{using :: a -> Strategy a -> a} operator. This strategy can be constructed with \code{parList :: Strategy a -> Strategy [a]} and \code{rdeepseq :: NFData a => Strategy a} where the latter is a strategy which evalutes to normal form.
-\textbf{\textcolor{red}{explain usage of pseq}}
+Multicore Haskell \cite{Marlow2009} is way to do parallel processing found in standard GHC.\footnote{See \url{https://hackage.haskell.org/package/parallel-3.2.1.0}.} It ships with parallel evaluation strategies for several types which can be applied with \code{using :: a -> Strategy a -> a}. For \code{parEvalN} this means that we can just apply the list of functions \code{[a -> b]} to the list of inputs \code{[a]} by zipping them with the application operator \code{\$}. We then evaluate this lazy list \code{[b]} according to a \code{Strategy [b]} with the \code{using :: a -> Strategy a -> a} operator. We construct this strategy with \code{parList :: Strategy a -> Strategy [a]} and \code{rdeepseq :: NFData a => Strategy a} where the latter is a strategy which evalutes to normal form. To ensure that programs that use \code{parEvalN} have the correct evaluation order, we annotate the computation with \code{pseq :: a -> b -> b} which forces the compiler to not reorder multiple \code{parEvalN} computations. This is particularly necessary in circular communication topologies like in the \code{torus} or \code{ring} skeleton that we will see in chapter \ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without \code{pseq} during testing for this paper.
 
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
@@ -31,6 +30,8 @@ The \code{Par} monad\footnote{It can be found in the \texttt{monad-par} package 
 
 
 Our parallel evaluation function \code{parEvalN} can be defined by zipping the list of \code{[a -> b]} with the list of inputs \code{[a]} with the application operator \code{\$} just like with Multicore Haskell. Then, we map over this not yet evaluated lazy list of results \code{[b]} with \code{spawnP :: NFData a => a -> Par (IVar a)} to transform them to a list of not yet evaluated forked away computations \code{[Par (IVar b)]}, which we convert to \code{Par [IVar b]} with \code{sequenceA}. We wait for the computations to finish by mapping over the \code{IVar b}'s inside the \code{Par} monad with \code{get}. This results in \code{Par [b]}. We finally execute this process with \code{runPar} to finally get \code{[b]} again.
+
+\textbf{\textcolor{red}{explain problems with laziness here. Problems with torus}}
 
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
