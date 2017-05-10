@@ -9,11 +9,12 @@ import Parrows.Util
 import Parrows.Skeletons.Topology
 import Data.List
 
-import GHC.Conc
+--import GHC.Conc
 
 import Control.Arrow
-import Control.Monad.Par
+--import Control.Monad.Par
 import Control.Parallel.Strategies
+import Control.Parallel
 import Control.DeepSeq
 
 import Control.DeepSeq
@@ -75,7 +76,7 @@ randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
 factor :: Int
-factor = 8
+factor = 30 
 
 n :: Int
 n = 32 * factor
@@ -94,4 +95,4 @@ combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
 main = print $ length $ (rnf val) `seq` val
     where
-        val = torus () (nodefunction 16) $ combine (splitMatrix (2 * factor) aMatrix) (splitMatrix (2 * factor) bMatrix)
+        val = torus () (nodefunction 16) $ combine (splitMatrix (2 * factor) (aMatrix)) (splitMatrix (2 * factor) (aMatrix))
