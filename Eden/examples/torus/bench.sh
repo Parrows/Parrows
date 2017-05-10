@@ -1,7 +1,73 @@
 #!/bin/bash
-ghc torus_matrix_parrows -parmpi -eventlog -rtsopts
-ghc torus_matrix_eden -parmpi -eventlog -rtsopts
 
-bench "./torus_matrix_parrows +RTS -N96" "./torus_matrix_parrows +RTS -N64" "./torus_matrix_parrows +RTS -N48" "./torus_matrix_parrows +RTS -N32" "./torus_matrix_parrows +RTS -N16" "./torus_matrix_parrows +RTS -N8" "./torus_matrix_parrows +RTS -N4" "./torus_matrix_parrows +RTS -N2" -o bench_parrows.html --resamples 10000
-bench "./torus_matrix_eden +RTS -N96" "./torus_matrix_eden +RTS -N64" "./torus_matrix_eden +RTS -N48" "./torus_matrix_eden +RTS -N32" "./torus_matrix_eden +RTS -N16" "./torus_matrix_eden +RTS -N8" "./torus_matrix_eden +RTS -N4" "./torus_matrix_eden +RTS -N2" -o bench_eden.html --resamples 10000
+echo "cleaning up stack environment"
+stack clean
+stack install
 
+echo "cleaning up previous compiled versions"
+# force recompile by cleaning up manually
+rm *.o
+rm *.hi
+
+echo "Compiling..."
+ghc torus_matrix_parrows -parmpi -rtsopts
+ghc torus_matrix_eden -parmpi -rtsopts
+stack ghc torus_matrix_multicore -- -threaded -rtsopts
+echo "done."
+
+procCounts=(
+    "2"
+    "4"
+    "8"
+    "16"
+    "32"
+#    "48"
+#    "64"
+#    "80"
+#    "96"
+)
+
+programs=(
+#    "torus_matrix_parrows"
+#    "torus_matrix_eden"
+    "torus_matrix_multicore" 
+)
+
+problemSizes=(
+    #"32"
+    #"64"
+    "128"
+    "256"
+    "512"
+)
+
+torusSizes=(
+    "2"
+    "4"
+    "8"
+    "16"
+    "32"
+    "64"
+)
+
+# get length of an array
+programCount=${#programs[@]}
+
+for problemSize in "${problemSizes[@]}"
+do
+    for torusSize in "${torusSizes[@]}"
+    do
+        for procCount in "${procCounts[@]}"
+        do
+            benchCmds=""
+            for program in "${programs[@]}"
+            do
+                cmd="\"./"${program}" "${torusSize}" "${problemSize}" +RTS -N"${procCount}"\""
+                benchCmds=${benchCmds}" "${cmd}
+            done 
+            evalCmd="bench "${benchCmds}" -o probSize=${problemSize}_torusSize=${torusSize}_procCount=${procCount}.html --resamples 1000"
+            echo "running ${evalCmd}"
+            eval "$evalCmd"
+        done
+    done
+done
