@@ -1,10 +1,12 @@
 \subsection{Arrows}
 \label{sec:arrows}
-\begin{center}
-	\includegraphics[]{images/arrow}
-\end{center}
+\begin{figure}[h]
+	\includegraphics{images/arrow}
+	\caption{schematic depiction of an arrow}
+\end{figure}
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \code{arr a b} represents  a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
 
+\begin{figure}[h]
 \begin{minipage}{\textwidth}
 \begin{minipage}{0.5\textwidth}
 \begin{lstlisting}[frame=htrbl]
@@ -23,13 +25,15 @@ first :: arr a b -> arr (a,c) (b,c)
 \end{minipage}
 ~~~~
 \begin{minipage}{0.25\textwidth}
-	~\\~\\~\\
-	\includegraphics[scale=0.6]{images/arr}~\\~\\
-	\includegraphics[scale=0.6]{images/compose}~\\~\\
-	\includegraphics[scale=0.6]{images/first}~\\~\\
+	\begin{center}
+	\subcaptionbox{arr}{\includegraphics[scale=0.6]{images/arr}}
+	\subcaptionbox{composition \code{(>>>)}}{\includegraphics[scale=0.6]{images/compose}}
+	\subcaptionbox{first}{\includegraphics[scale=0.6]{images/first}}
+	\end{center}
 \end{minipage}
-\olcomment{a figure?}
 \end{minipage}
+\caption{the arrow type class definition on the left with schematic depiction of its combinators on the right}
+\end{figure}
 \lstinline{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \lstinline{return}. The \lstinline{>>>} operator is analogous to the monadic composition  \lstinline{>>=} and combines two arrows \code{arr a b} and \code{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \code{arr a c}. Lastly, the \lstinline{first} operator  takes the input arrow from \lstinline{b} to \lstinline{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
 The most prominent instances of this interface are regular functions \lstinline{(->)},
@@ -44,9 +48,9 @@ and the Kleisli type
 data Kleisli m a b = Kleisli { run :: a -> m b }
 
 instance Monad m => Arrow (Kleisli m) where
-	arr f = Kleisli $ return . f
-	f >>> g = Kleisli $ \a -> f a >>= g
-	first f = Kleisli $ \(a,c) -> f a >>= \b -> return (b,c)
+	arr f = Kleisli (return . f)
+	f >>> g = Kleisli (\a -> f a >>= g)
+	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
 \end{lstlisting}%$
 \begin{figure}
 	\centering

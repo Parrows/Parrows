@@ -1,11 +1,8 @@
 \section{Parallel Arrows}
 \label{sec:parallel-arrows}
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
-\begin{center}
-	\includegraphics[scale=0.7]{images/parEvalN}
-\end{center}
 \subsection{The ArrowParallel typeclass}
-As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \code{a -> b} in parallel:
+As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \code{a -> b} in parallel, \code{parEvalN} (Fig.~\ref{fig:parEvalN}):
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -26,7 +23,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 Note that we don't require the \code{conf} parameter in every implementation. If it is not needed, we usually just default the \code{conf} type parameter to () and even blank it out in the parameter list of the implemented \code{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
 \subsection{Multicore Haskell}
-The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from chapter \ref{utilfns} combined with the \code{withStrategy :: Strategy a -> a -> a} and \code{pseq :: a -> b -> b} combinators from Multicore Haskell, where \code{withStrategy} is the same as \code{using :: a -> Strategy a -> a} but with flipped parameters.
+The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \code{withStrategy :: Strategy a -> a -> a} and \code{pseq :: a -> b -> b} combinators from Multicore Haskell, where \code{withStrategy} is the same as \code{using :: a -> Strategy a -> a} but with flipped parameters.
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b () where

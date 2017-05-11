@@ -8,10 +8,12 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
-\begin{center}
+\begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEvalN}
+	\caption{schematic illustration of parEvalN}
+	\label{fig:parEvalN}
+\end{figure}
 \olcomment{make them to real figures? with environment, reference and such?}
-\end{center}
 Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement \code{parEvalN} with several different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
@@ -22,10 +24,10 @@ parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = let bs = zipWith ($) fs as in
 	(bs `using` parList rdeepseq) `pseq` bs
 \end{lstlisting}
-\begin{center}
+\begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
-\olcomment{swap $f_i$ and $a_i$! add ``evaluation'' to the last set of arrows?}
-\end{center} %$ %% formatting
+	\caption{dataflow of the Multicore Haskell parEvalN version}
+\end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
 The \code{Par} monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
@@ -40,10 +42,10 @@ parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{lstlisting}
-\begin{center}
+\begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
-\olcomment{add as figure? both code and image? reference then!}
-\end{center}
+	\caption{dataflow of the Par Monad parEvalN version}
+\end{figure}
 
 \subsubsection{Eden}
 Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{See also \url{http://www.mathematik.uni-marburg.de/~eden/} and \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} This means that it works on clusters as well so it makes sense to have a Eden-based backend for our new parallel Haskell flavour.
@@ -62,10 +64,10 @@ allows us to define \code{parEvalN} directly:
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 parEvalN = spawnF 
 \end{lstlisting}
-\begin{center}
+\begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNEden}
-\olcomment{ditto mit figure}
-\end{center}
+	\caption{dataflow of the Eden parEvalN version}
+\end{figure}
 
 \paragraph{Eden TraceViewer.}
 To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See ..... on hackage for the last available version of Eden TraceViewer. There was an effort to implement the TraceViewer using modern web technologies \cite{traceviewer-web}.} \cite{Berthold2007a}. In the next sections we will present some \emph{traces}, the post-mortem process diagrams of Eden processes and their activity.
