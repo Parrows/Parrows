@@ -1,6 +1,6 @@
 \section{Topological Skeletons}
 \label{sec:topology-skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \code{pipe}, a \code{ring} and a \code{torus} implementation \cite{eden_cefp, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express such skeletons with Parallel Arrows as well.
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \code{pipe}, a \code{ring} and a \code{torus} implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express such skeletons with Parallel Arrows as well.
 
 \subsection{Parallel pipe}
 
@@ -95,7 +95,7 @@ rightRotate xs =  last xs : init xs
 %\begin{lstlisting}[frame=htrbl]
 
 
-We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{eden_cefp}:
+We can rewrite its functionality easily with the use of \code{loop} as the definition of the node function, \code{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \code{loop}'s \code{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \code{[fut r]} with \code{second (rightRotate >>> lazy)}. Similarly to the pipe, we have to feed the intermediary input into our \code{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
 %\begin{quotation}
 \enquote{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
 %\end{quotation}
@@ -167,7 +167,7 @@ ptorus f =
 	arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>>
 	arr (\ ~(d, a, b) -> (d, put a, put b))
 \end{lstlisting}
-As an example of using this skeleton \citet{eden_cefp} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Adapting this nodefunction to our Arrow API gives us:
+As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Adapting this nodefunction to our Arrow API gives us:
 \begin{lstlisting}[frame=htrbl]
 nodefunction :: Int ->
 	((Matrix, Matrix), [Matrix], [Matrix]) ->

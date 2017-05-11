@@ -3,7 +3,7 @@
 \begin{center}
 	\includegraphics[]{images/arrow.png}
 \end{center}
-Arrows were introduced by Hughes \citHughes\ as a general interface for computation. An arrow \code{arr a b} represents  a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \code{arr a b} represents  a computation that converts an input \code{a} to an output \code{b}. This is defined in the arrow typeclass:
 
 \begin{minipage}{\textwidth}
 \begin{minipage}{0.5\textwidth}
@@ -28,6 +28,7 @@ first :: arr a b -> arr (a,c) (b,c)
 	\includegraphics[scale=0.6]{images/compose}~\\~\\
 	\includegraphics[scale=0.6]{images/first}~\\~\\
 \end{minipage}
+\olcomment{a figure?}
 \end{minipage}
 \lstinline{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \lstinline{return}. The \lstinline{>>>} operator is analogous to the monadic composition  \lstinline{>>=} and combines two arrows \code{arr a b} and \code{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \code{arr a c}. Lastly, the \lstinline{first} operator  takes the input arrow from \lstinline{b} to \lstinline{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
@@ -55,10 +56,10 @@ instance Monad m => Arrow (Kleisli m) where
 		\subcaptionbox{(***)\label{c1}}{\includegraphics[width = 1.5in]{images/starstarstar}} &
 		\subcaptionbox{(\&\&\&)\label{c2}}{\includegraphics[width = 1.5in]{images/andandand}}\
 	\end{tabular}
-	\caption{Syntactic sugar for arrows. \olcomment{FIXME: subreferences}}
+	\caption{Syntactic sugar for arrows. \olcomment{FIXME: subreferences? refer to the figure in text!}}
 	\label{3}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \lstinline{first}, called \lstinline{second},
+With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \code{first}, called \code{second},
 \begin{lstlisting}[frame=htrbl]
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
 second f = arr swap >>> first f >>> arr swap
@@ -69,7 +70,7 @@ the *** combinator which combines first and second to handle two inputs in one a
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
 f *** g = first f >>> second g
 \end{lstlisting}
-and the \&\&\& combinator that constructs an arrow which outputs 2 different values like ***, but takes only one input.
+and the \code{&&&} combinator that constructs an arrow which outputs two different values like \code{***}, but takes only one input.
 \begin{lstlisting}[frame=htrbl]
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
 f &&& g = arr (\a -> (a, a)) >>> (f *** g)

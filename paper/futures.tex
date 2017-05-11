@@ -5,17 +5,17 @@ someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
 \end{lstlisting}
 In a distributed environment, the resulting arrow of this combinator first evaluates all \code{[arr a b]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \code{[arr b c]} in parallel to then gather the input once again on the master node. 
-Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,pact-fft}.
+Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
 While this could be rewritten into only one \code{parEvalN} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \code{ArrowParallel} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
-for larger amount of data and number of processes \citep[showcases][as, \eg]{Berthold2009b}.
+for larger amount of data and number of processes \citep[showcases][as, \eg]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
 	\caption[without Futures]{Communication between 4 threads without Futures}
 	\label{fig:withoutFutures}
 \end{figure}
-This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \code{RD} (remote data) that enables this behaviour \cite{AlGo03a,dieterle2010remotedata}. But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \code{Future} typeclass:
+This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \code{RD} (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}. But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \code{Future} typeclass:
 \begin{lstlisting}[frame=htrbl]
 class Future fut a | a -> fut where
     put :: (Arrow arr) => arr a (fut a)
