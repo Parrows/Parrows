@@ -16,6 +16,7 @@ stack ghc torus_matrix_multicore -- -threaded -rtsopts
 echo "done."
 
 procCounts=(
+    "1"
     "2"
     "4"
     "8"
@@ -42,6 +43,7 @@ problemSizes=(
 )
 
 torusSizes=(
+    "1"
     "2"
     "4"
     "8"
@@ -59,15 +61,17 @@ do
     do
         for procCount in "${procCounts[@]}"
         do
-            benchCmds=""
+            # benchCmds=""
             for program in "${programs[@]}"
             do
                 cmd="\"./"${program}" "${torusSize}" "${problemSize}" +RTS -N"${procCount}"\""
                 benchCmds=${benchCmds}" "${cmd}
-            done 
-            evalCmd="bench "${benchCmds}" -o probSize=${problemSize}_torusSize=${torusSize}_procCount=${procCount}.html --resamples 1000"
-            echo "running ${evalCmd}"
-            eval "$evalCmd"
+            done
         done
     done
 done
+
+#evalCmd="bench "${benchCmds}" -o probSize=${problemSize}_torusSize=${torusSize}_procCount=${procCount}.html --resamples 1000"
+evalCmd="bench "${benchCmds}" --csv benchResults.csv --resamples 1000"
+echo "running ${evalCmd}"
+eval "$evalCmd"
