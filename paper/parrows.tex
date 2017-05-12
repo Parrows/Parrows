@@ -31,7 +31,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 \end{figure}
 Note that we don't require the \code{conf} parameter in every implementation. If it is not needed, we usually just default the \code{conf} type parameter to () and even blank it out in the parameter list of the implemented \code{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
-\subsection{Multicore Haskell}
+\subsection{Multicore Haskell} \label{sec:parrows:multicore}
 The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \code{withStrategy :: Strategy a -> a -> a} and \code{pseq :: a -> b -> b} combinators from Multicore Haskell, where \code{withStrategy} is the same as \code{using :: a -> Strategy a -> a} but with flipped parameters.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
@@ -42,7 +42,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList rdeepseq)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{lstlisting}% $ %% formatting
-\caption{Fully evaluating ArrowParallel instance for the Multicore backend}
+\caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
 For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the \code{Strategy} interface, we want to the user not to lose this ability because of using our API. We therefore introduce the \code{Conf a} data-type that simply wraps a \code{Strategy a} (Fig.~\ref{fig:confa}). We can't directly use the \code{Strategy a} type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
@@ -63,7 +63,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList strat)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{lstlisting}
-\caption{Configurable ArrowParallel instance for the Multicore backend}
+\caption{Configurable ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 \subsection{Par Monad}
