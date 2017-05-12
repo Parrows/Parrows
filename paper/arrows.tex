@@ -72,7 +72,7 @@ instance Monad m => Arrow (Kleisli m) where
 	\caption{Syntactic sugar for arrows}
 	\label{3}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \code{first}, called \code{second} (Fig.~\ref{fig:secondImg},\ref{fig:second}),
+With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \code{first}, called \code{second} (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -82,7 +82,7 @@ second f = arr swap >>> first f >>> arr swap
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the *** combinator which combines first and second to handle two inputs in one arrow, (Fig.\ref{fig:***Img},\ref{fig:***})
+the *** combinator which combines first and second to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -91,7 +91,7 @@ f *** g = first f >>> second g
 \caption{The (***) combinator}
 \label{fig:***}
 \end{figure}
-and the \code{\&\&\&} combinator that constructs an arrow which outputs two different values like \code{***}, but takes only one input (Fig.~\ref{fig:&&&Img},\ref{fig:&&&}).
+and the \code{\&\&\&} combinator that constructs an arrow which outputs two different values like \code{***}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
