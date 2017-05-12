@@ -29,12 +29,12 @@ These combinators make use of the \code{ArrowChoice} type class, it provides the
 \begin{lstlisting}[frame=htrbl]
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{lstlisting}
-With the zipWithArr combinator we can also write a combinator \code{listApp}, which lifts a list of arrows \code{[arr a b]} to an arrow \code{arr [a] [b]}.
+With the zipWithArr combinator we can also write a combinator \code{listApp}, which lifts a list of arrows \code{[arr a b]} to an arrow \code{arr [a] [b]},
 \begin{lstlisting}[frame=htrbl]
 listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
 listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 \end{lstlisting}% $ %% formatting
-This combinator also makes use of the \code{ArrowApply} typeclass that allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
+which also makes use of the \code{ArrowApply} typeclass that allows us to evaluate arrows with \code{app :: arr (arr a b, a) c}.
 
 The definition of \code{unshuffle} is
 \begin{lstlisting}[frame=htrbl]
