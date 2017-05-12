@@ -1,3 +1,4 @@
+\FloatBarrier
 \section{Topological Skeletons}
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \code{pipe}, a \code{ring} and a \code{torus} implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express such skeletons with Parallel Arrows as well.
@@ -12,7 +13,7 @@ loop (arr (\(a, b) -> (b, a:b)))
 \begin{lstlisting}[frame=htrbl]
 loop (arr snd &&& arr (uncurry (:)))
 \end{lstlisting}
-defines an arrow that takes its input \code{a} and converts it into an infinite stream \code{[a]} of it. Using this to our advantage gives us a first draft of a pipe implementation by plugging in the parallel evaluation call \code{parEvalN conf fs} inside the second argument of \code{&&&} and then only picking the first element of the resulting list with \code{arr last}:
+defines an arrow that takes its input \code{a} and converts it into an infinite stream \code{[a]} of it. Using this to our advantage gives us a first draft of a pipe implementation by plugging in the parallel evaluation call \code{parEvalN conf fs} inside the second argument of \code{(\&\&\&)} and then only picking the first element of the resulting list with \code{arr last}:
 \begin{lstlisting}[frame=htrbl]
 pipeSimple :: (ArrowLoop arr, ArrowParallel arr a a conf) =>
 	conf -> [arr a a] -> arr a a
