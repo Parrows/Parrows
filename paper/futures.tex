@@ -72,8 +72,9 @@ instance Trans (RemoteData a)
 \end{lstlisting}
 \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
 \end{figure}
-\\\\
+
 Going back to our communication example we can use this Future concept in order to enable direct communications between the nodes in the following way:
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 =
@@ -81,6 +82,9 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get >>>) fs2)
 \end{lstlisting}
+\caption{The combinator from Fig.~\ref{fig:someCombinator} in parallel}
+\label{fig:someCombinatorParallel}
+\end{figure}
 In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in the trace in Fig.~\ref{fig:withFutures}.\olcomment{Fig.~3 is not really clear. Do Figs 2-3 with a lot of load?}
 \begin{figure}[ht]
 	\centering
