@@ -66,11 +66,12 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \caption{Configurable ArrowParallel instance for the Multicore backend}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
-\subsection{ParMonad}
-The ParMonad implementation makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
+\subsection{Par Monad}
+The ParMonad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
 
 
 We therefore apply each function to its corresponding input value with \code{app} and then fork the computation away with \code{arr spawnP} inside a \code{zipWithArr} call. This yields a list \code{[Par (IVar b)]}, which we then convert into \code{Par [IVar b]} with \code{arr sequenceA}. In order to wait for the computation to finish, we map over the \code{IVar}s inside the ParMonad with \code{arr (>>= mapM get)}. The result of this operation is a \code{Par [b]} from which we can finally remove the monad again by running \code{arr runPar} to get our output of \code{[b]}.
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b conf where
@@ -81,19 +82,31 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 			arr (>>= mapM get) >>>
 			arr runPar
 \end{lstlisting} %$ %% formatting
+\caption{ArrowParallel instance for the Par Monad backend}
+\label{fig:ArrowParallelParMonad}
+\end{figure}
 
 \subsection{Eden}
-For the Multicore and ParMonad implementation we could use general instances of \code{ArrowParallel} that just require the \code{ArrowApply} and \code{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass like
+For the Multicore and ParMonad implementation we could use general instances of \code{ArrowParallel} that just require the \code{ArrowApply} and \code{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass \code{ArrowUnwrap} (Fig.~\ref{fig:ArrowUnwrap}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 class (Arrow arr) => ArrowUnwrap arr where
 	arr a b -> (a -> b)
-\end{lstlisting} %
-we don't do it here, for aesthetic resons. For now, we just implement \code{ArrowParallel} for normal functions
+\end{lstlisting}
+\caption{possible ArrowUnwrap typeclass}
+\label{fig:ArrowUnwrap}
+\end{figure}
+We don't do it here for aesthetic resons, though. For now, we just implement \code{ArrowParallel} for normal functions (Fig.~\ref{fig:ArrowParallelEdenFns})
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
 parEvalN _ fs as = spawnF fs as
 \end{lstlisting}
-and the Kleisli type.
+\caption{ArrowParallel instance for functions in the Eden backend}
+\label{fig:ArrowParallelEdenFns}
+\end{figure}
+and the Kleisli type (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (Monad m, Trans a, Trans b, Trans (m b)) =>
 	ArrowParallel (Kleisli m) a b conf where
@@ -101,6 +114,9 @@ parEvalN conf fs =
 	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
 	(Kleisli $ sequence)
 \end{lstlisting}
+\caption{ArrowParallel instance for the Kleisli type in the Eden backend}
+\label{fig:ArrowParallelEdenKleisli}
+\end{figure}
 
 \subsection{Impact of parallel Arrows}
 \olcomment{move this to Contributions in the front or something}
