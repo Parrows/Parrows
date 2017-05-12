@@ -18,6 +18,9 @@
 
 \usepackage{placeins}
 
+\usepackage{microtype}
+\DisableLigatures[>,<]{encoding = T1,family=tt*} 
+
 % für Listings
 \usepackage{listings}
 \lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, keywordstyle=\color{black}\bfseries, stringstyle=\ttfamily,showstringspaces=false,basicstyle=\footnotesize,captionpos=b}
@@ -83,7 +86,7 @@
 
 \newcommand{\citHughes}{\citep{HughesArrows}}
 
-\newcommand{\code}[1]{\lstinline{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
 
 %\newcommand{\fixme}[1]{\colorbox{red}{#1}}
 

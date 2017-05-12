@@ -44,7 +44,7 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 	\caption{Schematic depiction of farm}
 	\label{fig:farmImg}
 \end{figure}
-A \code{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \code{ArrowParallel} we gave in this paper). This can be quite wasteful and a \code{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \code{numCores} workers (if numCores is greater than actualProcessorCount, the fastest processor(s) to finish will get more tasks) seems useful.
+A \code{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \code{ArrowParallel} we gave in this paper). This can be quite wasteful and a \code{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \code{numCores} workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 farm :: (ArrowParallel arr a b conf,
