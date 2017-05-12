@@ -5,12 +5,16 @@ There are already several ways to write parallel programs in Haskell. As we will
 
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \code{a -> b} in parallel:
 
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
+\caption{parEvalN's type signature}
+\label{fig:parEvalNTypeSig}
+\end{figure}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEvalN}
-	\caption{schematic illustration of parEvalN}
+	\caption{Schematic illustration of parEvalN}
 	\label{fig:parEvalN}
 \end{figure}
 \olcomment{make them to real figures? with environment, reference and such?}
@@ -26,7 +30,7 @@ parEvalN fs as = let bs = zipWith ($) fs as in
 \end{lstlisting}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
-	\caption{dataflow of the Multicore Haskell parEvalN version}
+	\caption{Dataflow of the Multicore Haskell parEvalN version}
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
@@ -44,7 +48,7 @@ parEvalN fs as = runPar $
 \end{lstlisting}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
-	\caption{dataflow of the Par Monad parEvalN version}
+	\caption{Dataflow of the Par Monad parEvalN version}
 \end{figure}
 
 \subsubsection{Eden}
@@ -66,7 +70,7 @@ parEvalN = spawnF
 \end{lstlisting}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNEden}
-	\caption{dataflow of the Eden parEvalN version}
+	\caption{Dataflow of the Eden parEvalN version}
 \end{figure}
 
 \paragraph{Eden TraceViewer.}
