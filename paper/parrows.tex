@@ -2,28 +2,38 @@
 \label{sec:parallel-arrows}
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel typeclass}
-As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \code{a -> b} in parallel, \code{parEvalN} (Fig.~\ref{fig:parEvalN}):
-\begin{lstlisting}[frame=htrbl]
-parEvalN :: [a -> b] -> [a] -> [b]
-\end{lstlisting}
-Translating this into arrow terms gives us a new operator \code{parEvalN} that lifts a list of arrows \code{[arr a b]} to a parallel arrow \code{arr [a] [b]} (This combinator is similar to our utility function \lstinline{listApp}, but does parallel instead of serial evaluation).
+As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \code{a -> b} in parallel, \code{parEvalN} (Fig.~\ref{fig:parEvalNTypeSig},\ref{fig:parEvalN}).
+Translating this into arrow terms gives us a new operator \code{parEvalN} that lifts a list of arrows \code{[arr a b]} to a parallel arrow \code{arr [a] [b]} (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function \lstinline{listApp} from Appendix \ref{utilfns}, but does parallel instead of serial evaluation).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 \end{lstlisting}
-With this definition of \code{parEvalN}, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow \code{arr} and we want this to be an interface for different backends, we have to introduce the new typeclass \code{ArrowParallel} to host this combinator.
+\caption{parEvalN Arrow combinator as a function}
+\label{fig:parEvalNArrowFn}
+\end{figure}
+With this definition of \code{parEvalN}, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow \code{arr} and we want this to be an interface for different backends, we introduce a new typeclass \code{ArrowParallel arr a b} to host this combinator (Fig.~\ref{fig:parEvalNArrowTypeClass1}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b where
 	parEvalN :: [arr a b] -> arr [a] [b]
 \end{lstlisting}
-Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional \code{conf} parameter to the function. We also do not want \code{conf} to be a fixed type, as the configuration parameters can differ for different instances of \code{ArrowParallel}. So we add it to the type signature of the typeclass as well.
+\caption{parEvalN Arrow combinator in a first version of the ArrowParallel typeclass}
+\label{fig:parEvalNArrowTypeClass1}
+\end{figure}
+Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional \code{conf} parameter to the function. We also do not want \code{conf} to be a fixed type, as the configuration parameters can differ for different instances of \code{ArrowParallel}. So we add it to the type signature of the typeclass as well and get \code{ArrowParallel arr a b conf} (Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{lstlisting}
+\caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
+\label{fig:parEvalNArrowTypeClassFinal}
+\end{figure}
 Note that we don't require the \code{conf} parameter in every implementation. If it is not needed, we usually just default the \code{conf} type parameter to () and even blank it out in the parameter list of the implemented \code{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
 \subsection{Multicore Haskell}
 The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \code{withStrategy :: Strategy a -> a -> a} and \code{pseq :: a -> b -> b} combinators from Multicore Haskell, where \code{withStrategy} is the same as \code{using :: a -> Strategy a -> a} but with flipped parameters.
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b () where
@@ -32,11 +42,19 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList rdeepseq)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{lstlisting}% $ %% formatting
-For most cases this fully evaluating version would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the \code{Strategy} interface, we want to the user not to lose this ability because of using our API. We therefore introduce the \code{Conf a} data-type that simply wraps a \code{Strategy a}. We can't directly use the \code{Strategy a} type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
+\caption{Fully evaluating ArrowParallel instance for the Multicore backend}
+\label{fig:ArrowParallelMulticoreRdeepseq}
+\end{figure}
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the \code{Strategy} interface, we want to the user not to lose this ability because of using our API. We therefore introduce the \code{Conf a} data-type that simply wraps a \code{Strategy a} (Fig.~\ref{fig:confa}). We can't directly use the \code{Strategy a} type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 data Conf a = Conf (Strategy a)
 \end{lstlisting}
-We simply unwrap the strategy out of this wrapper and get the following (configurable) \code{ArrowParallel} instance:
+\caption{Definition of Conf a}
+\label{fig:confa}
+\end{figure}
+To get our configurable \code{ArrowParallel} instance, we simply unwrap the strategy and pass it to \code{parList} as in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 	ArrowParallel arr a b (Conf b) where
@@ -45,6 +63,9 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList strat)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{lstlisting}
+\caption{Configurable ArrowParallel instance for the Multicore backend}
+\label{fig:ArrowParallelMulticoreConfigurable}
+\end{figure}
 \subsection{ParMonad}
 The ParMonad implementation makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
 
