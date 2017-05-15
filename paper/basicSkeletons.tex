@@ -2,13 +2,13 @@
 \label{sec:extending-interface}
 With the \code{ArrowParallel} typeclass in place and implemented, we can now implement some further basic parallel interface functions. These are algorithmic skeletons that, however, mostly serve as a foundation to further, more specific algorithmic skeletons.
 
-\subsection{Lazy \code{parEvalN}}
+\subsubsection{Lazy \code{parEvalN}}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEvalNLazy}
 	\caption{Schematic depiction of parEvalNLazy}
 	\label{fig:parEvalNLazyImg}
 \end{figure}
-The function \code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} (Fig.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{arr (chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp}. The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
+The function \code{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \code{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \code{parEvalNLazy} (Fig.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from \code{[a]} to \code{[[a]]} with the given \code{ChunkSize} in \code{arr (chunksOf chunkSize)}. These chunks are then fed into a list \code{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \code{ChunkSize} into the regular parEvalN by using \code{listApp} (Fig.~\ref{fig:listApp}). The resulting \code{[[b]]} is lastly converted into \code{[b]} with \code{arr concat}.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
@@ -23,7 +23,7 @@ parEvalNLazy conf chunkSize fs =
 \label{fig:parEvalNLazy}
 \end{figure}
 
-\subsection{Heterogenous tasks}
+\subsubsection{Heterogenous tasks}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEval2}
 	\caption{Schematic depiction of parEval2}

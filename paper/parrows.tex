@@ -31,7 +31,9 @@ class Arrow arr => ArrowParallel arr a b conf where
 \end{figure}
 Note that we don't require the \code{conf} parameter in every implementation. If it is not needed, we usually just default the \code{conf} type parameter to () and even blank it out in the parameter list of the implemented \code{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
-\subsection{Multicore Haskell} \label{sec:parrows:multicore}
+\subsection{ArrowParallel instances}
+
+\subsubsection{Multicore Haskell} \label{sec:parrows:multicore}
 The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \code{withStrategy :: Strategy a -> a -> a} and \code{pseq :: a -> b -> b} combinators from Multicore Haskell, where \code{withStrategy} is the same as \code{using :: a -> Strategy a -> a} but with flipped parameters.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
@@ -66,11 +68,11 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \caption{Configurable ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
-\subsection{Par Monad}
+\subsubsection{Par Monad}
 The ParMonad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and ParMonad's \code{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \code{IVar} containing the result in the \code{Par} monad.
 
 
-We therefore apply each function to its corresponding input value with \code{app} and then fork the computation away with \code{arr spawnP} inside a \code{zipWithArr} call. This yields a list \code{[Par (IVar b)]}, which we then convert into \code{Par [IVar b]} with \code{arr sequenceA}. In order to wait for the computation to finish, we map over the \code{IVar}s inside the ParMonad with \code{arr (>>= mapM get)}. The result of this operation is a \code{Par [b]} from which we can finally remove the monad again by running \code{arr runPar} to get our output of \code{[b]}.
+We therefore apply each function to its corresponding input value with \code{listApp} (Fig.~\ref{fig:listApp}) and then fork the computation away with \code{arr spawnP} inside a \code{zipWithArr} call. This yields a list \code{[Par (IVar b)]}, which we then convert into \code{Par [IVar b]} with \code{arr sequenceA}. In order to wait for the computation to finish, we map over the \code{IVar}s inside the ParMonad with \code{arr (>>= mapM get)}. The result of this operation is a \code{Par [b]} from which we can finally remove the monad again by running \code{arr runPar} to get our output of \code{[b]}.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
@@ -86,7 +88,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \label{fig:ArrowParallelParMonad}
 \end{figure}
 
-\subsection{Eden}
+\subsubsection{Eden}
 For the Multicore and ParMonad implementation we could use general instances of \code{ArrowParallel} that just require the \code{ArrowApply} and \code{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass \code{ArrowUnwrap} (Fig.~\ref{fig:ArrowUnwrap}).
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]

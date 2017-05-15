@@ -54,8 +54,18 @@ farm conf numCores f =
 	unshuffle numCores >>>
 	parEvalN conf (repeat (mapArr f)) >>>
 	shuffle
+
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
+
+takeEach :: Int -> [a] -> [a]
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
+
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
 \end{lstlisting}
-\caption{Definition of farm}
+\caption{Definition of farm. \code{unshuffle}, \code{takeEach}, \code{shuffle} were taken from Eden's source code \cite{eden_skel_shuffle}}
 \label{fig:farm}
 \end{figure}
 
