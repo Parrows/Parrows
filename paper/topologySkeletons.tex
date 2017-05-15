@@ -82,7 +82,7 @@ Note that extensive use of this combinator over \code{pipe} with a hand-written 
 \subsection{Ring skeleton}
 \begin{figure}[h]
 	\includegraphics[scale=0.75]{images/ring}
-	\caption{Schematic depiction of a ring skeleton}
+	\caption{Schematic depiction of the ring skeleton}
 	\label{fig:ringImg}
 \end{figure}
 Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \code{[i] -> [o]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \code{i -> r -> (o, r)} in which \code{r} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
@@ -121,10 +121,8 @@ We can rewrite its functionality easily with the use of \code{loop} as the defin
 %\begin{quotation}
 \enquote{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
 %\end{quotation}
-Next, we zip the resulting \code{([i], [fut r])} to \code{[(i, fut r)]} with \code{arr (uncurry zip)} so we can feed that into a our input arrow \code{arr (i, r) (o, r)}, which we transform into \code{arr (i, fut r) (o, fut r)} before lifting it to \code{arr [(i, fut r)] [(o, fut r)]} to get a list \code{[(o, fut r)]}. Finally we unzip this list into \code{([o], [fut r])}. Plugging this arrow \code{arr ([i], [fut r]) ([o], fut r)} into the definition of \code{loop} from earlier gives us \code{arr [i] [o]}, our ring arrow.
-
-
-This gives us the following complete definition for the \code{ring} combinator:
+Next, we zip the resulting \code{([i], [fut r])} to \code{[(i, fut r)]} with \code{arr (uncurry zip)} so we can feed that into a our input arrow \code{arr (i, r) (o, r)}, which we transform into \code{arr (i, fut r) (o, fut r)} before lifting it to \code{arr [(i, fut r)] [(o, fut r)]} to get a list \code{[(o, fut r)]}. Finally we unzip this list into \code{([o], [fut r])}. Plugging this arrow \code{arr ([i], [fut r]) ([o], fut r)} into the definition of \code{loop} from earlier gives us \code{arr [i] [o]}, our ring arrow (Fig.~\ref{fig:ringFinal}).
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 ring :: (ArrowLoop arr, Future fut r,
 	ArrowParallel arr (i, fut r) (o, fut r) conf) =>
@@ -136,14 +134,16 @@ ring conf f =
     arr (uncurry zip) >>>
     parMap conf (second get >>> f >>> second put) >>>
     arr unzip)
-\end{lstlisting}
-with \code{rightRotate}:
-\begin{lstlisting}[frame=htrbl]
+
 rightRotate :: (Arrow arr) => arr [a] [a]
 rightRotate = arr $ \list -> case list of 
   [] -> []
   xs -> last xs : init xs
-\end{lstlisting} %$ %% formatting
+\end{lstlisting}
+\caption{Final Definition of the ring Skeleton}
+\label{fig:ringFinal}
+\end{figure}
+ %$ %% formatting
 % and lazy:
 % \begin{lstlisting}[frame=htrbl]			
 % lazy :: (Arrow arr) => arr [a] [a]
@@ -154,18 +154,20 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 %Further details on this can be found in \cite{eden_cefp}.
 \olcomment{let's do it?}
 \subsection{Torus skeleton}
-\begin{center}
+\begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
-\end{center}
-If we take the concept of a ring one dimension further, we get a torus. Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
+	\caption{Schematic depiction of the torus skeleton}
+	\label{fig:ringTorusImg}
+\end{figure}
+If we take the concept of a ring one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
 \\\\
-With our parallel Arrows we implement a torus combinator yet again with the help of the \code{ArrowLoop} typeclass.
+With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology} - yet again with the help of the \code{ArrowLoop} typeclass.
 \\\\
 Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \code{([[fut a]], [[fut b]])} in the second argument (loop only allows for 2 arguments) of our looped arrow \code{arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))} and our rotation arrow becomes \code{second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))} instead of the singular rotation in the ring as we rotate \code{[[fut a]]} horizontally and \code{[[fut b]]} vertically. Then, we once again zip the inputs for the input arrow with \code{arr (uncurry3 zipWith3 lazyzip3)} from \code{([[c]], ([[fut a]], [[fut b]]))} to \code{[[(c, fut a, fut b)]]}, which we then feed into our parallel execution.
 \\\\
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \code{shuffle} all the inputs to then pass it into \code{parMap conf (ptorus f)} which yields us \code{[(d, fut a, fut b)]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \code{arr length >>> arr unshuffle} with the use of \code{app} from the \code{ArrowApply} typeclass. Finally, we unpack this matrix \code{[[[(d, fut a, fut b)]]} with \code{arr (map unzip3) >>> arr unzip3 >>> threetotwo} to get  \code{([[d]], ([[fut a]], [[fut b]]))}.
 \\\\
-The complete definition of the \code{torus} combinator is:
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
 	ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
@@ -179,9 +181,7 @@ torus conf f =
 		(shuffle >>> parMap conf (ptorus f)) >>>
 	app >>>
 	arr (map unzip3) >>> arr unzip3 >>> threetotwo)
-\end{lstlisting}
-with uncurry3, lazyzip3, and threetotwo from the Appendix, and
-\begin{lstlisting}[frame=htrbl]
+
 ptorus :: (Arrow arr, Future fut a, Future fut b) =>
 	arr (c, a, b) (d, a, b) ->
 	arr (c, fut a, fut b) (d, fut a, fut b)
@@ -189,7 +189,11 @@ ptorus f =
 	arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>>
 	arr (\ ~(d, a, b) -> (d, put a, put b))
 \end{lstlisting}
-As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Adapting this nodefunction to our Arrow API gives us:
+\caption{Definition of the torus skeleton}
+\label{fig:torus}
+\end{figure}
+As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Their nodefunction can be adapted as shown in Fig.~\ref{fig:torusMatMult}.
+\begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 nodefunction :: Int ->
 	((Matrix, Matrix), [Matrix], [Matrix]) ->
@@ -201,6 +205,9 @@ nodefunction n ((bA, bB), rows, cols) =
 			nextAs = take (n-1) rows
 			nextBs = take (n-1) cols
 \end{lstlisting}
+\caption{Adapted nodefunction for matrix multiplication with the torus from Fig.~\ref{fig:torus}}
+\label{fig:torusMatMult}
+\end{figure}
 If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.\olcomment{much more details on this!}
 \begin{figure}[ht]
 	\centering
@@ -215,6 +222,8 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden)}
 	\label{fig:torus_eden_trace}
 \end{figure}
+
+\FloatBarrier
 
 %%% Local Variables:
 %%% mode: latex
