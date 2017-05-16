@@ -55,7 +55,7 @@ data Conf a = Conf (Strategy a)
 \caption{Definition of Conf a}
 \label{fig:confa}
 \end{figure}
-To get our configurable \code{ArrowParallel} instance, we simply unwrap the strategy and pass it to \code{parList} as in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
+To get our configurable \code{ArrowParallel} instance, we simply unwrap the strategy and pass it to \code{parList} like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
