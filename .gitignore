@@ -47,3 +47,6 @@ dist/*
 *.dpth
 *.auxlock
 paper/main-figure0.md5
+
+*/CMakeFiles
+paper/cmake_install.cmake
