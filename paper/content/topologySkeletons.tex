@@ -66,7 +66,7 @@ pipe2 conf f g =
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(|>>>|)} (Fig.~\ref{fig:|>>>|}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
+Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(|>>>|)} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
@@ -76,7 +76,7 @@ Note that extensive use of this combinator over \inlinecode{pipe} with a hand-wr
 (|>>>|) = pipe2 ()
 \end{lstlisting}
 \caption{Definition of \texttt{(|>>>|)}}
-\label{fig:|>>>|}
+\label{fig:par>>>}
 \end{figure}
 
 \subsection{Ring skeleton} \label{sec:ring}
