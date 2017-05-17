@@ -8,6 +8,8 @@
 
 \documentclass{jfp1}
 
+%include polycode.fmt
+
 %%% Macros for the guide only %%%
 %\providecommand\AMSLaTeX{AMS\,\LaTeX}
 %\newcommand\eg{\emph{e.g.}\ }
@@ -25,7 +27,7 @@
 
 %\newtheorem{lemma}{Lemma}[section]
 
-\input{prelude}
+%include prelude.tex
 
 
 \title{Arrows for Parallel Computations}
@@ -44,7 +46,7 @@
 }% end ifthenelse
 
 
-		 
+
 \begin{document}
 
 \label{firstpage}
@@ -52,41 +54,41 @@
 \maketitle
 
 %% environment inside
-\input{abstract}
+%include abstract.tex
 
 \tableofcontents
 
 	%
-	%\input{abstract}
+	%%include abstract.tex
 	%
 	%\newpage
 	\tableofcontents
 	%\pagebreak
-	\input{motivation}
-	\input{parallelHaskells}
-	\input{arrows}
+	%include motivation.tex
+	%include parallelHaskells.tex
+	%include arrows.tex
 	%\pagebreak
-	\input{relwork}
+	%include relwork.tex
 	%\pagebreak
 	%\pagebreak
-	\input{parrows}
+	%include parrows.tex
 	%\pagebreak
-	\input{basicSkeletons}
+	%include basicSkeletons.tex
 	%\pagebreak
-	\input{syntacticSugar}
+	%include syntacticSugar.tex
 	%\pagebreak
-	\input{futures}
+	%include futures.tex
 	%\pagebreak
-	\input{mapSkeletons}
+	%include mapSkeletons.tex
 	%\pagebreak
-	\input{topologySkeletons}
+	%include topologySkeletons.tex
 	%\pagebreak
-	\input{benchmarks}
+	%include benchmarks.tex
 	%%\pagebreak
-	\input{conclusion}
+	%include conclusion.tex
 	%\pagebreak
         \bibliographystyle{jfp}
 	\bibliography{references,main}
         \appendix
-	\input{utilityFunctions}
+	%include utilityFunctions.tex
 \end{document}
