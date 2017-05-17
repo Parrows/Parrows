@@ -37,7 +37,7 @@ We start by transforming the \inlinecode{(a, c)} input into a 2-element list \in
 parEval2 :: (ArrowChoice arr,
 	ArrowParallel arr (Either a c) (Either b d) conf) =>
 	conf -> arr a b -> arr c d -> arr (a, c) (b, d)
-parEval2 conf f g = 
+parEval2 conf f g =
 	arr Left *** (arr Right >>> arr return) >>>
 	arr (uncurry (:)) >>>
 	parEvalN conf (replicate 2 (f +++ g)) >>>

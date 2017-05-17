@@ -50,7 +50,7 @@ pipe2 :: (ArrowLoop arr, ArrowChoice arr,
 	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
 	Future fut (([a], [b]), [c])) =>
 	conf -> arr a b -> arr b c -> arr a c
-pipe2 conf f g = 
+pipe2 conf f g =
 	(arr return &&& arr (const [])) &&& arr (const []) >>>
 	pipe conf (replicate 2 (unify f g)) >>>
 	arr snd >>>
@@ -96,7 +96,7 @@ ringSimple f is =  os
                                    (zip is $ lazy ringIns))
         ringIns = rightRotate ringOuts
 
-toRD :: (Trans i, Trans o, Trans r) => 
+toRD :: (Trans i, Trans o, Trans r) =>
         ((i,r) -> (o,r))
         -> ((i, RD r) -> (o, RD r))
 toRD  f (i, ringIn)  = (o, release ringOut)
@@ -139,7 +139,7 @@ ring conf f =
     arr unzip)
 
 rightRotate :: (Arrow arr) => arr [a] [a]
-rightRotate = arr $ \list -> case list of 
+rightRotate = arr $ \list -> case list of
   [] -> []
   xs -> last xs : init xs
 
@@ -151,12 +151,12 @@ lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{figure}
  %$ %% formatting
 % and lazy:
-% \begin{lstlisting}[frame=htrbl]			
+% \begin{lstlisting}[frame=htrbl]
 % lazy :: (Arrow arr) => arr [a] [a]
 % lazy = arr (\ ~(x:xs) -> x : lazy xs
 % \end{lstlisting}
 %% we have shown this already.
-This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm. 
+This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
 %Further details on this can be found in \cite{eden_cefp}.
 \olcomment{let's do it?}
 \subsection{Torus skeleton}
