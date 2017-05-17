@@ -1,5 +1,5 @@
 \subsubsection{Syntactic Sugar} \label{syntacticSugar}
-For basic arrows, we have the \code{(***)} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \code{arr a b} and \code{arr c d} into an arrow \code{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version \code{(|***|)} (Fig.~\ref{fig:|***|}) with the use of \code{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \code{()} as the conf parameter in Fig.~\ref{fig:|***|}).
+For basic arrows, we have the \inlinecode{(***)} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \inlinecode{arr a b} and \inlinecode{arr c d} into an arrow \inlinecode{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version \inlinecode{(|***|)} (Fig.~\ref{fig:|***|}) with the use of \inlinecode{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \inlinecode{()} as the conf parameter in Fig.~\ref{fig:|***|}).
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ())) =>
@@ -9,8 +9,8 @@ For basic arrows, we have the \code{(***)} combinator (Fig.~\ref{fig:***Img},~\r
 \caption{Definition of (|***|) - the parallel version of (***)}
 \label{fig:|***|}
 \end{figure}
-% With this we can analogously to the serial \code{&&&}
-We define the parallel \code{(|\&\&\&|)} (Fig.~\ref{fig:|&&&|}) in a similar manner to its sequential pendant \code{(\&\&\&)} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+% With this we can analogously to the serial \inlinecode{&&&}
+We define the parallel \inlinecode{(|\&\&\&|)} (Fig.~\ref{fig:|&&&|}) in a similar manner to its sequential pendant \inlinecode{(\&\&\&)} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) =>
