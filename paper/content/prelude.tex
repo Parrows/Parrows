@@ -1,0 +1,164 @@
+\usepackage{tikz}
+
+\usepackage{filecontents}
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{statistics}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+%\usepackage{color}
+\usepackage{hyperref}
+
+\usepackage{subcaption}
+
+\usepackage[round]{natbib}
+
+\usepackage{csquotes}
+
+\usepackage{placeins}
+
+\usepackage{microtype}
+\DisableLigatures[>,<]{encoding = T1,family=tt*} 
+
+% für Listings
+\usepackage{listings}
+\lstset{numbers=left, numberstyle=\tiny, numbersep=5pt, keywordstyle=\color{black}\bfseries, stringstyle=\ttfamily,showstringspaces=false,basicstyle=\footnotesize,captionpos=b}
+\lstset{%
+	frame=none,
+	xleftmargin=2pt,
+	stepnumber=1,
+	numbers=left,
+	numbersep=5pt,
+        firstnumber=auto, %% auto-continues the numbering for the same listing name
+	numberstyle=\ttfamily\tiny\color[gray]{0.3},
+	belowcaptionskip=\bigskipamount,
+	captionpos=b,
+%	escapeinside={*'}{'*},
+	language=haskell,
+	tabsize=2,
+	emphstyle={\color{blue}\bfseries},
+        emphstyle={[2]\color{blue}},
+        emph={[2]Arrow,arr,Monad,return},
+        emphstyle={[3]\color{red}\bfseries},
+        emph={[3]r0,rwhnf,rnf,rdeepseq,unsafePerformIO,IO,merge},
+	commentstyle=\it,
+	stringstyle=\mdseries\rmfamily,
+	showspaces=false,
+	keywordstyle=\color{blue}\bfseries\rmfamily,
+	columns=flexible,
+	basicstyle=\small\sffamily,
+	showstringspaces=false,
+%	morecomment=[l]\%,
+    literate={+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
+%             {`+`}{{$\;+\;$}}1  {`-`}{{$\;-\;$}}1 {`*`}{{$\;*\;$}}1
+%% make it back
+%             {`+`}{{+}}1  {`-`}{{-}}1 {`*`}{{*}}1 
+             {>}{{$>$}}1 {<}{{$<$}}1 {\\}{{$\lambda$}}1 {\\n}{{\textbackslash
+             n}}2 {\\\\}{{\char`\\\char`\\}}1
+             {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 
+%             {<-}{{$\leftarrow$}}2
+%             {<-}{{$\in$}}2 % the list comprehension <- (MB: doesn't work, kills the do notation)
+             {<--}{{$\leftarrow$}}2 % the monadic <-
+             {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2
+             {\ .\ }{{ $\circ$ }}3     
+             {(.)}{{($\circ$)}}3     
+%%%             {\ |.\ }{{ . }}3
+             {>>>}{{$>\!>\!>$ }}4 {>>=}{{$>\!>\!=$ }}4 {/=}{{$\neq$}}2
+             {|}{{$\mid$}}1
+%%% vector operations
+%             {v+}{{$\overrightarrow{+}$}}1 {v-}{{$\overrightarrow{-}$}}1
+%             {v*}{{$\overrightarrow{\cdot}$}}1
+%%% number fields
+%             {NN}{{$\N$}}1 {ZZ}{{$\Z$}}1 {QQ}{{$\Q$}}1
+%             {xdd}{{$\delta$}}1
+%             {xaa}{{$\alpha$}}1
+%%% further hacks
+%             {`l_p`}{{l\textsubscript{p}}}2 {`=`}{{$=$}}1
+%             {p^k}{{p\textsuperscript{k}}}2
+%             {`p^k`}{{p\textsuperscript{k}}}2
+%             {`^2`}{{\textsuperscript{2}}}1
+%             {`xsinn`}{{$\zeta_n^n$}}2
+             {bottom}{{$\bot$}}1
+}
+
+\renewcommand{\cite}[1]{\citep{#1}}
+
+\newcommand{\citHughes}{\citep{HughesArrows}}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+%\newcommand{\fixme}[1]{\colorbox{red}{#1}}
+
+%%%%%% more fun and typography
+
+\usepackage{xifthen}
+
+\newboolean{anonymous}
+\setboolean{anonymous}{False}
+
+\usepackage[british]{babel}
+
+\usepackage{siunitx}
+
+\usepackage{xspace}
+\usepackage{xcolor}
+\newcommand{\hl}[1]{\textcolor{red}{#1}}
+\newcommand{\comm}[2]{\textcolor{red}{\bfseries #1: #2}}
+%\newcommand{\comm}[2]{}
+\newcommand{\olcomment}[1]{\comm{OL}{#1}}
+\newcommand{\mbcomment}[1]{\comm{MB}{#1}}
+\newcommand{\ptcomment}[1]{\comm{Phil}{#1}}
+%\newcommand{\done}{\xspace\hl{done!}\xspace}
+\newcommand{\fixme}{\mbcomment}
+
+\DeclareRobustCommand{\xth}{\textsuperscript{th}\xspace}
+\DeclareRobustCommand{\st}{\textsuperscript{st}\xspace}
+\DeclareRobustCommand{\nd}{\textsuperscript{nd}\xspace}
+\DeclareRobustCommand{\xrd}{\textsuperscript{rd}\xspace}
+
+%% kuerzel
+%\newcommand{\todo}{\textcolor{red}{\bfseries TODO!}\xspace}
+\newcommand{\done}{\textcolor{green}{\bfseries done!}\xspace}
+\DeclareRobustCommand{\hairspn}{\hspace{1pt}\nolinebreak}% hair space with no break
+
+% \DeclareRobustCommand{\ie}{{i.\hairspn{}e.\nopagebreak[4] }}
+% \DeclareRobustCommand{\eg}{{e.\hairspn{}g.\nopagebreak[4] }}
+% \DeclareRobustCommand{\fe}{{f.\hairspn{}e.,}\nopagebreak[4] }
+\DeclareRobustCommand{\ie}{{i.\hairspn{}e.~}}
+\DeclareRobustCommand{\eg}{{e.\hairspn{}g.~}}
+\DeclareRobustCommand{\fe}{{f.\hairspn{}e.,~}}
+\DeclareRobustCommand{\ad}{{A.\hairspn{}D.\xspace}}
+\DeclareRobustCommand{\bcc}{{A.\hairspn{}C.\xspace}}
+\DeclareRobustCommand{\wrt}{w.\hairspn{}r.\hairspn{}t.~}
+\DeclareRobustCommand{\etc}{etc.\ }
+\DeclareRobustCommand{\cf}{\textit{cf.~}}
+\DeclareRobustCommand{\viz}{\textit{viz.~}}
+%\DeclareRobustCommand{\hof}{higher-or\-der function\xspace}
+
+% %% the numberings
+\DeclareRobustCommand{\xth}{\textsuperscript{th}\xspace}
+\DeclareRobustCommand{\st}{\textsuperscript{st}\xspace}
+\DeclareRobustCommand{\nd}{\textsuperscript{nd}\xspace}
+\DeclareRobustCommand{\xrd}{\textsuperscript{rd}\xspace}
+
+\newcommand{\tabsepbakup}{\tabcolsep}
+%% for narrower tables
+
+%% nice tables
+\usepackage{booktabs}
+%\usepackage{multirow}
+
+%\usepackage{ifpdf} %% broken?!!
+%\ifpdf
+%\usepackage[activate={true,nocompatibility},kerning=true,spacing=true,tracking=true]{microtype}
+%\else
+%% non-pdf latex can less, let microtype itself decide
+\usepackage{microtype}
+%\fi
+\microtypecontext{spacing=nonfrench} %% log said so
+
+%%% JFP requirements:
+%%% Harvard citing style, "(Curry 1933)".
+%%% code: identifies italic, keywords bold
+%%% figures: eps(!) or ps (can convert pdf), eventually provide a greyscale version, color NOT in cmyk
