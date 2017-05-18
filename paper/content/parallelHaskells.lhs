@@ -3,33 +3,31 @@
 \subsection{Short introduction to parallel Haskells}
 There are already several ways to write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
-In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \inlinecode{a -> b} in parallel:
+In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \inlinecode{a -> b} in parallel, as also Figure~\ref{fig:parevaln-init} symbolically shows:
 
-\begin{figure}[h]
-%\begin{lstlisting}[frame=htrbl]
 \begin{code}
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{code}
-%\end{lstlisting}
-\caption{parEvalN's type signature}
-\label{fig:parEvalNTypeSig}
-\end{figure}
+
 \begin{figure}[h]
+  \centering
 	\includegraphics[scale=0.7]{images/parEvalN}
-	\caption{Schematic illustration of parEvalN}
+	\caption{Schematic illustration of \texttt{parEvalN}.}
 	\label{fig:parEvalN}
 \end{figure}
-\olcomment{make them to real figures? with environment, reference and such?}
+
 Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement \inlinecode{parEvalN} with several different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
 Multicore Haskell \cite{Marlow2009,Trinder1999} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies \cite{Trinder1998a,Marlow2010} for several types which can be applied with \inlinecode{using :: a -> Strategy a -> a}. For \inlinecode{parEvalN} this means that we can just apply the list of functions \inlinecode{[a -> b]} to the list of inputs \inlinecode{[a]} by zipping them with the application operator \inlinecode{\$}. We then evaluate this lazy list \inlinecode{[b]} according to a \inlinecode{Strategy [b]} with the \inlinecode{using :: a -> Strategy a -> a} operator. We construct this strategy with \inlinecode{parList :: Strategy a -> Strategy [a]} and \inlinecode{rdeepseq :: NFData a => Strategy a} where the latter is a strategy which evalutes to normal form. To ensure that programs that use \inlinecode{parEvalN} have the correct evaluation order, we annotate the computation with \inlinecode{pseq :: a -> b -> b} which forces the compiler to not reorder multiple \inlinecode{parEvalN} computations. This is particularly necessary in circular communication topologies like in the \inlinecode{torus} or \inlinecode{ring} skeleton that we will see in chapter \ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without \inlinecode{pseq} during testing for this paper.
 
-\begin{lstlisting}[frame=htrbl]
+%%%% BROKEN!
+\begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
-parEvalN fs as = let bs = zipWith ($) fs as in
-	(bs `using` parList rdeepseq) `pseq` bs
-\end{lstlisting}
+parEvalN fs as = let bs = zipWith ($) fs as 
+                 in (bs `using` parList rdeepseq) `pseq` bs
+\end{code}
+
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
 	\caption{Dataflow of the Multicore Haskell parEvalN version}
@@ -43,11 +41,11 @@ Our parallel evaluation function \inlinecode{parEvalN} can be defined by zipping
 
 \textbf{\textcolor{red}{explain problems with laziness here. Problems with torus}}
 
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
-\end{lstlisting}
+\end{code}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
 	\caption{Dataflow of the Par Monad parEvalN version}
@@ -66,10 +64,10 @@ a \inlinecode{spawnF} function that
 %This 
 allows us to define \inlinecode{parEvalN} directly:
 
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 parEvalN = spawnF 
-\end{lstlisting}
+\end{code}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNEden}
 	\caption{Dataflow of the Eden parEvalN version}

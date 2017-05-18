@@ -8,6 +8,15 @@
 
 \documentclass{jfp1}
 
+%% add a tweak to polycode, similar to literate in lstlistings, but uglier
+%format |>>>|        = "\mathbin{|\!>\!>\!>\!|}"
+%format >>>        = "\mathbin{>\!>\!>}"
+%% ^^^^ you want this. and similar for ***, +++, etc.
+%% a hack for list comprehensions' <-, typeset it as <--
+%%%%%format <--        = "\in "
+%format DOLLAR = "\mathbin{\$}"
+%fornat ` = "\`"
+
 %include polycode.fmt
 
 %%% Macros for the guide only %%%

@@ -10,7 +10,7 @@
 %\usepackage{color}
 \usepackage{hyperref}
 
-\usepackage{subcaption}
+%\usepackage{subcaption}
 
 \usepackage[round]{natbib}
 
@@ -94,14 +94,10 @@
 \usepackage{booktabs}
 %\usepackage{multirow}
 
-%\usepackage{ifpdf} %% broken?!!
-%\ifpdf
-%\usepackage[activate={true,nocompatibility},kerning=true,spacing=true,tracking=true]{microtype}
-%\else
-%% non-pdf latex can less, let microtype itself decide
-\usepackage{microtype}
-%\fi
+%% more microtype
 \microtypecontext{spacing=nonfrench} %% log said so
+
+\usepackage{subfig}
 
 %%% JFP requirements:
 %%% Harvard citing style, "(Curry 1933)".
