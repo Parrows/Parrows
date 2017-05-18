@@ -36,13 +36,13 @@ parEvalN fs as = let bs = zipWith ($) fs as
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
-The |Par} monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
+The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
 
 
-Our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
-Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b|'s inside the |Par| monad with |get|. This results in |Par [b]|. We finally execute this process with |runPar| to finally get |[b]| again.
+Our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |DOLLAR| just like with Multicore Haskell. % $
+Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| monad with |get|. This results in |Par [b]|. We finally execute this process with |runPar| to finally get |[b]| again.
 
-\textbf{\textcolor{red}{explain problems with laziness here. Problems with torus}}
+\mbcomment{explain problems with laziness here. Problems with torus}
 
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]

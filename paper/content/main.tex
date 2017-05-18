@@ -310,7 +310,7 @@
 
 \usepackage{csquotes}
 
-\usepackage{placeins}
+% \usepackage{placeins} %% unneeded
 
 \usepackage{microtype}
 \DisableLigatures[>,<]{encoding = T1,family=tt*} 
@@ -465,7 +465,7 @@ blablabla arrows, parallel, haskell.
 HIT HERE REALLY STRONG
 
 \paragraph{Structure}
-The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons (parallel \inlinecode{map} with and without load balancing, \inlinecode{map-reduce}) in our newly defined dialect. More advanced ones are showcased in Section~\ref{sec:topology-skeletons} (\inlinecode{pipe}, \inlinecode{ring}, \inlinecode{torus}). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
+The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons (parallel \ensuremath{\Varid{map}} with and without load balancing, \ensuremath{\Varid{map}\mathbin{-}\Varid{reduce}}) in our newly defined dialect. More advanced ones are showcased in Section~\ref{sec:topology-skeletons} (\ensuremath{\Varid{pipe}}, \ensuremath{\Varid{ring}}, \ensuremath{\Varid{torus}}). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
 
 %%% Local Variables:
 %%% mode: latex
@@ -476,7 +476,7 @@ The remaining text is structures as follows. Section~\ref{sec:background} briefl
 \subsection{Short introduction to parallel Haskells}
 There are already several ways to write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
-In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \inlinecode{a -> b} in parallel, as also Figure~\ref{fig:parevaln-init} symbolically shows:
+In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \ensuremath{\Varid{a}\to \Varid{b}} in parallel, as also Figure~\ref{fig:parevaln-init} symbolically shows:
 
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -492,10 +492,11 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 	\label{fig:parEvalN}
 \end{figure}
 
-Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement \inlinecode{parEvalN} with several different parallel Haskells.
+Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement \ensuremath{\Varid{parEvalN}} with several different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009,Trinder1999} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies \cite{Trinder1998a,Marlow2010} for several types which can be applied with \inlinecode{using :: a -> Strategy a -> a}. For \inlinecode{parEvalN} this means that we can just apply the list of functions \inlinecode{[a -> b]} to the list of inputs \inlinecode{[a]} by zipping them with the application operator \inlinecode{\$}. We then evaluate this lazy list \inlinecode{[b]} according to a \inlinecode{Strategy [b]} with the \inlinecode{using :: a -> Strategy a -> a} operator. We construct this strategy with \inlinecode{parList :: Strategy a -> Strategy [a]} and \inlinecode{rdeepseq :: NFData a => Strategy a} where the latter is a strategy which evalutes to normal form. To ensure that programs that use \inlinecode{parEvalN} have the correct evaluation order, we annotate the computation with \inlinecode{pseq :: a -> b -> b} which forces the compiler to not reorder multiple \inlinecode{parEvalN} computations. This is particularly necessary in circular communication topologies like in the \inlinecode{torus} or \inlinecode{ring} skeleton that we will see in chapter \ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without \inlinecode{pseq} during testing for this paper.
+Multicore Haskell \cite{Marlow2009,Trinder1999} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies \cite{Trinder1998a,Marlow2010} for several types which can be applied with \ensuremath{\Varid{using}\mathbin{::}\Varid{a}\to \Conid{Strategy}\;\Varid{a}\to \Varid{a}}. For \ensuremath{\Varid{parEvalN}} this means that we can just apply the list of functions \ensuremath{[\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]} to the list of inputs \ensuremath{[\mskip1.5mu \Varid{a}\mskip1.5mu]} by zipping them with the application operator \ensuremath{\mathbin{\$}}. % $
+We then evaluate this lazy list \ensuremath{[\mskip1.5mu \Varid{b}\mskip1.5mu]} according to a \ensuremath{\Conid{Strategy}\;[\mskip1.5mu \Varid{b}\mskip1.5mu]} with the \ensuremath{\Varid{using}\mathbin{::}\Varid{a}\to \Conid{Strategy}\;\Varid{a}\to \Varid{a}} operator. We construct this strategy with \ensuremath{\Varid{parList}\mathbin{::}\Conid{Strategy}\;\Varid{a}\to \Conid{Strategy}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]} and \ensuremath{\Varid{rdeepseq}\mathbin{::}\Conid{NFData}\;\Varid{a}\Rightarrow \Conid{Strategy}\;\Varid{a}} where the latter is a strategy which evalutes to normal form. To ensure that programs that use \ensuremath{\Varid{parEvalN}} have the correct evaluation order, we annotate the computation with \ensuremath{\Varid{pseq}\mathbin{::}\Varid{a}\to \Varid{b}\to \Varid{b}} which forces the compiler to not reorder multiple \ensuremath{\Varid{parEvalN}} computations. This is particularly necessary in circular communication topologies like in the \ensuremath{\Varid{torus}} or \ensuremath{\Varid{ring}} skeleton that we will see in chapter \ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without \ensuremath{\Varid{pseq}} during testing for this paper.
 
 %%%% BROKEN!
 \begin{hscode}\SaveRestoreHook
@@ -518,12 +519,13 @@ Multicore Haskell \cite{Marlow2009,Trinder1999} is way to do parallel processing
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
-The \inlinecode{Par} monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
+The \ensuremath{\Conid{Par}} monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
 
 
-Our parallel evaluation function \inlinecode{parEvalN} can be defined by zipping the list of \inlinecode{[a -> b]} with the list of inputs \inlinecode{[a]} with the application operator \inlinecode{\$} just like with Multicore Haskell. Then, we map over this not yet evaluated lazy list of results \inlinecode{[b]} with \inlinecode{spawnP :: NFData a => a -> Par (IVar a)} to transform them to a list of not yet evaluated forked away computations \inlinecode{[Par (IVar b)]}, which we convert to \inlinecode{Par [IVar b]} with \inlinecode{sequenceA}. We wait for the computations to finish by mapping over the \inlinecode{IVar b}'s inside the \inlinecode{Par} monad with \inlinecode{get}. This results in \inlinecode{Par [b]}. We finally execute this process with \inlinecode{runPar} to finally get \inlinecode{[b]} again.
+Our parallel evaluation function \ensuremath{\Varid{parEvalN}} can be defined by zipping the list of \ensuremath{[\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]} with the list of inputs \ensuremath{[\mskip1.5mu \Varid{a}\mskip1.5mu]} with the application operator \ensuremath{\mathbin{\$}} just like with Multicore Haskell. % $
+Then, we map over this not yet evaluated lazy list of results \ensuremath{[\mskip1.5mu \Varid{b}\mskip1.5mu]} with \ensuremath{\Varid{spawnP}\mathbin{::}\Conid{NFData}\;\Varid{a}\Rightarrow \Varid{a}\to \Conid{Par}\;(\Conid{IVar}\;\Varid{a})} to transform them to a list of not yet evaluated forked away computations \ensuremath{[\mskip1.5mu \Conid{Par}\;(\Conid{IVar}\;\Varid{b})\mskip1.5mu]}, which we convert to \ensuremath{\Conid{Par}\;[\mskip1.5mu \Conid{IVar}\;\Varid{b}\mskip1.5mu]} with \ensuremath{\Varid{sequenceA}}. We wait for the computations to finish by mapping over the \ensuremath{\Conid{IVar}\;\Varid{b}} values inside the \ensuremath{\Conid{Par}} monad with \ensuremath{\Varid{get}}. This results in \ensuremath{\Conid{Par}\;[\mskip1.5mu \Varid{b}\mskip1.5mu]}. We finally execute this process with \ensuremath{\Varid{runPar}} to finally get \ensuremath{[\mskip1.5mu \Varid{b}\mskip1.5mu]} again.
 
-\textbf{\textcolor{red}{explain problems with laziness here. Problems with torus}}
+\mbcomment{explain problems with laziness here. Problems with torus}
 
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -547,13 +549,14 @@ Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and com
 
 Eden was designed to work on clusters, but with a further simple backend it operates on multicores. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results also on multicores \cite{arcs-dc,aswad2009low}.
 
-While Eden also comes with a monad \inlinecode{PA} for parallel evaluation, it also ships with a completely functional interface that includes
+While Eden also comes with a monad \ensuremath{\Conid{PA}} for parallel evaluation, it also ships with a completely functional interface that includes
 %\\
-%\inlinecode{spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]}.
+a \ensuremath{\Varid{spawnF}\mathbin{::}(\Conid{Trans}\;\Varid{a},\Conid{Trans}\;\Varid{b})\Rightarrow [\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]\to [\mskip1.5mu \Varid{b}\mskip1.5mu]}
 %\\
-a \inlinecode{spawnF} function that
+%a |spawnF| 
+function that
 %This 
-allows us to define \inlinecode{parEvalN} directly:
+allows us to define \ensuremath{\Varid{parEvalN}} directly:
 
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -586,7 +589,7 @@ In a trace, the $x$ axis shows the time, the $y$ axis enumerates the machines an
 	\includegraphics{images/arrow}
 	\caption{Schematic depiction of an arrow}
 \end{figure}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \inlinecode{arr a b} represents  a computation that converts an input \inlinecode{a} to an output \inlinecode{b}. This is defined in the arrow typeclass:
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} represents  a computation that converts an input \ensuremath{\Varid{a}} to an output \ensuremath{\Varid{b}}. This is defined in the arrow typeclass:
 
 \begin{figure}[h]
 \centering
@@ -620,12 +623,12 @@ Arrows were introduced by \citet{HughesArrows} as a general interface for comput
 	{\includegraphics[scale=0.6]{images/first}}
 %	\end{center}
 %}%\hfill
-\caption{The schematic depiction of \inlinecode{Arrow} combinators}
+\caption{The schematic depiction of \ensuremath{\Conid{Arrow}} combinators}
 \end{minipage}
 \end{figure}
-\inlinecode{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \inlinecode{return}. The \inlinecode{>>>} operator is analogous to the monadic composition  \inlinecode{>>=} and combines two arrows \inlinecode{arr a b} and \inlinecode{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \inlinecode{arr a c}. Lastly, the \inlinecode{first} operator  takes the input arrow from \inlinecode{b} to \inlinecode{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
+\ensuremath{\Varid{arr}} is used to lift an ordinary function to an arrow type, similarly to the monadic \ensuremath{\Varid{return}}. The \ensuremath{\mathbin{>\!\!>\!\!>}} operator is analogous to the monadic composition  \ensuremath{\bind } and combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{b}\;\Varid{c}} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{c}}. Lastly, the \ensuremath{\Varid{first}} operator  takes the input arrow from \ensuremath{\Varid{b}} to \ensuremath{\Varid{c}} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
-The most prominent instances of this interface are regular functions \inlinecode{(->)} (Fig.~\ref{fig:arrowfn}),
+The most prominent instances of this interface are regular functions \ensuremath{(\to )} (Fig.~\ref{fig:arrowfn}),
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -685,7 +688,7 @@ and the Kleisli type (Fig.~\ref{fig:arrowkleisli}).
 	\caption{Syntactic sugar for arrows}
 	\label{3}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \inlinecode{first}, called \inlinecode{second} (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
+With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \ensuremath{\Varid{first}}, called \ensuremath{\Varid{second}} (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -702,7 +705,7 @@ With this typeclass in place, Hughes also defined some syntactic sugar: The mirr
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the \inlinecode{***} combinator which combines \inlinecode{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
+the \ensuremath{\mathbin{\*\!\*\!\*}} combinator which combines \ensuremath{\Varid{first}} and \ensuremath{\Varid{second}} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -715,7 +718,7 @@ the \inlinecode{***} combinator which combines \inlinecode{first} and \inlinecod
 \caption{The (***) combinator}
 \label{fig:***}
 \end{figure}
-and the \inlinecode{\&\&\&} combinator that constructs an arrow which outputs two different values like \inlinecode{***}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+and the \ensuremath{\mathbin{\char92 \&\char92 \&\char92 \&}} combinator that constructs an arrow which outputs two different values like \ensuremath{\mathbin{\*\!\*\!\*}}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -728,7 +731,7 @@ and the \inlinecode{\&\&\&} combinator that constructs an arrow which outputs tw
 \caption{The (\&\&\&) combinator}
 \label{fig:&&&}
 \end{figure}
-A short example given by Hughes on how to use this is \inlinecode{add} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
+A short example given by Hughes on how to use this is \ensuremath{\Varid{add}} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -741,9 +744,9 @@ A short example given by Hughes on how to use this is \inlinecode{add} over arro
 \caption{Add over arrows}
 \label{fig:addArrows}
 \end{figure}
-% The benefit of using the \inlinecode{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \inlinecode{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
+% The benefit of using the |Arrow| typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created |add| combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
 % \\\\
-% \textit{Note: In the definitions Hughes gave in his paper, the notation \inlinecode{a b c} for an arrow from \inlinecode{b} to \inlinecode{c} is used. We use the equivalent definition \inlinecode{arr a b} for an arrow from \inlinecode{a} to \inlinecode{b} instead, to make it easier to find the arrow type in type signatures.}
+% \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
 
 The more restrictive interface of arrows (a monad can be \emph{anything}, an arrow is a process of doing something, a \emph{computation}) allows for more elaborate composition and transformation combinators. One of the major problems in parallel computing is composition of parallel processes.
@@ -760,11 +763,11 @@ The more restrictive interface of arrows (a monad can be \emph{anything}, an arr
 \olcomment{arrows or Arrows?}
 
 \subsection{Parallel Haskells}
-Of course, the three parallel Haskell flavours we have presented above: the GpH \cite{Trinder1998a,Trinder1999} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the \inlinecode{Par} monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012} are related to this work. We use these languages as backends: our library can switch from one to other at user's command.
+Of course, the three parallel Haskell flavours we have presented above: the GpH \cite{Trinder1998a,Trinder1999} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the \ensuremath{\Conid{Par}} monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012} are related to this work. We use these languages as backends: our library can switch from one to other at user's command.
 
-HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an extension of \inlinecode{Par} monad to heterogeneous clusters. LVish \cite{Kuper:2014:TPE:2666356.2594312} is a communication-centred extension of \inlinecode{Par} monad.
+HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an extension of \ensuremath{\Conid{Par}} monad to heterogeneous clusters. LVish \cite{Kuper:2014:TPE:2666356.2594312} is a communication-centred extension of \ensuremath{\Conid{Par}} monad.
 %
-Further parallel Haskell approaches include pH \cite{ph-book}, research work done on distributed variants of GpH \cite{Trinder1996,Aljabri:2013:DIG:2620678.2620682,Aljabri2015} and low-level Eden implementation \cite{JostThesis,berthold_loidl_hammond_2016}. Skeleton composition \cite{dieterle_horstmeyer_loogen_berthold_2016}, communication \cite{Dieterle2010}, and generation of process networks \cite{Horstmeyer2013} are recent in-focus research topics in Eden. This also includes the definitions of new skeletons \cite{doi:10.1142/S0129626403001380,Eden:PARCO05,Berthold2009-mr,Berthold2009-fft,brown2010ever,dieterle2010skeleton,delaEncina2011,Dieterle2013}.
+Further parallel Haskell approaches include pH \cite{ph-book}, research work done on distributed variants of GpH \cite{Trinder1996,Aljabri:2013:DIG:2620678.2620682,Aljabri2015} and low-level Eden implementation \cite{JostThesis,berthold_loidl_hammond_2016}. Skeleton composition \cite{dieterle_horstmeyer_loogen_berthold_2016}, communication \cite{Dieterle2010}, and generation of process networks \cite{Horstmeyer2013} are recent in-focus research topics in Eden. This also includes the definitions of new skeletons \cite{doi:10.1142/S0129626403001380,Eden:PARCO05,Berthold2009-mr,Berthold2009-fft,dieterle2010skeleton,delaEncina2011,Dieterle2013,janjic2013space}.
 
 More different approaches include data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582,}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
 %
@@ -774,13 +777,13 @@ The Haskell--GPU bridge Accelerate \cite{Chakravarty:2011:AHA:1926354.1926358,CM
 
 Algorithmic skeletons were introduced by \citet{Cole1989}.
 Early efforts include \cite{darlington1993parallel,botorog1996efficient,p3l97,Gorlatch1998,Lengauer1997}. \citet{SkeletonBook} consolidated early reports on high-level programming approaches.
-The effort is ongoing, including topological skeletons \cite{Eden:PARCO05}, special-purpose skeletons for computer algebra \cite{Berthold2009-fft,brown2010ever,lobachev-phd,Lobachev2012}, iteration skeletons \cite{Dieterle2013}. The idea of \citet{scscp} is to use a parallel Haskell to orchestrate further software systems to run in parallel. \citet{dieterle_horstmeyer_loogen_berthold_2016} compare the composition of skeleton to stable process networks.
+The effort is ongoing, including topological skeletons \cite{Eden:PARCO05}, special-purpose skeletons for computer algebra \cite{Berthold2009-fft,lobachev-phd,Lobachev2012,janjic2013space}, iteration skeletons \cite{Dieterle2013}. The idea of \citet{scscp} is to use a parallel Haskell to orchestrate further software systems to run in parallel. \citet{dieterle_horstmeyer_loogen_berthold_2016} compare the composition of skeleton to stable process networks.
 
 \subsection{Arrows}
 
-Arrows were introduced by \citet{HughesArrows}, basically they are a generalised function arrow~\inlinecode{->}. \citet{Hughes2005} is a tutorial on arrows. Some theoretical details on arrows \cite{jacobs_heunen_hasuo_2009,LINDLEY201197,ATKEY201119} are viable. \citet{Paterson:2001:NNA:507669.507664} introduced a new notation for arrows. Arrows have applications in information flow research \cite{1648705,LI20101974,Russo:2008:LLI:1411286.1411289}, invertible programming \cite{Alimarine:2005:BAA:1088348.1088357}, and quantum computer simulation \cite{vizzotto_altenkirch_sabry_2006}. But perhaps most prominent application of arrows is functional reactive programming \cite{Hudak2003}.\olcomment{cite more!}
+Arrows were introduced by \citet{HughesArrows}, basically they are a generalised function arrow~\ensuremath{\to }. \citet{Hughes2005} is a tutorial on arrows. Some theoretical details on arrows \cite{jacobs_heunen_hasuo_2009,LINDLEY201197,ATKEY201119} are viable. \citet{Paterson:2001:NNA:507669.507664} introduced a new notation for arrows. Arrows have applications in information flow research \cite{1648705,LI20101974,Russo:2008:LLI:1411286.1411289}, invertible programming \cite{Alimarine:2005:BAA:1088348.1088357}, and quantum computer simulation \cite{vizzotto_altenkirch_sabry_2006}. But perhaps most prominent application of arrows is functional reactive programming \cite{Hudak2003}.\olcomment{cite more!}
 
-\citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of arrows that capsule the computation more than regular arrows do and thus enable optimizations. Their approach would allow parallel composition, as their special arrows would not interfere with each other in concurrent execution. In a contrast, we capture a whole parallel computation as a single entity: our main instantiation function \inlinecode{parEvalN} makes a single (parallel) arrow out of list of arrows.\olcomment{ugh, take care!}
+\citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of arrows that capsule the computation more than regular arrows do and thus enable optimizations. Their approach would allow parallel composition, as their special arrows would not interfere with each other in concurrent execution. In a contrast, we capture a whole parallel computation as a single entity: our main instantiation function \ensuremath{\Varid{parEvalN}} makes a single (parallel) arrow out of list of arrows.\olcomment{ugh, take care!}
 \citet{Huang2007} utilise arrows for parallelism, but strikingly different from our approach. They basically use arrows to orchestrate several tasks in robotics. We propose a general interface for parallel programming, remaining completely in Haskell.
 
 \subsection{Other languages}
@@ -800,8 +803,8 @@ Although this work is centred on Haskell implementation of arrows, it is applica
 \label{sec:parallel-arrows}
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel typeclass}
-As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \inlinecode{a -> b} in parallel, \inlinecode{parEvalN} (Fig.~\ref{fig:parEvalNTypeSig},~\ref{fig:parEvalN}).
-Translating this into arrow terms gives us a new operator \inlinecode{parEvalN} that lifts a list of arrows \inlinecode{[arr a b]} to a parallel arrow \inlinecode{arr [a] [b]} (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function \inlinecode{listApp} from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation).
+As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \ensuremath{\Varid{a}\to \Varid{b}} in parallel, \ensuremath{\Varid{parEvalN}} (Fig.~\ref{fig:parEvalNTypeSig},~\ref{fig:parEvalN}).
+Translating this into arrow terms gives us a new operator \ensuremath{\Varid{parEvalN}} that lifts a list of arrows \ensuremath{[\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]} to a parallel arrow \ensuremath{\Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]} (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function \ensuremath{\Varid{listApp}} from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -812,7 +815,7 @@ Translating this into arrow terms gives us a new operator \inlinecode{parEvalN} 
 \caption{parEvalN Arrow combinator as a function}
 \label{fig:parEvalNArrowFn}
 \end{figure}
-With this definition of \inlinecode{parEvalN}, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow \inlinecode{arr} and we want this to be an interface for different backends, we introduce a new typeclass \inlinecode{ArrowParallel arr a b} to host this combinator (Fig.~\ref{fig:parEvalNArrowTypeClass1}).
+With this definition of \ensuremath{\Varid{parEvalN}}, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow \ensuremath{\Varid{arr}} and we want this to be an interface for different backends, we introduce a new typeclass \ensuremath{\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}} to host this combinator (Fig.~\ref{fig:parEvalNArrowTypeClass1}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -827,7 +830,7 @@ With this definition of \inlinecode{parEvalN}, parallel execution is yet another
 \caption{parEvalN Arrow combinator in a first version of the ArrowParallel typeclass}
 \label{fig:parEvalNArrowTypeClass1}
 \end{figure}
-Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional \inlinecode{conf} parameter to the function. We also do not want \inlinecode{conf} to be a fixed type, as the configuration parameters can differ for different instances of \inlinecode{ArrowParallel}. So we add it to the type signature of the typeclass as well and get \inlinecode{ArrowParallel arr a b conf} (Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
+Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional \ensuremath{\Varid{conf}} parameter to the function. We also do not want \ensuremath{\Varid{conf}} to be a fixed type, as the configuration parameters can differ for different instances of \ensuremath{\Conid{ArrowParallel}}. So we add it to the type signature of the typeclass as well and get \ensuremath{\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}\;\Varid{conf}} (Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -842,12 +845,12 @@ Sometimes parallel Haskells require or allow for additional configuration parame
 \caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
 \label{fig:parEvalNArrowTypeClassFinal}
 \end{figure}
-Note that we don't require the \inlinecode{conf} parameter in every implementation. If it is not needed, we usually just default the \inlinecode{conf} type parameter to () and even blank it out in the parameter list of the implemented \inlinecode{parEvalN}, as we will see in the implementation of the Multicore and the ParMonad backend.
+Note that we don't require the \ensuremath{\Varid{conf}} parameter in every implementation. If it is not needed, we usually just default the \ensuremath{\Varid{conf}} type parameter to () and even blank it out in the parameter list of the implemented \ensuremath{\Varid{parEvalN}}, as we will see in the implementation of the Multicore and the ParMonad backend.
 
 \subsection{ArrowParallel instances}
 
 \subsubsection{Multicore Haskell} \label{sec:parrows:multicore}
-The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \inlinecode{withStrategy :: Strategy a -> a -> a} and \inlinecode{pseq :: a -> b -> b} combinators from Multicore Haskell, where \inlinecode{withStrategy} is the same as \inlinecode{using :: a -> Strategy a -> a} but with flipped parameters.
+The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the \ensuremath{\Varid{withStrategy}\mathbin{::}\Conid{Strategy}\;\Varid{a}\to \Varid{a}\to \Varid{a}} and \ensuremath{\Varid{pseq}\mathbin{::}\Varid{a}\to \Varid{b}\to \Varid{b}} combinators from Multicore Haskell, where \ensuremath{\Varid{withStrategy}} is the same as \ensuremath{\Varid{using}\mathbin{::}\Varid{a}\to \Conid{Strategy}\;\Varid{a}\to \Varid{a}} but with flipped parameters.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -876,7 +879,7 @@ The Multicore Haskell implementation of this class is implemented in a straightf
 \caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the \inlinecode{Strategy} interface, we want to the user not to lose this ability because of using our API. We therefore introduce the \inlinecode{Conf a} data-type that simply wraps a \inlinecode{Strategy a} (Fig.~\ref{fig:confa}). We can't directly use the \inlinecode{Strategy a} type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the \ensuremath{\Conid{Strategy}} interface, we want to the user not to lose this ability because of using our API. We therefore introduce the \ensuremath{\Conid{Conf}\;\Varid{a}} data-type that simply wraps a \ensuremath{\Conid{Strategy}\;\Varid{a}} (Fig.~\ref{fig:confa}). We can't directly use the \ensuremath{\Conid{Strategy}\;\Varid{a}} type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -887,7 +890,7 @@ For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMul
 \caption{Definition of Conf a}
 \label{fig:confa}
 \end{figure}
-To get our configurable \inlinecode{ArrowParallel} instance, we simply unwrap the strategy and pass it to \inlinecode{parList} like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
+To get our configurable \ensuremath{\Conid{ArrowParallel}} instance, we simply unwrap the strategy and pass it to \ensuremath{\Varid{parList}} like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -916,10 +919,10 @@ To get our configurable \inlinecode{ArrowParallel} instance, we simply unwrap th
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 \subsubsection{Par Monad}
-The ParMonad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and ParMonad's \inlinecode{spawnP :: NFData a =>\ \ a -> Par (IVar a)} function. The latter forks away the computation of a value and returns an \inlinecode{IVar} containing the result in the \inlinecode{Par} monad.
+The ParMonad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and ParMonad's \ensuremath{\Varid{spawnP}\mathbin{::}\Conid{NFData}\;\Varid{a}\Rightarrow \Varid{a}\to \Conid{Par}\;(\Conid{IVar}\;\Varid{a})} function. The latter forks away the computation of a value and returns an \ensuremath{\Conid{IVar}} containing the result in the \ensuremath{\Conid{Par}} monad.
 
 
-We therefore apply each function to its corresponding input value with \inlinecode{listApp} (Fig.~\ref{fig:listApp}) and then fork the computation away with \inlinecode{arr spawnP} inside a \inlinecode{zipWithArr} call. This yields a list \inlinecode{[Par (IVar b)]}, which we then convert into \inlinecode{Par [IVar b]} with \inlinecode{arr sequenceA}. In order to wait for the computation to finish, we map over the \inlinecode{IVar}s inside the ParMonad with \inlinecode{arr (>>= mapM get)}. The result of this operation is a \inlinecode{Par [b]} from which we can finally remove the monad again by running \inlinecode{arr runPar} to get our output of \inlinecode{[b]}.
+We therefore apply each function to its corresponding input value with \ensuremath{\Varid{listApp}} (Fig.~\ref{fig:listApp}) and then fork the computation away with \ensuremath{\Varid{arr}\;\Varid{spawnP}} inside a \ensuremath{\Varid{zipWithArr}} call. This yields a list \ensuremath{[\mskip1.5mu \Conid{Par}\;(\Conid{IVar}\;\Varid{b})\mskip1.5mu]}, which we then convert into \ensuremath{\Conid{Par}\;[\mskip1.5mu \Conid{IVar}\;\Varid{b}\mskip1.5mu]} with \ensuremath{\Varid{arr}\;\Varid{sequenceA}}. In order to wait for the computation to finish, we map over the \ensuremath{\Conid{IVar}}s inside the ParMonad with \ensuremath{\Varid{arr}\;(\bind \Varid{mapM}\;\Varid{get})}. The result of this operation is a \ensuremath{\Conid{Par}\;[\mskip1.5mu \Varid{b}\mskip1.5mu]} from which we can finally remove the monad again by running \ensuremath{\Varid{arr}\;\Varid{runPar}} to get our output of \ensuremath{[\mskip1.5mu \Varid{b}\mskip1.5mu]}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -957,7 +960,7 @@ We therefore apply each function to its corresponding input value with \inlineco
 \end{figure}
 
 \subsubsection{Eden}
-For the Multicore and ParMonad implementation we could use general instances of \inlinecode{ArrowParallel} that just require the \inlinecode{ArrowApply} and \inlinecode{ArrowChoice} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass \inlinecode{ArrowUnwrap} (Fig.~\ref{fig:ArrowUnwrap}).
+For the Multicore and ParMonad implementation we could use general instances of \ensuremath{\Conid{ArrowParallel}} that just require the \ensuremath{\Conid{ArrowApply}} and \ensuremath{\Conid{ArrowChoice}} typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass \ensuremath{\Conid{ArrowUnwrap}} (Fig.~\ref{fig:ArrowUnwrap}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -972,7 +975,7 @@ For the Multicore and ParMonad implementation we could use general instances of 
 \caption{possible ArrowUnwrap typeclass}
 \label{fig:ArrowUnwrap}
 \end{figure}
-We don't do it here for aesthetic resons, though. For now, we just implement \inlinecode{ArrowParallel} for normal functions (Fig.~\ref{fig:ArrowParallelEdenFns})
+We don't do it here for aesthetic resons, though. For now, we just implement \ensuremath{\Conid{ArrowParallel}} for normal functions (Fig.~\ref{fig:ArrowParallelEdenFns})
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1009,16 +1012,16 @@ and the Kleisli type (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
 \label{fig:ArrowParallelEdenKleisli}
 \end{figure}
 
-\FloatBarrier
+%\FloatBarrier
 
 \subsection{Impact of parallel Arrows}
 \olcomment{move this to Contributions in the front or something}
-We have seen that we can wrap parallel Haskells inside of the \inlinecode{ArrowParallel} interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
+We have seen that we can wrap parallel Haskells inside of the \ensuremath{\Conid{ArrowParallel}} interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
 \begin{itemize}
 	\item \textbf{Arrow API benefits}:
-	With the \inlinecode{ArrowParallel} typeclass we do not lose any benefits of using arrows as \inlinecode{parEvalN} is just yet another arrow combinator. The resulting arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into our sequential programs without having to change anything.
+	With the \ensuremath{\Conid{ArrowParallel}} typeclass we do not lose any benefits of using arrows as \ensuremath{\Varid{parEvalN}} is just yet another arrow combinator. The resulting arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into our sequential programs without having to change anything.
 	\item \textbf{Abstraction}:
-	With the \inlinecode{ArrowParallel} typeclass, we abstracted all parallel implementation logic away from the business logic. This gives us the beautiful situation of being able to write our code against the interface the typeclass gives us without being bound to any parallel Haskell. So as an example, during development, we can run the code on the simple Multicore version and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the actual \inlinecode{ArrowParallel} instance.
+	With the \ensuremath{\Conid{ArrowParallel}} typeclass, we abstracted all parallel implementation logic away from the business logic. This gives us the beautiful situation of being able to write our code against the interface the typeclass gives us without being bound to any parallel Haskell. So as an example, during development, we can run the code on the simple Multicore version and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the actual \ensuremath{\Conid{ArrowParallel}} instance.
 \end{itemize}
 
 
@@ -1029,15 +1032,15 @@ We have seen that we can wrap parallel Haskells inside of the \inlinecode{ArrowP
 	%\pagebreak
 	\subsection{Extending the Interface}
 \label{sec:extending-interface}
-With the \inlinecode{ArrowParallel} typeclass in place and implemented, we can now implement some further basic parallel interface functions. These are algorithmic skeletons that, however, mostly serve as a foundation to further, more specific algorithmic skeletons.
+With the \ensuremath{\Conid{ArrowParallel}} typeclass in place and implemented, we can now implement some further basic parallel interface functions. These are algorithmic skeletons that, however, mostly serve as a foundation to further, more specific algorithmic skeletons.
 
-\subsubsection{Lazy \inlinecode{parEvalN}}
+\subsubsection{Lazy \ensuremath{\Varid{parEvalN}}}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEvalNLazy}
 	\caption{Schematic depiction of parEvalNLazy}
 	\label{fig:parEvalNLazyImg}
 \end{figure}
-The function \inlinecode{parEvalN} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \inlinecode{map (arr . (+)) [1..]} or just because we need the arrows evaluated in chunks. \inlinecode{parEvalNLazy} (Fig.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from \inlinecode{[a]} to \inlinecode{[[a]]} with the given \inlinecode{ChunkSize} in \inlinecode{arr (chunksOf chunkSize)}. These chunks are then fed into a list \inlinecode{[arr [a] [b]]} of parallel arrows created by feeding chunks of the passed \inlinecode{ChunkSize} into the regular parEvalN by using \inlinecode{listApp} (Fig.~\ref{fig:listApp}). The resulting \inlinecode{[[b]]} is lastly converted into \inlinecode{[b]} with \inlinecode{arr concat}.
+The function \ensuremath{\Varid{parEvalN}} is 100\% strict, which means that it fully evaluates all passed arrows. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. \ensuremath{\Varid{map}\;(\Varid{arr}\mathbin{\circ}(\mathbin{+}))\;[\mskip1.5mu \mathrm{1}\mathinner{\ldotp\ldotp}\mskip1.5mu]} or just because we need the arrows evaluated in chunks. \ensuremath{\Varid{parEvalNLazy}} (Fig.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from \ensuremath{[\mskip1.5mu \Varid{a}\mskip1.5mu]} to \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{a}\mskip1.5mu]\mskip1.5mu]} with the given \ensuremath{\Conid{ChunkSize}} in \ensuremath{\Varid{arr}\;(\Varid{chunksOf}\;\Varid{chunkSize})}. These chunks are then fed into a list \ensuremath{[\mskip1.5mu \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]\mskip1.5mu]} of parallel arrows created by feeding chunks of the passed \ensuremath{\Conid{ChunkSize}} into the regular parEvalN by using \ensuremath{\Varid{listApp}} (Fig.~\ref{fig:listApp}). The resulting \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{b}\mskip1.5mu]\mskip1.5mu]} is lastly converted into \ensuremath{[\mskip1.5mu \Varid{b}\mskip1.5mu]} with \ensuremath{\Varid{arr}\;\Varid{concat}}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1074,9 +1077,9 @@ The function \inlinecode{parEvalN} is 100\% strict, which means that it fully ev
 	\caption{Schematic depiction of parEval2}
 	\label{fig:parEval2Img}
 \end{figure}
-We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a \inlinecode{parEval2} combinator (Fig.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows \inlinecode{arr a b} and \inlinecode{arr c d} into a new parallel arrow \inlinecode{arr (a, c) (b, d)} quite easily with the help of the \inlinecode{ArrowChoice} typeclass. The idea is to use the \inlinecode{+++} combinator which combines two arrows \inlinecode{arr a b} and \inlinecode{arr c d} and transforms them into \inlinecode{arr (Either a c) (Either b d)} to get a common arrow type that we can then feed into parEvalN.
+We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a \ensuremath{\Varid{parEval2}} combinator (Fig.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into a new parallel arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} quite easily with the help of the \ensuremath{\Conid{ArrowChoice}} typeclass. The idea is to use the \ensuremath{\mathbin{+++}} combinator which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} and transforms them into \ensuremath{\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})} to get a common arrow type that we can then feed into parEvalN.
 \\\\
-We start by transforming the \inlinecode{(a, c)} input into a 2-element list \inlinecode{[Either a c]} by first tagging the two inputs with \inlinecode{Left} and \inlinecode{Right} and wrapping the right element in a singleton list with \inlinecode{return} so that we can combine them with \inlinecode{arr (uncurry (:))}. Next, we feed this list into a parallel arrow running on 2 instances of \inlinecode{f +++ g} as described above. After the calculation is finished, we convert the resulting \inlinecode{[Either b d]} into \inlinecode{([b], [d])} with \inlinecode{arr partitionEithers}. The two lists in this tuple contain only 1 element each by construction, so we can finally just convert the tuple to \inlinecode{(b, d)} in the last step.
+We start by transforming the \ensuremath{(\Varid{a},\Varid{c})} input into a 2-element list \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{a}\;\Varid{c}\mskip1.5mu]} by first tagging the two inputs with \ensuremath{\Conid{Left}} and \ensuremath{\Conid{Right}} and wrapping the right element in a singleton list with \ensuremath{\Varid{return}} so that we can combine them with \ensuremath{\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))}. Next, we feed this list into a parallel arrow running on 2 instances of \ensuremath{\Varid{f}\mathbin{+++}\Varid{g}} as described above. After the calculation is finished, we convert the resulting \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{b}\;\Varid{d}\mskip1.5mu]} into \ensuremath{([\mskip1.5mu \Varid{b}\mskip1.5mu],[\mskip1.5mu \Varid{d}\mskip1.5mu])} with \ensuremath{\Varid{arr}\;\Varid{partitionEithers}}. The two lists in this tuple contain only 1 element each by construction, so we can finally just convert the tuple to \ensuremath{(\Varid{b},\Varid{d})} in the last step.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1119,7 +1122,7 @@ We start by transforming the \inlinecode{(a, c)} input into a 2-element list \in
 %%% End:
 	%\pagebreak
 	\subsubsection{Syntactic Sugar} \label{syntacticSugar}
-For basic arrows, we have the \inlinecode{(***)} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \inlinecode{arr a b} and \inlinecode{arr c d} into an arrow \inlinecode{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version \inlinecode{(\ensuremath{\mathbin{\*\!\*\!\*}})} (Fig.~\ref{fig:par***}) with the use of \inlinecode{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \inlinecode{()} as the conf parameter in Fig.~\ref{fig:par***}).
+For basic arrows, we have the \ensuremath{(\mathbin{\*\!\*\!\*})} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into an arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} which does both computations at once. This can easily be translated into a parallel version \ensuremath{\mathbin{|\!\*\!\*\!\*\!|}} (Fig.~\ref{fig:par***}) with the use of \ensuremath{\Varid{parEval2}}, but for this we require a backend which has an implementation that does not require any configuration (hence the \ensuremath{()} as the conf parameter in Fig.~\ref{fig:par***}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1133,26 +1136,26 @@ For basic arrows, we have the \inlinecode{(***)} combinator (Fig.~\ref{fig:***Im
 \>[B]{}(\mathbin{|\!\*\!\*\!\*\!|})\mathrel{=}\Varid{parEval2}\;(){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Definition of (\ensuremath{\mathbin{\*\!\*\!\*}}) - the parallel version of (***)}
+\caption{Definition of \ensuremath{\mathbin{|\!\*\!\*\!\*\!|}}, the parallel version of \ensuremath{\mathbin{\*\!\*\!\*}}.}
 \label{fig:par***}
 \end{figure}
-% With this we can analogously to the serial \inlinecode{&&&}
-We define the parallel \inlinecode{(\ensuremath{\mathbin{\char92 \&\char92 \&\char92 \&}})} (Fig.~\ref{fig:par&&&}) in a similar manner to its sequential pendant \inlinecode{(\&\&\&)} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+% With this we can analogously to the serial |&&&|
+We define the parallel \ensuremath{\mathbin{|\!\&\!\&\!\&\!|}} (Fig.~\ref{fig:par&&&}) in a similar manner to its sequential pendant \ensuremath{\mathbin{\&\!\&\!\&}} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{|\&\&\&|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{a})\;(\Conid{Either}\;\Varid{b}\;\Varid{c})\;())\Rightarrow {}\<[E]%
+\>[B]{}(\mathbin{|\!\&\!\&\!\&\!|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{a})\;(\Conid{Either}\;\Varid{b}\;\Varid{c})\;())\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
 \\
-\>[B]{}(\mathbin{|\&\&\&|})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{|\!\*\!\*\!\*\!|}\Varid{g}{}\<[E]%
+\>[B]{}(\mathbin{|\!\&\!\&\!\&\!|})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{|\!\*\!\*\!\*\!|}\Varid{g}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
  % $ %% formatting
-\caption{Definition of (\ensuremath{\mathbin{\char92 \&\char92 \&\char92 \&}}) - the parallel version of (\&\&\&)}
+\caption{Definition of \ensuremath{\mathbin{|\!\&\!\&\!\&\!|}} - the parallel version of \ensuremath{\mathbin{\&\!\&\!\&}}.}
 \label{fig:par&&&}
 \end{figure}
 	%\pagebreak
@@ -1170,10 +1173,10 @@ Consider the parallel arrow combinator in Fig.~\ref{fig:someCombinator}
 \caption{An example parallel Arrow combinator without Futures}
 \label{fig:someCombinator}
 \end{figure}
-In a distributed environment, the resulting arrow of this combinator first evaluates all \inlinecode{[arr a b]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \inlinecode{[arr b c]} in parallel to then gather the input once again on the master node.
+In a distributed environment, the resulting arrow of this combinator first evaluates all \ensuremath{[\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \ensuremath{[\mskip1.5mu \Varid{arr}\;\Varid{b}\;\Varid{c}\mskip1.5mu]} in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
-While the example in Fig.~\ref{fig:someCombinator} could be rewritten into only one \inlinecode{parEvalN} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \inlinecode{ArrowParallel} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
+While the example in Fig.~\ref{fig:someCombinator} could be rewritten into only one \ensuremath{\Varid{parEvalN}} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \ensuremath{\Conid{ArrowParallel}} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
 for larger amount of data and number of processes \citep[showcases][as, \eg]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
@@ -1182,9 +1185,9 @@ for larger amount of data and number of processes \citep[showcases][as, \eg]{Ber
 	\label{fig:withoutFutures}
 \end{figure}
 
-This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \inlinecode{RD} (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
+This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \ensuremath{\Conid{RD}} (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
 
-But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \inlinecode{Future} typeclass (Fig.~\ref{fig:future}).
+But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \ensuremath{\Conid{Future}} typeclass (Fig.~\ref{fig:future}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1202,7 +1205,7 @@ But as we want code written against our API to be implementation agnostic, we ha
 \caption{Definition of the Future typeclass}
 \label{fig:future}
 \end{figure}
-Since \inlinecode{RD} is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for \inlinecode{Strategy a} in the Multicore Haskell implementation of \inlinecode{ArrowParallel} in chapter \ref{sec:parrows:multicore}).
+Since \ensuremath{\Conid{RD}} is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for \ensuremath{\Conid{Strategy}\;\Varid{a}} in the Multicore Haskell implementation of \ensuremath{\Conid{ArrowParallel}} in chapter \ref{sec:parrows:multicore}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1223,7 +1226,7 @@ Since \inlinecode{RD} is only a type synonym for communication type that Eden us
 \label{fig:RDFuture}
 \end{figure}
 
-For our Par Monad and Multicore Haskell backends, we can simply use \inlinecode{MVar}s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
+For our Par Monad and Multicore Haskell backends, we can simply use \ensuremath{\Conid{MVar}}s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1255,9 +1258,9 @@ For our Par Monad and Multicore Haskell backends, we can simply use \inlinecode{
 \end{hscode}\resethooks
 \caption{MVar instance of the Future typeclass for the Par Monad and Multicore Haskell backends}
 \label{fig:MVarFuture}
-\end{figure}
+\end{figure} % $
 
-Furthermore, in order for these \inlinecode{Future} types to fit with the \inlinecode{ArrowParallel} instances we gave earlier, we have to give the necessary \inlinecode{NFData} and \inlinecode{Trans} instances - the latter only being needed in Eden. Because \inlinecode{MVar} already ships with a \inlinecode{NFData} instance, we only have to supply two simple instances for our \inlinecode{RemoteData} type.
+Furthermore, in order for these \ensuremath{\Conid{Future}} types to fit with the \ensuremath{\Conid{ArrowParallel}} instances we gave earlier, we have to give the necessary \ensuremath{\Conid{NFData}} and \ensuremath{\Conid{Trans}} instances - the latter only being needed in Eden. Because \ensuremath{\Conid{MVar}} already ships with a \ensuremath{\Conid{NFData}} instance, we only have to supply two simple instances for our \ensuremath{\Conid{RemoteData}} type.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1306,7 +1309,7 @@ In a distributed environment, this gives us a communication scheme with messages
 \end{figure}
 	%\pagebreak
 	
-\FloatBarrier
+%%% \FloatBarrier
 \section{Map-based Skeletons}
 \label{sec:map-skeletons}
 Now we have developed Parallel Arrows far enough to define some algorithmic skeletons useful to an application programmer.
@@ -1316,8 +1319,8 @@ Now we have developed Parallel Arrows far enough to define some algorithmic skel
 	\caption{Schematic depiction of parMap}
 	\label{fig:parMapImg}
 \end{figure}
-\inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with \inlinecode{ArrowParallel} by repeating an arrow \inlinecode{arr a b} and then passing it into \inlinecode{parEvalN} to get an arrow \inlinecode{arr [a] [b]}.
-Just like \inlinecode{parEvalN}, \inlinecode{parMap} is 100 \% strict.
+\ensuremath{\Varid{parMap}} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with \ensuremath{\Conid{ArrowParallel}} by repeating an arrow \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and then passing it into \ensuremath{\Varid{parEvalN}} to get an arrow \ensuremath{\Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]}.
+Just like \ensuremath{\Varid{parEvalN}}, \ensuremath{\Varid{parMap}} is 100\% strict.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1341,7 +1344,7 @@ Just like \inlinecode{parEvalN}, \inlinecode{parMap} is 100 \% strict.
 	\caption{Schematic depiction of parMapStream}
 	\label{fig:parMapStreamImg}
 \end{figure}
-As \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as \inlinecode{parEvalN} compared to \inlinecode{parEvalNLazy}. So it makes sense to also have a \inlinecode{parMapStream} (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like \inlinecode{parMap}, but uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
+As \ensuremath{\Varid{parMap}} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as \ensuremath{\Varid{parEvalN}} compared to \ensuremath{\Varid{parEvalNLazy}}. So it makes sense to also have a \ensuremath{\Varid{parMapStream}} (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like \ensuremath{\Varid{parMap}}, but uses \ensuremath{\Varid{parEvalNLazy}} instead of \ensuremath{\Varid{parEvalN}}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1365,7 +1368,7 @@ As \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% str
 	\caption{Schematic depiction of farm}
 	\label{fig:farmImg}
 \end{figure}
-A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \inlinecode{ArrowParallel} we gave in this paper). This can be quite wasteful and a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \inlinecode{numCores} workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
+A \ensuremath{\Varid{parMap}} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \ensuremath{\Conid{ArrowParallel}} we gave in this paper). This can be quite wasteful and a \ensuremath{\Varid{farm}} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \ensuremath{\Varid{numCores}} workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1405,7 +1408,7 @@ A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every 
 \>[B]{}\Varid{shuffle}\mathrel{=}\Varid{arr}\;(\Varid{concat}\mathbin{\circ}\Varid{transpose}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Definition of farm. \inlinecode{unshuffle}, \inlinecode{takeEach}, \inlinecode{shuffle} were taken from Eden's source code \cite{eden_skel_shuffle}}
+\caption{Definition of farm. \ensuremath{\Varid{unshuffle}}, \ensuremath{\Varid{takeEach}}, \ensuremath{\Varid{shuffle}} were taken from Eden's source code \cite{eden_skel_shuffle}}
 \label{fig:farm}
 \end{figure}
 
@@ -1415,16 +1418,13 @@ A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every 
 \caption{Schematic depiction of farmChunk}
 \label{fig:farmChunkImg}
 \end{figure}
-Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just \inlinecode{parMap} with a different work distribution, it is, again, 100\% strict. So we define \inlinecode{farmChunk} (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
+Since a \ensuremath{\Varid{farm}} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just \ensuremath{\Varid{parMap}} with a different work distribution, it is, again, 100\% strict. So we define \ensuremath{\Varid{farmChunk}} (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses \ensuremath{\Varid{parEvalNLazy}} instead of \ensuremath{\Varid{parEvalN}}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{farmChunk}\mathbin{::}(\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}\;\Varid{conf},\Conid{ArrowParallel}\;\Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]\;\Varid{conf},{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowApply}\;\Varid{arr})\Rightarrow {}\<[E]%
+\>[B]{}\Varid{farmChunk}\mathbin{::}(\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}\;\Varid{conf},\Conid{ArrowParallel}\;\Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]\;\Varid{conf},\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowApply}\;\Varid{arr})\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{conf}\to \Conid{ChunkSize}\to \Conid{NumCores}\to \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]{}\<[E]%
@@ -1489,14 +1489,14 @@ Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically 
 %%% TeX-master: "main"
 %%% End:
 	%\pagebreak
-	\FloatBarrier
+	%\FloatBarrier
 \section{Topological Skeletons}
 \label{sec:topology-skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \inlinecode{pipe}, a \inlinecode{ring} and a \inlinecode{torus} implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \ensuremath{\Varid{pipe}}, a \ensuremath{\Varid{ring}} and a \ensuremath{\Varid{torus}} implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
 \subsection{Parallel pipe}
 
-The parallel pipe skeleton is semantically equivalent to folding over a list \inlinecode{[arr a a]} of arrows with \inlinecode{>>>}, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the \inlinecode{ArrowLoop} typeclass which gives us the \inlinecode{loop :: arr (a, b) (c, b) -> arr a c} combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
+The parallel pipe skeleton is semantically equivalent to folding over a list \ensuremath{[\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{a}\mskip1.5mu]} of arrows with \ensuremath{\mathbin{>\!\!>\!\!>}}, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the \ensuremath{\Conid{ArrowLoop}} typeclass which gives us the \ensuremath{\Varid{loop}\mathbin{::}\Varid{arr}\;(\Varid{a},\Varid{b})\;(\Varid{c},\Varid{b})\to \Varid{arr}\;\Varid{a}\;\Varid{c}} combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \mbcomment{das kann man hier so lassen, oder?}
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1511,7 +1511,7 @@ The parallel pipe skeleton is semantically equivalent to folding over a list \in
 \>[B]{}\Varid{loop}\;(\Varid{arr}\;\Varid{snd}\mathbin{\&\!\&\!\&}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-defines an arrow that takes its input \inlinecode{a} and converts it into an infinite stream \inlinecode{[a]} of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call \inlinecode{parEvalN conf fs} inside the second argument of \inlinecode{(\&\&\&)} and then only picking the first element of the resulting list with \inlinecode{arr last}.
+defines an arrow that takes its input \ensuremath{\Varid{a}} and converts it into an infinite stream \ensuremath{[\mskip1.5mu \Varid{a}\mskip1.5mu]} of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call \ensuremath{\Varid{parEvalN}\;\Varid{conf}\;\Varid{fs}} inside the second argument of \ensuremath{\mathbin{\&\!\&\!\&}} and then only picking the first element of the resulting list with \ensuremath{\Varid{arr}\;\Varid{last}}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1539,20 +1539,17 @@ defines an arrow that takes its input \inlinecode{a} and converts it into an inf
 \>[B]{}\Varid{lazy}\mathrel{=}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{x}\mathbin{:}\Varid{xs})\to \Varid{x}\mathbin{:}\Varid{lazy}\;\Varid{xs}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{A first draft of the pipe skeleton expressed with parallel arrows. Note that the use of \inlinecode{lazy} is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input \inlinecode{[a]} terminates before passing it into \inlinecode{parEvalN}.}
+\caption{A first draft of the pipe skeleton expressed with parallel arrows. Note that the use of \ensuremath{\Varid{lazy}} is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input \ensuremath{[\mskip1.5mu \Varid{a}\mskip1.5mu]} terminates before passing it into \ensuremath{\Varid{parEvalN}}.}
 \label{fig:pipeSimple}
 \end{figure}
 
-However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of \inlinecode{pipe} \ref{fig:pipe}.
+However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of \ensuremath{\Varid{pipe}} \ref{fig:pipe}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{pipe}\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Varid{fut}\;\Varid{a})\;(\Varid{fut}\;\Varid{a})\;\Varid{conf},{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Conid{Future}\;\Varid{fut}\;\Varid{a})\Rightarrow {}\<[E]%
+\>[B]{}\Varid{pipe}\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Varid{fut}\;\Varid{a})\;(\Varid{fut}\;\Varid{a})\;\Varid{conf},\Conid{Future}\;\Varid{fut}\;\Varid{a})\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{conf}\to [\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{a}\mskip1.5mu]\to \Varid{arr}\;\Varid{a}\;\Varid{a}{}\<[E]%
@@ -1564,12 +1561,11 @@ However, using this definition directly will make the master node a potential bo
 \label{fig:pipe}
 \end{figure}
 
-Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \inlinecode{arr a b} and \inlinecode{arr b c}. By wrapping these two arrows inside a common type we obtain \inlinecode{pipe2} (Fig.~\ref{fig:pipe2}).
+Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{b}\;\Varid{c}}. By wrapping these two arrows inside a common type we obtain \ensuremath{\Varid{pipe2}} (Fig.~\ref{fig:pipe2}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{25}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{33}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1596,18 +1592,15 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \>[9]{}\Varid{arr}\;\Varid{snd}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{head}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{head}\;\mathbf{where}{}\<[E]%
 \\
-\>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\mathbf{where}{}\<[E]%
-\\
-\>[17]{}\hsindent{8}{}\<[25]%
+\>[9]{}\hsindent{16}{}\<[25]%
 \>[25]{}\Varid{unify}\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr})\Rightarrow {}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
 \>[33]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;(([\mskip1.5mu \Varid{a}\mskip1.5mu],[\mskip1.5mu \Varid{b}\mskip1.5mu]),[\mskip1.5mu \Varid{c}\mskip1.5mu])\;(([\mskip1.5mu \Varid{a}\mskip1.5mu],[\mskip1.5mu \Varid{b}\mskip1.5mu]),[\mskip1.5mu \Varid{c}\mskip1.5mu]){}\<[E]%
 \\
-\>[17]{}\hsindent{8}{}\<[25]%
+\>[9]{}\hsindent{16}{}\<[25]%
 \>[25]{}\Varid{unify}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
@@ -1621,7 +1614,7 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(\ensuremath{\mathbin{>\!\!>\!\!>}})} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
+Note that extensive use of this combinator over \ensuremath{\Varid{pipe}} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \ensuremath{(}>>>\ensuremath{)} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \ensuremath{(\mathbin{>\!\!>\!\!>})} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1651,7 +1644,7 @@ Note that extensive use of this combinator over \inlinecode{pipe} with a hand-wr
 	\caption{Schematic depiction of the ring skeleton}
 	\label{fig:ringImg}
 \end{figure}
-Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \inlinecode{[i] -> [o]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \inlinecode{i -> r -> (o, r)} in which \inlinecode{r} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
+Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \ensuremath{[\mskip1.5mu \Varid{i}\mskip1.5mu]\to [\mskip1.5mu \Varid{o}\mskip1.5mu]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \ensuremath{\Varid{i}\to \Varid{r}\to (\Varid{o},\Varid{r})} in which \ensuremath{\Varid{r}} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1725,11 +1718,11 @@ Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that all
 %\begin{code}
 
 
-We can rewrite its functionality easily with the use of \inlinecode{loop} as the definition of the node function, \inlinecode{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \inlinecode{loop}'s \inlinecode{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \inlinecode{[fut r]} with \inlinecode{second (rightRotate >>> lazy)}. Similarly to the \inlinecode{pipe} (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our \inlinecode{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
-%\begin{quotation}
-\enquote{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
-%\end{quotation}
-Next, we zip the resulting \inlinecode{([i], [fut r])} to \inlinecode{[(i, fut r)]} with \inlinecode{arr (uncurry zip)} so we can feed that into a our input arrow \inlinecode{arr (i, r) (o, r)}, which we transform into \inlinecode{arr (i, fut r) (o, fut r)} before lifting it to \inlinecode{arr [(i, fut r)] [(o, fut r)]} to get a list \inlinecode{[(o, fut r)]}. Finally we unzip this list into \inlinecode{([o], [fut r])}. Plugging this arrow \inlinecode{arr ([i], [fut r]) ([o], fut r)} into the definition of \inlinecode{loop} from earlier gives us \inlinecode{arr [i] [o]}, our ring arrow (Fig.~\ref{fig:ringFinal}).
+We can rewrite its functionality easily with the use of \ensuremath{\Varid{loop}} as the definition of the node function, \ensuremath{\Varid{arr}\;(\Varid{i},\Varid{r})\;(\Varid{o},\Varid{r})}, after being transformed into an arrow, already fits quite neatly into the \ensuremath{\Varid{loop}}'s \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{b})\;(\Varid{c},\Varid{b})\to \Varid{arr}\;\Varid{a}\;\Varid{c}}. In each iteration we start by rotating the intermediary input from the nodes \ensuremath{[\mskip1.5mu \Varid{fut}\;\Varid{r}\mskip1.5mu]} with \ensuremath{\Varid{second}\;(\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})}. Similarly to the \ensuremath{\Varid{pipe}} (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our \ensuremath{\Varid{lazy}} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
+\begin{quote}
+{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
+\end{quote}
+Next, we zip the resulting \ensuremath{([\mskip1.5mu \Varid{i}\mskip1.5mu],[\mskip1.5mu \Varid{fut}\;\Varid{r}\mskip1.5mu])} to \ensuremath{[\mskip1.5mu (\Varid{i},\Varid{fut}\;\Varid{r})\mskip1.5mu]} with \ensuremath{\Varid{arr}\;(\Varid{uncurry}\;\Varid{zip})} so we can feed that into a our input arrow \ensuremath{\Varid{arr}\;(\Varid{i},\Varid{r})\;(\Varid{o},\Varid{r})}, which we transform into \ensuremath{\Varid{arr}\;(\Varid{i},\Varid{fut}\;\Varid{r})\;(\Varid{o},\Varid{fut}\;\Varid{r})} before lifting it to \ensuremath{\Varid{arr}\;[\mskip1.5mu (\Varid{i},\Varid{fut}\;\Varid{r})\mskip1.5mu]\;[\mskip1.5mu (\Varid{o},\Varid{fut}\;\Varid{r})\mskip1.5mu]} to get a list \ensuremath{[\mskip1.5mu (\Varid{o},\Varid{fut}\;\Varid{r})\mskip1.5mu]}. Finally we unzip this list into \ensuremath{([\mskip1.5mu \Varid{o}\mskip1.5mu],[\mskip1.5mu \Varid{fut}\;\Varid{r}\mskip1.5mu])}. Plugging this arrow \ensuremath{\Varid{arr}\;([\mskip1.5mu \Varid{i}\mskip1.5mu],[\mskip1.5mu \Varid{fut}\;\Varid{r}\mskip1.5mu])\;([\mskip1.5mu \Varid{o}\mskip1.5mu],\Varid{fut}\;\Varid{r})} into the definition of \ensuremath{\Varid{loop}} from earlier gives us \ensuremath{\Varid{arr}\;[\mskip1.5mu \Varid{i}\mskip1.5mu]\;[\mskip1.5mu \Varid{o}\mskip1.5mu]}, our ring arrow (Fig.~\ref{fig:ringFinal}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1800,12 +1793,12 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
+
+With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology}---yet again with the help of the \ensuremath{\Conid{ArrowLoop}} typeclass.
+
+Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu])} in the second argument (loop only allows for 2 arguments) of our looped arrow \ensuremath{\Varid{arr}\;([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))\;([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} and our rotation arrow becomes \ensuremath{\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{\*\!\*\!\*}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))} instead of the singular rotation in the ring as we rotate \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu]} horizontally and \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]} vertically. Then, we once again zip the inputs for the input arrow with \ensuremath{\Varid{arr}\;(\Varid{uncurry3}\;\Varid{zipWith3}\;\Varid{lazyzip3})} from \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} to \ensuremath{[\mskip1.5mu [\mskip1.5mu (\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]}, which we then feed into our parallel execution.
 \\\\
-With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology} - yet again with the help of the \inlinecode{ArrowLoop} typeclass.
-\\\\
-Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \inlinecode{([[fut a]], [[fut b]])} in the second argument (loop only allows for 2 arguments) of our looped arrow \inlinecode{arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))} and our rotation arrow becomes \inlinecode{second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))} instead of the singular rotation in the ring as we rotate \inlinecode{[[fut a]]} horizontally and \inlinecode{[[fut b]]} vertically. Then, we once again zip the inputs for the input arrow with \inlinecode{arr (uncurry3 zipWith3 lazyzip3)} from \inlinecode{([[c]], ([[fut a]], [[fut b]]))} to \inlinecode{[[(c, fut a, fut b)]]}, which we then feed into our parallel execution.
-\\\\
-This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \inlinecode{shuffle} all the inputs to then pass it into \inlinecode{parMap conf (ptorus f)} which yields us \inlinecode{[(d, fut a, fut b)]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \inlinecode{arr length >>> arr unshuffle} with the use of \inlinecode{app :: arr (arr a b, a) c} from the \inlinecode{ArrowApply} typeclass. Finally, we unpack this matrix \inlinecode{[[[(d, fut a, fut b)]]} with \inlinecode{arr (map unzip3) >>> arr unzip3 >>> threetotwo} to get  \inlinecode{([[d]], ([[fut a]], [[fut b]]))}.
+This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \ensuremath{\Varid{shuffle}} all the inputs to then pass it into \ensuremath{\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f})} which yields us \ensuremath{[\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \ensuremath{\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle}} with the use of \ensuremath{\Varid{app}\mathbin{::}\Varid{arr}\;(\Varid{arr}\;\Varid{a}\;\Varid{b},\Varid{a})\;\Varid{c}} from the \ensuremath{\Conid{ArrowApply}} typeclass. Finally, we unpack this matrix \ensuremath{[\mskip1.5mu [\mskip1.5mu [\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]} with \ensuremath{\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!\!>\!\!>}\Varid{threetotwo}} to get  \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))}.
 \\\\
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
@@ -1876,6 +1869,7 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{threetotwo}\mathrel{=}\Varid{arr}\mathbin{\$}\lambda \mathord{\sim}(\Varid{a},\Varid{b},\Varid{c})\to (\Varid{a},(\Varid{b},\Varid{c})){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
+ % $
 \caption{Definition of the torus skeleton}
 \label{fig:torus}
 \end{figure}
@@ -1931,7 +1925,7 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 	\label{fig:torus_eden_trace}
 \end{figure}
 
-\FloatBarrier
+%\FloatBarrier
 
 %%% Local Variables:
 %%% mode: latex
@@ -1992,7 +1986,7 @@ Arrows are a generic concept that allows for powerful composition combinators. T
 
 Arrows turn out to be a useful tool for composing in parallel programs. We do not have to introduce new monadic types that wrap the computation. Instead use arrows just like regular sequential pure functions. 
 %
-This work features multiple parallel backends: the already available parallel Haskell flavours. Parallel Arrows feature an implementation of the \inlinecode{ArrowParallel} interface for Multicore Haskell, \inlinecode{Par} monad, and Eden. With our approach parallel programs can be ported across these flavours with no effort.
+This work features multiple parallel backends: the already available parallel Haskell flavours. Parallel Arrows feature an implementation of the \ensuremath{\Conid{ArrowParallel}} interface for Multicore Haskell, \ensuremath{\Conid{Par}} monad, and Eden. With our approach parallel programs can be ported across these flavours with no effort.
 %
 %
 Performancewise, Parallel Arrows are on par with existing parallel Haskells, as they do not introduce any notable overhead.\olcomment{PROOFS. Many proofs in benchmarks!}

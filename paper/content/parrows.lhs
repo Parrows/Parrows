@@ -120,7 +120,7 @@ parEvalN conf fs =
 \label{fig:ArrowParallelEdenKleisli}
 \end{figure}
 
-\FloatBarrier
+%\FloatBarrier
 
 \subsection{Impact of parallel Arrows}
 \olcomment{move this to Contributions in the front or something}
