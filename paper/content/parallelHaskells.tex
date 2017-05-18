@@ -6,9 +6,11 @@ There are already several ways to write parallel programs in Haskell. As we will
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \inlinecode{a -> b} in parallel:
 
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+%\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parEvalN :: [a -> b] -> [a] -> [b]
-\end{lstlisting}
+\end{code}
+%\end{lstlisting}
 \caption{parEvalN's type signature}
 \label{fig:parEvalNTypeSig}
 \end{figure}
