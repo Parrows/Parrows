@@ -20,12 +20,15 @@
 %%%% %% works fine without
 %format ||| = "\mathbin{\mid\!\mid\!\mid}"
 %format pipepipepipe = "\mathbin{\mid\!\mid\!\mid}"
-%format |&&&| = "\mathbin{|\!\&\!\&\!\&\!|}"
-%format parand = "\mathbin{|\!\&\!\&\!\&\!|}"
+%format |&&&| = "\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}"
+%format parand = "\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}"
 %format &&& = "\mathbin{\&\!\&\!\&}"
-%format |***| = "\mathbin{|\!\*\!\*\!\*\!|}"
-%format parstar = "\mathbin{|\!\*\!\*\!\*\!|}"
-%format *** = "\mathbin{\*\!\*\!\*}"
+%format |***| = "\mathbin{\mid\!\!*\!*\!*\!\!\mid}"
+%format parstar = "\mathbin{\mid\!\!*\!*\!*\!\!\mid}"
+%format *** = "\mathbin{*\!*\!*}"
+%format |+++| = "\mathbin{\mid\!\!+\!\!+\!\!+\!\!\mid}"
+%format +++ = "\mathbin{+\!\!+\!\!+}"
+
 
 %include polycode.fmt
 

@@ -15,6 +15,7 @@
 %%%% %format ` = "\`"
 %%%% %% works fine without
 
+
 %% ODER: format ==         = "\mathrel{==}"
 %% ODER: format /=         = "\neq "
 %
@@ -705,27 +706,27 @@ With this typeclass in place, Hughes also defined some syntactic sugar: The mirr
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the \ensuremath{\mathbin{\*\!\*\!\*}} combinator which combines \ensuremath{\Varid{first}} and \ensuremath{\Varid{second}} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
+the \ensuremath{\mathbin{*\!*\!*}} combinator which combines \ensuremath{\Varid{first}} and \ensuremath{\Varid{second}} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{\*\!\*\!\*})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
+\>[B]{}(\mathbin{*\!*\!*})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
 \\
-\>[B]{}\Varid{f}\mathbin{\*\!\*\!\*}\Varid{g}\mathrel{=}\Varid{first}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{g}{}\<[E]%
+\>[B]{}\Varid{f}\mathbin{*\!*\!*}\Varid{g}\mathrel{=}\Varid{first}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{g}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{The (***) combinator}
 \label{fig:***}
 \end{figure}
-and the \ensuremath{\mathbin{\char92 \&\char92 \&\char92 \&}} combinator that constructs an arrow which outputs two different values like \ensuremath{\mathbin{\*\!\*\!\*}}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+and the \ensuremath{\mathbin{\char92 \&\char92 \&\char92 \&}} combinator that constructs an arrow which outputs two different values like \ensuremath{\mathbin{*\!*\!*}}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}(\mathbin{\&\!\&\!\&})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{a}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
 \\
-\>[B]{}\Varid{f}\mathbin{\&\!\&\!\&}\Varid{g}\mathrel{=}\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}(\Varid{f}\mathbin{\*\!\*\!\*}\Varid{g}){}\<[E]%
+\>[B]{}\Varid{f}\mathbin{\&\!\&\!\&}\Varid{g}\mathrel{=}\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}(\Varid{f}\mathbin{*\!*\!*}\Varid{g}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{The (\&\&\&) combinator}
@@ -1077,9 +1078,9 @@ The function \ensuremath{\Varid{parEvalN}} is 100\% strict, which means that it 
 	\caption{Schematic depiction of parEval2}
 	\label{fig:parEval2Img}
 \end{figure}
-We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a \ensuremath{\Varid{parEval2}} combinator (Fig.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into a new parallel arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} quite easily with the help of the \ensuremath{\Conid{ArrowChoice}} typeclass. The idea is to use the \ensuremath{\mathbin{+++}} combinator which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} and transforms them into \ensuremath{\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})} to get a common arrow type that we can then feed into parEvalN.
+We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a \ensuremath{\Varid{parEval2}} combinator (Fig.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into a new parallel arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} quite easily with the help of the \ensuremath{\Conid{ArrowChoice}} typeclass. The idea is to use the \ensuremath{\mathbin{+\!\!+\!\!+}} combinator which combines two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} and transforms them into \ensuremath{\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})} to get a common arrow type that we can then feed into parEvalN.
 \\\\
-We start by transforming the \ensuremath{(\Varid{a},\Varid{c})} input into a 2-element list \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{a}\;\Varid{c}\mskip1.5mu]} by first tagging the two inputs with \ensuremath{\Conid{Left}} and \ensuremath{\Conid{Right}} and wrapping the right element in a singleton list with \ensuremath{\Varid{return}} so that we can combine them with \ensuremath{\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))}. Next, we feed this list into a parallel arrow running on 2 instances of \ensuremath{\Varid{f}\mathbin{+++}\Varid{g}} as described above. After the calculation is finished, we convert the resulting \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{b}\;\Varid{d}\mskip1.5mu]} into \ensuremath{([\mskip1.5mu \Varid{b}\mskip1.5mu],[\mskip1.5mu \Varid{d}\mskip1.5mu])} with \ensuremath{\Varid{arr}\;\Varid{partitionEithers}}. The two lists in this tuple contain only 1 element each by construction, so we can finally just convert the tuple to \ensuremath{(\Varid{b},\Varid{d})} in the last step.
+We start by transforming the \ensuremath{(\Varid{a},\Varid{c})} input into a 2-element list \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{a}\;\Varid{c}\mskip1.5mu]} by first tagging the two inputs with \ensuremath{\Conid{Left}} and \ensuremath{\Conid{Right}} and wrapping the right element in a singleton list with \ensuremath{\Varid{return}} so that we can combine them with \ensuremath{\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))}. Next, we feed this list into a parallel arrow running on 2 instances of \ensuremath{\Varid{f}\mathbin{+\!\!+\!\!+}\Varid{g}} as described above. After the calculation is finished, we convert the resulting \ensuremath{[\mskip1.5mu \Conid{Either}\;\Varid{b}\;\Varid{d}\mskip1.5mu]} into \ensuremath{([\mskip1.5mu \Varid{b}\mskip1.5mu],[\mskip1.5mu \Varid{d}\mskip1.5mu])} with \ensuremath{\Varid{arr}\;\Varid{partitionEithers}}. The two lists in this tuple contain only 1 element each by construction, so we can finally just convert the tuple to \ensuremath{(\Varid{b},\Varid{d})} in the last step.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -1096,19 +1097,19 @@ We start by transforming the \ensuremath{(\Varid{a},\Varid{c})} input into a 2-e
 \>[B]{}\Varid{parEval2}\;\Varid{conf}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Conid{Left}\mathbin{\*\!\*\!\*}(\Varid{arr}\;\Conid{Right}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{return})\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Conid{Left}\mathbin{*\!*\!*}(\Varid{arr}\;\Conid{Right}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{return})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{f}\mathbin{+++}\Varid{g}))\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{f}\mathbin{+\!\!+\!\!+}\Varid{g}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{partitionEithers}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{head}\mathbin{\*\!\*\!\*}\Varid{arr}\;\Varid{head}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{head}\mathbin{*\!*\!*}\Varid{arr}\;\Varid{head}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 	\caption{Definition of parEval2}
@@ -1122,40 +1123,40 @@ We start by transforming the \ensuremath{(\Varid{a},\Varid{c})} input into a 2-e
 %%% End:
 	%\pagebreak
 	\subsubsection{Syntactic Sugar} \label{syntacticSugar}
-For basic arrows, we have the \ensuremath{(\mathbin{\*\!\*\!\*})} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into an arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} which does both computations at once. This can easily be translated into a parallel version \ensuremath{\mathbin{|\!\*\!\*\!\*\!|}} (Fig.~\ref{fig:par***}) with the use of \ensuremath{\Varid{parEval2}}, but for this we require a backend which has an implementation that does not require any configuration (hence the \ensuremath{()} as the conf parameter in Fig.~\ref{fig:par***}).
+For basic arrows, we have the \ensuremath{\mathbin{*\!*\!*}} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into an arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} which does both computations at once. This can easily be translated into a parallel version \ensuremath{\mathbin{\mid\!\!*\!*\!*\!\!\mid}} (Fig.~\ref{fig:par***}) with the use of \ensuremath{\Varid{parEval2}}, but for this we require a backend which has an implementation that does not require any configuration (hence the \ensuremath{()} as the conf parameter in Fig.~\ref{fig:par***}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{|\!\*\!\*\!\*\!|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})\;()))\Rightarrow {}\<[E]%
+\>[B]{}(\mathbin{\mid\!\!*\!*\!*\!\!\mid})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})\;()))\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
 \\
-\>[B]{}(\mathbin{|\!\*\!\*\!\*\!|})\mathrel{=}\Varid{parEval2}\;(){}\<[E]%
+\>[B]{}(\mathbin{\mid\!\!*\!*\!*\!\!\mid})\mathrel{=}\Varid{parEval2}\;(){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Definition of \ensuremath{\mathbin{|\!\*\!\*\!\*\!|}}, the parallel version of \ensuremath{\mathbin{\*\!\*\!\*}}.}
+\caption{Definition of \ensuremath{\mathbin{\mid\!\!*\!*\!*\!\!\mid}}, the parallel version of \ensuremath{\mathbin{*\!*\!*}}.}
 \label{fig:par***}
 \end{figure}
 % With this we can analogously to the serial |&&&|
-We define the parallel \ensuremath{\mathbin{|\!\&\!\&\!\&\!|}} (Fig.~\ref{fig:par&&&}) in a similar manner to its sequential pendant \ensuremath{\mathbin{\&\!\&\!\&}} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+We define the parallel \ensuremath{\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}} (Fig.~\ref{fig:par&&&}) in a similar manner to its sequential pendant \ensuremath{\mathbin{\&\!\&\!\&}} (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{|\!\&\!\&\!\&\!|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{a})\;(\Conid{Either}\;\Varid{b}\;\Varid{c})\;())\Rightarrow {}\<[E]%
+\>[B]{}(\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{a})\;(\Conid{Either}\;\Varid{b}\;\Varid{c})\;())\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
 \\
-\>[B]{}(\mathbin{|\!\&\!\&\!\&\!|})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{|\!\*\!\*\!\*\!|}\Varid{g}{}\<[E]%
+\>[B]{}(\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{\mid\!\!*\!*\!*\!\!\mid}\Varid{g}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
  % $ %% formatting
-\caption{Definition of \ensuremath{\mathbin{|\!\&\!\&\!\&\!|}} - the parallel version of \ensuremath{\mathbin{\&\!\&\!\&}}.}
+\caption{Definition of \ensuremath{\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}} - the parallel version of \ensuremath{\mathbin{\&\!\&\!\&}}.}
 \label{fig:par&&&}
 \end{figure}
 	%\pagebreak
@@ -1604,7 +1605,7 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \>[25]{}\Varid{unify}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
-\>[33]{}(\Varid{mapArr}\;\Varid{f}\mathbin{\*\!\*\!\*}\Varid{mapArr}\;\Varid{g})\mathbin{\*\!\*\!\*}\Varid{arr}\;(\mathbin{\char92 \char95 }\to [\mskip1.5mu \mskip1.5mu])\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[33]{}(\Varid{mapArr}\;\Varid{f}\mathbin{*\!*\!*}\Varid{mapArr}\;\Varid{g})\mathbin{*\!*\!*}\Varid{arr}\;(\mathbin{\char92 \char95 }\to [\mskip1.5mu \mskip1.5mu])\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
 \>[33]{}\Varid{arr}\;(\lambda ((\Varid{a},\Varid{b}),\Varid{c})\to ((\Varid{c},\Varid{a}),\Varid{b})){}\<[E]%
@@ -1796,7 +1797,7 @@ If we take the concept of a ring from \ref{sec:ring} one dimension further, we g
 
 With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology}---yet again with the help of the \ensuremath{\Conid{ArrowLoop}} typeclass.
 
-Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu])} in the second argument (loop only allows for 2 arguments) of our looped arrow \ensuremath{\Varid{arr}\;([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))\;([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} and our rotation arrow becomes \ensuremath{\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{\*\!\*\!\*}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))} instead of the singular rotation in the ring as we rotate \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu]} horizontally and \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]} vertically. Then, we once again zip the inputs for the input arrow with \ensuremath{\Varid{arr}\;(\Varid{uncurry3}\;\Varid{zipWith3}\;\Varid{lazyzip3})} from \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} to \ensuremath{[\mskip1.5mu [\mskip1.5mu (\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]}, which we then feed into our parallel execution.
+Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu])} in the second argument (loop only allows for 2 arguments) of our looped arrow \ensuremath{\Varid{arr}\;([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))\;([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} and our rotation arrow becomes \ensuremath{\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{*\!*\!*}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))} instead of the singular rotation in the ring as we rotate \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu]} horizontally and \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]} vertically. Then, we once again zip the inputs for the input arrow with \ensuremath{\Varid{arr}\;(\Varid{uncurry3}\;\Varid{zipWith3}\;\Varid{lazyzip3})} from \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} to \ensuremath{[\mskip1.5mu [\mskip1.5mu (\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]}, which we then feed into our parallel execution.
 \\\\
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \ensuremath{\Varid{shuffle}} all the inputs to then pass it into \ensuremath{\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f})} which yields us \ensuremath{[\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \ensuremath{\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle}} with the use of \ensuremath{\Varid{app}\mathbin{::}\Varid{arr}\;(\Varid{arr}\;\Varid{a}\;\Varid{b},\Varid{a})\;\Varid{c}} from the \ensuremath{\Conid{ArrowApply}} typeclass. Finally, we unpack this matrix \ensuremath{[\mskip1.5mu [\mskip1.5mu [\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]} with \ensuremath{\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!\!>\!\!>}\Varid{threetotwo}} to get  \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))}.
 \\\\
@@ -1820,7 +1821,7 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{torus}\;\Varid{conf}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{\*\!\*\!\*}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{*\!*\!*}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
 \>[17]{}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))\mathbin{>\!\!>\!\!>}{}\<[E]%
@@ -2018,7 +2019,7 @@ The \ensuremath{\Varid{mapArr}} combinator (Fig.~\ref{fig:mapArr}) lifts any arr
 \>[9]{}\Varid{arr}\;\Varid{listcase}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\mathbin{\mid\!\mid\!\mid}(\Varid{f}\mathbin{\*\!\*\!\*}\Varid{mapArr}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\mathbin{\mid\!\mid\!\mid}(\Varid{f}\mathbin{*\!*\!*}\Varid{mapArr}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\mathbf{where}\;\Varid{listcase}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}\Conid{Left}\;(){}\<[E]%
