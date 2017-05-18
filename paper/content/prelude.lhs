@@ -29,7 +29,9 @@
 
 \newcommand{\citHughes}{\citep{HughesArrows}}
 
-\newcommand{\inlinecode}[1]{\texttt{#1}}
+%\newcommand{\inlinecode}[1]{\texttt{#1}}
+\newcommand{\inlinecode}[1]{\emph{#1}} %%% booo
+%%% |code| is inline code in lhs2tex
 
 %\newcommand{\fixme}[1]{\colorbox{red}{#1}}
 
