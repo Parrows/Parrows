@@ -1,11 +1,11 @@
 \FloatBarrier
 \section{Topological Skeletons}
 \label{sec:topology-skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a \inlinecode{pipe}, a \inlinecode{ring} and a \inlinecode{torus} implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a |pipe|, a |ring| and a |torus| implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
 \subsection{Parallel pipe}
 
-The parallel pipe skeleton is semantically equivalent to folding over a list \inlinecode{[arr a a]} of arrows with \inlinecode{>>>}, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the \inlinecode{ArrowLoop} typeclass which gives us the \inlinecode{loop :: arr (a, b) (c, b) -> arr a c} combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
+The parallel pipe skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \mbcomment{das kann man hier so lassen, oder?}
 \begin{code}
 loop (arr (\(a, b) -> (b, a:b)))
@@ -14,7 +14,7 @@ loop (arr (\(a, b) -> (b, a:b)))
 \begin{code}
 loop (arr snd &&& arr (uncurry (:)))
 \end{code}
-defines an arrow that takes its input \inlinecode{a} and converts it into an infinite stream \inlinecode{[a]} of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call \inlinecode{parEvalN conf fs} inside the second argument of \inlinecode{(\&\&\&)} and then only picking the first element of the resulting list with \inlinecode{arr last}.
+defines an arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |parEvalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
 \begin{figure}[h]
 \begin{code}
 pipeSimple :: (ArrowLoop arr, ArrowParallel arr a a conf) =>
@@ -27,15 +27,14 @@ pipeSimple conf fs =
 lazy :: (Arrow arr) => arr [a] [a]
 lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{code}
-\caption{A first draft of the pipe skeleton expressed with parallel arrows. Note that the use of \inlinecode{lazy} is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input \inlinecode{[a]} terminates before passing it into \inlinecode{parEvalN}.}
+\caption{A first draft of the pipe skeleton expressed with parallel arrows. Note that the use of |lazy| is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |parEvalN|.}
 \label{fig:pipeSimple}
 \end{figure}
 
-However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of \inlinecode{pipe} \ref{fig:pipe}.
+However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of |pipe| \ref{fig:pipe}.
 \begin{figure}[h]
 \begin{code}
-pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf,
-	Future fut a) =>
+pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{code}
@@ -43,7 +42,7 @@ pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \label{fig:pipe}
 \end{figure}
 
-Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. \inlinecode{arr a b} and \inlinecode{arr b c}. By wrapping these two arrows inside a common type we obtain \inlinecode{pipe2} (Fig.~\ref{fig:pipe2}).
+Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
 \begin{figure}[h]
 \begin{code}
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
@@ -54,8 +53,7 @@ pipe2 conf f g =
 	(arr return &&& arr (const [])) &&& arr (const []) >>>
 	pipe conf (replicate 2 (unify f g)) >>>
 	arr snd >>>
-	arr head
-		where
+	arr head where
 			unify :: (ArrowChoice arr) =>
 				arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
 			unify f g =
@@ -66,7 +64,7 @@ pipe2 conf f g =
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(|>>>|)} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
+Note that extensive use of this combinator over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator |(|>>>|)| (Fig.~\ref{fig:par>>>}, which is semantically equivalent to |(>>>)| in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
 \begin{figure}[h]
 \begin{code}
 (|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
@@ -85,7 +83,7 @@ Note that extensive use of this combinator over \inlinecode{pipe} with a hand-wr
 	\caption{Schematic depiction of the ring skeleton}
 	\label{fig:ringImg}
 \end{figure}
-Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \inlinecode{[i] -> [o]} with a ring of nodes that communicate in a ring topology with each other. Its input is a node function \inlinecode{i -> r -> (o, r)} in which \inlinecode{r} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
+Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function |[i] -> [o]| with a ring of nodes that communicate in a ring topology with each other. Its input is a node function |i -> r -> (o, r)| in which |r| serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
 \begin{figure}[h]
 \begin{code}
 ringSimple :: (Trans i, Trans o, Trans r) =>
@@ -120,11 +118,11 @@ lazy ~(x:xs) = x : lazy xs
 %\begin{code}
 
 
-We can rewrite its functionality easily with the use of \inlinecode{loop} as the definition of the node function, \inlinecode{arr (i, r) (o, r)}, after being transformed into an arrow, already fits quite neatly into the \inlinecode{loop}'s \inlinecode{arr (a, b) (c, b) -> arr a c}. In each iteration we start by rotating the intermediary input from the nodes \inlinecode{[fut r]} with \inlinecode{second (rightRotate >>> lazy)}. Similarly to the \inlinecode{pipe} (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our \inlinecode{lazy} arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
-%\begin{quotation}
-\enquote{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
-%\end{quotation}
-Next, we zip the resulting \inlinecode{([i], [fut r])} to \inlinecode{[(i, fut r)]} with \inlinecode{arr (uncurry zip)} so we can feed that into a our input arrow \inlinecode{arr (i, r) (o, r)}, which we transform into \inlinecode{arr (i, fut r) (o, fut r)} before lifting it to \inlinecode{arr [(i, fut r)] [(o, fut r)]} to get a list \inlinecode{[(o, fut r)]}. Finally we unzip this list into \inlinecode{([o], [fut r])}. Plugging this arrow \inlinecode{arr ([i], [fut r]) ([o], fut r)} into the definition of \inlinecode{loop} from earlier gives us \inlinecode{arr [i] [o]}, our ring arrow (Fig.~\ref{fig:ringFinal}).
+We can rewrite its functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
+\begin{quotation}
+{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
+\end{quotation}
+Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)| so we can feed that into a our input arrow |arr (i, r) (o, r)|, which we transform into |arr (i, fut r) (o, fut r)| before lifting it to |arr [(i, fut r)] [(o, fut r)]| to get a list |[(o, fut r)]|. Finally we unzip this list into |([o], [fut r])|. Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}).
 \begin{figure}[h]
 \begin{code}
 ring :: (ArrowLoop arr, Future fut r,
@@ -166,12 +164,12 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
+
+With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology}---yet again with the help of the |ArrowLoop| typeclass.
+
+Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for 2 arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes |second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))| instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with |arr (uncurry3 zipWith3 lazyzip3)| from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 \\\\
-With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology} - yet again with the help of the \inlinecode{ArrowLoop} typeclass.
-\\\\
-Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \inlinecode{([[fut a]], [[fut b]])} in the second argument (loop only allows for 2 arguments) of our looped arrow \inlinecode{arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))} and our rotation arrow becomes \inlinecode{second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))} instead of the singular rotation in the ring as we rotate \inlinecode{[[fut a]]} horizontally and \inlinecode{[[fut b]]} vertically. Then, we once again zip the inputs for the input arrow with \inlinecode{arr (uncurry3 zipWith3 lazyzip3)} from \inlinecode{([[c]], ([[fut a]], [[fut b]]))} to \inlinecode{[[(c, fut a, fut b)]]}, which we then feed into our parallel execution.
-\\\\
-This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \inlinecode{shuffle} all the inputs to then pass it into \inlinecode{parMap conf (ptorus f)} which yields us \inlinecode{[(d, fut a, fut b)]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \inlinecode{arr length >>> arr unshuffle} with the use of \inlinecode{app :: arr (arr a b, a) c} from the \inlinecode{ArrowApply} typeclass. Finally, we unpack this matrix \inlinecode{[[[(d, fut a, fut b)]]} with \inlinecode{arr (map unzip3) >>> arr unzip3 >>> threetotwo} to get  \inlinecode{([[d]], ([[fut a]], [[fut b]]))}.
+This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |parMap conf (ptorus f)| which yields us |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| typeclass. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
 \\\\
 \begin{figure}[h]
 \begin{code}
@@ -203,7 +201,7 @@ lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
 
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
-\end{code}
+\end{code} % $
 \caption{Definition of the torus skeleton}
 \label{fig:torus}
 \end{figure}
@@ -238,7 +236,7 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 	\label{fig:torus_eden_trace}
 \end{figure}
 
-\FloatBarrier
+%\FloatBarrier
 
 %%% Local Variables:
 %%% mode: latex

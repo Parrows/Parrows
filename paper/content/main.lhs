@@ -10,6 +10,7 @@
 
 %% add a tweak to polycode, similar to literate in lstlistings, but uglier
 %format |>>>|        = "\mathbin{|\!\!>\!\!>\!\!>\!\!|}"
+%format parcomp        = "\mathbin{|\!\!>\!\!>\!\!>\!\!|}"
 %format >>>        = "\mathbin{>\!\!>\!\!>}"
 %% ^^^^ you want this. and similar for ***, +++, etc.
 %% a hack for list comprehensions' <-, typeset it as <--
@@ -19,8 +20,11 @@
 %%%% %% works fine without
 %format ||| = "\mathbin{\mid\!\mid\!\mid}"
 %format pipepipepipe = "\mathbin{\mid\!\mid\!\mid}"
+%format |&&&| = "\mathbin{|\!\&\!\&\!\&\!|}"
+%format parand = "\mathbin{|\!\&\!\&\!\&\!|}"
 %format &&& = "\mathbin{\&\!\&\!\&}"
 %format |***| = "\mathbin{|\!\*\!\*\!\*\!|}"
+%format parstar = "\mathbin{|\!\*\!\*\!\*\!|}"
 %format *** = "\mathbin{\*\!\*\!\*}"
 
 %include polycode.fmt

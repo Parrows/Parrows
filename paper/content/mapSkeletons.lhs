@@ -1,5 +1,5 @@
 
-\FloatBarrier
+%%% \FloatBarrier
 \section{Map-based Skeletons}
 \label{sec:map-skeletons}
 Now we have developed Parallel Arrows far enough to define some algorithmic skeletons useful to an application programmer.
@@ -9,8 +9,8 @@ Now we have developed Parallel Arrows far enough to define some algorithmic skel
 	\caption{Schematic depiction of parMap}
 	\label{fig:parMapImg}
 \end{figure}
-\inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with \inlinecode{ArrowParallel} by repeating an arrow \inlinecode{arr a b} and then passing it into \inlinecode{parEvalN} to get an arrow \inlinecode{arr [a] [b]}.
-Just like \inlinecode{parEvalN}, \inlinecode{parMap} is 100 \% strict.
+|parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to get an arrow |arr [a] [b]|.
+Just like |parEvalN|, |parMap| is 100\% strict.
 \begin{figure}[h]
 \begin{code}
 parMap :: (ArrowParallel arr a b conf) =>
@@ -27,7 +27,7 @@ parMap conf f = parEvalN conf (repeat f)
 	\caption{Schematic depiction of parMapStream}
 	\label{fig:parMapStreamImg}
 \end{figure}
-As \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as \inlinecode{parEvalN} compared to \inlinecode{parEvalNLazy}. So it makes sense to also have a \inlinecode{parMapStream} (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like \inlinecode{parMap}, but uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
+As |parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as |parEvalN| compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|.
 \begin{figure}[h]
 \begin{code}
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
@@ -44,7 +44,7 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 	\caption{Schematic depiction of farm}
 	\label{fig:farmImg}
 \end{figure}
-A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \inlinecode{ArrowParallel} we gave in this paper). This can be quite wasteful and a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \inlinecode{numCores} workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
+A |parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we gave in this paper). This can be quite wasteful and a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{figure}[h]
 \begin{code}
 farm :: (ArrowParallel arr a b conf,
@@ -65,7 +65,7 @@ takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 shuffle :: (Arrow arr) => arr [[a]] [a]
 shuffle = arr (concat . transpose)
 \end{code}
-\caption{Definition of farm. \inlinecode{unshuffle}, \inlinecode{takeEach}, \inlinecode{shuffle} were taken from Eden's source code \cite{eden_skel_shuffle}}
+\caption{Definition of farm. |unshuffle|, |takeEach|, |shuffle| were taken from Eden's source code \cite{eden_skel_shuffle}}
 \label{fig:farm}
 \end{figure}
 
@@ -75,11 +75,10 @@ shuffle = arr (concat . transpose)
 \caption{Schematic depiction of farmChunk}
 \label{fig:farmChunkImg}
 \end{figure}
-Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just \inlinecode{parMap} with a different work distribution, it is, again, 100\% strict. So we define \inlinecode{farmChunk} (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
+Since a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we define |farmChunk| (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|.
 \begin{figure}[h]
 \begin{code}
-farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
-	ArrowChoice arr, ArrowApply arr) =>
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
 farmChunk conf chunkSize numCores f =
 	unshuffle numCores >>>

@@ -16,7 +16,7 @@
 
 \usepackage{csquotes}
 
-\usepackage{placeins}
+% \usepackage{placeins} %% unneeded
 
 \usepackage{microtype}
 \DisableLigatures[>,<]{encoding = T1,family=tt*} 

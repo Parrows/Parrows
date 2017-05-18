@@ -4,7 +4,7 @@
 	\includegraphics{images/arrow}
 	\caption{Schematic depiction of an arrow}
 \end{figure}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \inlinecode{arr a b} represents  a computation that converts an input \inlinecode{a} to an output \inlinecode{b}. This is defined in the arrow typeclass:
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the arrow typeclass:
 
 \begin{figure}[h]
 \centering
@@ -28,12 +28,12 @@ class Arrow arr where
 	{\includegraphics[scale=0.6]{images/first}}
 %	\end{center}
 %}%\hfill
-\caption{The schematic depiction of \inlinecode{Arrow} combinators}
+\caption{The schematic depiction of |Arrow| combinators}
 \end{minipage}
 \end{figure}
-\inlinecode{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \inlinecode{return}. The \inlinecode{>>>} operator is analogous to the monadic composition  \inlinecode{>>=} and combines two arrows \inlinecode{arr a b} and \inlinecode{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \inlinecode{arr a c}. Lastly, the \inlinecode{first} operator  takes the input arrow from \inlinecode{b} to \inlinecode{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
+|arr| is used to lift an ordinary function to an arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
-The most prominent instances of this interface are regular functions \inlinecode{(->)} (Fig.~\ref{fig:arrowfn}),
+The most prominent instances of this interface are regular functions |(->)| (Fig.~\ref{fig:arrowfn}),
 \begin{figure}[h]
 \begin{code}
 instance Arrow (->) where
@@ -72,7 +72,7 @@ instance Monad m => Arrow (Kleisli m) where
 	\caption{Syntactic sugar for arrows}
 	\label{3}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \inlinecode{first}, called \inlinecode{second} (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
+With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of |first|, called |second| (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
 \begin{figure}[h]
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -82,7 +82,7 @@ second f = arr swap >>> first f >>> arr swap
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the \inlinecode{***} combinator which combines \inlinecode{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
+the |***| combinator which combines |first| and |second| to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -91,7 +91,7 @@ f *** g = first f >>> second g
 \caption{The (***) combinator}
 \label{fig:***}
 \end{figure}
-and the \inlinecode{\&\&\&} combinator that constructs an arrow which outputs two different values like \inlinecode{***}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
+and the |\&\&\&| combinator that constructs an arrow which outputs two different values like |***|, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
@@ -100,7 +100,7 @@ f &&& g = arr (\a -> (a, a)) >>> (f *** g)
 \caption{The (\&\&\&) combinator}
 \label{fig:&&&}
 \end{figure}
-A short example given by Hughes on how to use this is \inlinecode{add} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
+A short example given by Hughes on how to use this is |add| over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 \begin{figure}[h]
 \begin{code}
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
@@ -109,9 +109,9 @@ add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 \caption{Add over arrows}
 \label{fig:addArrows}
 \end{figure}
-% The benefit of using the \inlinecode{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \inlinecode{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
+% The benefit of using the |Arrow| typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created |add| combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
 % \\\\
-% \textit{Note: In the definitions Hughes gave in his paper, the notation \inlinecode{a b c} for an arrow from \inlinecode{b} to \inlinecode{c} is used. We use the equivalent definition \inlinecode{arr a b} for an arrow from \inlinecode{a} to \inlinecode{b} instead, to make it easier to find the arrow type in type signatures.}
+% \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
 
 The more restrictive interface of arrows (a monad can be \emph{anything}, an arrow is a process of doing something, a \emph{computation}) allows for more elaborate composition and transformation combinators. One of the major problems in parallel computing is composition of parallel processes.

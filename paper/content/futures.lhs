@@ -8,10 +8,10 @@ someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
 \caption{An example parallel Arrow combinator without Futures}
 \label{fig:someCombinator}
 \end{figure}
-In a distributed environment, the resulting arrow of this combinator first evaluates all \inlinecode{[arr a b]} in parallel, sends the results back to the master node, rotates the input once and then evaluates the \inlinecode{[arr b c]} in parallel to then gather the input once again on the master node.
+In a distributed environment, the resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
-While the example in Fig.~\ref{fig:someCombinator} could be rewritten into only one \inlinecode{parEvalN} call by directly wiring the arrows properly together, this example illustrates an important problem: When using a \inlinecode{ArrowParallel} backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
+While the example in Fig.~\ref{fig:someCombinator} could be rewritten into only one |parEvalN| call by directly wiring the arrows properly together, this example illustrates an important problem: When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
 for larger amount of data and number of processes \citep[showcases][as, \eg]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
@@ -20,9 +20,9 @@ for larger amount of data and number of processes \citep[showcases][as, \eg]{Ber
 	\label{fig:withoutFutures}
 \end{figure}
 
-This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of \inlinecode{RD} (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
+This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of |RD| (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
 
-But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \inlinecode{Future} typeclass (Fig.~\ref{fig:future}).
+But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the |Future| typeclass (Fig.~\ref{fig:future}).
 \begin{figure}[h]
 \begin{code}
 class Future fut a @|@ a -> fut where
@@ -32,7 +32,7 @@ class Future fut a @|@ a -> fut where
 \caption{Definition of the Future typeclass}
 \label{fig:future}
 \end{figure}
-Since \inlinecode{RD} is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for \inlinecode{Strategy a} in the Multicore Haskell implementation of \inlinecode{ArrowParallel} in chapter \ref{sec:parrows:multicore}).
+Since |RD| is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in chapter \ref{sec:parrows:multicore}).
 \begin{figure}[h]
 \begin{code}
 data RemoteData a = RD { rd :: RD a }
@@ -45,7 +45,7 @@ instance (Trans a) => Future RemoteData a where
 \label{fig:RDFuture}
 \end{figure}
 
-For our Par Monad and Multicore Haskell backends, we can simply use \inlinecode{MVar}s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
+For our Par Monad and Multicore Haskell backends, we can simply use |MVar|s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
 \begin{figure}[h]
 \begin{code}
 {-# NOINLINE putUnsafe #-}
@@ -61,9 +61,9 @@ instance (NFData a) => Future MVar a where
 \end{code}
 \caption{MVar instance of the Future typeclass for the Par Monad and Multicore Haskell backends}
 \label{fig:MVarFuture}
-\end{figure}
+\end{figure} % $
 
-Furthermore, in order for these \inlinecode{Future} types to fit with the \inlinecode{ArrowParallel} instances we gave earlier, we have to give the necessary \inlinecode{NFData} and \inlinecode{Trans} instances - the latter only being needed in Eden. Because \inlinecode{MVar} already ships with a \inlinecode{NFData} instance, we only have to supply two simple instances for our \inlinecode{RemoteData} type.
+Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances - the latter only being needed in Eden. Because |MVar| already ships with a |NFData| instance, we only have to supply two simple instances for our |RemoteData| type.
 \begin{figure}[h]
 \begin{code}
 instance NFData (RemoteData a) where
