@@ -9,13 +9,19 @@
 \documentclass{jfp1}
 
 %% add a tweak to polycode, similar to literate in lstlistings, but uglier
-%format |>>>|        = "\mathbin{|\!>\!>\!>\!|}"
-%format >>>        = "\mathbin{>\!>\!>}"
+%format |>>>|        = "\mathbin{|\!\!>\!\!>\!\!>\!\!|}"
+%format >>>        = "\mathbin{>\!\!>\!\!>}"
 %% ^^^^ you want this. and similar for ***, +++, etc.
 %% a hack for list comprehensions' <-, typeset it as <--
 %%%%%format <--        = "\in "
 %format DOLLAR = "\mathbin{\$}"
-%fornat ` = "\`"
+%%%% %format ` = "\`"
+%%%% %% works fine without
+%format ||| = "\mathbin{\mid\!\mid\!\mid}"
+%format pipepipepipe = "\mathbin{\mid\!\mid\!\mid}"
+%format &&& = "\mathbin{\&\!\&\!\&}"
+%format |***| = "\mathbin{|\!\*\!\*\!\*\!|}"
+%format *** = "\mathbin{\*\!\*\!\*}"
 
 %include polycode.fmt
 

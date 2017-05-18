@@ -12,7 +12,8 @@
 %% ^^^^ you want this. and similar for ***, +++, etc.
 %% a hack for list comprehensions' <-, typeset it as <--
 %%%%%format <--        = "\in "
-%fornat ` = "\`"
+%%%% %format ` = "\`"
+%%%% %% works fine without
 
 %% ODER: format ==         = "\mathrel{==}"
 %% ODER: format /=         = "\neq "
@@ -392,6 +393,12 @@
 
 \usepackage{subfig}
 
+
+%% fight for pipepipepipe
+\newcommand{\pipepipepipe}{\ensuremath{\mathbin{\mid\!\mid\!\mid}}\xspace}
+%%% ^^^^ keep consistent with definition at the top of main.lhs
+%%%\newcommand{\pipepipepipe}{\inlinecode{|||}\xspace}
+
 %%% JFP requirements:
 %%% Harvard citing style, "(Curry 1933)".
 %%% code: identifies italic, keywords bold
@@ -581,8 +588,9 @@ Arrows were introduced by \citet{HughesArrows} as a general interface for comput
 
 \begin{figure}[h]
 \centering
-\subfloat[Arrow class definition][]{%
+%\subfloat[Arrow class definition][]{%
 % begin{minipage}{0.5\textwidth}
+\parbox{0.49\linewidth}{%
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{3}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -593,26 +601,29 @@ Arrows were introduced by \citet{HughesArrows} as a general interface for comput
 \>[3]{}\Varid{arr}\mathbin{::}(\Varid{a}\to \Varid{b})\to \Varid{arr}\;\Varid{a}\;\Varid{b}{}\<[E]%
 \\
 \>[B]{}\hsindent{3}{}\<[3]%
-\>[3]{}(\mathbin{>\!>\!>})\mathbin{::}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;\Varid{c}{}\<[E]%
+\>[3]{}(\mathbin{>\!\!>\!\!>})\mathbin{::}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;\Varid{c}{}\<[E]%
 \\
 \>[B]{}\hsindent{3}{}\<[3]%
 \>[3]{}\Varid{first}\mathbin{::}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{c}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-% caption{Arrow class definition}
-}%\hfill
-\subfloat[The arrow type class definition on the left with schematic depiction of its combinators on the right][]{%
-	\begin{center}
+\caption{Arrow class definition}
+}\qquad
+\begin{minipage}{0.49\linewidth}%
+%\subfloat[The arrow type class definition on the left with schematic depiction of its combinators on the right][]{%
+%	\begin{center}
+\centering
 	{\includegraphics[scale=0.6]{images/arr}}
 	{\includegraphics[scale=0.6]{images/compose}}
 	{\includegraphics[scale=0.6]{images/first}}
-	\end{center}
-}%\hfill
-%\caption{The arrow type class definition on the left with schematic depiction of its combinators on the right}
+%	\end{center}
+%}%\hfill
+\caption{The schematic depiction of \inlinecode{Arrow} combinators}
+\end{minipage}
 \end{figure}
-\lstinline{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \lstinline{return}. The \lstinline{>>>} operator is analogous to the monadic composition  \lstinline{>>=} and combines two arrows \inlinecode{arr a b} and \inlinecode{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \inlinecode{arr a c}. Lastly, the \lstinline{first} operator  takes the input arrow from \lstinline{b} to \lstinline{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
+\inlinecode{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \inlinecode{return}. The \inlinecode{>>>} operator is analogous to the monadic composition  \inlinecode{>>=} and combines two arrows \inlinecode{arr a b} and \inlinecode{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \inlinecode{arr a c}. Lastly, the \inlinecode{first} operator  takes the input arrow from \inlinecode{b} to \inlinecode{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
-The most prominent instances of this interface are regular functions \lstinline{(->)} (Fig.~\ref{fig:arrowfn}),
+The most prominent instances of this interface are regular functions \inlinecode{(->)} (Fig.~\ref{fig:arrowfn}),
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -624,7 +635,7 @@ The most prominent instances of this interface are regular functions \lstinline{
 \>[9]{}\Varid{arr}\;\Varid{f}\mathrel{=}\Varid{f}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{f}\mathbin{>\!>\!>}\Varid{g}\mathrel{=}\Varid{g}\mathbin{\circ}\Varid{f}{}\<[E]%
+\>[9]{}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{g}\mathrel{=}\Varid{g}\mathbin{\circ}\Varid{f}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{first}\;\Varid{f}\mathrel{=}\lambda (\Varid{a},\Varid{c})\to (\Varid{f}\;\Varid{a},\Varid{c}){}\<[E]%
@@ -647,7 +658,7 @@ and the Kleisli type (Fig.~\ref{fig:arrowkleisli}).
 \>[9]{}\Varid{arr}\;\Varid{f}\mathrel{=}\Conid{Kleisli}\;(\Varid{return}\mathbin{\circ}\Varid{f}){}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{f}\mathbin{>\!>\!>}\Varid{g}\mathrel{=}\Conid{Kleisli}\;(\lambda \Varid{a}\to \Varid{f}\;\Varid{a}\bind \Varid{g}){}\<[E]%
+\>[9]{}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{g}\mathrel{=}\Conid{Kleisli}\;(\lambda \Varid{a}\to \Varid{f}\;\Varid{a}\bind \Varid{g}){}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{first}\;\Varid{f}\mathrel{=}\Conid{Kleisli}\;(\lambda (\Varid{a},\Varid{c})\to \Varid{f}\;\Varid{a}\bind \lambda \Varid{b}\to \Varid{return}\;(\Varid{b},\Varid{c})){}\<[E]%
@@ -660,10 +671,14 @@ and the Kleisli type (Fig.~\ref{fig:arrowkleisli}).
 \begin{figure}[h]
 	\centering
 	\begin{tabular}{cc}
-		\subcaptionbox{first\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
-		\subcaptionbox{second\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
-		\subcaptionbox{(***)\label{fig:***Img}}{\includegraphics[width = 1.5in]{images/starstarstar}} &
-		\subcaptionbox{(\&\&\&)\label{fig:&&&Img}}{\includegraphics[width = 1.5in]{images/andandand}}\
+		% \subcaptionbox
+{first\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
+		% \subcaptionbox
+{second\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
+		% \subcaptionbox
+{(***)\label{fig:***Img}}{\includegraphics[width = 1.5in]{images/starstarstar}} &
+		% \subcaptionbox
+{(\&\&\&)\label{fig:&&&Img}}{\includegraphics[width = 1.5in]{images/andandand}}\
 	\end{tabular}
 	\caption{Syntactic sugar for arrows}
 	\label{3}
@@ -676,7 +691,7 @@ With this typeclass in place, Hughes also defined some syntactic sugar: The mirr
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\Varid{second}\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;(\Varid{c},\Varid{a})\;(\Varid{c},\Varid{b}){}\<[E]%
 \\
-\>[B]{}\Varid{second}\;\Varid{f}\mathrel{=}\Varid{arr}\;\Varid{swap}\mathbin{>\!>\!>}\Varid{first}\;\Varid{f}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{swap}{}\<[E]%
+\>[B]{}\Varid{second}\;\Varid{f}\mathrel{=}\Varid{arr}\;\Varid{swap}\mathbin{>\!\!>\!\!>}\Varid{first}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{swap}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\mathbf{where}\;\Varid{swap}\;(\Varid{x},\Varid{y})\mathrel{=}(\Varid{y},\Varid{x}){}\<[E]%
@@ -685,14 +700,14 @@ With this typeclass in place, Hughes also defined some syntactic sugar: The mirr
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the \inlinecode{***} combinator which combines \includegraphics{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
+the \inlinecode{***} combinator which combines \inlinecode{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{***})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
+\>[B]{}(\mathbin{\*\!\*\!\*})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
 \\
-\>[B]{}\Varid{f}\mathbin{***}\Varid{g}\mathrel{=}\Varid{first}\;\Varid{f}\mathbin{>\!>\!>}\Varid{second}\;\Varid{g}{}\<[E]%
+\>[B]{}\Varid{f}\mathbin{\*\!\*\!\*}\Varid{g}\mathrel{=}\Varid{first}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{g}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{The (***) combinator}
@@ -703,28 +718,28 @@ and the \inlinecode{\&\&\&} combinator that constructs an arrow which outputs tw
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{\&\&\&})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{a}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
+\>[B]{}(\mathbin{\&\!\&\!\&})\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{a}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
 \\
-\>[B]{}\Varid{f}\mathbin{\&\&\&}\Varid{g}\mathrel{=}\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!>\!>}(\Varid{f}\mathbin{***}\Varid{g}){}\<[E]%
+\>[B]{}\Varid{f}\mathbin{\&\!\&\!\&}\Varid{g}\mathrel{=}\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}(\Varid{f}\mathbin{\*\!\*\!\*}\Varid{g}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{The (\&\&\&) combinator}
 \label{fig:&&&}
 \end{figure}
-A short example given by Hughes on how to use this is \lstinline{add} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
+A short example given by Hughes on how to use this is \inlinecode{add} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\Varid{add}\mathbin{::}\Conid{Arrow}\;\Varid{arr}\Rightarrow \Varid{arr}\;\Varid{a}\;\Conid{Int}\to \Varid{arr}\;\Varid{a}\;\Conid{Int}\to \Varid{arr}\;\Varid{a}\;\Conid{Int}{}\<[E]%
 \\
-\>[B]{}\Varid{add}\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{f}\mathbin{\&\&\&}\Varid{g})\mathbin{>\!>\!>}\Varid{arr}\;(\lambda (\Varid{u},\Varid{v})\to \Varid{u}\mathbin{+}\Varid{v}){}\<[E]%
+\>[B]{}\Varid{add}\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{f}\mathbin{\&\!\&\!\&}\Varid{g})\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\lambda (\Varid{u},\Varid{v})\to \Varid{u}\mathbin{+}\Varid{v}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{Add over arrows}
 \label{fig:addArrows}
 \end{figure}
-% The benefit of using the \inlinecode{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \lstinline{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
+% The benefit of using the \inlinecode{Arrow} typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created \inlinecode{add} combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
 % \\\\
 % \textit{Note: In the definitions Hughes gave in his paper, the notation \inlinecode{a b c} for an arrow from \inlinecode{b} to \inlinecode{c} is used. We use the equivalent definition \inlinecode{arr a b} for an arrow from \inlinecode{a} to \inlinecode{b} instead, to make it easier to find the arrow type in type signatures.}
 %
@@ -784,7 +799,7 @@ Although this work is centred on Haskell implementation of arrows, it is applica
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel typeclass}
 As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions \inlinecode{a -> b} in parallel, \inlinecode{parEvalN} (Fig.~\ref{fig:parEvalNTypeSig},~\ref{fig:parEvalN}).
-Translating this into arrow terms gives us a new operator \inlinecode{parEvalN} that lifts a list of arrows \inlinecode{[arr a b]} to a parallel arrow \inlinecode{arr [a] [b]} (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function \lstinline{listApp} from Appendix \ref{utilfns}, but does parallel instead of serial evaluation).
+Translating this into arrow terms gives us a new operator \inlinecode{parEvalN} that lifts a list of arrows \inlinecode{[arr a b]} to a parallel arrow \inlinecode{arr [a] [b]} (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function \inlinecode{listApp} from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
@@ -846,10 +861,10 @@ The Multicore Haskell implementation of this class is implemented in a straightf
 \>[9]{}\Varid{parEvalN}\;\anonymous \;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\Varid{listApp}\;\Varid{fs}\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}\Varid{listApp}\;\Varid{fs}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\Varid{arr}\;(\Varid{withStrategy}\;(\Varid{parList}\;\Varid{rdeepseq}))\mathbin{\&\&\&}\Varid{arr}\;\Varid{id}\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}\Varid{arr}\;(\Varid{withStrategy}\;(\Varid{parList}\;\Varid{rdeepseq}))\mathbin{\&\!\&\!\&}\Varid{arr}\;\Varid{id}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
 \>[17]{}\Varid{arr}\;(\Varid{uncurry}\;\Varid{pseq}){}\<[E]%
@@ -886,10 +901,10 @@ To get our configurable \inlinecode{ArrowParallel} instance, we simply unwrap th
 \>[9]{}\Varid{parEvalN}\;(\Conid{Conf}\;\Varid{strat})\;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\Varid{listApp}\;\Varid{fs}\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}\Varid{listApp}\;\Varid{fs}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\Varid{arr}\;(\Varid{withStrategy}\;(\Varid{parList}\;\Varid{strat}))\mathbin{\&\&\&}\Varid{arr}\;\Varid{id}\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}\Varid{arr}\;(\Varid{withStrategy}\;(\Varid{parList}\;\Varid{strat}))\mathbin{\&\!\&\!\&}\Varid{arr}\;\Varid{id}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
 \>[17]{}\Varid{arr}\;(\Varid{uncurry}\;\Varid{pseq}){}\<[E]%
@@ -919,16 +934,16 @@ We therefore apply each function to its corresponding input value with \inlineco
 \>[17]{}\Varid{parEvalN}\;\anonymous \;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}(\Varid{arr}\mathbin{\$}\lambda \Varid{as}\to (\Varid{fs},\Varid{as}))\mathbin{>\!>\!>}{}\<[E]%
+\>[25]{}(\Varid{arr}\mathbin{\$}\lambda \Varid{as}\to (\Varid{fs},\Varid{as}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{zipWithArr}\;(\Varid{app}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{spawnP})\mathbin{>\!>\!>}{}\<[E]%
+\>[25]{}\Varid{zipWithArr}\;(\Varid{app}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{spawnP})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{arr}\;\Varid{sequenceA}\mathbin{>\!>\!>}{}\<[E]%
+\>[25]{}\Varid{arr}\;\Varid{sequenceA}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{arr}\;(\bind \Varid{mapM}\;\Varid{get})\mathbin{>\!>\!>}{}\<[E]%
+\>[25]{}\Varid{arr}\;(\bind \Varid{mapM}\;\Varid{get})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[17]{}\hsindent{8}{}\<[25]%
 \>[25]{}\Varid{arr}\;\Varid{runPar}{}\<[E]%
@@ -982,7 +997,7 @@ and the Kleisli type (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
 \>[B]{}\Varid{parEvalN}\;\Varid{conf}\;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}(\Varid{arr}\mathbin{\$}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{map}\;(\lambda (\Conid{Kleisli}\;\Varid{f})\to \Varid{f})\;\Varid{fs}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}(\Varid{arr}\mathbin{\$}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{map}\;(\lambda (\Conid{Kleisli}\;\Varid{f})\to \Varid{f})\;\Varid{fs}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}(\Conid{Kleisli}\mathbin{\$}\Varid{sequence}){}\<[E]%
@@ -1034,10 +1049,10 @@ The function \inlinecode{parEvalN} is 100\% strict, which means that it fully ev
 \>[B]{}\Varid{parEvalNLazy}\;\Varid{conf}\;\Varid{chunkSize}\;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{chunksOf}\;\Varid{chunkSize})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{chunksOf}\;\Varid{chunkSize})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{listApp}\;\Varid{fchunks}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{listApp}\;\Varid{fchunks}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{concat}{}\<[E]%
@@ -1076,19 +1091,19 @@ We start by transforming the \inlinecode{(a, c)} input into a 2-element list \in
 \>[B]{}\Varid{parEval2}\;\Varid{conf}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Conid{Left}\mathbin{***}(\Varid{arr}\;\Conid{Right}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{return})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Conid{Left}\mathbin{\*\!\*\!\*}(\Varid{arr}\;\Conid{Right}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{return})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{f}\mathbin{+++}\Varid{g}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{f}\mathbin{+++}\Varid{g}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{partitionEithers}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{partitionEithers}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{head}\mathbin{***}\Varid{arr}\;\Varid{head}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{head}\mathbin{\*\!\*\!\*}\Varid{arr}\;\Varid{head}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 	\caption{Definition of parEval2}
@@ -1102,21 +1117,21 @@ We start by transforming the \inlinecode{(a, c)} input into a 2-element list \in
 %%% End:
 	%\pagebreak
 	\subsubsection{Syntactic Sugar} \label{syntacticSugar}
-For basic arrows, we have the \inlinecode{(***)} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \inlinecode{arr a b} and \inlinecode{arr c d} into an arrow \inlinecode{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version \inlinecode{(\ensuremath{\mathbin{***}})} (Fig.~\ref{fig:par***}) with the use of \inlinecode{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \inlinecode{()} as the conf parameter in Fig.~\ref{fig:par***}).
+For basic arrows, we have the \inlinecode{(***)} combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows \inlinecode{arr a b} and \inlinecode{arr c d} into an arrow \inlinecode{arr (a, c) (b, d)} which does both computations at once. This can easily be translated into a parallel version \inlinecode{(\ensuremath{\mathbin{\*\!\*\!\*}})} (Fig.~\ref{fig:par***}) with the use of \inlinecode{parEval2}, but for this we require a backend which has an implementation that does not require any configuration (hence the \inlinecode{()} as the conf parameter in Fig.~\ref{fig:par***}).
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{|***|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})\;()))\Rightarrow {}\<[E]%
+\>[B]{}(\mathbin{|\!\*\!\*\!\*\!|})\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowParallel}\;\Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{c})\;(\Conid{Either}\;\Varid{b}\;\Varid{d})\;()))\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{c}\;\Varid{d}\to \Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d}){}\<[E]%
 \\
-\>[B]{}(\mathbin{|***|})\mathrel{=}\Varid{parEval2}\;(){}\<[E]%
+\>[B]{}(\mathbin{|\!\*\!\*\!\*\!|})\mathrel{=}\Varid{parEval2}\;(){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Definition of (\ensuremath{\mathbin{***}}) - the parallel version of (***)}
+\caption{Definition of (\ensuremath{\mathbin{\*\!\*\!\*}}) - the parallel version of (***)}
 \label{fig:par***}
 \end{figure}
 % With this we can analogously to the serial \inlinecode{&&&}
@@ -1131,7 +1146,7 @@ We define the parallel \inlinecode{(\ensuremath{\mathbin{\char92 \&\char92 \&\ch
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;(\Varid{b},\Varid{c}){}\<[E]%
 \\
-\>[B]{}(\mathbin{|\&\&\&|})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!>\!>}\Varid{f}\mathbin{|***|}\Varid{g}{}\<[E]%
+\>[B]{}(\mathbin{|\&\&\&|})\;\Varid{f}\;\Varid{g}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{a}\to (\Varid{a},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{|\!\*\!\*\!\*\!|}\Varid{g}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
  % $ %% formatting
@@ -1147,7 +1162,7 @@ Consider the parallel arrow combinator in Fig.~\ref{fig:someCombinator}
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\Varid{someCombinator}\mathbin{::}(\Conid{Arrow}\;\Varid{arr})\Rightarrow [\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]\to [\mskip1.5mu \Varid{arr}\;\Varid{b}\;\Varid{c}\mskip1.5mu]\to \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{c}\mskip1.5mu]{}\<[E]%
 \\
-\>[B]{}\Varid{someCombinator}\;\Varid{fs1}\;\Varid{fs2}\mathrel{=}\Varid{parEvalN}\;()\;\Varid{fs1}\mathbin{>\!>\!>}\Varid{rightRotate}\mathbin{>\!>\!>}\Varid{parEvalN}\;()\;\Varid{fs2}{}\<[E]%
+\>[B]{}\Varid{someCombinator}\;\Varid{fs1}\;\Varid{fs2}\mathrel{=}\Varid{parEvalN}\;()\;\Varid{fs1}\mathbin{>\!\!>\!\!>}\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{parEvalN}\;()\;\Varid{fs2}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{An example parallel Arrow combinator without Futures}
@@ -1199,7 +1214,7 @@ Since \inlinecode{RD} is only a type synonym for communication type that Eden us
 \>[5]{}\Varid{put}\mathrel{=}\Varid{arr}\;(\lambda \Varid{a}\to \Conid{RD}\;\{\mskip1.5mu \Varid{rd}\mathrel{=}\Varid{release}\;\Varid{a}\mskip1.5mu\}){}\<[E]%
 \\
 \>[B]{}\hsindent{5}{}\<[5]%
-\>[5]{}\Varid{get}\mathrel{=}\Varid{arr}\;\Varid{rd}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{fetch}{}\<[E]%
+\>[5]{}\Varid{get}\mathrel{=}\Varid{arr}\;\Varid{rd}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{fetch}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{RD based RemoteData version of Future for the Eden backend}
@@ -1233,7 +1248,7 @@ For our Par Monad and Multicore Haskell backends, we can simply use \inlinecode{
 \>[5]{}\Varid{put}\mathrel{=}\Varid{arr}\;\Varid{putUnsafe}{}\<[E]%
 \\
 \>[B]{}\hsindent{5}{}\<[5]%
-\>[5]{}\Varid{get}\mathrel{=}\Varid{arr}\;\Varid{takeMVar}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{unsafePerformIO}{}\<[E]%
+\>[5]{}\Varid{get}\mathrel{=}\Varid{arr}\;\Varid{takeMVar}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unsafePerformIO}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{MVar instance of the Future typeclass for the Par Monad and Multicore Haskell backends}
@@ -1268,13 +1283,13 @@ Going back to our communication example we can use this Future concept in order 
 \>[B]{}\Varid{someCombinator}\;\Varid{fs1}\;\Varid{fs2}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalN}\;()\;(\Varid{map}\;(\mathbin{>\!>\!>}\Varid{put})\;\Varid{fs1})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{parEvalN}\;()\;(\Varid{map}\;(\mathbin{>\!\!>\!\!>}\Varid{put})\;\Varid{fs1})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{rightRotate}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{rightRotate}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalN}\;()\;(\Varid{map}\;(\Varid{get}\mathbin{>\!>\!>})\;\Varid{fs2}){}\<[E]%
+\>[9]{}\Varid{parEvalN}\;()\;(\Varid{map}\;(\Varid{get}\mathbin{>\!\!>\!\!>})\;\Varid{fs2}){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{The combinator from Fig.~\ref{fig:someCombinator} in parallel}
@@ -1365,10 +1380,10 @@ A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every 
 \>[B]{}\Varid{farm}\;\Varid{conf}\;\Varid{numCores}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{unshuffle}\;\Varid{numCores}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{unshuffle}\;\Varid{numCores}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{repeat}\;(\Varid{mapArr}\;\Varid{f}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{parEvalN}\;\Varid{conf}\;(\Varid{repeat}\;(\Varid{mapArr}\;\Varid{f}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{shuffle}{}\<[E]%
@@ -1415,10 +1430,10 @@ Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically 
 \>[B]{}\Varid{farmChunk}\;\Varid{conf}\;\Varid{chunkSize}\;\Varid{numCores}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{unshuffle}\;\Varid{numCores}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{unshuffle}\;\Varid{numCores}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parEvalNLazy}\;\Varid{conf}\;\Varid{chunkSize}\;(\Varid{repeat}\;(\Varid{mapArr}\;\Varid{f}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{parEvalNLazy}\;\Varid{conf}\;\Varid{chunkSize}\;(\Varid{repeat}\;(\Varid{mapArr}\;\Varid{f}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{shuffle}{}\<[E]%
@@ -1453,10 +1468,10 @@ Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically 
 \>[B]{}\Varid{parMapReduceDirect}\;\Varid{conf}\;\Varid{chunkSize}\;\Varid{mapfn}\;\Varid{foldfn}\;\Varid{neutral}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{chunksOf}\;\Varid{chunkSize})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{chunksOf}\;\Varid{chunkSize})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{mapArr}\;\Varid{mapfn}\mathbin{>\!>\!>}\Varid{foldlArr}\;\Varid{foldfn}\;\Varid{neutral})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{mapArr}\;\Varid{mapfn}\mathbin{>\!\!>\!\!>}\Varid{foldlArr}\;\Varid{foldfn}\;\Varid{neutral})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{foldlArr}\;\Varid{foldfn}\;\Varid{neutral}{}\<[E]%
@@ -1491,7 +1506,7 @@ The parallel pipe skeleton is semantically equivalent to folding over a list \in
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{loop}\;(\Varid{arr}\;\Varid{snd}\mathbin{\&\&\&}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
+\>[B]{}\Varid{loop}\;(\Varid{arr}\;\Varid{snd}\mathbin{\&\!\&\!\&}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 defines an arrow that takes its input \inlinecode{a} and converts it into an infinite stream \inlinecode{[a]} of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call \inlinecode{parEvalN conf fs} inside the second argument of \inlinecode{(\&\&\&)} and then only picking the first element of the resulting list with \inlinecode{arr last}.
@@ -1509,10 +1524,10 @@ defines an arrow that takes its input \inlinecode{a} and converts it into an inf
 \>[B]{}\Varid{pipeSimple}\;\Varid{conf}\;\Varid{fs}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{arr}\;\Varid{snd}\mathbin{\&\&\&}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{arr}\;\Varid{snd}\mathbin{\&\!\&\!\&}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:})\mathbin{>\!>\!>}\Varid{lazy})\mathbin{>\!>\!>}\Varid{parEvalN}\;\Varid{conf}\;\Varid{fs}))\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}(\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:})\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{>\!\!>\!\!>}\Varid{parEvalN}\;\Varid{conf}\;\Varid{fs}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{last}{}\<[E]%
@@ -1570,13 +1585,13 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \>[B]{}\Varid{pipe2}\;\Varid{conf}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}(\Varid{arr}\;\Varid{return}\mathbin{\&\&\&}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu]))\mathbin{\&\&\&}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}(\Varid{arr}\;\Varid{return}\mathbin{\&\!\&\!\&}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu]))\mathbin{\&\!\&\!\&}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{pipe}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{unify}\;\Varid{f}\;\Varid{g}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{pipe}\;\Varid{conf}\;(\Varid{replicate}\;\mathrm{2}\;(\Varid{unify}\;\Varid{f}\;\Varid{g}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{snd}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{snd}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{head}{}\<[E]%
@@ -1594,7 +1609,7 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \>[25]{}\Varid{unify}\;\Varid{f}\;\Varid{g}\mathrel{=}{}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
-\>[33]{}(\Varid{mapArr}\;\Varid{f}\mathbin{***}\Varid{mapArr}\;\Varid{g})\mathbin{***}\Varid{arr}\;(\mathbin{\char92 \char95 }\to [\mskip1.5mu \mskip1.5mu])\mathbin{>\!>\!>}{}\<[E]%
+\>[33]{}(\Varid{mapArr}\;\Varid{f}\mathbin{\*\!\*\!\*}\Varid{mapArr}\;\Varid{g})\mathbin{\*\!\*\!\*}\Varid{arr}\;(\mathbin{\char92 \char95 }\to [\mskip1.5mu \mskip1.5mu])\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[25]{}\hsindent{8}{}\<[33]%
 \>[33]{}\Varid{arr}\;(\lambda ((\Varid{a},\Varid{b}),\Varid{c})\to ((\Varid{c},\Varid{a}),\Varid{b})){}\<[E]%
@@ -1604,13 +1619,13 @@ Sometimes, this pipe definition can be a bit inconvenient, especially if we want
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(\ensuremath{\mathbin{>\!>\!>}})} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
+Note that extensive use of this combinator over \inlinecode{pipe} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator \inlinecode{(\ensuremath{\mathbin{>\!\!>\!\!>}})} (Fig.~\ref{fig:par>>>}, which is semantically equivalent to \inlinecode{(>>>)} in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathbin{|\!>\!>\!>\!|})\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowChoice}\;\Varid{arr},{}\<[E]%
+\>[B]{}(\mathbin{|\!\!>\!\!>\!\!>\!\!|})\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowChoice}\;\Varid{arr},{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Conid{ArrowParallel}\;\Varid{arr}\;(\Varid{fut}\;(([\mskip1.5mu \Varid{a}\mskip1.5mu],[\mskip1.5mu \Varid{b}\mskip1.5mu]),[\mskip1.5mu \Varid{c}\mskip1.5mu]))\;(\Varid{fut}\;(([\mskip1.5mu \Varid{a}\mskip1.5mu],[\mskip1.5mu \Varid{b}\mskip1.5mu]),[\mskip1.5mu \Varid{c}\mskip1.5mu]))\;(),{}\<[E]%
@@ -1621,10 +1636,10 @@ Note that extensive use of this combinator over \inlinecode{pipe} with a hand-wr
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;\Varid{a}\;\Varid{b}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;\Varid{a}\;\Varid{c}{}\<[E]%
 \\
-\>[B]{}(\mathbin{|\!>\!>\!>\!|})\mathrel{=}\Varid{pipe2}\;(){}\<[E]%
+\>[B]{}(\mathbin{|\!\!>\!\!>\!\!>\!\!|})\mathrel{=}\Varid{pipe2}\;(){}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Definition of \texttt{(\ensuremath{\mathbin{>\!>\!>}})}}
+\caption{Definition of \texttt{(\ensuremath{\mathbin{>\!\!>\!\!>}})}}
 \label{fig:par>>>}
 \end{figure}
 
@@ -1737,13 +1752,13 @@ Next, we zip the resulting \inlinecode{([i], [fut r])} to \inlinecode{[(i, fut r
 \>[B]{}\Varid{ring}\;\Varid{conf}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{second}\;(\Varid{rightRotate}\mathbin{>\!>\!>}\Varid{lazy})\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{second}\;(\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{5}{}\<[5]%
-\>[5]{}\Varid{arr}\;(\Varid{uncurry}\;\Varid{zip})\mathbin{>\!>\!>}{}\<[E]%
+\>[5]{}\Varid{arr}\;(\Varid{uncurry}\;\Varid{zip})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{5}{}\<[5]%
-\>[5]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{second}\;\Varid{get}\mathbin{>\!>\!>}\Varid{f}\mathbin{>\!>\!>}\Varid{second}\;\Varid{put})\mathbin{>\!>\!>}{}\<[E]%
+\>[5]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{second}\;\Varid{get}\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{put})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{5}{}\<[5]%
 \>[5]{}\Varid{arr}\;\Varid{unzip}){}\<[E]%
@@ -1810,25 +1825,25 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{torus}\;\Varid{conf}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!>\!>}\Varid{lazy})\mathbin{***}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{\*\!\*\!\*}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!>\!>}\Varid{lazy}))\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{uncurry3}\;(\Varid{zipWith3}\;\Varid{lazyzip3}))\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{uncurry3}\;(\Varid{zipWith3}\;\Varid{lazyzip3}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}(\Varid{arr}\;\Varid{length}\mathbin{>\!>\!>}\Varid{arr}\;\Varid{unshuffle})\mathbin{\&\&\&}{}\<[E]%
+\>[9]{}(\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle})\mathbin{\&\!\&\!\&}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{shuffle}\mathbin{>\!>\!>}\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f}))\mathbin{>\!>\!>}{}\<[E]%
+\>[17]{}(\Varid{shuffle}\mathbin{>\!\!>\!\!>}\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{app}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{app}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!>\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!>\!>}\Varid{threetotwo}){}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!\!>\!\!>}\Varid{threetotwo}){}\<[E]%
 \\[\blanklineskip]%
 \>[B]{}\Varid{ptorus}\mathbin{::}(\Conid{Arrow}\;\Varid{arr},\Conid{Future}\;\Varid{fut}\;\Varid{a},\Conid{Future}\;\Varid{fut}\;\Varid{b})\Rightarrow {}\<[E]%
 \\
@@ -1841,7 +1856,7 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{ptorus}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{c},\Varid{a},\Varid{b})\to (\Varid{c},\Varid{get}\;\Varid{a},\Varid{get}\;\Varid{b}))\mathbin{>\!>\!>}\Varid{f}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{c},\Varid{a},\Varid{b})\to (\Varid{c},\Varid{get}\;\Varid{a},\Varid{get}\;\Varid{b}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{d},\Varid{a},\Varid{b})\to (\Varid{d},\Varid{put}\;\Varid{a},\Varid{put}\;\Varid{b})){}\<[E]%
@@ -2004,10 +2019,10 @@ The \inlinecode{mapArr} combinator (Fig.~\ref{fig:mapArr}) lifts any arrow \inli
 \>[B]{}\Varid{mapArr}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{listcase}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{listcase}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\;\Varid{pipepipepipe}\;(\Varid{f}\mathbin{***}\Varid{mapArr}\;\Varid{f}\mathbin{>\!>\!>}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{const}\;[\mskip1.5mu \mskip1.5mu])\mathbin{\mid\!\mid\!\mid}(\Varid{f}\mathbin{\*\!\*\!\*}\Varid{mapArr}\;\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\Varid{uncurry}\;(\mathbin{:}))){}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\mathbf{where}\;\Varid{listcase}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}\Conid{Left}\;(){}\<[E]%
@@ -2032,13 +2047,13 @@ Similarly, we can also define \inlinecode{foldlArr} (Fig.~\ref{fig:foldlArr}) th
 \>[B]{}\Varid{foldlArr}\;\Varid{f}\;\Varid{b}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{listcase}\mathbin{>\!>\!>}{}\<[E]%
+\>[9]{}\Varid{arr}\;\Varid{listcase}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{const}\;\Varid{b})\;\Varid{pipepipepipe}\;{}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{const}\;\Varid{b})\mathbin{\mid\!\mid\!\mid}{}\<[E]%
 \\
 \>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{first}\;(\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{b},\Varid{a}))\mathbin{>\!>\!>}\Varid{f}\mathbin{>\!>\!>}\Varid{arr}\;(\Varid{foldlArr}\;\Varid{f}))\mathbin{>\!>\!>}\Varid{app}){}\<[E]%
+\>[17]{}(\Varid{first}\;(\Varid{arr}\;(\lambda \Varid{a}\to (\Varid{b},\Varid{a}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\Varid{foldlArr}\;\Varid{f}))\mathbin{>\!\!>\!\!>}\Varid{app}){}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\mathbf{where}\;\Varid{listcase}\;[\mskip1.5mu \mskip1.5mu]\mathrel{=}\Conid{Left}\;[\mskip1.5mu \mskip1.5mu]{}\<[E]%
@@ -2051,32 +2066,33 @@ Similarly, we can also define \inlinecode{foldlArr} (Fig.~\ref{fig:foldlArr}) th
 \label{fig:foldlArr}
 \end{figure}
 \fixme{pipepipepipe does not work with lhs2TeX}
-Finally, with the help of \inlinecode{mapArr} (Fig.~\ref{fig:mapArr}), we can define \lstinline{zipWithArr} (Fig.~\ref{fig:zipWithArr}) that lifts any arrow \inlinecode{arr (a, b) c} to an arrow \inlinecode{arr ([a], [b]) [c]}.
+Finally, with the help of \inlinecode{mapArr} (Fig.~\ref{fig:mapArr}), we can define \inlinecode{zipWithArr} (Fig.~\ref{fig:zipWithArr}) that lifts any arrow \inlinecode{arr (a, b) c} to an arrow \inlinecode{arr ([a], [b]) [c]}.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\Varid{zipWithArr}\mathbin{::}\Conid{ArrowChoice}\;\Varid{arr}\Rightarrow \Varid{arr}\;(\Varid{a},\Varid{b})\;\Varid{c}\to \Varid{arr}\;([\mskip1.5mu \Varid{a}\mskip1.5mu],[\mskip1.5mu \Varid{b}\mskip1.5mu])\;[\mskip1.5mu \Varid{c}\mskip1.5mu]{}\<[E]%
 \\
-\>[B]{}\Varid{zipWithArr}\;\Varid{f}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda (\Varid{as},\Varid{bs})\to \Varid{zipWith}\;(,)\;\Varid{as}\;\Varid{bs})\mathbin{>\!>\!>}\Varid{mapArr}\;\Varid{f}{}\<[E]%
+\>[B]{}\Varid{zipWithArr}\;\Varid{f}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda (\Varid{as},\Varid{bs})\to \Varid{zipWith}\;(,)\;\Varid{as}\;\Varid{bs})\mathbin{>\!\!>\!\!>}\Varid{mapArr}\;\Varid{f}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{\inlinecode{zipWith} over arrows}
 \label{fig:zipWithArr}
 \end{figure}
  %$ %% formatting
-These combinators make use of the \inlinecode{ArrowChoice} type class which provides the \inlinecode{(\textpipe\textpipe\textpipe)} combinator. It takes two arrows \inlinecode{arr a c} and \inlinecode{arr b c} and combines them into a new arrow \inlinecode{arr (Either a b) c} which pipes all \inlinecode{Left a}'s to the first arrow and all \inlinecode{Right b}'s to the second arrow.
+These combinators make use of the \inlinecode{ArrowChoice} type class which provides the \pipepipepipe\olcomment{CHECK!} combinator. It takes two arrows \inlinecode{arr a c} and \inlinecode{arr b c} and combines them into a new arrow \inlinecode{arr (Either a b) c} which pipes all \inlinecode{Left a}'s to the first arrow and all \inlinecode{Right b}'s to the second arrow.
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}(\mathord{@}\Varid{pipepipepipe}\mathord{@})\mathbin{::}\Conid{ArrowChoice}\;\Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{b})\;\Varid{c}{}\<[E]%
+\>[B]{}(\mathbin{\mid\!\mid\!\mid})\mathbin{::}\Conid{ArrowChoice}\;\Varid{arr}\;\Varid{a}\;\Varid{c}\to \Varid{arr}\;\Varid{b}\;\Varid{c}\to \Varid{arr}\;(\Conid{Either}\;\Varid{a}\;\Varid{b})\;\Varid{c}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
-\caption{Type signature of \inlinecode{(\textpipe\textpipe\textpipe)}}
+\caption{Type signature of \pipepipepipe}
 \label{fig:codeSigPipePipePipe}
 \end{figure}
-\fixme{pipepipepipe does not work with lhs2TeX}
+\fixme{pipepipepipe does not work with lhs2TeX}\olcomment{trying
+  direct one}
 
 With the zipWithArr combinator we can also write a combinator \inlinecode{listApp} (Fig.~\ref{fig:listApp}), that lifts a list of arrows \inlinecode{[arr a b]} to an arrow \inlinecode{arr [a] [b]}.
 \begin{figure}[h]
@@ -2085,7 +2101,7 @@ With the zipWithArr combinator we can also write a combinator \inlinecode{listAp
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
 \>[B]{}\Varid{listApp}\mathbin{::}(\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowApply}\;\Varid{arr})\Rightarrow [\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]\to \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]{}\<[E]%
 \\
-\>[B]{}\Varid{listApp}\;\Varid{fs}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{as}\to (\Varid{fs},\Varid{as}))\mathbin{>\!>\!>}\Varid{zipWithArr}\;\Varid{app}{}\<[E]%
+\>[B]{}\Varid{listApp}\;\Varid{fs}\mathrel{=}(\Varid{arr}\mathbin{\$}\lambda \Varid{as}\to (\Varid{fs},\Varid{as}))\mathbin{>\!\!>\!\!>}\Varid{zipWithArr}\;\Varid{app}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{Definition of \inlinecode{listApp}}

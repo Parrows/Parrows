@@ -99,6 +99,12 @@
 
 \usepackage{subfig}
 
+
+%% fight for pipepipepipe
+\newcommand{\pipepipepipe}{\ensuremath{\mathbin{\mid\!\mid\!\mid}}\xspace}
+%%% ^^^^ keep consistent with definition at the top of main.lhs
+%%%\newcommand{\pipepipepipe}{\inlinecode{|||}\xspace}
+
 %%% JFP requirements:
 %%% Harvard citing style, "(Curry 1933)".
 %%% code: identifies italic, keywords bold
