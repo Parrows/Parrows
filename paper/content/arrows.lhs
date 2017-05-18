@@ -82,7 +82,7 @@ second f = arr swap >>> first f >>> arr swap
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
-the *** combinator which combines first and second to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
+the \inlinecode{***} combinator which combines \includegraphics{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
 \begin{lstlisting}[frame=htrbl]
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
