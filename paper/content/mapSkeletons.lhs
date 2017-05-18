@@ -12,11 +12,11 @@ Now we have developed Parallel Arrows far enough to define some algorithmic skel
 \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with \inlinecode{ArrowParallel} by repeating an arrow \inlinecode{arr a b} and then passing it into \inlinecode{parEvalN} to get an arrow \inlinecode{arr [a] [b]}.
 Just like \inlinecode{parEvalN}, \inlinecode{parMap} is 100 \% strict.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parMap :: (ArrowParallel arr a b conf) =>
 	conf -> (arr a b) -> (arr [a] [b])
 parMap conf f = parEvalN conf (repeat f)
-\end{lstlisting}
+\end{code}
 \caption{Definition of parMap}
 \label{fig:parMap}
 \end{figure}
@@ -29,11 +29,11 @@ parMap conf f = parEvalN conf (repeat f)
 \end{figure}
 As \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as \inlinecode{parEvalN} compared to \inlinecode{parEvalNLazy}. So it makes sense to also have a \inlinecode{parMapStream} (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like \inlinecode{parMap}, but uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> arr a b -> arr [a] [b]
 parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
-\end{lstlisting}
+\end{code}
 \caption{Definition of parMapStream}
 \label{fig:parMapStream}
 \end{figure}
@@ -46,7 +46,7 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \end{figure}
 A \inlinecode{parMap} (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of \inlinecode{ArrowParallel} we gave in this paper). This can be quite wasteful and a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over \inlinecode{numCores} workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 farm :: (ArrowParallel arr a b conf,
 	ArrowParallel arr [a] [b] conf, ArrowChoice arr) =>
 	conf -> NumCores -> arr a b -> arr [a] [b]
@@ -64,7 +64,7 @@ takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 
 shuffle :: (Arrow arr) => arr [[a]] [a]
 shuffle = arr (concat . transpose)
-\end{lstlisting}
+\end{code}
 \caption{Definition of farm. \inlinecode{unshuffle}, \inlinecode{takeEach}, \inlinecode{shuffle} were taken from Eden's source code \cite{eden_skel_shuffle}}
 \label{fig:farm}
 \end{figure}
@@ -77,7 +77,7 @@ shuffle = arr (concat . transpose)
 \end{figure}
 Since a \inlinecode{farm} (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just \inlinecode{parMap} with a different work distribution, it is, again, 100\% strict. So we define \inlinecode{farmChunk} (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses \inlinecode{parEvalNLazy} instead of \inlinecode{parEvalN}.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf,
 	ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
@@ -85,7 +85,7 @@ farmChunk conf chunkSize numCores f =
 	unshuffle numCores >>>
 	parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
 	shuffle
-\end{lstlisting}
+\end{code}
 \caption{Definition of farmChunk}
 \label{fig:farmChunk}
 \end{figure}
@@ -100,7 +100,7 @@ farmChunk conf chunkSize numCores f =
 -- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
 
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 parMapReduceDirect :: (ArrowParallel arr [a] b conf,
 	ArrowApply arr, ArrowChoice arr) =>
 	conf -> ChunkSize -> arr a b -> arr (b, b) b -> b -> arr [a] b
@@ -108,7 +108,7 @@ parMapReduceDirect conf chunkSize mapfn foldfn neutral =
 	arr (chunksOf chunkSize) >>>
 	parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
 	foldlArr foldfn neutral
-\end{lstlisting}
+\end{code}
 \caption{Definition of parMapReduceDirect}
 \label{fig:parMapReduceDirect}
 \end{figure}

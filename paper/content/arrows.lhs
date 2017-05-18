@@ -7,57 +7,49 @@
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow \inlinecode{arr a b} represents  a computation that converts an input \inlinecode{a} to an output \inlinecode{b}. This is defined in the arrow typeclass:
 
 \begin{figure}[h]
-\begin{subfigure}{0.5\textwidth}
-%\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[frame=htrbl]
+\centering
+\subfloat[Arrow class definition][]{%
+% begin{minipage}{0.5\textwidth}
+\begin{code}
 class Arrow arr where
-arr :: (a -> b) -> arr a b
-
-
-
-(>>>) :: arr a b -> arr b c -> arr a c
-
-
-
-
-first :: arr a b -> arr (a,c) (b,c)
-\end{lstlisting}
-\caption{Arrow class definition}
-%\end{minipage}
-\end{subfigure}
-~~~~
-\begin{subfigure}{0.45\textwidth}
+  arr :: (a -> b) -> arr a b
+  (>>>) :: arr a b -> arr b c -> arr a c
+  first :: arr a b -> arr (a,c) (b,c)
+\end{code}
+% caption{Arrow class definition}
+}%\hfill
+\subfloat[The arrow type class definition on the left with schematic depiction of its combinators on the right][]{%
 	\begin{center}
-	\subcaptionbox{arr}{\includegraphics[scale=0.6]{images/arr}}
-	\subcaptionbox{composition \inlinecode{(>>>)}}{\includegraphics[scale=0.6]{images/compose}}
-	\subcaptionbox{first}{\includegraphics[scale=0.6]{images/first}}
+	{\includegraphics[scale=0.6]{images/arr}}
+	{\includegraphics[scale=0.6]{images/compose}}
+	{\includegraphics[scale=0.6]{images/first}}
 	\end{center}
-\end{subfigure}
-\caption{The arrow type class definition on the left with schematic depiction of its combinators on the right}
+}%\hfill
+%\caption{The arrow type class definition on the left with schematic depiction of its combinators on the right}
 \end{figure}
 \lstinline{arr} is used to lift an ordinary function to an arrow type, similarly to the monadic \lstinline{return}. The \lstinline{>>>} operator is analogous to the monadic composition  \lstinline{>>=} and combines two arrows \inlinecode{arr a b} and \inlinecode{arr b c} by "wiring" the outputs of the first to the inputs to the second to get a new arrow \inlinecode{arr a c}. Lastly, the \lstinline{first} operator  takes the input arrow from \lstinline{b} to \lstinline{c} and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
 The most prominent instances of this interface are regular functions \lstinline{(->)} (Fig.~\ref{fig:arrowfn}),
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 instance Arrow (->) where
 	arr f = f
 	f >>> g = g . f
 	first f = \(a, c) -> (f a, c) 
-\end{lstlisting}
+\end{code}
 \caption{Arrow instance for regular functions}
 \label{fig:arrowfn}
 \end{figure}
 and the Kleisli type (Fig.~\ref{fig:arrowkleisli}).
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 data Kleisli m a b = Kleisli { run :: a -> m b }
 
 instance Monad m => Arrow (Kleisli m) where
 	arr f = Kleisli (return . f)
 	f >>> g = Kleisli (\a -> f a >>= g)
 	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
-\end{lstlisting}%$
+\end{code}%$
 \caption{Definition of the Kleisli type and the corresponding arrow instance}
 \label{fig:arrowkleisli}
 \end{figure}
@@ -74,38 +66,38 @@ instance Monad m => Arrow (Kleisli m) where
 \end{figure}
 With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of \inlinecode{first}, called \inlinecode{second} (Fig.~\ref{fig:secondImg},~\ref{fig:second}),
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
 second f = arr swap >>> first f >>> arr swap
 	where swap (x, y) = (y, x)
-\end{lstlisting}
+\end{code}
 \caption{The second combinator}
 \label{fig:second}
 \end{figure}
 the \inlinecode{***} combinator which combines \includegraphics{first} and \inlinecode{second} to handle two inputs in one arrow, (Fig.\ref{fig:***Img},~\ref{fig:***})
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
 f *** g = first f >>> second g
-\end{lstlisting}
+\end{code}
 \caption{The (***) combinator}
 \label{fig:***}
 \end{figure}
 and the \inlinecode{\&\&\&} combinator that constructs an arrow which outputs two different values like \inlinecode{***}, but takes only one input (Fig.~\ref{fig:&&&Img},~\ref{fig:&&&}).
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
 f &&& g = arr (\a -> (a, a)) >>> (f *** g)
-\end{lstlisting}
+\end{code}
 \caption{The (\&\&\&) combinator}
 \label{fig:&&&}
 \end{figure}
 A short example given by Hughes on how to use this is \lstinline{add} over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
 add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
-\end{lstlisting}
+\end{code}
 \caption{Add over arrows}
 \label{fig:addArrows}
 \end{figure}

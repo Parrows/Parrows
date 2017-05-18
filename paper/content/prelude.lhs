@@ -22,7 +22,7 @@
 \DisableLigatures[>,<]{encoding = T1,family=tt*} 
 
 % für Listings
-\usepackage{listings}
+%\usepackage{listings}
 
 
 \renewcommand{\cite}[1]{\citep{#1}}
@@ -44,7 +44,7 @@
 
 \usepackage{siunitx}
 
-\usepackage{tipa}
+%%\usepackage{tipa} %% causes problems with lhs2tex?!
 
 \usepackage{xspace}
 \usepackage{xcolor}

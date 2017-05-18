@@ -1,10 +1,10 @@
 \section{Futures} \label{futures}
 Consider the parallel arrow combinator in Fig.~\ref{fig:someCombinator}
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
-\end{lstlisting}
+\end{code}
 \caption{An example parallel Arrow combinator without Futures}
 \label{fig:someCombinator}
 \end{figure}
@@ -24,30 +24,30 @@ This motivates for an approach that allows the nodes to communicate directly wit
 
 But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the \inlinecode{Future} typeclass (Fig.~\ref{fig:future}).
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 class Future fut a @|@ a -> fut where
     put :: (Arrow arr) => arr a (fut a)
     get :: (Arrow arr) => arr (fut a) a
-\end{lstlisting}
+\end{code}
 \caption{Definition of the Future typeclass}
 \label{fig:future}
 \end{figure}
 Since \inlinecode{RD} is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for \inlinecode{Strategy a} in the Multicore Haskell implementation of \inlinecode{ArrowParallel} in chapter \ref{sec:parrows:multicore}).
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 data RemoteData a = RD { rd :: RD a }
 
 instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
-\end{lstlisting}
+\end{code}
 \caption{RD based RemoteData version of Future for the Eden backend}
 \label{fig:RDFuture}
 \end{figure}
 
 For our Par Monad and Multicore Haskell backends, we can simply use \inlinecode{MVar}s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 {-# NOINLINE putUnsafe #-}
 putUnsafe :: a -> MVar a
 putUnsafe a = unsafePerformIO $ do
@@ -58,30 +58,30 @@ putUnsafe a = unsafePerformIO $ do
 instance (NFData a) => Future MVar a where
     put = arr putUnsafe
     get = arr takeMVar >>> arr unsafePerformIO
-\end{lstlisting}
+\end{code}
 \caption{MVar instance of the Future typeclass for the Par Monad and Multicore Haskell backends}
 \label{fig:MVarFuture}
 \end{figure}
 
 Furthermore, in order for these \inlinecode{Future} types to fit with the \inlinecode{ArrowParallel} instances we gave earlier, we have to give the necessary \inlinecode{NFData} and \inlinecode{Trans} instances - the latter only being needed in Eden. Because \inlinecode{MVar} already ships with a \inlinecode{NFData} instance, we only have to supply two simple instances for our \inlinecode{RemoteData} type.
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
-\end{lstlisting}
+\end{code}
 \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
 \end{figure}
 
 Going back to our communication example we can use this Future concept in order to enable direct communications between the nodes in the following way:
 \begin{figure}[h]
-\begin{lstlisting}[frame=htrbl]
+\begin{code}
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 =
 	parEvalN () (map (>>> put) fs1) >>>
 	rightRotate >>>
 	parEvalN () (map (get >>>) fs2)
-\end{lstlisting}
+\end{code}
 \caption{The combinator from Fig.~\ref{fig:someCombinator} in parallel}
 \label{fig:someCombinatorParallel}
 \end{figure}
