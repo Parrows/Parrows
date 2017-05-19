@@ -6,15 +6,14 @@ Now we have developed Parallel Arrows far enough to define some algorithmic skel
 \subsection{Parallel map}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parMap}
-	\caption{Schematic depiction of parMap}
+	\caption{Schematic depiction of |parMap|.}
 	\label{fig:parMapImg}
 \end{figure}
-|parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to get an arrow |arr [a] [b]|.
+The |parMap| skeleton (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to get an arrow |arr [a] [b]|.
 Just like |parEvalN|, |parMap| is 100\% strict.
 \begin{figure}[h]
 \begin{code}
-parMap :: (ArrowParallel arr a b conf) =>
-	conf -> (arr a b) -> (arr [a] [b])
+parMap :: (ArrowParallel arr a b conf) => conf -> (arr a b) -> (arr [a] [b])
 parMap conf f = parEvalN conf (repeat f)
 \end{code}
 \caption{Definition of parMap}
@@ -34,17 +33,19 @@ parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> arr a b -> arr [a] [b]
 parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \end{code}
-\caption{Definition of parMapStream}
+\caption{Definition of |parMapStream|.}
 \label{fig:parMapStream}
 \end{figure}
 
 \subsection{Statically load-balancing parallel map}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/farm}
-	\caption{Schematic depiction of farm}
+	\caption{Schematic depiction of a |farm|, a statically
+          load-balanced |parMap|.}
 	\label{fig:farmImg}
 \end{figure}
 A |parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we gave in this paper). This can be quite wasteful and a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers (if numCores is greater than the actual processor count, the fastest processor(s) to finish will get more tasks) seems useful.
+The definitions of helper functions |unshuffle|, |takeEach|, |shuffle| (shown in Appendix) originate from an Eden skeleton\footnote{Available on Hackage under \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Map.html}.}.
 \begin{figure}[h]
 \begin{code}
 farm :: (ArrowParallel arr a b conf,
@@ -65,7 +66,7 @@ takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 shuffle :: (Arrow arr) => arr [[a]] [a]
 shuffle = arr (concat . transpose)
 \end{code}
-\caption{Definition of farm. |unshuffle|, |takeEach|, |shuffle| were taken from Eden's source code \cite{eden_skel_shuffle}}
+\caption{The definition of |farm|.}
 \label{fig:farm}
 \end{figure}
 
@@ -75,28 +76,21 @@ shuffle = arr (concat . transpose)
 \caption{Schematic depiction of farmChunk}
 \label{fig:farmChunkImg}
 \end{figure}
-Since a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we define |farmChunk| (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|.
-\begin{figure}[h]
-\begin{code}
-farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) =>
-	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
-farmChunk conf chunkSize numCores f =
-	unshuffle numCores >>>
-	parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
-	shuffle
-\end{code}
-\caption{Definition of farmChunk}
-\label{fig:farmChunk}
-\end{figure}
+Since a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we can define |farmChunk| (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|. It is basically the same definition as for |farm|, with |parEvalN| replaced with |parEvalNLazy|, as Appendix shows.
 
 \subsection{parMapReduce}
-\olcomment{it appears STRANGE. are the data really left alone and noded after map and taken from there by reduce? It makes sense only is no communication through master takes place. ELSE: CUT!}
+
+A~simple |map|--|reduce| can be written like in Figure~\ref{fig:parMapReduceDirect}. Notice that the performance of the |>>>| combinator is essential for the performance of the skeleton. A~definitive version would use Futures.
+
+ \olcomment{it appears STRANGE. are the data really left alone and noded after map and taken from there by reduce? It makes sense only is no communication through master takes place. ELSE: CUT!}
 
 
-\mbcomment{this requires some work. Either change this to use futures or cut, yes.}
--- this does not completely adhere to Google's definition of Map Reduce as it
--- the mapping function does not allow for "reordering" of the output
--- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
+ \mbcomment{this requires some work. Either change this to use futures or cut, yes.}
+% -- this does not completely adhere to Google's definition of Map Reduce as it
+% -- the mapping function does not allow for "reordering" of the output
+% -- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
+
+\olcomment{now rewritten as motivation for futures. maybe still cut?}
 
 \begin{figure}[h]
 \begin{code}

@@ -19,14 +19,14 @@ parEvalNLazy conf chunkSize fs =
 	arr concat
 	where fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
 \end{code} %$ %% formatting
-\caption{Definition of parEvalNLazy}
+\caption{Definition of |parEvalNLazy|.}
 \label{fig:parEvalNLazy}
 \end{figure}
 
 \subsubsection{Heterogenous tasks}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parEval2}
-	\caption{Schematic depiction of parEval2}
+	\caption{Schematic depiction of |parEval2|.}
 	\label{fig:parEval2Img}
 \end{figure}
 We have only talked about the paralellization arrows of the same type until now. But sometimes we want to paralellize heterogenous types as well. However, we can implement such a |parEval2| combinator (Fig.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows |arr a b| and |arr c d| into a new parallel arrow |arr (a, c) (b, d)| quite easily with the help of the |ArrowChoice| typeclass. The idea is to use the |+++| combinator which combines two arrows |arr a b| and |arr c d| and transforms them into |arr (Either a c) (Either b d)| to get a common arrow type that we can then feed into parEvalN.

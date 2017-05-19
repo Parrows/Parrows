@@ -3,17 +3,17 @@
 
 \section{Introduction}
 \label{sec:introduction}
-\olcomment{todo, reuse 5.5, "Impact" at the end and more}
+\olcomment{todo, reuse 5.5, and more}
 
 blablabla arrows, parallel, haskell.
 
 \paragraph{Contribution}
 
-HIT HERE REALLY STRONG
+\olcomment{HIT HERE REALLY STRONG}
 
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
-We have seen that we can wrap parallel Haskells inside of the |ArrowParallel| interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
+We wrap parallel Haskells inside of our |ArrowParallel| interface, but why do we aim to abstract parallelism this way and what does this approach do better than the other parallel Haskells?
 \begin{itemize}
 	\item \textbf{Arrow API benefits}:
 	With the |ArrowParallel| typeclass we do not lose any benefits of using arrows as |parEvalN| is just yet another arrow combinator. The resulting arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into our sequential programs without having to change anything.

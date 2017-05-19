@@ -18,6 +18,7 @@ for larger amount of data and number of processes \citep[showcases][as, \eg]{Ber
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
 	\caption[without Futures]{Communication between 4 threads without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colors: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
+\olcomment{more practical and heavy-weight example! fft (I have the code)?}
 \end{figure}
 
 This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of |RD| (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
@@ -32,18 +33,7 @@ class Future fut a @|@ a -> fut where
 \caption{Definition of the Future typeclass}
 \label{fig:future}
 \end{figure}
-Since |RD| is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture} (this is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in chapter \ref{sec:parrows:multicore}).
-\begin{figure}[h]
-\begin{code}
-data RemoteData a = RD { rd :: RD a }
-
-instance (Trans a) => Future RemoteData a where
-    put = arr (\a -> RD { rd = release a })
-    get = arr rd >>> arr fetch
-\end{code}
-\caption{RD based RemoteData version of Future for the Eden backend}
-\label{fig:RDFuture}
-\end{figure}
+Since |RD| is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Appendix in Fig.~\ref{fig:RDFuture}. This is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
 
 For our Par Monad and Multicore Haskell backends, we can simply use |MVar|s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
 \begin{figure}[h]
@@ -63,17 +53,18 @@ instance (NFData a) => Future MVar a where
 \label{fig:MVarFuture}
 \end{figure} % $
 
-Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances - the latter only being needed in Eden. Because |MVar| already ships with a |NFData| instance, we only have to supply two simple instances for our |RemoteData| type.
-\begin{figure}[h]
+Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. Because |MVar| already ships with a |NFData| instance, we only have to supply two simple instances for our |RemoteData| type:
+% \begin{figure}[h]
 \begin{code}
 instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
 \end{code}
-\caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
-\end{figure}
+% \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
+% \end{figure}
+The |Trans| instance does not have any functions declared as the default implementation suffices here.
 
-Going back to our communication example we can use this Future concept in order to enable direct communications between the nodes in the following way:
+Going back to our communication example we can use this |Future| concept in order to enable direct communications between the nodes in the following way:
 \begin{figure}[h]
 \begin{code}
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]

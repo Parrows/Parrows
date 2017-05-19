@@ -64,6 +64,42 @@ listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 
 % $ %% formatting
 
+\subsection{Omitted Funtion Definitions}
+
+We have omitted some function definitions in the main text for
+brevity, and redeem this here.
+%
+We warp Eden's build-in Futures in PArrows as in Figure~\ref{fig:RDFuture}.
+
+\begin{figure}[h]
+\begin{code}
+data RemoteData a = RD { rd :: RD a }
+
+instance (Trans a) => Future RemoteData a where
+    put = arr (\a -> RD { rd = release a })
+    get = arr rd >>> arr fetch
+\end{code}
+\caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
+\label{fig:RDFuture}
+\end{figure}
+
+The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
+
+\begin{figure}[h]
+\begin{code}
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) =>
+	conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
+farmChunk conf chunkSize numCores f =
+	unshuffle numCores >>>
+	parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
+	shuffle
+\end{code}
+\caption{Definition of |farmChunk|.}
+\label{fig:farmChunk}
+\end{figure}
+
+
+
 
 %%% Local Variables:
 %%% mode: latex

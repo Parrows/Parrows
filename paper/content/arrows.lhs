@@ -47,35 +47,38 @@ instance Arrow (->) where
 %%% on the verge of acceptable code
 and the Kleisli type: %(Fig.~\ref{fig:arrowkleisli}).
 % \begin{figure}[h]
-% \begin{code}
+\begin{code}
 data Kleisli m a b = Kleisli { run :: a -> m b }
 
 instance Monad m => Arrow (Kleisli m) where
 	arr f = Kleisli (return . f)
 	f >>> g = Kleisli (\a -> f a >>= g)
 	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
-% \end{code}%$
+\end{code}%$
 % \caption{Definition of the Kleisli type and the corresponding arrow instance}
 % \label{fig:arrowkleisli}
 % \end{figure}
 \begin{figure}[h]
-\olcomment{fix this layout, find the subfigure flavor that is working}
 	\centering
 	\begin{tabular}{cc}
 		% \subcaptionbox
-{first\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
+{\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
 		% \subcaptionbox
-{second\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
+{\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
+|first| & |second| \\
+\midrule
 		% \subcaptionbox
-{(***)\label{fig:***Img}}{\includegraphics[width = 1.5in]{images/starstarstar}} &
+{}{\includegraphics[width = 1.5in]{images/starstarstar}} &
 		% \subcaptionbox
-{(\&\&\&)\label{fig:&&&Img}}{\includegraphics[width = 1.5in]{images/andandand}}\
+{}{\includegraphics[width = 1.5in]{images/andandand}}\\
+|(***)|\label{fig:***Img} & |(&&&)| \label{fig:&&&Img} \\
 	\end{tabular}
-	\caption{Syntactic sugar for arrows}
+	\caption{Visual depiction of syntactic sugar for Arrows.}
 	\label{3}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: The mirrored version of |first|, called |second| (Fig.~\ref{fig:secondImg}% ,~\ref{fig:second}
-):
+With this typeclass in place, Hughes also defined some syntactic sugar: the functions |second|, |***| and |&&&|. 
+The mirrored version of |first|, called |second| (Fig.~\ref{fig:secondImg}% ,~\ref{fig:second}
+) is:
 % \begin{figure}[h]
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -85,8 +88,9 @@ second f = arr swap >>> first f >>> arr swap
 % \caption{The second combinator}
 % \label{fig:second}
 % \end{figure}
-the |***| combinator which combines |first| and |second| to handle two inputs in one arrow, (Fig.\ref{fig:***Img}% ,~\ref{fig:***}
-)
+the |***| combinator that combines |first| and |second| to handle two inputs in one arrow, (Fig.\ref{fig:***Img}%
+% ,~\ref{fig:***}
+) is defined as
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -96,7 +100,7 @@ f *** g = first f >>> second g
 % \label{fig:***}
 % \end{figure}
 and the |&&&| combinator that constructs an arrow which outputs two different values like |***|, but takes only one input (Fig.~\ref{fig:&&&Img}% ,~\ref{fig:&&&}
-).
+) is:
 % \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)

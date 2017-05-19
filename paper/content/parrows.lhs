@@ -23,6 +23,7 @@ class Arrow arr => ArrowParallel arr a b where
 % \end{figure}
 Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional |conf| parameter to the function. We also do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. So we add it to the type signature of the typeclass as well and get |ArrowParallel arr a b conf|: %(Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
 % \begin{figure}[h]
+\olcomment{|ArrowParallel arr a b conf| or |ArrowParallel conf arr a b|?}
 \begin{code}
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
@@ -35,11 +36,10 @@ Note that we don't require the |conf| parameter in every implementation. If it i
 \subsection{ArrowParallel instances}
 
 \subsubsection{Multicore Haskell} \label{sec:parrows:multicore}
-The Multicore Haskell implementation of this class is implemented in a straightforward manner by using listApp from appendix \ref{utilfns} combined with the |withStrategy :: Strategy a -> a -> a| and |pseq :: a -> b -> b| combinators from Multicore Haskell, where |withStrategy| is the same as |using :: a -> Strategy a -> a| but with flipped parameters.
+The Multicore Haskell implementation of this class is implemented in a straightforward manner by using |listApp| from Appendix~\ref{utilfns} combined with the |withStrategy :: Strategy a -> a -> a| and |pseq :: a -> b -> b| combinators from Multicore Haskell, where |withStrategy| is the same as |using :: a -> Strategy a -> a| but with flipped parameters.
 \begin{figure}[h]
 \begin{code}
-instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
-	ArrowParallel arr a b () where
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
     	parEvalN _ fs =
        		listApp fs >>>
         	arr (withStrategy (parList rdeepseq)) &&& arr id >>>
@@ -69,11 +69,12 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \caption{Configurable ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
-\subsubsection{Par Monad}
-The ParMonad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and ParMonad's |spawnP :: NFData a => a -> Par (IVar a)| function. The latter forks away the computation of a value and returns an |IVar| containing the result in the |Par| monad.
+\subsubsection{|Par| Monad}
+\olcomment{introduce a newcommand for par-monad, "arrows", "parrows" and replace all mentions to them to ensure uniform typesetting}
+The |Par| monad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and |Par| monad's |spawnP :: NFData a => a -> Par (IVar a)| function. The latter forks away the computation of a value and returns an |IVar| containing the result in the |Par| monad.
 
 
-We therefore apply each function to its corresponding input value with |listApp| (Fig.~\ref{fig:listApp}) and then fork the computation away with |arr spawnP| inside a |zipWithArr| call. This yields a list |[Par (IVar b)]|, which we then convert into |Par [IVar b]| with |arr sequenceA|. In order to wait for the computation to finish, we map over the |IVar|s inside the ParMonad with |arr (>>= mapM get)|. The result of this operation is a |Par [b]| from which we can finally remove the monad again by running |arr runPar| to get our output of |[b]|.
+We therefore apply each function to its corresponding input value with |listApp| (Fig.~\ref{fig:listApp}) and then fork the computation away with |arr spawnP| inside a |zipWithArr| call. This yields a list |[Par (IVar b)]|, which we then convert into |Par [IVar b]| with |arr sequenceA|. In order to wait for the computation to finish, we map over the |IVar|s inside the |Par| monad with |arr (>>= mapM get)|. The result of this operation is a |Par [b]| from which we can finally remove the monad again by running |arr runPar| to get our output of |[b]|.
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
@@ -90,7 +91,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{figure}
 
 \subsubsection{Eden}
-For the Multicore and ParMonad implementation we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
+For both the Multicore Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
 % \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
