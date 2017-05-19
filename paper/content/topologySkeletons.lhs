@@ -105,10 +105,8 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
-	loop (second (rightRotate >>> lazy) >>>
-        arr (uncurry zip) >>>
-        parMap conf (second get >>> f >>> second put) >>>
-        arr unzip)
+	loop (second (rightRotate >>> lazy) >>> arr (uncurry zip) >>>
+        parMap conf (second get >>> f >>> second put) >>> arr unzip)
 
 rightRotate :: (Arrow arr) => arr [a] [a]
 rightRotate = arr $ \list -> case list of
@@ -132,37 +130,31 @@ lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \subsection{Torus skeleton}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
-	\caption{Schematic depiction of the torus skeleton}
+	\caption{Schematic depiction of the |torus| skeleton.}
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
-With our Parallel Arrows we re-implement the torus combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
+With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
 
 Similar to the |ring|, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes |second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))| instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with |arr (uncurry3 zipWith3 lazyzip3)| from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |parMap conf (ptorus f)| which yields us |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| typeclass. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
 
 \begin{figure}[h]
+\olcomment{swapped type classes}
 \begin{code}
-torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
-	ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
-	Future fut a, Future fut b) =>
+torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr, Future fut a, Future fut b,
+          ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf) =>
 	conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
-	loop (second ((mapArr rightRotate >>> lazy) ***
-		(arr rightRotate >>> lazy)) >>>
+	loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
 	arr (uncurry3 (zipWith3 lazyzip3)) >>>
-	(arr length >>> arr unshuffle) &&&
-		(shuffle >>> parMap conf (ptorus f)) >>>
-	app >>>
+	(arr length >>> arr unshuffle) &&& (shuffle >>> parMap conf (ptorus f)) >>> app >>>
 	arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 ptorus :: (Arrow arr, Future fut a, Future fut b) =>
-	arr (c, a, b) (d, a, b) ->
-	arr (c, fut a, fut b) (d, fut a, fut b)
-ptorus f =
-	arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>>
-	arr (\ ~(d, a, b) -> (d, put a, put b))
+	arr (c, a, b) (d, a, b) -> arr (c, fut a, fut b) (d, fut a, fut b)
+ptorus f = arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>> arr (\ ~(d, a, b) -> (d, put a, put b))
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
@@ -179,15 +171,11 @@ threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Their instantiation of the skeleton |nodefunction| can be adapted as shown in Fig.~\ref{fig:torusMatMult}.
 \begin{figure}[h]
 \begin{code}
-nodefunction :: Int ->
-	((Matrix, Matrix), [Matrix], [Matrix]) ->
-	([Matrix], [Matrix], [Matrix])
-nodefunction n ((bA, bB), rows, cols) =
-	([bSum], bA:nextAs , bB:nextBs)
-		where bSum =
-			foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
-			nextAs = take (n-1) rows
-			nextBs = take (n-1) cols
+nodefunction :: Int -> ((Matrix, Matrix), [Matrix], [Matrix]) -> ([Matrix], [Matrix], [Matrix])
+nodefunction n ((bA, bB), rows, cols) = ([bSum], bA:nextAs , bB:nextBs)
+		where bSum = foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
+			     nextAs = take (n-1) rows
+			     nextBs = take (n-1) cols
 \end{code}
 \caption{Adapted |nodefunction| for matrix multiplication with the |torus| from Fig.~\ref{fig:torus}}
 \label{fig:torusMatMult}

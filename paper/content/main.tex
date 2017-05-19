@@ -1644,16 +1644,10 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 \>[B]{}\Varid{ring}\;\Varid{conf}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{second}\;(\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{second}\;(\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\Varid{uncurry}\;\Varid{zip})\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{uncurry}\;\Varid{zip})\mathbin{>\!\!>\!\!>}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{second}\;\Varid{get}\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{put})\mathbin{>\!\!>\!\!>}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;\Varid{unzip}){}\<[E]%
+\>[9]{}\Varid{parMap}\;\Varid{conf}\;(\Varid{second}\;\Varid{get}\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{second}\;\Varid{put})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip}){}\<[E]%
 \\[\blanklineskip]%
 \>[B]{}\Varid{rightRotate}\mathbin{::}(\Conid{Arrow}\;\Varid{arr})\Rightarrow \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{a}\mskip1.5mu]{}\<[E]%
 \\
@@ -1684,29 +1678,27 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 \subsection{Torus skeleton}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
-	\caption{Schematic depiction of the torus skeleton}
+	\caption{Schematic depiction of the \ensuremath{\Varid{torus}} skeleton.}
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
-With our Parallel Arrows we re-implement the torus combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the \ensuremath{\Conid{ArrowLoop}} typeclass.
+With our Parallel Arrows we re-implement the \ensuremath{\Varid{torus}} combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the \ensuremath{\Conid{ArrowLoop}} typeclass.
 
 Similar to the \ensuremath{\Varid{ring}}, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu])} in the second argument (loop only allows for two arguments) of our looped arrow \ensuremath{\Varid{arr}\;([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))\;([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} and our rotation arrow becomes \ensuremath{\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{*\!*\!*}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))} instead of the singular rotation in the ring as we rotate \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu]} horizontally and \ensuremath{[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]} vertically. Then, we once again zip the inputs for the input arrow with \ensuremath{\Varid{arr}\;(\Varid{uncurry3}\;\Varid{zipWith3}\;\Varid{lazyzip3})} from \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))} to \ensuremath{[\mskip1.5mu [\mskip1.5mu (\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]}, which we then feed into our parallel execution.
 
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to \ensuremath{\Varid{shuffle}} all the inputs to then pass it into \ensuremath{\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f})} which yields us \ensuremath{[\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]}. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with \ensuremath{\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle}} with the use of \ensuremath{\Varid{app}\mathbin{::}\Varid{arr}\;(\Varid{arr}\;\Varid{a}\;\Varid{b},\Varid{a})\;\Varid{c}} from the \ensuremath{\Conid{ArrowApply}} typeclass. Finally, we unpack this matrix \ensuremath{[\mskip1.5mu [\mskip1.5mu [\mskip1.5mu (\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\mskip1.5mu]\mskip1.5mu]} with \ensuremath{\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!\!>\!\!>}\Varid{threetotwo}} to get  \ensuremath{([\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu],([\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{a}\mskip1.5mu]\mskip1.5mu],[\mskip1.5mu [\mskip1.5mu \Varid{fut}\;\Varid{b}\mskip1.5mu]\mskip1.5mu]))}.
 
 \begin{figure}[h]
+\olcomment{swapped type classes}
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{9}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{17}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{11}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{torus}\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowApply}\;\Varid{arr},{}\<[E]%
+\>[B]{}\Varid{torus}\mathbin{::}(\Conid{ArrowLoop}\;\Varid{arr},\Conid{ArrowChoice}\;\Varid{arr},\Conid{ArrowApply}\;\Varid{arr},\Conid{Future}\;\Varid{fut}\;\Varid{a},\Conid{Future}\;\Varid{fut}\;\Varid{b},{}\<[E]%
 \\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Conid{ArrowParallel}\;\Varid{arr}\;(\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;(\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;\Varid{conf},{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Conid{Future}\;\Varid{fut}\;\Varid{a},\Conid{Future}\;\Varid{fut}\;\Varid{b})\Rightarrow {}\<[E]%
+\>[B]{}\hsindent{11}{}\<[11]%
+\>[11]{}\Conid{ArrowParallel}\;\Varid{arr}\;(\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;(\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;\Varid{conf})\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{conf}\to \Varid{arr}\;(\Varid{c},\Varid{a},\Varid{b})\;(\Varid{d},\Varid{a},\Varid{b})\to \Varid{arr}\;[\mskip1.5mu [\mskip1.5mu \Varid{c}\mskip1.5mu]\mskip1.5mu]\;[\mskip1.5mu [\mskip1.5mu \Varid{d}\mskip1.5mu]\mskip1.5mu]{}\<[E]%
@@ -1714,22 +1706,13 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{torus}\;\Varid{conf}\;\Varid{f}\mathrel{=}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{*\!*\!*}{}\<[E]%
-\\
-\>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[9]{}\Varid{loop}\;(\Varid{second}\;((\Varid{mapArr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy})\mathbin{*\!*\!*}(\Varid{arr}\;\Varid{rightRotate}\mathbin{>\!\!>\!\!>}\Varid{lazy}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;(\Varid{uncurry3}\;(\Varid{zipWith3}\;\Varid{lazyzip3}))\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}(\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle})\mathbin{\&\!\&\!\&}{}\<[E]%
-\\
-\>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}(\Varid{shuffle}\mathbin{>\!\!>\!\!>}\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f}))\mathbin{>\!\!>\!\!>}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{app}\mathbin{>\!\!>\!\!>}{}\<[E]%
+\>[9]{}(\Varid{arr}\;\Varid{length}\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unshuffle})\mathbin{\&\!\&\!\&}(\Varid{shuffle}\mathbin{>\!\!>\!\!>}\Varid{parMap}\;\Varid{conf}\;(\Varid{ptorus}\;\Varid{f}))\mathbin{>\!\!>\!\!>}\Varid{app}\mathbin{>\!\!>\!\!>}{}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
 \>[9]{}\Varid{arr}\;(\Varid{map}\;\Varid{unzip3})\mathbin{>\!\!>\!\!>}\Varid{arr}\;\Varid{unzip3}\mathbin{>\!\!>\!\!>}\Varid{threetotwo}){}\<[E]%
@@ -1737,18 +1720,9 @@ This, however, is more complicated than in the ring case as we have one more dim
 \>[B]{}\Varid{ptorus}\mathbin{::}(\Conid{Arrow}\;\Varid{arr},\Conid{Future}\;\Varid{fut}\;\Varid{a},\Conid{Future}\;\Varid{fut}\;\Varid{b})\Rightarrow {}\<[E]%
 \\
 \>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{c},\Varid{a},\Varid{b})\;(\Varid{d},\Varid{a},\Varid{b})\to {}\<[E]%
+\>[9]{}\Varid{arr}\;(\Varid{c},\Varid{a},\Varid{b})\;(\Varid{d},\Varid{a},\Varid{b})\to \Varid{arr}\;(\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;(\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b}){}\<[E]%
 \\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\Varid{c},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b})\;(\Varid{d},\Varid{fut}\;\Varid{a},\Varid{fut}\;\Varid{b}){}\<[E]%
-\\
-\>[B]{}\Varid{ptorus}\;\Varid{f}\mathrel{=}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{c},\Varid{a},\Varid{b})\to (\Varid{c},\Varid{get}\;\Varid{a},\Varid{get}\;\Varid{b}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{d},\Varid{a},\Varid{b})\to (\Varid{d},\Varid{put}\;\Varid{a},\Varid{put}\;\Varid{b})){}\<[E]%
+\>[B]{}\Varid{ptorus}\;\Varid{f}\mathrel{=}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{c},\Varid{a},\Varid{b})\to (\Varid{c},\Varid{get}\;\Varid{a},\Varid{get}\;\Varid{b}))\mathbin{>\!\!>\!\!>}\Varid{f}\mathbin{>\!\!>\!\!>}\Varid{arr}\;(\lambda \mathord{\sim}(\Varid{d},\Varid{a},\Varid{b})\to (\Varid{d},\Varid{put}\;\Varid{a},\Varid{put}\;\Varid{b})){}\<[E]%
 \\[\blanklineskip]%
 \>[B]{}\Varid{uncurry3}\mathbin{::}(\Varid{a}\to \Varid{b}\to \Varid{c}\to \Varid{d})\to (\Varid{a},(\Varid{b},\Varid{c}))\to \Varid{d}{}\<[E]%
 \\
@@ -1771,34 +1745,21 @@ As an example of using this skeleton \citep{Loogen2012} showed the matrix multip
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{17}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{25}{@{}>{\hspre}l<{\hspost}@{}}%
+\column{30}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{nodefunction}\mathbin{::}\Conid{Int}\to {}\<[E]%
+\>[B]{}\Varid{nodefunction}\mathbin{::}\Conid{Int}\to ((\Conid{Matrix},\Conid{Matrix}),[\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu])\to ([\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu]){}\<[E]%
 \\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}((\Conid{Matrix},\Conid{Matrix}),[\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu])\to {}\<[E]%
+\>[B]{}\Varid{nodefunction}\;\Varid{n}\;((\Varid{bA},\Varid{bB}),\Varid{rows},\Varid{cols})\mathrel{=}([\mskip1.5mu \Varid{bSum}\mskip1.5mu],\Varid{bA}\mathbin{:}\Varid{nextAs},\Varid{bB}\mathbin{:}\Varid{nextBs}){}\<[E]%
 \\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}([\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu],[\mskip1.5mu \Conid{Matrix}\mskip1.5mu]){}\<[E]%
+\>[B]{}\hsindent{17}{}\<[17]%
+\>[17]{}\mathbf{where}\;\Varid{bSum}\mathrel{=}\Varid{foldl'}\;\Varid{matAdd}\;(\Varid{matMult}\;\Varid{bA}\;\Varid{bB})\;(\Varid{zipWith}\;\Varid{matMult}\;\Varid{nextAs}\;\Varid{nextBs}){}\<[E]%
 \\
-\>[B]{}\Varid{nodefunction}\;\Varid{n}\;((\Varid{bA},\Varid{bB}),\Varid{rows},\Varid{cols})\mathrel{=}{}\<[E]%
+\>[17]{}\hsindent{13}{}\<[30]%
+\>[30]{}\Varid{nextAs}\mathrel{=}\Varid{take}\;(\Varid{n}\mathbin{-}\mathrm{1})\;\Varid{rows}{}\<[E]%
 \\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}([\mskip1.5mu \Varid{bSum}\mskip1.5mu],\Varid{bA}\mathbin{:}\Varid{nextAs},\Varid{bB}\mathbin{:}\Varid{nextBs}){}\<[E]%
-\\
-\>[9]{}\hsindent{8}{}\<[17]%
-\>[17]{}\mathbf{where}\;\Varid{bSum}\mathrel{=}{}\<[E]%
-\\
-\>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{foldl'}\;\Varid{matAdd}\;(\Varid{matMult}\;\Varid{bA}\;\Varid{bB})\;(\Varid{zipWith}\;\Varid{matMult}\;\Varid{nextAs}\;\Varid{nextBs}){}\<[E]%
-\\
-\>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{nextAs}\mathrel{=}\Varid{take}\;(\Varid{n}\mathbin{-}\mathrm{1})\;\Varid{rows}{}\<[E]%
-\\
-\>[17]{}\hsindent{8}{}\<[25]%
-\>[25]{}\Varid{nextBs}\mathrel{=}\Varid{take}\;(\Varid{n}\mathbin{-}\mathrm{1})\;\Varid{cols}{}\<[E]%
+\>[17]{}\hsindent{13}{}\<[30]%
+\>[30]{}\Varid{nextBs}\mathrel{=}\Varid{take}\;(\Varid{n}\mathbin{-}\mathrm{1})\;\Varid{cols}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 \caption{Adapted \ensuremath{\Varid{nodefunction}} for matrix multiplication with the \ensuremath{\Varid{torus}} from Fig.~\ref{fig:torus}}
