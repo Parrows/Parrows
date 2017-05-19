@@ -3,33 +3,34 @@
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel typeclass}
 As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions |a -> b| in parallel, |parEvalN| (Fig.~\ref{fig:parEvalNTypeSig},~\ref{fig:parEvalN}).
-Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]| (Fig.~\ref{fig:parEvalNArrowFn}) (This combinator is similar to our utility function |listApp| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation).
-\begin{figure}[h]
+Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
+This combinator is similar to our utility function |listApp| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
+% \begin{figure}[h]
 \begin{code}
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 \end{code}
-\caption{parEvalN Arrow combinator as a function}
-\label{fig:parEvalNArrowFn}
-\end{figure}
-With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| and we want this to be an interface for different backends, we introduce a new typeclass |ArrowParallel arr a b| to host this combinator (Fig.~\ref{fig:parEvalNArrowTypeClass1}).
-\begin{figure}[h]
+% \caption{parEvalN Arrow combinator as a function}
+% \label{fig:parEvalNArrowFn}
+% \end{figure}
+With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| and we want this to be an interface for different backends, we introduce a new typeclass |ArrowParallel arr a b| to host this combinator: %(Fig.~\ref{fig:parEvalNArrowTypeClass1}).
+% \begin{figure}[h]
 \begin{code}
 class Arrow arr => ArrowParallel arr a b where
 	parEvalN :: [arr a b] -> arr [a] [b]
 \end{code}
-\caption{parEvalN Arrow combinator in a first version of the ArrowParallel typeclass}
-\label{fig:parEvalNArrowTypeClass1}
-\end{figure}
-Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional |conf| parameter to the function. We also do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. So we add it to the type signature of the typeclass as well and get |ArrowParallel arr a b conf| (Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
-\begin{figure}[h]
+% \caption{parEvalN Arrow combinator in a first version of the ArrowParallel typeclass}
+% \label{fig:parEvalNArrowTypeClass1}
+% \end{figure}
+Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak-head normalform vs. normalform). For this reason we also introduce an additional |conf| parameter to the function. We also do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. So we add it to the type signature of the typeclass as well and get |ArrowParallel arr a b conf|: %(Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
+% \begin{figure}[h]
 \begin{code}
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{code}
-\caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
-\label{fig:parEvalNArrowTypeClassFinal}
-\end{figure}
-Note that we don't require the |conf| parameter in every implementation. If it is not needed, we usually just default the |conf| type parameter to () and even blank it out in the parameter list of the implemented |parEvalN|, as we will see in the implementation of the Multicore and the ParMonad backend.
+% \caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
+% \label{fig:parEvalNArrowTypeClassFinal}
+% \end{figure}
+Note that we don't require the |conf| parameter in every implementation. If it is not needed, we usually just default the |conf| type parameter to |()| and even blank it out in the parameter list of the implemented |parEvalN|, as we will see in the implementation of the Multicore and the |Par| Monad backend.
 
 \subsection{ArrowParallel instances}
 
@@ -47,14 +48,14 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, we want to the user not to lose this ability because of using our API. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a| (Fig.~\ref{fig:confa}). We can't directly use the |Strategy a| type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances.
-\begin{figure}[h]
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, we want to the user not to lose this ability because of using our API. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a| (Fig.~\ref{fig:confa}). We can't directly use the |Strategy a| type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances:
+% \begin{figure}[h]
 \begin{code}
 data Conf a = Conf (Strategy a)
 \end{code}
-\caption{Definition of Conf a}
-\label{fig:confa}
-\end{figure}
+% \caption{Definition of Conf a}
+% \label{fig:confa}
+% \end{figure}
 To get our configurable |ArrowParallel| instance, we simply unwrap the strategy and pass it to |parList| like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
 \begin{figure}[h]
 \begin{code}
@@ -89,26 +90,26 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{figure}
 
 \subsubsection{Eden}
-For the Multicore and ParMonad implementation we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
-\begin{figure}[h]
+For the Multicore and ParMonad implementation we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
+% \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
 	arr a b -> (a -> b)
 \end{code}
-\caption{possible ArrowUnwrap typeclass}
-\label{fig:ArrowUnwrap}
-\end{figure}
-We don't do it here for aesthetic resons, though. For now, we just implement |ArrowParallel| for normal functions (Fig.~\ref{fig:ArrowParallelEdenFns})
-\begin{figure}[h]
+% \caption{possible ArrowUnwrap typeclass}
+% \label{fig:ArrowUnwrap}
+% \end{figure}
+We don't do it here for aesthetic resons, though. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
+% \begin{figure}[h]
 \begin{code}
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
 parEvalN _ fs as = spawnF fs as
 \end{code}
-\caption{ArrowParallel instance for functions in the Eden backend}
-\label{fig:ArrowParallelEdenFns}
-\end{figure}
-and the Kleisli type (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
-\begin{figure}[h]
+% \caption{ArrowParallel instance for functions in the Eden backend}
+% \label{fig:ArrowParallelEdenFns}
+% \end{figure}
+and the Kleisli type: % (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
+% \begin{figure}[h]
 \begin{code}
 instance (Monad m, Trans a, Trans b, Trans (m b)) =>
 	ArrowParallel (Kleisli m) a b conf where
@@ -116,21 +117,12 @@ parEvalN conf fs =
 	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
 	(Kleisli $ sequence)
 \end{code}
-\caption{ArrowParallel instance for the Kleisli type in the Eden backend}
-\label{fig:ArrowParallelEdenKleisli}
-\end{figure}
+% \caption{ArrowParallel instance for the Kleisli type in the Eden backend}
+% \label{fig:ArrowParallelEdenKleisli}
+% \end{figure}
 
 %\FloatBarrier
 
-\subsection{Impact of parallel Arrows}
-\olcomment{move this to Contributions in the front or something}
-We have seen that we can wrap parallel Haskells inside of the |ArrowParallel| interface, but why do we abstract parallelism this way and what does this approach do better than the other parallel Haskells?
-\begin{itemize}
-	\item \textbf{Arrow API benefits}:
-	With the |ArrowParallel| typeclass we do not lose any benefits of using arrows as |parEvalN| is just yet another arrow combinator. The resulting arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into our sequential programs without having to change anything.
-	\item \textbf{Abstraction}:
-	With the |ArrowParallel| typeclass, we abstracted all parallel implementation logic away from the business logic. This gives us the beautiful situation of being able to write our code against the interface the typeclass gives us without being bound to any parallel Haskell. So as an example, during development, we can run the code on the simple Multicore version and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the actual |ArrowParallel| instance.
-\end{itemize}
 
 
 %%% Local Variables:
