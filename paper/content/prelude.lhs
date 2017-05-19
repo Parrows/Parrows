@@ -12,7 +12,15 @@
 
 %\usepackage{subcaption}
 
-\usepackage[round]{natbib}
+\usepackage[round,sectionbib]{natbib}
+%% https://tex.stackexchange.com/questions/148992/changing-the-heading-style-of-references-section
+%% and jfp1.cls
+\renewcommand\refname{References}
+\makeatletter
+\renewcommand\bibsection{%
+  \section*{\refname}%
+}%
+\makeatother
 
 \usepackage{csquotes}
 
