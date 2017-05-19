@@ -20,14 +20,13 @@ Before we go into detail on how we can use this idea of parallelism for parallel
 
 \subsubsection{Multicore Haskell}
 Multicore Haskell \cite{Marlow2009,Trinder1999} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies \cite{Trinder1998a,Marlow2010} for several types which can be applied with |using :: a -> Strategy a -> a|. For |parEvalN| this means that we can just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
-We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| skeleton that we will see in chapter \ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without |pseq| during testing for this paper.
+We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| skeleton that we will see in Section~\ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without |pseq| during testing for this paper.
 
-%%%% BROKEN!
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = let bs = zipWith ($) fs as 
                  in (bs `using` parList rdeepseq) `pseq` bs
-\end{code}
+\end{code} %$
 
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
