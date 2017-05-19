@@ -98,6 +98,31 @@ farmChunk conf chunkSize numCores f =
 \label{fig:farmChunk}
 \end{figure}
 
+Eden definition of |ring| skeleton is in Figure~\ref{fig:ringEden}.
+
+\begin{figure}[h]
+\begin{code}
+ringSimple :: (Trans i, Trans o, Trans r) =>
+   (i -> r -> (o,r)) -> [i] -> [o]
+ringSimple f is =  os
+  where (os,ringOuts) = unzip (parMap (toRD $ uncurry f) (zip is $ lazy ringIns))
+        ringIns = rightRotate ringOuts
+
+toRD :: (Trans i, Trans o, Trans r) =>
+        ((i,r) -> (o,r)) -> ((i, RD r) -> (o, RD r))
+toRD  f (i, ringIn)  = (o, release ringOut)
+  where (o, ringOut) = f (i, fetch ringIn)
+
+rightRotate    :: [a] -> [a]
+rightRotate [] =  []
+rightRotate xs =  last xs : init xs
+
+lazy :: [a] -> [a]
+lazy ~(x:xs) = x : lazy xs
+\end{code}
+\caption{Eden's definition of the |ring| skeleton.}
+\label{fig:ringEden}
+\end{figure}
 
 
 

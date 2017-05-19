@@ -1,16 +1,16 @@
 %\FloatBarrier
 \section{Topological Skeletons}
 \label{sec:topology-skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons, among them a |pipe|, a |ring|, and a |torus| implementation \cite{Loogen2012, eden_skel_topology}. These seem like reasonable candidates to be ported to our arrow based parallel Haskell to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} with more predefined skeletons, among them a |pipe|, a |ring|, and a |torus| implementations \cite{Loogen2012}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
 \subsection{Parallel pipe}
 
-The parallel pipe skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
-\mbcomment{das kann man hier so lassen, oder?}
+The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
+\mbcomment{das kann man hier so lassen, oder?}\olcomment{sicherlich!}
 \begin{code}
 loop (arr (\(a, b) -> (b, a:b)))
 \end{code}
-, which is the same as
+which is the same as
 \begin{code}
 loop (arr snd &&& arr (uncurry (:)))
 \end{code}
@@ -27,53 +27,51 @@ pipeSimple conf fs =
 lazy :: (Arrow arr) => arr [a] [a]
 lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{code}
-\caption{A first draft of the pipe skeleton expressed with parallel arrows. Note that the use of |lazy| is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |parEvalN|.}
+\caption{A~first implementation of the |pipe| skeleton expressed with Parallel Arrows. Note that the use of |lazy| is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |parEvalN|.}
 \label{fig:pipeSimple}
 \end{figure}
 
-However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of |pipe| \ref{fig:pipe}.
-\begin{figure}[h]
+However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of |pipe|: % ~\ref{fig:pipe}.
+% \begin{figure}[h]
 \begin{code}
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{code}
-\caption{Final definition of the pipe skeleton which uses Futures}
-\label{fig:pipe}
-\end{figure}
+% \caption{Final definition of the pipe skeleton which uses Futures}
+% \label{fig:pipe}
+% \end{figure}
 
-Sometimes, this pipe definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
+Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
 \begin{figure}[h]
+\olcomment{I swapped the type classes here:}
 \begin{code}
-pipe2 :: (ArrowLoop arr, ArrowChoice arr,
-	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
-	Future fut (([a], [b]), [c])) =>
+pipe2 :: (ArrowLoop arr, ArrowChoice arr, Future fut (([a], [b]), [c]),
+         ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf) =>
 	conf -> arr a b -> arr b c -> arr a c
 pipe2 conf f g =
 	(arr return &&& arr (const [])) &&& arr (const []) >>>
 	pipe conf (replicate 2 (unify f g)) >>>
-	arr snd >>>
-	arr head where
-			unify :: (ArrowChoice arr) =>
-				arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
+	arr snd >>> arr head where
+			unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
 			unify f g =
 				(mapArr f *** mapArr g) *** arr (\_ -> []) >>>
 				arr (\((a, b), c) -> ((c, a), b))
 \end{code}
-\caption{Definition of pipe2}
+\caption{Definition of |pipe2|.}
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of this combinator over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator |(|>>>|)| (Fig.~\ref{fig:par>>>}, which is semantically equivalent to |(>>>)| in a similar manner to the other parallel syntactic sugar from section~\ref{syntacticSugar}.
+Note that extensive use of this combinator over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator |parcomp| (Fig.~\ref{fig:par>>>}, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Section~\ref{syntacticSugar}.
 \begin{figure}[h]
+\olcomment{swapped type classes}
 \begin{code}
-(|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
-	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
-	Future fut (([a], [b]), [c])) =>
+(|>>>|) :: (ArrowLoop arr, ArrowChoice arr, Future fut (([a], [b]), [c]),
+	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) ()) =>
 	arr a b -> arr b c -> arr a c
 (|>>>|) = pipe2 ()
 \end{code}
-\caption{Definition of \texttt{(|>>>|)}}
+\caption{Definition of |parcomp|.}
 \label{fig:par>>>}
 \end{figure}
 
@@ -83,33 +81,7 @@ Note that extensive use of this combinator over |pipe| with a hand-written combi
 	\caption{Schematic depiction of the ring skeleton}
 	\label{fig:ringImg}
 \end{figure}
-Eden comes with a ring skeleton (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function |[i] -> [o]| with a ring of nodes that communicate in a ring topology with each other. Its input is a node function |i -> r -> (o, r)| in which |r| serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels (remote data) (Fig.~\ref{fig:ringEden}).
-\begin{figure}[h]
-\begin{code}
-ringSimple :: (Trans i, Trans o, Trans r) =>
-   (i -> r -> (o,r))
-   -> [i] -> [o]
-ringSimple f is =  os
-  where (os,ringOuts) = unzip (parMap (toRD $ uncurry f)
-                                   (zip is $ lazy ringIns))
-        ringIns = rightRotate ringOuts
-
-toRD :: (Trans i, Trans o, Trans r) =>
-        ((i,r) -> (o,r))
-        -> ((i, RD r) -> (o, RD r))
-toRD  f (i, ringIn)  = (o, release ringOut)
-  where (o, ringOut) = f (i, fetch ringIn)
-
-rightRotate    :: [a] -> [a]
-rightRotate [] =  []
-rightRotate xs =  last xs : init xs
-
-lazy :: [a] -> [a]
-lazy ~(x:xs) = x : lazy xs
-\end{code}
-\caption{Eden's definition of the ring skeleton \citep{eden_skel_topology}}
-\label{fig:ringEden}
-\end{figure}
+Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}} (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function |[i] -> [o]| with a ring of nodes that communicate in a ring topology with each other. Its input is a node function |i -> r -> (o, r)| in which |r| serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels, so called \enquote{remote data}. We depict it in Appendix, Fig.~\ref{fig:ringEden}.
 %\end{code}
 %with toRD (to make use of remote data)
 %\begin{code}
@@ -118,23 +90,25 @@ lazy ~(x:xs) = x : lazy xs
 %\begin{code}
 
 
-We can rewrite its functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
+We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
 \begin{quote}
-{Note that the list of ring inputs ringIns is the same as the list of ring outputs ringOuts rotated by one element to the right using the auxiliary function rightRotate. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
+{Note that the list of ring inputs |ringIns| is the same as the list of ring outputs |ringOuts| rotated by one element to the right using the auxiliary function |rightRotate|. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
 \end{quote}
 Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)| so we can feed that into a our input arrow |arr (i, r) (o, r)|, which we transform into |arr (i, fut r) (o, fut r)| before lifting it to |arr [(i, fut r)] [(o, fut r)]| to get a list |[(o, fut r)]|. Finally we unzip this list into |([o], [fut r])|. Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}).
+This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
+%Further details on this can be found in \cite{eden_cefp}.
+\olcomment{let's do it?}
+
+
 \begin{figure}[h]
 \begin{code}
-ring :: (ArrowLoop arr, Future fut r,
-	ArrowParallel arr (i, fut r) (o, fut r) conf) =>
-    conf ->
-    arr (i, r) (o, r) ->
-    arr [i] [o]
+ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+    conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
 	loop (second (rightRotate >>> lazy) >>>
-    arr (uncurry zip) >>>
-    parMap conf (second get >>> f >>> second put) >>>
-    arr unzip)
+        arr (uncurry zip) >>>
+        parMap conf (second get >>> f >>> second put) >>>
+        arr unzip)
 
 rightRotate :: (Arrow arr) => arr [a] [a]
 rightRotate = arr $ \list -> case list of
@@ -144,19 +118,17 @@ rightRotate = arr $ \list -> case list of
 lazy :: (Arrow arr) => arr [a] [a]
 lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{code}
-\caption{Final Definition of the ring Skeleton}
+\caption{Final definition of the |ring| skeleton.}
 \label{fig:ringFinal}
 \end{figure}
- %$ %% formatting
+ % $ %% formatting
 % and lazy:
 % \begin{code}
 % lazy :: (Arrow arr) => arr [a] [a]
 % lazy = arr (\ ~(x:xs) -> x : lazy xs
 % \end{code}
 %% we have shown this already.
-This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
-%Further details on this can be found in \cite{eden_cefp}.
-\olcomment{let's do it?}
+
 \subsection{Torus skeleton}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
@@ -164,13 +136,12 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
+With our Parallel Arrows we re-implement the torus combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
 
-With our parallel Arrows we re-implement the torus combinator from Eden \citep{eden_skel_topology}---yet again with the help of the |ArrowLoop| typeclass.
+Similar to the |ring|, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes |second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))| instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with |arr (uncurry3 zipWith3 lazyzip3)| from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 
-Similar to the ring, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for 2 arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes |second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))| instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with |arr (uncurry3 zipWith3 lazyzip3)| from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
-\\\\
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |parMap conf (ptorus f)| which yields us |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| typeclass. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
-\\\\
+
 \begin{figure}[h]
 \begin{code}
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
@@ -202,10 +173,10 @@ lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 \end{code} % $
-\caption{Definition of the torus skeleton}
+\caption{Definition of the |torus| skeleton.}
 \label{fig:torus}
 \end{figure}
-As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Their nodefunction can be adapted as shown in Fig.~\ref{fig:torusMatMult}.
+As an example of using this skeleton \citep{Loogen2012} showed the matrix multiplication using the Gentleman algorithm \citep{Gentleman1978}. Their instantiation of the skeleton |nodefunction| can be adapted as shown in Fig.~\ref{fig:torusMatMult}.
 \begin{figure}[h]
 \begin{code}
 nodefunction :: Int ->
@@ -218,11 +189,12 @@ nodefunction n ((bA, bB), rows, cols) =
 			nextAs = take (n-1) rows
 			nextBs = take (n-1) cols
 \end{code}
-\caption{Adapted nodefunction for matrix multiplication with the torus from Fig.~\ref{fig:torus}}
+\caption{Adapted |nodefunction| for matrix multiplication with the |torus| from Fig.~\ref{fig:torus}}
 \label{fig:torusMatMult}
 \end{figure}
 If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.\olcomment{much more details on this!}
 \begin{figure}[ht]
+\olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
 	\caption[Matrix Multiplication with a torus (Parrows)]{Matrix Multiplication with a torus (Parrows)}

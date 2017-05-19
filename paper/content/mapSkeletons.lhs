@@ -70,7 +70,7 @@ shuffle = arr (concat . transpose)
 \label{fig:farm}
 \end{figure}
 
-\subsection{farmChunk}
+\subsection{The |farmChunk| Skeleton}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/farmChunk}
 \caption{Schematic depiction of farmChunk}
@@ -78,7 +78,7 @@ shuffle = arr (concat . transpose)
 \end{figure}
 Since a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we can define |farmChunk| (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|. It is basically the same definition as for |farm|, with |parEvalN| replaced with |parEvalNLazy|, as Appendix shows.
 
-\subsection{parMapReduce}
+\subsection{Map and reduce}
 
 A~simple |map|--|reduce| can be written like in Figure~\ref{fig:parMapReduceDirect}. Notice that the performance of the |>>>| combinator is essential for the performance of the skeleton. A~definitive version would use Futures.
 
@@ -94,8 +94,7 @@ A~simple |map|--|reduce| can be written like in Figure~\ref{fig:parMapReduceDire
 
 \begin{figure}[h]
 \begin{code}
-parMapReduceDirect :: (ArrowParallel arr [a] b conf,
-	ArrowApply arr, ArrowChoice arr) =>
+parMapReduceDirect :: (ArrowParallel arr [a] b conf, ArrowApply arr, ArrowChoice arr) =>
 	conf -> ChunkSize -> arr a b -> arr (b, b) b -> b -> arr [a] b
 parMapReduceDirect conf chunkSize mapfn foldfn neutral =
 	arr (chunksOf chunkSize) >>>
