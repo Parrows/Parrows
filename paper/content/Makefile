@@ -1,8 +1,8 @@
-main.pdf : *.lhs *.bib Makefile
-	lhs2TeX main.lhs -o main.tex
-	latexmk -pdf main
+main.pdf : *.tex *.bib Makefile
+	lhs2TeX main.tex -o output.tex
+	latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf output
 
 clean :
-	rm -f main.pdf
-	latexmk -pdf -C main
-	rm -f main.tex
+	rm -f output.pdf
+	latexmk -pdf -C output
+	rm -f output.tex
