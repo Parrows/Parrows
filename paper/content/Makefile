@@ -1,12 +1,13 @@
 BUILD_FOLDER=build
-SOURCE_FOLDER=sources
 
 MAIN_FILE=main.tex
 
-main.pdf : $(SOURCE_FOLDER)/*.tex $(SOURCE_FOLDER)/*.bib Makefile
-	cp -r ${SOURCE_FOLDER} ${BUILD_FOLDER}
-	for texFile in $(wildcard $(SOURCE_FOLDER)/*.tex) ; do \
-		buildFile=`echo $$texFile | sed -r 's/${SOURCE_FOLDER}/${BUILD_FOLDER}/g'`; \
+main.pdf : *.tex *.bib Makefile
+	rm -r ${BUILD_FOLDER} || true
+	mkdir ${BUILD_FOLDER}
+	cp -r $(filter-out build, $(wildcard *)) ${BUILD_FOLDER}
+	for texFile in $(wildcard *.tex) ; do \
+		buildFile=${BUILD_FOLDER}/$$texFile; \
 		lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i polycode.fmt ; \
 		if [ "$${buildFile}" != "${BUILD_FOLDER}/prelude.tex" ]; then \
 			echo "removing lhs2TeX preamble for $${buildFile}"; \
@@ -16,7 +17,8 @@ main.pdf : $(SOURCE_FOLDER)/*.tex $(SOURCE_FOLDER)/*.bib Makefile
 			cp $${buildFile}.0 $${buildFile}; \
 		fi \
 	done
-	cd build && latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main
+	cd ${BUILD_FOLDER} && latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main
+	cp `ls ${BUILD_FOLDER}/main.* | grep -v 'main.tex'` .
 
 clean :
 	rm -r ${BUILD_FOLDER}
