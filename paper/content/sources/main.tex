@@ -49,7 +49,7 @@
 
 %\newtheorem{lemma}{Lemma}[section]
 
-%include prelude.tex
+\input{prelude}
 
 
 \title{Arrows for Parallel Computations}
@@ -76,7 +76,7 @@
 \maketitle
 
 %% environment inside
-%include abstract.tex
+\input{abstract.tex}
 
 \tableofcontents
 
@@ -86,31 +86,31 @@
 	%\newpage
 	\tableofcontents
 	%\pagebreak
-	%include motivation.tex
-	%include parallelHaskells.tex
-	%include arrows.tex
+	\input{motivation}
+	\input{parallelHaskells}
+	\input{arrows}
 	%\pagebreak
-	%include relwork.tex
+	\input{relwork}
 	%\pagebreak
 	%\pagebreak
-	%include parrows.tex
+	\input{parrows}
 	%\pagebreak
-	%include basicSkeletons.tex
+	\input{basicSkeletons}
 	%\pagebreak
-	%include syntacticSugar.tex
+	\input{syntacticSugar}
 	%\pagebreak
-	%include futures.tex
+	\input{futures}
 	%\pagebreak
-	%include mapSkeletons.tex
+	\input{mapSkeletons}
 	%\pagebreak
-	%include topologySkeletons.tex
+	\input{topologySkeletons}
 	%\pagebreak
-	%include benchmarks.tex
+	\input{benchmarks}
 	%%\pagebreak
-	%include conclusion.tex
+	\input{conclusion}
 	%\pagebreak
         \bibliographystyle{jfp}
 	\bibliography{references,main}
         \appendix
-	%include utilityFunctions.tex
+	\input{utilityFunctions}
 \end{document}
