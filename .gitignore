@@ -56,3 +56,5 @@ paper/cmake_install.cmake
 *.fdb_latexmk
 
 *build/
+*backup/
+*.0
