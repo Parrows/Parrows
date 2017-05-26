@@ -4,24 +4,18 @@
 \label{sec:parEvalNIntro}
 There are already several ways to write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
-In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel, as also Figure~\ref{fig:parEvalN} symbolically shows:
-
-\begin{code}
-parEvalN :: [a -> b] -> [a] -> [b]
-\end{code}
-
-\begin{figure}[h]
+In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel or |parEvalN :: [a -> b] -> [a] -> [b]|, as also Figure~\ref{fig:parEvalN} symbolically shows.
+\begin{figure}[t]
   \centering
 	\includegraphics[scale=0.7]{images/parEvalN}
-	\caption{Schematic illustration of \texttt{parEvalN}.}
+	\caption{Schematic illustration of |parEvalN|.}
 	\label{fig:parEvalN}
 \end{figure}
-
 Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement |parEvalN| with several different parallel Haskells.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009,Trinder1998a} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies \cite{Trinder1998a,Marlow2010} for several types which can be applied with |using :: a -> Strategy a -> a|. For |parEvalN| this means that we can just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
-We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| skeleton that we will see in Section~\ref{sec:topology-skeletons} which resulted in deadlock scenarios when executed without |pseq| during testing for this paper.
+Multicore Haskell \cite{Marlow2009,Trinder1998a} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|. For |parEvalN| this means that we can just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
+We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| (Chap.~\ref{sec:topology-skeletons}), where a wrong execution order would result in deadlock scenarios when executed without |pseq|.
 
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
@@ -32,14 +26,13 @@ parEvalN fs as = let bs = zipWith ($) fs as
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
 	\caption{Dataflow of the Multicore Haskell parEvalN version}
-\olcomment{Evaluation step explicitly shown?}
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
 The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
 
 
-Our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |DOLLAR| just like with Multicore Haskell. % $
+Our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
 Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| monad with |get|. This results in |Par [b]|. We finally execute this process with |runPar| to finally get |[b]| again.
 
 \mbcomment{explain problems with laziness here. Problems with torus}
