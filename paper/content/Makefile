@@ -15,7 +15,7 @@ main.pdf : *.tex *.bib Makefile
 			cp $${buildFile}.0 $${buildFile}; \
 		fi \
 	done
-	latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main
+	latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main || true
 	cd ${BACKUP_FOLDER} && cp -r `ls . ` ..
 
 clean :
