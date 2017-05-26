@@ -1,5 +1,5 @@
 \subsubsection{Syntactic Sugar} \label{syntacticSugar}
-For basic arrows, we have the |***| combinator (Fig.~\ref{fig:***Img},~\ref{fig:***}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| (Fig.~\ref{fig:par***}) with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
+For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| (Fig.~\ref{fig:par***}) with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
 ):
 % \begin{figure}[h]
 \begin{code}
@@ -12,8 +12,7 @@ For basic arrows, we have the |***| combinator (Fig.~\ref{fig:***Img},~\ref{fig:
 % \end{figure}
 % With this we can analogously to the serial |&&&|
 We define the parallel |parand| % (Fig.~\ref{fig:par&&&}) 
-in a similar manner to its sequential pendant |&&&| (Fig.~\ref{fig:&&&Img}% ,~\ref{fig:&&&}
-):
+in a similar manner to its sequential pendant |&&&| (Fig.~\ref{fig:syntacticSugarArrows}):
 % \begin{figure}[h]
 \begin{code}
 (|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) =>

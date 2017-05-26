@@ -73,12 +73,11 @@ instance Monad m => Arrow (Kleisli m) where
 {}{\includegraphics[width = 1.5in]{images/andandand}}\\
 |(***)|\label{fig:***Img} & |(&&&)| \label{fig:&&&Img} \\
 	\end{tabular}
-	\caption{Visual depiction of syntactic sugar for Arrows.}
-	\label{3}
+	\caption{Visual depiction of syntactic sugar for arrows.}
+	\label{fig:syntacticSugarArrows}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar: the functions |second|, |***| and |&&&|. 
-The mirrored version of |first|, called |second| (Fig.~\ref{fig:secondImg}% ,~\ref{fig:second}
-) is:
+With this typeclass in place, Hughes also defined some syntactic sugar (see Fig.~\ref{fig:syntacticSugarArrows}): the functions |second|, |***| and |&&&|. 
+The mirrored version of |first|, called |second| is:
 % \begin{figure}[h]
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -88,9 +87,7 @@ second f = arr swap >>> first f >>> arr swap
 % \caption{The second combinator}
 % \label{fig:second}
 % \end{figure}
-the |***| combinator that combines |first| and |second| to handle two inputs in one arrow, (Fig.\ref{fig:***Img}%
-% ,~\ref{fig:***}
-) is defined as
+the |***| combinator that combines |first| and |second| to handle two inputs in one arrow, is defined as
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -99,8 +96,7 @@ f *** g = first f >>> second g
 % \caption{The (***) combinator}
 % \label{fig:***}
 % \end{figure}
-and the |&&&| combinator that constructs an arrow which outputs two different values like |***|, but takes only one input (Fig.~\ref{fig:&&&Img}% ,~\ref{fig:&&&}
-) is:
+and the |&&&| combinator that constructs an arrow which outputs two different values like |***|, but takes only one input is:
 % \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)

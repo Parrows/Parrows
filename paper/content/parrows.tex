@@ -2,7 +2,7 @@
 \label{sec:parallel-arrows}
 We have seen what Arrows are and how they can be used as a general interface to computation. In the following section we will discuss how Arrows constitute a general interface not only to computation, but to \textbf{parallel computation} as well. We start by introducing the interface and explaining the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel typeclass}
-As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions |a -> b| in parallel, |parEvalN| (Fig.~\ref{fig:parEvalNTypeSig},~\ref{fig:parEvalN}).
+As we have seen earlier, in its purest form, parallel computation (on functions) can be seen as the execution of some functions |a -> b| in parallel, |parEvalN| (Chap.~\ref{sec:parEvalNIntro}, Fig.~\ref{fig:parEvalN}).
 Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
 This combinator is similar to our utility function |listApp| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
 % \begin{figure}[h]
@@ -48,7 +48,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
 \caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, we want to the user not to lose this ability because of using our API. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a| (Fig.~\ref{fig:confa}). We can't directly use the |Strategy a| type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances:
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, we want to the user not to lose this ability because of using our API. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|: 
 % \begin{figure}[h]
 \begin{code}
 data Conf a = Conf (Strategy a)
@@ -56,7 +56,7 @@ data Conf a = Conf (Strategy a)
 % \caption{Definition of Conf a}
 % \label{fig:confa}
 % \end{figure}
-To get our configurable |ArrowParallel| instance, we simply unwrap the strategy and pass it to |parList| like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
+We can't directly use the |Strategy a| type here as GHC (at least in the versions used for development in this paper) does not allow type synonyms in type class instances. To get our configurable |ArrowParallel| instance, we simply unwrap the strategy and pass it to |parList| like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
