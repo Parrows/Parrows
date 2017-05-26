@@ -4,7 +4,7 @@
 \label{sec:parEvalNIntro}
 There are already several ways to write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
-In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel, as also Figure~\ref{fig:parevaln-init} symbolically shows:
+In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel, as also Figure~\ref{fig:parEvalN} symbolically shows:
 
 \begin{code}
 parEvalN :: [a -> b] -> [a] -> [b]

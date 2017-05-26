@@ -3,7 +3,7 @@
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}.} with more predefined skeletons, among them a |pipe|, a |ring|, and a |torus| implementations \cite{Loogen2012}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
-\subsection{Parallel pipe}
+\subsection{Parallel pipe}\label{sec:pipe}
 
 The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \mbcomment{das kann man hier so lassen, oder?}\olcomment{sicherlich!}
@@ -32,15 +32,15 @@ lazy = arr (\ ~(x:xs) -> x : lazy xs)
 \end{figure}
 
 However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and get the final definition of |pipe|: % ~\ref{fig:pipe}.
-% \begin{figure}[h]
+%\begin{figure}[H]
 \begin{code}
 pipe :: (ArrowLoop arr, ArrowParallel arr (fut a) (fut a) conf, Future fut a) =>
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{code}
-% \caption{Final definition of the pipe skeleton which uses Futures}
-% \label{fig:pipe}
-% \end{figure}
+%\caption{Final definition of the pipe skeleton which uses Futures}
+%\label{fig:pipe}
+%\end{figure}
 
 Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
 \begin{figure}[h]
@@ -90,7 +90,7 @@ Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hack
 %\begin{code}
 
 
-We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| (Fig.~\ref{fig:pipeSimple},~\ref{fig:pipe}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
+We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| from Chapter~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
 \begin{quote}
 {Note that the list of ring inputs |ringIns| is the same as the list of ring outputs |ringOuts| rotated by one element to the right using the auxiliary function |rightRotate|. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
 \end{quote}
