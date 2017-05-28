@@ -6,10 +6,8 @@
 \end{figure}
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| shown in Fig.~\ref{fig:ArrowDefinition}.
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
-%\subfloat[Arrow class definition][]{%
-% begin{minipage}{0.5\textwidth}
 \parbox[c][16.5em]{0.49\linewidth}{%
 \begin{center}
 \vfill
@@ -21,19 +19,15 @@ class Arrow arr where
 \end{code}
 \vfill
 \end{center}
-\caption{Arrow class definition}
+\caption{|Arrow| class definition}
 \label{fig:ArrowDefinition}
 }
 \parbox[c][16.5em]{0.49\linewidth}{%
 \vfill
-%\subfloat[The arrow type class definition on the left with schematic depiction of its combinators on the right][]{%
-%	\begin{center}
 \centering
 	{\includegraphics[scale=0.6]{images/arr}}
 	{\includegraphics[scale=0.6]{images/compose}}
 	{\includegraphics[scale=0.6]{images/first}}
-%	\end{center}
-%}%\hfill
 \vfill
 \caption{The schematic depiction of |Arrow| combinators}
 }
@@ -83,8 +77,8 @@ instance Monad m => Arrow (Kleisli m) where
 	\caption{Visual depiction of syntactic sugar for arrows.}
 	\label{fig:syntacticSugarArrows}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar (see Fig.~\ref{fig:syntacticSugarArrows}): the functions |second|, |***| and |&&&|. 
-The mirrored version of |first|, called |second| is:
+With this typeclass in place, Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): The combinators |second|, |***| and |&&&|. 
+The definition of |second|, the mirrored version of |first|, is:
 % \begin{figure}[h]
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -94,7 +88,7 @@ second f = arr swap >>> first f >>> arr swap
 % \caption{The second combinator}
 % \label{fig:second}
 % \end{figure}
-the |***| combinator that combines |first| and |second| to handle two inputs in one arrow, is defined as
+The |***| combinator that combines |first| and |second| to handle two inputs in one arrow, is defined as
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -103,7 +97,7 @@ f *** g = first f >>> second g
 % \caption{The (***) combinator}
 % \label{fig:***}
 % \end{figure}
-and the |&&&| combinator that constructs an arrow which outputs two different values like |***|, but takes only one input is:
+, while the |&&&| combinator, that constructs an arrow which outputs two different values like |***|, but takes only one input, is:
 % \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
@@ -112,8 +106,7 @@ f &&& g = arr (\a -> (a, a)) >>> (f *** g)
 % \caption{The (\&\&\&) combinator}
 % \label{fig:&&&}
 % \end{figure}
-A short example given by Hughes on how to use this is 
-addition with arrows:
+A first short example given by Hughes on how to use arrows is addition with arrows:
 %|add| over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 % \begin{figure}[h]
 \begin{code}
