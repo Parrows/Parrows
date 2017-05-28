@@ -59,14 +59,12 @@ parEvalN fs as = runPar $
 \end{figure}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
-	\caption{Dataflow of the Par Monad parEvalN version}
+	\caption{Dataflow of the |Par| Monad |parEvalN| version}
 	\label{fig:parEvalNParMonadImg}
 \end{figure}
 
 \subsubsection{Eden}
-Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{See also \url{http://www.mathematik.uni-marburg.de/~eden/} and \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} This means that it works on clusters as well so it makes sense to have a Eden-based backend for our new parallel Haskell flavour.
-
-Eden was designed to work on clusters, but with a further simple backend it operates on multicores. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results also on multicores \cite{arcs-dc,aswad2009low}.
+Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{See also \url{http://www.mathematik.uni-marburg.de/~eden/} and \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} It is targeted towards clusters, but also functions well in a shared-memory setting with a further simple backend. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results also on multicores \cite{arcs-dc,aswad2009low}.
 
 While Eden also comes with a monad |PA| for parallel evaluation, it also ships with a completely functional interface that includes
 %\\
@@ -83,15 +81,16 @@ parEvalN = spawnF
 \end{code}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNEden}
-	\caption{Dataflow of the Eden parEvalN version}
+	\caption{Dataflow of the Eden |parEvalN| version}
+	\label{fig:parEvalNEden}
 \end{figure}
+A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
 
 \paragraph{Eden TraceViewer.}
+\label{sec:edentv}
 To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See \url{http://hackage.haskell.org/package/edentv} on Hackage for the last available version of Eden TraceViewer.} \cite{Berthold2007a}. In the next sections we will present some \emph{traces}, the post-mortem process diagrams of Eden processes and their activity.
 
-In a trace, the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. A~trace shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for then is GC. An inactive machine where no processes are started yet, or all are already terminated, is shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes.
-
-\olcomment{show example trace or refer to a trace in later figures}
+In a trace, the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. A~trace shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for then is GC. An inactive machine where no processes are started yet, or all are already terminated, is shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes. An example trace can be found in Fig.~\ref{fig:withoutFutures}.
 
 
 %%% Local Variables:

@@ -18,7 +18,9 @@ for larger amount of data and number of processes \citep[showcases][as, \eg]{Ber
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
 	\caption[without Futures]{Communication between 4 threads without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colors: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
-\olcomment{more practical and heavy-weight example! fft (I have the code)?}
+\olcomment{more practical and heavy-weight example! fft (I have the code)?}\\
+\mbcomment{Depends... Are the communications easy to read in such an example?}\\
+\mbcomment{Keep the description for the different colours, or link to the EdenTV description in \ref{sec:edentv}}
 \end{figure}
 
 This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of |RD| (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
