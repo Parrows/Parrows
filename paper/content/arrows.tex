@@ -4,22 +4,28 @@
 	\includegraphics{images/arrow}
 	\caption{Schematic depiction of an arrow}
 \end{figure}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the arrow typeclass:
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| shown in Fig.~\ref{fig:ArrowDefinition}.
 
 \begin{figure}[h]
 \centering
 %\subfloat[Arrow class definition][]{%
 % begin{minipage}{0.5\textwidth}
-\parbox{0.49\linewidth}{%
+\parbox[c][16.5em]{0.49\linewidth}{%
+\begin{center}
+\vfill
 \begin{code}
 class Arrow arr where
   arr :: (a -> b) -> arr a b
   (>>>) :: arr a b -> arr b c -> arr a c
   first :: arr a b -> arr (a,c) (b,c)
 \end{code}
+\vfill
+\end{center}
 \caption{Arrow class definition}
-}\qquad
-\begin{minipage}{0.49\linewidth}%
+\label{fig:ArrowDefinition}
+}
+\parbox[c][16.5em]{0.49\linewidth}{%
+\vfill
 %\subfloat[The arrow type class definition on the left with schematic depiction of its combinators on the right][]{%
 %	\begin{center}
 \centering
@@ -28,10 +34,11 @@ class Arrow arr where
 	{\includegraphics[scale=0.6]{images/first}}
 %	\end{center}
 %}%\hfill
+\vfill
 \caption{The schematic depiction of |Arrow| combinators}
-\end{minipage}
+}
 \end{figure}
-|arr| is used to lift an ordinary function to an arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
+Its |arr| operation is used to lift an ordinary function to the specified arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
 \\\\
 The most prominent instances of this interface are regular functions |(->)|: %(Fig.~\ref{fig:arrowfn}),
 %\begin{figure}[h]
