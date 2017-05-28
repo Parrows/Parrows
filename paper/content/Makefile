@@ -21,5 +21,5 @@ main.pdf : *.tex *.bib Makefile
 clean :
 	latexmk -C
 	cd ${BACKUP_FOLDER} && cp -r `ls . ` ..
-	rm -r ${BACKUP_FOLDER}
-	rm -r *.0
+	rm -r ${BACKUP_FOLDER} || true
+	rm -r *.0 || true
