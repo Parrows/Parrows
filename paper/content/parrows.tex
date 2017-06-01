@@ -23,7 +23,7 @@ class Arrow arr => ArrowParallel arr a b where
 % \end{figure}
 Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak head normal form vs. normal form). For this reason we also introduce an additional |conf| parameter to the function. We also do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. So we add it to the type signature of the typeclass as well: %(Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
 % \begin{figure}[h]
-\olcomment{|ArrowParallel arr a b conf| or |ArrowParallel conf arr a b|?}
+\olcomment{|ArrowParallel arr a b conf| or |ArrowParallel conf arr a b|?} \mbcomment{does it really matter?}
 \begin{code}
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
