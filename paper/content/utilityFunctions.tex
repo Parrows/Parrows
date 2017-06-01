@@ -32,17 +32,18 @@ foldlArr f b =
 \end{figure}
 %\fixme{pipepipepipe does not work with lhs2TeX}
 
-Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr| that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
-%\begin{figure}[htb]
+Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr|  (Fig.~\ref{fig:zipWithArr}) that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
+\begin{figure}[h]
 \begin{code}
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{code}
-% \caption{|zipWith| over arrows}
-% \label{fig:zipWithArr}
-% \end{figure}
+\caption{|zipWith| over arrows}
+\label{fig:zipWithArr}
+\end{figure}
  %$ %% formatting
-These combinators make use of the |ArrowChoice| type class which provides the \pipepipepipe\olcomment{CHECK!} combinator. It takes two arrows |arr a c| and |arr b c| and combines them into a new arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow.
+
+These combinators make use of the |ArrowChoice| type class which provides the \pipepipepipe combinator. It takes two arrows |arr a c| and |arr b c| and combines them into a new arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow.
 % \begin{figure}[htb]
 \begin{code}
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
@@ -76,7 +77,7 @@ The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton following \citep{Loogen2012} is in Figure~\ref{fig:ringEden}.
 
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 data RemoteData a = RD { rd :: RD a }
 
@@ -89,7 +90,7 @@ instance (Trans a) => Future RemoteData a where
 \end{figure}
 
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, 
              ArrowChoice arr, ArrowApply arr) =>
@@ -104,7 +105,7 @@ farmChunk conf chunkSize numCores f =
 \end{figure}
 
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 ringSimple :: (Trans i, Trans o, Trans r) => (i -> r -> (o,r)) -> [i] -> [o]
 ringSimple f is =  os
@@ -126,6 +127,48 @@ lazy ~(x:xs) = x : lazy xs
 \label{fig:ringEden}
 \end{figure}
 
+Furthermore, |parEval2| (Fig.~\ref{fig:parEval2}) is achieved as follows:
+We start by transforming the |(a, c)| input into a two-element list |[Either a c]| by first tagging the two inputs with |Left| and |Right| and wrapping the right element in a singleton list with |return| so that we can combine them with |arr (uncurry (:))|. Next, we feed this list into a parallel arrow running on two instances of |f +++ g| as described above. After the calculation is finished, we convert the resulting |[Either b d]| into |([b], [d])| with |arr partitionEithers|. The two lists in this tuple contain only one element each by construction, so we can finally just convert the tuple to |(b, d)| in the last step.
+\begin{figure}[h]
+\begin{code}
+parEval2 :: (ArrowChoice arr,
+	ArrowParallel arr (Either a c) (Either b d) conf) =>
+	conf -> arr a b -> arr c d -> arr (a, c) (b, d)
+parEval2 conf f g =
+	arr Left *** (arr Right >>> arr return) >>>
+	arr (uncurry (:)) >>>
+	parEvalN conf (replicate 2 (f +++ g)) >>>
+	arr partitionEithers >>>
+	arr head *** arr head
+\end{code}
+	\caption{Definition of parEval2}
+	\label{fig:parEval2}
+\end{figure}
+
+\section{Syntactic Sugar} \label{syntacticSugar}
+For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |***| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
+):
+% \begin{figure}[h]
+\begin{code}
+(|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ())) =>
+	arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) = parEval2 ()
+\end{code}
+% \caption{Definition of |parstar|, the parallel version of |***|.}
+% \label{fig:par***}
+% \end{figure}
+% With this we can analogously to the serial |&&&|
+We define the parallel |&&&| % (Fig.~\ref{fig:par&&&}) 
+in a similar manner to its sequential pendant |&&&| (Fig.~\ref{fig:syntacticSugarArrows}):
+% \begin{figure}[h]
+\begin{code}
+(|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) =>
+	arr a b -> arr a c -> arr a (b, c)
+(|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
+\end{code} % $ %% formatting
+% \caption{Definition of |parand| - the parallel version of |&&&|.}
+% \label{fig:par&&&}
+% \end{figure}
 
 
 %%% Local Variables:

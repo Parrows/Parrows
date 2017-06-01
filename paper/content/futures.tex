@@ -28,7 +28,7 @@ This motivates for an approach that allows the nodes to communicate directly wit
 But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the |Future| typeclass (Fig.~\ref{fig:future}).
 \begin{figure}[h]
 \begin{code}
-class Future fut a @|@ a -> fut where
+class Future fut a | a -> fut where
     put :: (Arrow arr) => arr a (fut a)
     get :: (Arrow arr) => arr (fut a) a
 \end{code}
