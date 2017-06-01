@@ -2,7 +2,7 @@
 \label{sec:arrows}
 \begin{figure}[h]
 	\includegraphics{images/arrow}
-	\caption{Schematic depiction of an arrow}
+	\caption{Schematic depiction of an arrow.}
 \end{figure}
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| shown in Fig.~\ref{fig:ArrowDefinition}.
 
@@ -19,7 +19,7 @@ class Arrow arr where
 \end{code}
 \vfill
 \end{center}
-\caption{|Arrow| class definition}
+\caption{|Arrow| class definition.}
 \label{fig:ArrowDefinition}
 }
 \parbox[c][17em]{0.49\linewidth}{%
@@ -29,7 +29,7 @@ class Arrow arr where
 	{\includegraphics[scale=0.6]{images/compose}}
 	{\includegraphics[scale=0.6]{images/first}}
 \vfill
-\caption{schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|}
+\caption{schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
 }
 \end{figure}
 Its |arr| operation is used to lift an ordinary function to the specified arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.

@@ -78,7 +78,7 @@ Note that extensive use of this combinator over |pipe| with a hand-written combi
 \subsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[h]
 	\includegraphics[scale=0.75]{images/ring}
-	\caption{Schematic depiction of the ring skeleton}
+	\caption{Schematic depiction of the ring skeleton.}
 	\label{fig:ringImg}
 \end{figure}
 Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.0.0.2/docs/Control-Parallel-Eden-Topology.html}} (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function |[i] -> [o]| with a ring of nodes that communicate in a ring topology with each other. Its input is a node function |i -> r -> (o, r)| in which |r| serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels, so called \enquote{remote data}. We depict it in Appendix, Fig.~\ref{fig:ringEden}.
@@ -177,7 +177,7 @@ nodefunction n ((bA, bB), rows, cols) = ([bSum], bA:nextAs , bB:nextBs)
 			     nextAs = take (n-1) rows
 			     nextBs = take (n-1) cols
 \end{code}
-\caption{Adapted |nodefunction| for matrix multiplication with the |torus| from Fig.~\ref{fig:torus}}
+\caption{Adapted |nodefunction| for matrix multiplication with the |torus| from Fig.~\ref{fig:torus}.}
 \label{fig:torusMatMult}
 \end{figure}
 If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version is comparable.\olcomment{much more details on this!}
@@ -185,14 +185,14 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 \olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[Matrix Multiplication with a torus (Parrows)]{Matrix Multiplication with a torus (Parrows)}
+	\caption[Matrix Multiplication with a torus (Parrows)]{Matrix Multiplication with a torus (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
-	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden)}
+	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
 

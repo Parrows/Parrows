@@ -45,7 +45,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
         	arr (withStrategy (parList rdeepseq)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{code}% $ %% formatting
-\caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend}
+\caption{Fully evaluating ArrowParallel instance for the Multicore Haskell backend.}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
 For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|: 
@@ -66,7 +66,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList strat)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{code}
-\caption{Configurable ArrowParallel instance for the Multicore Haskell backend}
+\caption{Configurable ArrowParallel instance for the Multicore Haskell backend.}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 \subsubsection{|Par| Monad}
@@ -86,7 +86,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 			arr (>>= mapM get) >>>
 			arr runPar
 \end{code} %$ %% formatting
-\caption{ArrowParallel instance for the Par Monad backend}
+\caption{ArrowParallel instance for the Par Monad backend.}
 \label{fig:ArrowParallelParMonad}
 \end{figure}
 

@@ -16,14 +16,14 @@ Just like |parEvalN|, |parMap| is 100\% strict.
 parMap :: (ArrowParallel arr a b conf) => conf -> (arr a b) -> (arr [a] [b])
 parMap conf f = parEvalN conf (repeat f)
 \end{code}
-\caption{Definition of parMap}
+\caption{Definition of parMap.}
 \label{fig:parMap}
 \end{figure}
 
 \subsection{Lazy parallel map}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/parMapStream}
-	\caption{Schematic depiction of parMapStream}
+	\caption{Schematic depiction of parMapStream.}
 	\label{fig:parMapStreamImg}
 \end{figure}
 As |parMap| (Fig.~\ref{fig:parMapImg},~\ref{fig:parMap}) is 100\% strict it has the same restrictions as |parEvalN| compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Fig.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|.
@@ -73,7 +73,7 @@ shuffle = arr (concat . transpose)
 \subsection{The |farmChunk| Skeleton}
 \begin{figure}[h]
 	\includegraphics[scale=0.7]{images/farmChunk}
-\caption{Schematic depiction of farmChunk}
+\caption{Schematic depiction of farmChunk.}
 \label{fig:farmChunkImg}
 \end{figure}
 Since a |farm| (Fig.~\ref{fig:farmImg},~\ref{fig:farm}) is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we can define |farmChunk| (Fig.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|. It is basically the same definition as for |farm|, with |parEvalN| replaced with |parEvalNLazy|, as Appendix shows.
@@ -101,7 +101,7 @@ parMapReduceDirect conf chunkSize mapfn foldfn neutral =
 	parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
 	foldlArr foldfn neutral
 \end{code}
-\caption{Definition of parMapReduceDirect}
+\caption{Definition of parMapReduceDirect.}
 \label{fig:parMapReduceDirect}
 \end{figure}
 

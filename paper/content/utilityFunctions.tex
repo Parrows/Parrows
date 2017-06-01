@@ -38,7 +38,7 @@ Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWi
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{code}
-\caption{|zipWith| over arrows}
+\caption{|zipWith| over arrows.}
 \label{fig:zipWithArr}
 \end{figure}
  %$ %% formatting
@@ -141,7 +141,7 @@ parEval2 conf f g =
 	arr partitionEithers >>>
 	arr head *** arr head
 \end{code}
-	\caption{Definition of parEval2}
+	\caption{Definition of parEval2.}
 	\label{fig:parEval2}
 \end{figure}
 

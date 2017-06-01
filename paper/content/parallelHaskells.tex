@@ -27,13 +27,13 @@ parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = let bs = zipWith ($) fs as 
                  in (bs `using` parList rdeepseq) `pseq` bs
 \end{code}
-\caption{Multicore version of |parEvalN|}
+\caption{Multicore version of |parEvalN|.}
 \label{fig:parEvalNMulticore}
 \end{figure}
 
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
-	\caption{Dataflow of the Multicore Haskell |parEvalN| version}
+	\caption{Dataflow of the Multicore Haskell |parEvalN| version.}
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
 
@@ -54,12 +54,12 @@ parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{code}
-\caption{|Par| Monad version of |parEvalN|}
+\caption{|Par| Monad version of |parEvalN|.}
 \label{fig:parEvalNParMonad}
 \end{figure}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
-	\caption{Dataflow of the |Par| Monad |parEvalN| version}
+	\caption{Dataflow of the |Par| Monad |parEvalN| version.}
 	\label{fig:parEvalNParMonadImg}
 \end{figure}
 
@@ -81,7 +81,7 @@ parEvalN = spawnF
 \end{code}
 \begin{figure}[h]
 	\includegraphics[scale=0.5]{images/parEvalNEden}
-	\caption{Dataflow of the Eden |parEvalN| version}
+	\caption{Dataflow of the Eden |parEvalN| version.}
 	\label{fig:parEvalNEden}
 \end{figure}
 A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
