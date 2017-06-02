@@ -1,11 +1,11 @@
-\section{Utility Functions}\label{utilfns}
+\section{Utility Arrows}\label{utilfns}
 To be able to go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: |map|, |foldl| and |zipWith| on arrows.
 
 The |mapArr| combinator (Fig.~\ref{fig:mapArr}) lifts any arrow |arr a
 b| to an arrow |arr [a] [b]| \cite{programming_with_arrows}. 
 Similarly, we can also define |foldlArr| (Fig.~\ref{fig:foldlArr}) that lifts any arrow |arr (b, a) b| with a neutral element |b| to |arr [a] b|.
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f =
@@ -19,7 +19,8 @@ listcase (x:xs) = Right (x,xs)
 function.}
 \label{fig:mapArr}
 \end{figure}
-\begin{figure}[htb]
+
+\begin{figure}[h]
 \begin{code}
 foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
 foldlArr f b =
@@ -30,7 +31,6 @@ foldlArr f b =
 \caption{The definition of |foldl| over Arrows.}
 \label{fig:foldlArr}
 \end{figure}
-%\fixme{pipepipepipe does not work with lhs2TeX}
 
 Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr|  (Fig.~\ref{fig:zipWithArr}) that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
 \begin{figure}[h]
@@ -72,7 +72,7 @@ We have omitted some function definitions in the main text for
 brevity, and redeem this here.
 %
 We warp Eden's build-in Futures in PArrows as in
-Figure~\ref{fig:RDFuture}. Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}.
+Figure~\ref{fig:RDFuture}. Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}. Similarly Figure~\ref{fig:edenlazyrightrotate} contains the definition of arrow versions of Eden's |lazy| and |rightRotate| utility functions. Fig.~\ref{fig:lazyzip3etc} contains Eden's definition of |lazyzip3| together with the utility functions |uncurry3| and |threetotwo|.
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton following \citep{Loogen2012} is in Figure~\ref{fig:ringEden}.
 
@@ -101,10 +101,38 @@ takeEach :: Int -> [a] -> [a]
 takeEach n [] = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 \end{code}
-\caption{Definitions of |shuffle|, |unshuffle|, |takeEach|}
+\caption{Definitions of |shuffle|, |unshuffle|, |takeEach|.}
 \label{fig:edenshuffleetc}
 \end{figure}
 
+\begin{figure}[h]
+\begin{code}
+lazy :: (Arrow arr) => arr [a] [a]
+lazy = arr (\ ~(x:xs) -> x : lazy xs)
+
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case list of
+  [] -> []
+  xs -> last xs : init xs
+\end{code}
+\caption{Definitions of |lazy| and |rightRotate|.}
+\label{fig:edenlazyrightrotate}
+\end{figure}
+
+\begin{figure}[h]
+\begin{code}
+lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
+
+uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
+uncurry3 f (a, (b, c)) = f a b c
+
+threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
+threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
+\end{code}
+\caption{Definitions of |lazyzip3|, |uncurry3| and |threetotwo|.}
+\label{fig:lazyzip3etc}
+\end{figure}
 
 \begin{figure}[h]
 \begin{code}
@@ -119,7 +147,6 @@ farmChunk conf chunkSize numCores f =
 \caption{Definition of |farmChunk|.}
 \label{fig:farmChunk}
 \end{figure}
-
 
 \begin{figure}[h]
 \begin{code}
