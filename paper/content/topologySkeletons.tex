@@ -43,7 +43,6 @@ pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 
 Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
 \begin{figure}[h]
-\olcomment{I swapped the type classes here:}
 \begin{code}
 pipe2 :: (ArrowLoop arr, ArrowChoice arr, Future fut (([a], [b]), [c]),
          ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf) =>
@@ -56,23 +55,18 @@ pipe2 conf f g =
 			unify f g =
 				(mapArr f *** mapArr g) *** arr (\_ -> []) >>>
 				arr (\((a, b), c) -> ((c, a), b))
-\end{code}
-\caption{Definition of |pipe2|.}
-\label{fig:pipe2}
-\end{figure}
 
-Note that extensive use of this combinator over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator |parcomp| (Fig.~\ref{fig:par>>>}, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Section~\ref{syntacticSugar}.
-\begin{figure}[h]
-\olcomment{swapped type classes}
-\begin{code}
 (|>>>|) :: (ArrowLoop arr, ArrowChoice arr, Future fut (([a], [b]), [c]),
 	ArrowParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) ()) =>
 	arr a b -> arr b c -> arr a c
 (|>>>|) = pipe2 ()
 \end{code}
-\caption{Definition of |parcomp|.}
-\label{fig:par>>>}
+\caption{Definition of |pipe2| and parallel |>>>|.}
+\label{fig:pipe2}
 \end{figure}
+\mbcomment{parallel >>>!!!!!!}
+
+Note that extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a parallel piping operator |>>>|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
 
 \subsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[h]
@@ -89,10 +83,8 @@ Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hack
 %\begin{code}
 
 
-We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| from Chapter~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012}:
-\begin{quote}
-{Note that the list of ring inputs |ringIns| is the same as the list of ring outputs |ringOuts| rotated by one element to the right using the auxiliary function |rightRotate|. Thus, the program would get stuck without the lazy pattern, because the ring input will only be produced after process creation and process creation will not occur without the first input.}
-\end{quote}
+We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)|. Similarly to the |pipe| from Chapter~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| arrow here, or the evaluation would hang.\olcomment{meh, wording} The reasoning is explained by \citet{Loogen2012} as a demand problem.
+
 Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)| so we can feed that into a our input arrow |arr (i, r) (o, r)|, which we transform into |arr (i, fut r) (o, fut r)| before lifting it to |arr [(i, fut r)] [(o, fut r)]| to get a list |[(o, fut r)]|. Finally we unzip this list into |([o], [fut r])|. Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}).
 This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
 %Further details on this can be found in \cite{eden_cefp}.
@@ -135,7 +127,15 @@ lazy = arr (\ ~(x:xs) -> x : lazy xs)
 If we take the concept of a ring from \ref{sec:ring} one dimension further, we get a torus (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
 With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
 
-Similar to the |ring|, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes |second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))| instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with |arr (uncurry3 zipWith3 lazyzip3)| from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
+Similar to the |ring|, we once again start by rotating the input, but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes 
+\begin{code}
+second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))
+\end{code}
+instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we once again zip the inputs for the input arrow with 
+\begin{code}
+arr (uncurry3 zipWith3 lazyzip3)
+\end{code}
+from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 
 This, however, is more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |parMap conf (ptorus f)| which yields us |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| typeclass. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
 
