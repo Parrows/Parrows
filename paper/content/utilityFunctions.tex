@@ -72,7 +72,7 @@ We have omitted some function definitions in the main text for
 brevity, and redeem this here.
 %
 We warp Eden's build-in Futures in PArrows as in
-Figure~\ref{fig:RDFuture}.
+Figure~\ref{fig:RDFuture}. Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}.
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton following \citep{Loogen2012} is in Figure~\ref{fig:ringEden}.
 
@@ -87,6 +87,22 @@ instance (Trans a) => Future RemoteData a where
 \end{code}
 \caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
 \label{fig:RDFuture}
+\end{figure}
+
+\begin{figure}[h]
+\begin{code}
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
+
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
+
+takeEach :: Int -> [a] -> [a]
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
+\end{code}
+\caption{Definitions of |shuffle|, |unshuffle|, |takeEach|}
+\label{fig:edenshuffleetc}
 \end{figure}
 
 

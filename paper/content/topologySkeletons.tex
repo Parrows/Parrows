@@ -6,7 +6,6 @@ Even though many algorithms can be expressed by parallel maps, some problems req
 \subsection{Parallel pipe}\label{sec:pipe}
 
 The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
-\mbcomment{das kann man hier so lassen, oder?}\olcomment{sicherlich!}
 \begin{code}
 loop (arr (\(a, b) -> (b, a:b)))
 \end{code}
