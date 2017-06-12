@@ -1,4 +1,6 @@
-\section{Background}
+\begin{flushright}
+
+\end{flushright}\section{Background}
 \label{sec:background}
 \subsection{Short introduction to parallel Haskells}
 \label{sec:parEvalNIntro}
@@ -38,7 +40,7 @@ parEvalN fs as = let bs = zipWith ($) fs as
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
-The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{monad_par_paper_2011}, is a monad designed for composition of parallel programs.
+The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{par-monad}, is a monad designed for composition of parallel programs.
 
 
 The |Par| Monad version of our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
