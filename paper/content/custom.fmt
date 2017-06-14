@@ -1,0 +1,21 @@
+%% add a tweak to polycode, similar to literate in lstlistings, but uglier
+%format >>>        = "\mathbin{>\!\!>\!\!>}"
+%format parcomp        = "\mathbin{|\!>\!\!>\!\!>\!|}"
+%% ^^^^ you want this. and similar for ***, +++, etc.
+%% a hack for list comprehensions' <-, typeset it as <--
+%%%%%format <--        = "\in "
+%format DOLLAR = "\mathbin{\$}"
+%%%% %format ` = "\`"
+%%%% %% works fine without
+%format ||| = "\mathbin{\mid\!\mid\!\mid}"
+%format pipepipepipe = "\mathbin{\mid\!\mid\!\mid}"
+%format |&&&| = "\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}"
+%format parand = "\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}"
+%format &&& = "\mathbin{\&\!\&\!\&}"
+%format |***| = "\mathbin{\mid\!\!*\!*\!*\!\!\mid}"
+%format parstar = "\mathbin{\mid\!\!*\!*\!*\!\!\mid}"
+%format *** = "\mathbin{*\!*\!*}"
+%format |+++| = "\mathbin{\mid\!\!+\!\!+\!\!+\!\!\mid}"
+%format +++ = "\mathbin{+\!\!+\!\!+}"
+
+%include polycode.fmt

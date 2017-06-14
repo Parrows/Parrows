@@ -6,7 +6,7 @@ main.pdf : *.tex *.bib Makefile
 	
 	for texFile in $(wildcard *.tex) ; do \
 		buildFile=$$texFile; \
-		lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i polycode.fmt ; \
+		lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i custom.fmt ; \
 		if [ "$${buildFile}" != "prelude.tex" ]; then \
 			echo "removing lhs2TeX preamble for $${buildFile}"; \
 			perl -0777 -pe "s/(?s).*\\EndFmtInput//" $${buildFile}.0 > $${buildFile}; \
