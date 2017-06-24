@@ -5,37 +5,39 @@ Consider the parallel arrow combinator in Fig.~\ref{fig:someCombinator}
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
 \end{code}
-\caption{An example parallel Arrow combinator without Futures}
+\caption{An example parallel Arrow combinator without Futures.}
 \label{fig:someCombinator}
 \end{figure}
-In a distributed environment, the resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
+In a distributed environment, a resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
 While the example in Fig.~\ref{fig:someCombinator} could be rewritten into only one |parEvalN| call by directly wiring the arrows properly together, this example illustrates an important problem: When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
-for larger amount of data and number of processes \citep[showcases][as, \eg]{Berthold2009-fft}.
+for larger amount of data and number of processes \citep[as \eg][showcases]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
-	\caption[without Futures]{Communication between 4 threads without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colors: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
+	\caption[without Futures]{Communication between 4 Eden processes without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colors: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
-\olcomment{more practical and heavy-weight example! fft (I have the code)?}
+\olcomment{more practical and heavy-weight example! fft (I have the code)?}\\
+\mbcomment{Depends... Are the communications easy to read in such an example?}\\
+\mbcomment{Keep the description for the different colours, or link to the EdenTV description in \ref{sec:edentv}}
 \end{figure}
 
-This motivates for an approach that allows the nodes to communicate directly with each other. Thankfully, Eden, the distributed parallel Haskell we have used in this paper so far, already ships with the concept of |RD| (remote data) that enables this behaviour \cite{AlGo03a,Dieterle2010}.
+We should allow the nodes to communicate directly with each other. Eden already ships with "remote data" that enable this \cite{AlGo03a,Dieterle2010}.
 
-But as we want code written against our API to be implementation agnostic, we have to wrap this context. We do this with the |Future| typeclass (Fig.~\ref{fig:future}).
+But as we want code with our DSL to be implementation agnostic, we have to wrap this context. We do this with the |Future| typeclass (Fig.~\ref{fig:future}).
 \begin{figure}[h]
 \begin{code}
-class Future fut a @|@ a -> fut where
+class Future fut a | a -> fut where
     put :: (Arrow arr) => arr a (fut a)
     get :: (Arrow arr) => arr (fut a) a
 \end{code}
-\caption{Definition of the Future typeclass}
+\caption{Definition of the |Future| typeclass.}
 \label{fig:future}
 \end{figure}
-Since |RD| is only a type synonym for communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Appendix in Fig.~\ref{fig:RDFuture}. This is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
+Since |RD| is only a type synonym for a communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as seen in Fig.~\ref{fig:RDFuture}. This is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
 
-For our Par Monad and Multicore Haskell backends, we can simply use |MVar|s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), because we have shared memory in a single node and don't require Eden's sophisticated communication channels. \fixme{explain MVars}
+For our |Par| Monad and Multicore Haskell backends, we can simply use |MVar|s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), as in a shared memory setting we do not require Eden's sophisticated communication channels. \fixme{explain MVars}
 \begin{figure}[h]
 \begin{code}
 {-# NOINLINE putUnsafe #-}
@@ -49,11 +51,11 @@ instance (NFData a) => Future MVar a where
     put = arr putUnsafe
     get = arr takeMVar >>> arr unsafePerformIO
 \end{code}
-\caption{MVar instance of the Future typeclass for the Par Monad and Multicore Haskell backends}
+\caption{A |MVar| instance of the |Future| typeclass for the |Par| Monad and Multicore Haskell backends.}
 \label{fig:MVarFuture}
 \end{figure} % $
 
-Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. Because |MVar| already ships with a |NFData| instance, we only have to supply two simple instances for our |RemoteData| type:
+Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. The |Trans| instance does not have any functions declared as the default implementation suffices here. Furthermore, because |MVar| already ships with a |NFData| instance, we only have to supply a simple delegating |NFData| instance for our |RemoteData| type, where |rd| simply unwraps |RD|:
 % \begin{figure}[h]
 \begin{code}
 instance NFData (RemoteData a) where
@@ -62,10 +64,9 @@ instance Trans (RemoteData a)
 \end{code}
 % \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
 % \end{figure}
-The |Trans| instance does not have any functions declared as the default implementation suffices here.
 
-Going back to our communication example we can use this |Future| concept in order to enable direct communications between the nodes in the following way:
-\begin{figure}[h]
+In our communication example we can use this |Future| concept for direct communications between the nodes as shown in Fig.~\ref{fig:someCombinatorParallel}.
+\begin{figure}[t]
 \begin{code}
 someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 =
@@ -73,13 +74,13 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get >>>) fs2)
 \end{code}
-\caption{The combinator from Fig.~\ref{fig:someCombinator} in parallel}
+\caption{The combinator from Fig.~\ref{fig:someCombinator} in parallel.}
 \label{fig:someCombinatorParallel}
 \end{figure}
-In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in the trace in Fig.~\ref{fig:withFutures}.\olcomment{Fig.~3 is not really clear. Do Figs 2-3 with a lot of load?}
+In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed - similar to what is shown in the trace in Fig.~\ref{fig:withFutures}.\olcomment{Fig. is not really clear. Do Figs with a lot of load?}
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withFutures}
-	\caption[with Futures]{Communication between 4 threads with Futures. Other than in Fig.~\ref{fig:withoutFutures}, threads communicate directly (black lines between the bars) instead of always going through the master node (bottom bar).}
+	\caption[with Futures]{Communication between 4 Eden processes with Futures. Other than in Fig.~\ref{fig:withoutFutures}, processes communicate directly (black lines between the bars) instead of always going through the master node (bottom bar).}
 	\label{fig:withFutures}
 \end{figure}

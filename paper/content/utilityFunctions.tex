@@ -1,11 +1,11 @@
-\section{Utility Functions}\label{utilfns}
+\section{Utility Arrows}\label{utilfns}
 To be able to go into detail on parallel arrows, we introduce some utility combinators first, that will help us later: |map|, |foldl| and |zipWith| on arrows.
 
 The |mapArr| combinator (Fig.~\ref{fig:mapArr}) lifts any arrow |arr a
 b| to an arrow |arr [a] [b]| \cite{programming_with_arrows}. 
 Similarly, we can also define |foldlArr| (Fig.~\ref{fig:foldlArr}) that lifts any arrow |arr (b, a) b| with a neutral element |b| to |arr [a] b|.
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f =
@@ -19,7 +19,8 @@ listcase (x:xs) = Right (x,xs)
 function.}
 \label{fig:mapArr}
 \end{figure}
-\begin{figure}[htb]
+
+\begin{figure}[h]
 \begin{code}
 foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
 foldlArr f b =
@@ -30,19 +31,19 @@ foldlArr f b =
 \caption{The definition of |foldl| over Arrows.}
 \label{fig:foldlArr}
 \end{figure}
-%\fixme{pipepipepipe does not work with lhs2TeX}
 
-Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr| that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
-%\begin{figure}[htb]
+Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr|  (Fig.~\ref{fig:zipWithArr}) that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
+\begin{figure}[h]
 \begin{code}
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{code}
-% \caption{|zipWith| over arrows}
-% \label{fig:zipWithArr}
-% \end{figure}
+\caption{|zipWith| over arrows.}
+\label{fig:zipWithArr}
+\end{figure}
  %$ %% formatting
-These combinators make use of the |ArrowChoice| type class which provides the \pipepipepipe\olcomment{CHECK!} combinator. It takes two arrows |arr a c| and |arr b c| and combines them into a new arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow.
+
+These combinators make use of the |ArrowChoice| type class which provides the \pipepipepipe combinator. It takes two arrows |arr a c| and |arr b c| and combines them into a new arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow.
 % \begin{figure}[htb]
 \begin{code}
 (|||) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
@@ -71,12 +72,12 @@ We have omitted some function definitions in the main text for
 brevity, and redeem this here.
 %
 We warp Eden's build-in Futures in PArrows as in
-Figure~\ref{fig:RDFuture}.
+Figure~\ref{fig:RDFuture}, where |rd| is the accessor function for the |RD| wrapped inside |RemoteData|. Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}. Similarly Figure~\ref{fig:edenlazyrightrotate} contains the definition of arrow versions of Eden's |lazy| and |rightRotate| utility functions. Fig.~\ref{fig:lazyzip3etc} contains Eden's definition of |lazyzip3| together with the utility functions |uncurry3| and |threetotwo|.
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton following \citep{Loogen2012} is in Figure~\ref{fig:ringEden}.
 
 
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 data RemoteData a = RD { rd :: RD a }
 
@@ -88,8 +89,52 @@ instance (Trans a) => Future RemoteData a where
 \label{fig:RDFuture}
 \end{figure}
 
+\begin{figure}[h]
+\begin{code}
+shuffle :: (Arrow arr) => arr [[a]] [a]
+shuffle = arr (concat . transpose)
 
-\begin{figure}[htb]
+unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
+unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
+
+takeEach :: Int -> [a] -> [a]
+takeEach n [] = []
+takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
+\end{code}
+\caption{Definitions of |shuffle|, |unshuffle|, |takeEach|.}
+\label{fig:edenshuffleetc}
+\end{figure}
+
+\begin{figure}[h]
+\begin{code}
+lazy :: (Arrow arr) => arr [a] [a]
+lazy = arr (\ ~(x:xs) -> x : lazy xs)
+
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case list of
+  [] -> []
+  xs -> last xs : init xs
+\end{code}
+\caption{Definitions of |lazy| and |rightRotate|.}
+\label{fig:edenlazyrightrotate}
+\end{figure}
+
+\begin{figure}[h]
+\begin{code}
+lazyzip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+lazyzip3 as bs cs = zip3 as (lazy bs) (lazy cs)
+
+uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
+uncurry3 f (a, (b, c)) = f a b c
+
+threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
+threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
+\end{code}
+\caption{Definitions of |lazyzip3|, |uncurry3| and |threetotwo|.}
+\label{fig:lazyzip3etc}
+\end{figure}
+
+\begin{figure}[h]
 \begin{code}
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, 
              ArrowChoice arr, ArrowApply arr) =>
@@ -103,8 +148,7 @@ farmChunk conf chunkSize numCores f =
 \label{fig:farmChunk}
 \end{figure}
 
-
-\begin{figure}[htb]
+\begin{figure}[h]
 \begin{code}
 ringSimple :: (Trans i, Trans o, Trans r) => (i -> r -> (o,r)) -> [i] -> [o]
 ringSimple f is =  os
@@ -126,6 +170,48 @@ lazy ~(x:xs) = x : lazy xs
 \label{fig:ringEden}
 \end{figure}
 
+Furthermore, |parEval2| (Fig.~\ref{fig:parEval2}) is achieved as follows:
+We start by transforming the |(a, c)| input into a two-element list |[Either a c]| by first tagging the two inputs with |Left| and |Right| and wrapping the right element in a singleton list with |return| so that we can combine them with |arr (uncurry (:))|. Next, we feed this list into a parallel arrow running on two instances of |f +++ g| as described above. After the calculation is finished, we convert the resulting |[Either b d]| into |([b], [d])| with |arr partitionEithers|. The two lists in this tuple contain only one element each by construction, so we can finally just convert the tuple to |(b, d)| in the last step.
+\begin{figure}[h]
+\begin{code}
+parEval2 :: (ArrowChoice arr,
+	ArrowParallel arr (Either a c) (Either b d) conf) =>
+	conf -> arr a b -> arr c d -> arr (a, c) (b, d)
+parEval2 conf f g =
+	arr Left *** (arr Right >>> arr return) >>>
+	arr (uncurry (:)) >>>
+	parEvalN conf (replicate 2 (f +++ g)) >>>
+	arr partitionEithers >>>
+	arr head *** arr head
+\end{code}
+	\caption{Definition of parEval2.}
+	\label{fig:parEval2}
+\end{figure}
+
+\section{Syntactic Sugar} \label{syntacticSugar}
+For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |***| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
+):
+% \begin{figure}[h]
+\begin{code}
+(|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ())) =>
+	arr a b -> arr c d -> arr (a, c) (b, d)
+(|***|) = parEval2 ()
+\end{code}
+% \caption{Definition of |parstar|, the parallel version of |***|.}
+% \label{fig:par***}
+% \end{figure}
+% With this we can analogously to the serial |&&&|
+We define the parallel |&&&| % (Fig.~\ref{fig:par&&&}) 
+in a similar manner to its sequential pendant |&&&| (Fig.~\ref{fig:syntacticSugarArrows}):
+% \begin{figure}[h]
+\begin{code}
+(|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) =>
+	arr a b -> arr a c -> arr a (b, c)
+(|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
+\end{code} % $ %% formatting
+% \caption{Definition of |parand| - the parallel version of |&&&|.}
+% \label{fig:par&&&}
+% \end{figure}
 
 
 %%% Local Variables:
