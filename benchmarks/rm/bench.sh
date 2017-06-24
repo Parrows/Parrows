@@ -9,7 +9,8 @@ programs=(
 )
 
 parameters=(
-    "5 256"
+    "11213 256"
+    "44497 256"
 )
 
 # get length of an array

@@ -1,4 +1,4 @@
-Paralleles Rabin-Miller. Jetzt mit map+reduce Skelett.
+Paralleles Rabin-Miller. Old Code.
 
 This is -*- Literate Haskell -*-
 

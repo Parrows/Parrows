@@ -1,4 +1,4 @@
-Paralleles Rabin-Miller. Jetzt mit map+reduce Skelett.
+Sequentielles Rabin-Miller Programm
 
 This is -*- Literate Haskell -*-
 
