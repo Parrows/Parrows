@@ -1,0 +1,114 @@
+{-# OPTIONS -cpp #-}
+module EdiWP where 
+
+import Edi
+import ParPrim(connectToPort, sendData, Mode(Stream, Data))
+
+
+import Control.Parallel.Strategies
+import Control.Concurrent
+import Data.List
+import System.IO.Unsafe
+
+
+data Task t = Done --  implies worker termination 
+                   --  (task list ends with np times "Done")
+	    | T Int t -- tasks are tagged (for sorting results)
+type Res r  = (Int,r) -- results keep the original task tag
+
+#define SORTING
+
+--------------------------------------------
+-- difference to workpool type in EdenSkel.lhs: 
+--   1.  Trans / NFData
+--   2.  Process (on lists) replaced by function (on single items)
+--   3.  return type IO-monadic
+
+
+ediWP :: (NFData t, NFData r) => 
+          Int -> -- no of workers
+          Int -> -- prefetch
+          (t -> r) -> 
+          [t] -> 
+          IO [r]
+ediWP np prefetch workerF input 
+--    | np * prefetch > length input = ediWP np (prefetch - 1) workerF input
+--    | otherwise 
+          = do
+             (wInCCs, wInCs) <- createCs np
+             (wOutCs, wOuts) <- createCs np
+             sequence_ [ spawnProcessAt 0 (worker workerF wOutC wInCC)
+                         | (wOutC,wInCC) <- zip wOutCs wInCCs ]
+             -- input is written to a channel
+             taskChan <- newChan
+             fork $ writeList2Chan taskChan 
+                        ((zipWith T [1..] input) ++ (replicate np Done))
+             -- input senders supply tasks for workers
+             sequence_ [ fork (inputSender prefetch inC taskChan answers) 
+                         | (inC,answers) <- zip wInCs wOuts ]
+#ifdef SORTING
+             -- -- sort results
+             -- outs <- nMergeIO wOuts
+             -- return (sortByTag outs)
+             -- OR ELSE: use that all wOuts are ascending:
+             return (map snd (mergewOutsByTag wOuts))
+#else
+             -- results simply merged, unsorted
+             outs <- nmergeIO wOuts
+             return (map snd outs)
+#endif
+
+ediWPf :: (NFData t, NFData r) => 
+          Int -> Int -> (t -> r) -> [t] -> [r]
+ediWPf np pf f ts = unsafePerformIO (ediWP np pf f ts)
+
+
+sortByTag :: [(Int,t)] -> [t]
+sortByTag = map snd . sortBy ( \(i,_) (j,_) -> compare i j)
+
+mergewOutsByTag :: [[(Int,r)]] -> [(Int,r)]
+mergewOutsByTag [] = []
+mergewOutsByTag [wOut] = wOut
+-- mergewOutsByTag (w1:rest) = merge2ByTag w1 (mergewOutsByTag rest)
+mergewOutsByTag [w1,w2] = merge2ByTag w1 w2
+mergewOutsByTag wOuts = merge2ByTag 
+			   (mergeHalf wOuts) 
+			   (mergeHalf (tail wOuts))
+    where mergeHalf = mergewOutsByTag . (takeEach 2)
+	  takeEach n [] = []
+	  takeEach n xs@(x:_) = x:takeEach n (drop n xs)
+
+merge2ByTag [] w2 = w2
+merge2ByTag w1 [] = w1
+merge2ByTag w1@(r1@(i,_):w1s) w2@(r2@(j,_):w2s) 
+                        | i < j = r1: merge2ByTag w1s w2
+                        | i > j = r2: merge2ByTag w1 w2s
+                        | otherwise = error "found tags i == j"
+
+inputSender :: (NFData t) => 
+               Int -> -- prefetch 
+               ChanName' [(Int,t)] -> -- destination
+               Chan (Task t) -> -- tagged input tasks (shared channel)
+               [r] ->
+               IO ()
+inputSender prefetch inC concHsC answers 
+            = do connectToPort inC
+		 react ( replicate prefetch dummy  ++ answers)
+    where dummy = undefined
+	  react [] = sendData Data [] -- should not happen...
+          react (_:as) = do task <- readChan concHsC -- get a task
+                            case task of 
+                             (T i t) -> do let t' = (i,t) 
+                                           (rnf t' `seq` sendData Stream t' )
+                                           react as
+                             Done    -> sendData Data [] -- and done.
+          
+worker :: (NFData t, NFData r) => 
+          (t -> r) -> 
+          ChanName' [(Int,r)] -> 
+          ChanName' (ChanName' [(Int,t)]) -> 
+          IO ()
+worker f outC inCC 
+      = do (inC, inTasks) <- createC
+	   sendNF inCC inC
+           sendNFStream outC (map (\ (i,t) -> (i,f t)) inTasks)

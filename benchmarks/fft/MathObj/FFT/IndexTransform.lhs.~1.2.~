@@ -1,0 +1,48 @@
+Die Indextransformationen von Nussbaumer, s. 125f.
+
+\begin{code}
+module MathObj.FFT.IndexTransform where
+
+import Prelude
+import MathObj.Residue.Inverse (inverse)
+\end{code}
+
+Die Laengen:
+l=l1*l2
+ggt(l1, l2)==1
+
+Die Indizes der eindimensionalen Transformationen:
+n1, n2
+
+Indextranfsformation:
+n = l1*n2 + n2*n1 mod l, n1,k1=[0..l1-1]
+k = l1*k2 + l2*k1 mod l, n2,k2=[0..l2-1]
+
+Dabei ist es besser k anders zu berechnen:
+
+t1 = n2^{-1} mod n1
+t2 = n1^{-1} mod n2
+
+Das gibt ueberigens die Permunation auf den Indizes der 1-dim. Transformation an. Somit ist
+
+k = l1*t1*k2 + l2*t2*k1 mod l
+
+----------------------------
+
+indexTransform bekommt zwei Teilerfremde Faktoren n1 und n2. Wir liefern die permutierten Listen der Indizes (is, js). Dann kann man die eigentliche Eingabe auf n1 Teillisten der Laenge n2 zerhacken -- sei xss das Ergebnis -- und fuer deren Eintraege permutieren: 
+
+[ xss!!n!!k, n<-is!!i, k<-js!!j, i<-[1..n1], j<-[1..n2] ]
+
+TODO: zipN und nur ein mal listen durchlaufen?
+\begin{code}
+indexTransform n1 n2 = ([(n1*j    + n2*i   ) `mod` n | i<-[0..n1-1], j<-[0..n2-1] ],
+                        [(n1*j*t1 + n2*i*t2) `mod` n | i<-[0..n1-1], j<-[0..n2-1] ])
+    where n  = n1*n2
+          t1 = inverse n2 n1
+          t2 = inverse n1 n2
+\end{code}
+
+Und so wird's angewanndt:
+\begin{nocode}
+applyTransform n1 n2 xss (is, js) = [ xss!!n!!k | n<-(is!!i), k<-(js!!j), let i<-[1..n1], let j<-[1..n2] ]
+\end{nocode}

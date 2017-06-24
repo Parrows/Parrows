@@ -1,0 +1,35 @@
+Chirp z-Transform.
+
+\begin{code}
+module MathObj.FFT.Chirp (fft) where
+\end{code}
+
+Es ist eine Art DFT über eine Faltung zu Berechnen, ähnlich zu Rader Algrithmus, allerdings ist in diesem Fall die Faltung von der gleichen Länge. Wir _dürfen_ aber mit 0 padden und unseren Lieblings 2-radix Algorithmus oder einen beliebigen anderen Verfahren für die Faltung verwenden.
+
+\begin{code}
+import MathObj.FFT.Convolution (conv)
+\end{code}
+
+Es gibt auch ein Rader-Verfahren für, der permutiert. Hier müssen wir bloß durchmultipizieren. Das _soll_ beser für Streaming sein. FALLS die Faltung auch gut streamable ist.
+
+\begin{code}
+
+import MathObj.Vector.Vector
+import Prelude hiding ((++), concat)
+import MathObj.FFT.Complex
+import Data.Complex
+
+fft (n, xs) = let rs = (n, xs) @* (n, wps)
+                  (wps, wns) | odd n = let ws = doW (1.0:+0.0) w n
+                                       in (ws, ws)
+                             | otherwise = (doW 1 w n, doW ((-1.0):+0.0) w n)
+                      where doW :: (RealFloat b) => Complex b -> Complex b -> Int -> [Complex b]
+                            doW t w n = map (\x -> w ** (t*x*x / 2)) $ lift [0..n-1]
+                            w = root_of_unity 1 n
+                  -- (wps, wns) = unzip [ (w^i, w^j) | k<-[0..n-1], let i=k*k/2, let j=-i ]
+                  folded = conv (n, wns) rs
+                  outs = folded @* (n, wps)
+              in outs
+\end{code}
+
+Optiierungspotenzial! n ungerade: w^j == w^i, in einen Durchlauf?

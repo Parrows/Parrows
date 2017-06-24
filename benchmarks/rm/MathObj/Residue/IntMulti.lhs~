@@ -1,0 +1,110 @@
+\begin{code}
+{-# OPTIONS -XFlexibleInstances -XTypeSynonymInstances #-}
+module MathObj.Residue.IntMulti where
+
+import MathObj.Residue.Modulo hiding (lift2) -- hiding ((+),(-),(*),(/),lift2)
+-- import qualified MathObj.Residue.Modulo as M
+import Prelude -- hiding ((+),(-),(*),(/))
+import qualified Prelude as P
+
+import MathObj.Residue.Inverse
+
+import Debug.Trace
+\end{code}
+
+\begin{code}
+type IMods a = [Mod a]
+\end{code}
+
+Eine Entkoppelung mit Integral a, Integral b ist wegen makeFZ notwendig, dort ist die Eingabe auch Fractional, die Ausgabe aber nicht.
+\begin{code}
+makeIZ :: (Integral a) => [a] -> [a] -> IMods a
+makeIZ = zipWith makeZ
+
+-- makeIZ' :: (Integral a, Integral b) => a -> [a] -> IMods b
+makeIZ' value primes = map (makeZ value) primes
+\end{code}
+
+CRT
+\begin{code}
+valuesPrimes :: Integral a => IMods a -> [(a, a)]
+valuesPrimes = map (\(Z x y) -> (x, y))
+valuesRadices :: Integral a => MixedRadix a -> [(a, a)]
+valuesRadices = map (\(MR x y) -> (x, y))
+\end{code}
+\begin{xcode}
+-- lagrangeFactors :: Integral a => [a] -> Integer -> [a]
+lagrangeFactors primes bigP = map (fromInteger . \p -> (bigP `div`p)`mod`p) primes --- ??? FALSCH
+
+-- FALSCH
+-- restoreIZ :: Integral a => IMods a -> Mod a
+restoreIZ input = let (values, primes) = unzip $ valuesPrimes input
+                      bigP = product primes -- Integer!
+                      lfactors = lagrangeFactors primes bigP
+                      summands = zipWith (P.*) values lfactors
+                  in flip makeZ bigP $ sum summands
+\end{xcode}
+
+REDUCE-CRT, mixed radix method
+\begin{code}
+data SingleRadix a = MR a a
+                     deriving (Eq, Show)
+-- instance Show a => Show (SingleRadix a) where
+-- show (MR k p) = (P.show k) ++ "_" ++ (P.show p)
+
+type MixedRadix a = [SingleRadix a]
+
+-- restoreIZ :: Integral a => IMods a -> a
+restoreIZ input = let (values, primes) = unzip $ valuesPrimes input
+                  in convertMixedRadix $ mixedRadix input
+
+getPrimes :: Integral a => IMods a -> [a]
+getPrimes input = let (_, primes) = unzip $ valuesPrimes input
+                  in primes
+
+inverses k ps = flip makeIZ ps $ map (inverse k) ps
+
+lagrangians ps = let bigP = product ps
+                 in map ((P.div) bigP) ps
+
+
+takeFirstValue input = let (values, primes) = unzip $ valuesPrimes input
+                       in head values
+
+-- mixedRadixStep :: Integral a => IMods a -> IMods a
+mixedRadixStep input = let (values, primes) = unzip $ valuesPrimes input
+                           h = head values
+                           diffs = (tail input) - (makeIZ' h $ tail primes)
+                           lagranges = inverses (head primes) (tail primes)
+                       in diffs * lagranges
+
+-- mixedRadix :: Integral a => IMods a -> MixedRadix a
+mixedRadix input = zipWith (\b v -> MR v b) (getPrimes input) $ 
+                   map takeFirstValue $ takeWhile (\x -> length x > 0) $ iterate mixedRadixStep input
+
+convertMixedRadix :: Integral a => MixedRadix a -> Mod a
+convertMixedRadix mixed = let residue = product primes
+                              (values, primes) = unzip $ valuesRadices mixed
+                              primes' = 1:primes
+                          in flip makeZ residue -- (acc + v)*p
+                                 $ foldr (\(v, p) acc -> (P.*) ((P.+) acc v) p) 0 
+                                       $ zip values primes'
+\end{code}
+Arithmetik
+\begin{code}
+lift2 :: Integral a => (Mod a -> Mod a -> Mod a) -> IMods a -> IMods a -> IMods a
+lift2 f = zipWith f
+
+instance (Integral a) => Num (IMods a) where
+    (+) = lift2 (+)
+    (-) = lift2 (-)
+    (*) = lift2 (*)
+    fromInteger = error "fromInteger: no residue class specified!"
+    abs = error "abs: it's a residue class"
+    signum = error "signum: it's a classic residue class"
+
+instance (Integral a) => Fractional (IMods a) where
+    (/) = lift2 (/)
+    fromRational = error "use FMods and specify residue classes!"
+   -- magic!
+\end{code}

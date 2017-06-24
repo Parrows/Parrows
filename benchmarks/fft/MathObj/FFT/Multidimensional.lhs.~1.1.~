@@ -1,0 +1,17 @@
+Multidimensionales FFT.
+
+Fuer 2D wir operieren erstmal auf Spalten und dann auf Zeilen. Die Vorgehensweise kann verallgemeinert werden.
+\begin{code}
+module MathObj.FFT.Multidimensional where
+
+import MathObj.FFT.Radix2TimeSeq (fft) -- oder anderes 1D FFT unserer Wahl
+import MathObj.Vector.Vector
+import qualified Prelude -- hide!
+\end{code}
+
+2D
+\begin{code}
+2dFft xss = transpose $ map (fft) $ transpose $ map (fft) xss
+\end{code}
+
+Fuer n-dim. FFT brauchen wir eine Art geschachtelte Listen zu "transponieren", in array-termen: x[i,j,k,...] nicht nach i, sondern nach j, k,... durchzuiterieren.
