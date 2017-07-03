@@ -4,7 +4,7 @@
 \label{sec:background}
 \subsection{Short introduction to parallel Haskells}
 \label{sec:parEvalNIntro}
-There are already several ways to write parallel programs in Haskell. As we will base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
+There are already several ways to write parallel programs in Haskell. As we base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel or |parEvalN :: [a -> b] -> [a] -> [b]|, as also Figure~\ref{fig:parEvalN} symbolically shows.
 \begin{figure}[t]
@@ -13,53 +13,69 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 	\caption{Schematic illustration of |parEvalN|.}
 	\label{fig:parEvalN}
 \end{figure}
-Before we go into detail on how we can use this idea of parallelism for parallel Arrows, as a short introduction to parallelism in Haskell we will now implement |parEvalN| with several different parallel Haskells.
+%Before we go into detail on how we can use this idea of parallelism
+%for parallel Arrows, as a short introduction to parallelism in
+%Haskell we will now implement |parEvalN| with several different
+%parallel Haskells.
+As a demonstration, we implement here the non-Arrows |parEvalN| in multiple parallel Haskells.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009,Trinder1998a} is way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|.
+Multicore Haskell \cite{Marlow2009,Trinder1998a} is a way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|. Let:
 
-For |parEvalN| this means that we can just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
-We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| (Chap.~\ref{sec:topology-skeletons}), where a wrong execution order would result in deadlock scenarios when executed without |pseq|.
 
-The resulting code and a graphical representation can be found in Fig.~\ref{fig:parEvalNMulticore} and Fig.~\ref{fig:parEvalNMulticoreImg}, respectively.
-
-\begin{figure}[h]
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = let bs = zipWith ($) fs as 
                  in (bs `using` parList rdeepseq) `pseq` bs
-\end{code}
-\caption{Multicore version of |parEvalN|.}
-\label{fig:parEvalNMulticore}
-\end{figure}
+\end{code} %$
 
-\begin{figure}[h]
+In the above definition of |parEvalN| we just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
+We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| (Chap.~\ref{sec:topology-skeletons}), where a wrong execution order would result in deadlock scenarios when executed without |pseq|.
+\olcomment{CAREFUL! is |pseq| REALLY about multiple instances or \emph{merely} order of execution?}
+%
+Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
+
+% \begin{figure}[h]
+% \begin{code}
+% parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+% parEvalN fs as = let bs = zipWith ($) fs as 
+%                  in (bs `using` parList rdeepseq) `pseq` bs
+% \end{code}
+% \caption{Multicore version of |parEvalN|.}
+% \label{fig:parEvalNMulticore}
+% \end{figure}
+
+\begin{figure}[t]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
 	\caption{Dataflow of the Multicore Haskell |parEvalN| version.}
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
 
 \subsubsection{ParMonad}
-The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{par-monad}, is a monad designed for composition of parallel programs.
+The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{par-monad}, is a monad designed for composition of parallel programs. Let:
 
-
-The |Par| Monad version of our parallel evaluation function |parEvalN| can be defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
-Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get the final |[b]|.
-
-Again, the resulting code and a graphical representation can be found in Fig.~\ref{fig:parEvalNParMonad} and Fig.~\ref{fig:parEvalNParMonadImg}, respectively.
-
-\mbcomment{explain problems with laziness here. Problems with torus}
-
-\begin{figure}[h]
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
 	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{code}
-\caption{|Par| Monad version of |parEvalN|.}
-\label{fig:parEvalNParMonad}
-\end{figure}
-\begin{figure}[h]
+
+The |Par| Monad version of our parallel evaluation function |parEvalN| is defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
+Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get the final |[b]|.
+A graphical representation can be found Fig.~\ref{fig:parEvalNParMonadImg}.
+
+\mbcomment{explain problems with laziness here. Problems with torus}
+
+% \begin{figure}[h]
+% \begin{code}
+% parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
+% parEvalN fs as = runPar $ 
+% 	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+% \end{code}
+% \caption{|Par| Monad version of |parEvalN|.}
+% \label{fig:parEvalNParMonad}
+% \end{figure}
+\begin{figure}[t]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
 	\caption{Dataflow of the |Par| Monad |parEvalN| version.}
 	\label{fig:parEvalNParMonadImg}
@@ -81,18 +97,19 @@ allows us to define |parEvalN| directly:
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 parEvalN = spawnF 
 \end{code}
-\begin{figure}[h]
-	\includegraphics[scale=0.5]{images/parEvalNEden}
-	\caption{Dataflow of the Eden |parEvalN| version.}
-	\label{fig:parEvalNEden}
-\end{figure}
-A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
+% \begin{figure}[h]
+% 	\includegraphics[scale=0.5]{images/parEvalNEden}
+% 	\caption{Dataflow of the Eden |parEvalN| version.}
+% 	\label{fig:parEvalNEden}
+% \end{figure}
+% A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
+\olcomment{removed the image as it shows nothing new}
 
 \paragraph{Eden TraceViewer.}
 \label{sec:edentv}
-To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See \url{http://hackage.haskell.org/package/edentv} on Hackage for the last available version of Eden TraceViewer.} \cite{Berthold2007a}. In the next sections we will present some \emph{traces}, the post-mortem process diagrams of Eden processes and their activity.
+To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See \url{http://hackage.haskell.org/package/edentv} on Hackage for the last available version of Eden TraceViewer.} \cite{Berthold2007a}. In the next sections we will present some \emph{trace visualizations}, the post-mortem process diagrams of Eden processes and their activity.
 
-In a trace, the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. A~trace shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for then is GC. An inactive machine where no processes are started yet, or all are already terminated, is shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes. An example trace can be found in Fig.~\ref{fig:withoutFutures}.
+The trace visualizations are color-coded. In such a visualization (Fig.~\ref{fig:withoutFutures}), the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. The visualization shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for thus is GC. An inactive machine, where no processes are started yet, or all are already terminated, shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes.
 
 
 %%% Local Variables:

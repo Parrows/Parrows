@@ -12,7 +12,8 @@ Performance-wise, Parallel Arrows are on par with existing parallel Haskells, as
 
 \mbcomment{ArrowApply (or equivalent) are needed because we basically want to be able to produce intermediary results, this is by definition of the parallel evaluation combinators}
 
-\olcomment{Remove websites from citations, put them into footnotes!}
+\olcomment{Remove websites from citations, put them into footnotes! --
+\done}
 
 \olcomment{Parrows + accelerate = love? Metion port to Frege. Mention the Par monad troubles.}
 
@@ -20,10 +21,10 @@ Performance-wise, Parallel Arrows are on par with existing parallel Haskells, as
 \subsection{Future Work}
 \label{sec:future-work}
 
-Our PArrows DSL can be expanded to futher parallel Haskells. More specifically we target HdpH \cite{Maier:2014:HDS:2775050.2633363} a modern distributed Haskell that would benefit from our Arrows notation. Future-aware special versions of Arrow combinated can be extended and further improved. We would look into more transparency of the DSL, it should basically infuse as little overhead as possible.
+Our PArrows DSL can be expanded to futher parallel Haskells. More specifically we target HdpH \cite{Maier:2014:HDS:2775050.2633363}, a modern distributed Haskell that would benefit from our Arrows notation. More Future-aware versions of Arrow combinators can be defined and existing can be further improved. We would look into more transparency of the DSL, it should basically infuse as little overhead as possible.
 
-Of course, definitions of further skeletons are viable and needed. We are looking into more experiences with seamless porting of parallel PArrow-based programs across the backends.
+We are looking into more experiences with seamless porting of parallel PArrow-based programs across the backends.
+Of course, we are working on expanding both our skeleton library and the number of skeleton-based parallel programs that use our DSL to be portable across flavours of parallel Haskells.
+It would also be interesting to see a hybrid of PArrows and Accelerate.
 
-Accelerate~\cite{Chakravarty:2011:AHA:1926354.1926358} is not related to our approach. It would be interesting to see a hybrid of both APIs.
-
-\olcomment{replace API with DSL globally?}
+\olcomment{replace API with DSL globally? \done}

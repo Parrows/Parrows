@@ -1,26 +1,37 @@
-\subsection{Arrows}
-\label{sec:arrows}
-\begin{figure}[h]
-	\includegraphics{images/arrow}
-	\caption{Schematic depiction of an arrow.}
-\end{figure}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| shown in Fig.~\ref{fig:ArrowDefinition}.
-
 \begin{figure}[t]
 \centering
-\parbox[c][17em]{0.49\linewidth}{%
-\begin{center}
-\vfill
 \begin{code}
 class Arrow arr where
   arr :: (a -> b) -> arr a b
   (>>>) :: arr a b -> arr b c -> arr a c
   first :: arr a b -> arr (a,c) (b,c)
+
+instance Arrow (->) where
+	arr f = f
+	f >>> g = g . f
+	first f = \(a, c) -> (f a, c) 
+
+data Kleisli m a b = Kleisli { run :: a -> m b }
+
+instance Monad m => Arrow (Kleisli m) where
+	arr f = Kleisli (return . f)
+	f >>> g = Kleisli (\a -> f a >>= g)
+	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
 \end{code}
 \vfill
-\end{center}
-\caption{|Arrow| class definition.}
+\caption{The definition of |Arrow| type class and its two most typical instances.}
 \label{fig:ArrowDefinition}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\parbox[c][17em]{0.49\linewidth}{%
+\vfill
+\centering
+	\includegraphics{images/arrow}
+\vfill
+%	\caption{Schematic depiction of an Arrow.}
+%\label{fig:arrow-sch}
 }
 \parbox[c][17em]{0.49\linewidth}{%
 \vfill
@@ -29,36 +40,23 @@ class Arrow arr where
 	{\includegraphics[scale=0.6]{images/compose}}
 	{\includegraphics[scale=0.6]{images/first}}
 \vfill
-\caption{schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
+%\caption{Schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
+%\label{fig:arrows-viz}
 }
+\caption{Schematic depiction of Arrow (left) and its basic
+  combinators |arr|, |>>>| and |first| (right).}
+\label{fig:arrow-sch}
+\label{fig:arrows-viz}
 \end{figure}
-Its |arr| operation is used to lift an ordinary function to the specified arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows.
-\\\\
-The most prominent instances of this interface are regular functions |(->)|: %(Fig.~\ref{fig:arrowfn}),
-%\begin{figure}[h]
-\begin{code}
-instance Arrow (->) where
-	arr f = f
-	f >>> g = g . f
-	first f = \(a, c) -> (f a, c) 
-\end{code}
-% \caption{Arrow instance for regular functions}
-% \label{fig:arrowfn}
-% \end{figure}
-%%% on the verge of acceptable code
-and the Kleisli type: %(Fig.~\ref{fig:arrowkleisli}).
-% \begin{figure}[h]
-\begin{code}
-data Kleisli m a b = Kleisli { run :: a -> m b }
 
-instance Monad m => Arrow (Kleisli m) where
-	arr f = Kleisli (return . f)
-	f >>> g = Kleisli (\a -> f a >>= g)
-	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
-\end{code}%$
-% \caption{Definition of the Kleisli type and the corresponding arrow instance}
-% \label{fig:arrowkleisli}
-% \end{figure}
+\subsection{Arrows}
+\label{sec:arrows}
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An Arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
+%
+Its |arr| operation is used to lift an ordinary function to the specified arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of the basic Arrow combinators.
+The most prominent instances of this interface are regular functions |(->)|
+and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}).
+
 \begin{figure}[h]
 	\centering
 	\begin{tabular}{cc}
@@ -74,21 +72,12 @@ instance Monad m => Arrow (Kleisli m) where
 {}{\includegraphics[width = 1.5in]{images/andandand}}\\
 |(***)|\label{fig:***Img} & |(&&&)| \label{fig:&&&Img} \\
 	\end{tabular}
-	\caption{Visual depiction of syntactic sugar for arrows.}
+	\caption{Visual depiction of syntactic sugar for Arrows.}
 	\label{fig:syntacticSugarArrows}
 \end{figure}
 With this typeclass in place, Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): The combinators |second|, |***| and |&&&|. 
-The definition of |second|, the mirrored version of |first|, is:
-% \begin{figure}[h]
-\begin{code}
-second :: Arrow arr => arr a b -> arr (c, a) (c, b)
-second f = arr swap >>> first f >>> arr swap
-	where swap (x, y) = (y, x)
-\end{code}
-% \caption{The second combinator}
-% \label{fig:second}
-% \end{figure}
-The |***| combinator that combines |first| and |second| to handle two inputs in one arrow, is defined as
+The combinator |second| is the mirrored version of |first| (Appendix~\ref{utilfns}).
+The |***| function combines |first| and |second| to handle two inputs in one arrow, is defined as
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -97,7 +86,7 @@ f *** g = first f >>> second g
 % \caption{The (***) combinator}
 % \label{fig:***}
 % \end{figure}
-, while the |&&&| combinator, that constructs an arrow which outputs two different values like |***|, but takes only one input, is:
+while the |&&&| combinator, that constructs an arrow which outputs two different values like |***|, but takes only one input, is:
 % \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
@@ -106,7 +95,7 @@ f &&& g = arr (\a -> (a, a)) >>> (f *** g)
 % \caption{The (\&\&\&) combinator}
 % \label{fig:&&&}
 % \end{figure}
-A first short example given by Hughes on how to use arrows is addition with arrows:
+A~first short example given by Hughes on how to use arrows is addition with arrows:
 %|add| over arrows, which can be seen in Fig.~\ref{fig:addArrows}.
 % \begin{figure}[h]
 \begin{code}
@@ -121,7 +110,7 @@ add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 % \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
 
-The more restrictive interface of arrows (a monad can be \emph{anything}, an arrow is a process of doing something, a \emph{computation}) allows for more elaborate composition and transformation combinators. One of the major problems in parallel computing is composition of parallel processes.
+The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. One of the major problems in parallel computing is, however, composition of parallel processes.
 
 
 %%% Local Variables:
