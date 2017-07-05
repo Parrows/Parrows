@@ -105,12 +105,12 @@ add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 % \caption{Add over arrows}
 % \label{fig:addArrows}
 % \end{figure}
-% The benefit of using the |Arrow| typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created |add| combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
+% The benefit of using the |Arrow| typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created |add| combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple Monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
 % \\\\
 % \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
 
-The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. One of the major problems in parallel computing is, however, composition of parallel processes.
+The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a Monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. One of the major problems in parallel computing is, however, composition of parallel processes.
 
 
 %%% Local Variables:

@@ -51,8 +51,8 @@ Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
 
-\subsubsection{ParMonad}
-The |Par| monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{par-monad}, is a monad designed for composition of parallel programs. Let:
+\subsubsection{Par Monad}
+The |Par| Monad\footnote{It can be found in the \texttt{monad-par} package on hackage under \url{https://hackage.haskell.org/package/monad-par-0.3.4.8/}.} introduced by \citet{par-monad}, is a Monad designed for composition of parallel programs. Let:
 
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
@@ -61,10 +61,8 @@ parEvalN fs as = runPar $
 \end{code}
 
 The |Par| Monad version of our parallel evaluation function |parEvalN| is defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
-Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get the final |[b]|.
-A graphical representation can be found Fig.~\ref{fig:parEvalNParMonadImg}.
-
-\mbcomment{explain problems with laziness here. Problems with torus}
+Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| Monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get |[b]|.
+A graphical representation can be found in Fig.~\ref{fig:parEvalNParMonadImg}.
 
 % \begin{figure}[h]
 % \begin{code}
@@ -84,7 +82,7 @@ A graphical representation can be found Fig.~\ref{fig:parEvalNParMonadImg}.
 \subsubsection{Eden}
 Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{See also \url{http://www.mathematik.uni-marburg.de/~eden/} and \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} It is targeted towards clusters, but also functions well in a shared-memory setting with a further simple backend. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results also on multicores \cite{arcs-dc,aswad2009low}.
 
-While Eden also comes with a monad |PA| for parallel evaluation, it also ships with a completely functional interface that includes
+While Eden also comes with a Monad |PA| for parallel evaluation, it also ships with a completely functional interface that includes
 %\\
 a |spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]|
 %\\
@@ -103,7 +101,6 @@ parEvalN = spawnF
 % 	\label{fig:parEvalNEden}
 % \end{figure}
 % A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
-\olcomment{removed the image as it shows nothing new}
 
 \paragraph{Eden TraceViewer.}
 \label{sec:edentv}

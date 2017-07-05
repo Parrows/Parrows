@@ -62,7 +62,6 @@ pipe2 conf f g =
 \caption{Definition of |pipe2| and a parallel |>>>|.}
 \label{fig:pipe2}
 \end{figure}
-\mbcomment{parallel >>>!!!!!!}
 
 Note that extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to parEvalN. Nonetheless, we can define a version of parallel piping operator |parcomp|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
 
@@ -91,6 +90,8 @@ We can rewrite this functionality easily with the use of |loop| as the definitio
 
 Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)| so we can feed that into a our input arrow |arr (i, r) (o, r)|, which we transform into |arr (i, fut r) (o, fut r)| before lifting it to |arr [(i, fut r)] [(o, fut r)]| to get a list |[(o, fut r)]|. Finally we unzip this list into |([o], [fut r])|. Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}).
 This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
+
+Note that the Par Monad version of the |ArrowParallel| version  presented in this paper (Fig.~\ref{fig:ArrowParallelParMonad}) does not work with the looping behaviour in the |ring| skeletons. Whenever |runPar| is invoked, strictness is enforced, which means that the |lazy| operation in the definition of |ring| will not work.
 %Further details on this can be found in \cite{eden_cefp}.
 \olcomment{let's do it?}
 
@@ -114,7 +115,7 @@ ring conf f =
 % \end{code}
 %% we have shown this already.
 
-\subsection{Torus skeleton}
+\subsection{Torus skeleton}\label{sec:torus}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
 	\caption{Schematic depiction of the |torus| skeleton.}
@@ -180,6 +181,8 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
+
+Again, the implementation of the Par Monad version prevents this definition of the |torus| skeleton to work due to the reasons explained in the section about the |ring| skeleton in section \ref{sec:ring}.
 
 %\FloatBarrier
 

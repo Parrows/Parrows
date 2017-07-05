@@ -70,11 +70,11 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 \subsubsection{|Par| Monad}
-\olcomment{introduce a newcommand for par-monad, "arrows", "parrows" and replace all mentions to them to ensure uniform typesetting \done, we write Arrows. also "Monad"?}
-The |Par| monad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and |Par| monad's |spawnP :: NFData a => a -> Par (IVar a)| function. The latter forks away the computation of a value and returns an |IVar| containing the result in the |Par| monad.
+\olcomment{introduce a newcommand for par-monad, "arrows", "parrows" and replace all mentions to them to ensure uniform typesetting \done, we write Arrows. also "Monad"? \done}
+The |Par| Monad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and |Par| Monad's |spawnP :: NFData a => a -> Par (IVar a)| function. The latter forks away the computation of a value and returns an |IVar| containing the result in the |Par| Monad.
 
 
-We therefore apply each function to its corresponding input value with and then fork the computation away with |arr spawnP| inside a |zipWithArr| (Fig.~\ref{fig:zipWithArr}) call. This yields a list |[Par (IVar b)]|, which we then convert into |Par [IVar b]| with |arr sequenceA|. In order to wait for the computation to finish, we map over the |IVar|s inside the |Par| monad with |arr (>>= mapM get)|. The result of this operation is a |Par [b]| from which we can finally remove the monad again by running |arr runPar| to get our output of |[b]|.
+We therefore apply each function to its corresponding input value with and then fork the computation away with |arr spawnP| inside a |zipWithArr| (Fig.~\ref{fig:zipWithArr}) call. This yields a list |[Par (IVar b)]|, which we then convert into |Par [IVar b]| with |arr sequenceA|. In order to wait for the computation to finish, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)|. The result of this operation is a |Par [b]| from which we can finally remove the Monad again by running |arr runPar| to get our output of |[b]|.
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowApply arr, ArrowChoice arr) =>

@@ -35,7 +35,7 @@ farm conf numCores f =
 \end{figure}
 
 \paragraph{Statically load-balancing parallel |map|.}
-Our |parMap| spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we gave in this paper). This can be quite wasteful and a |farm| (Figs.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers seems useful. \olcomment{it is a \emph{static} load balancing}
+Our |parMap| spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we gave in this paper). This can be quite wasteful and a statically load-balancing |farm| (Figs.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers seems useful.
 The definitions of the helper functions |unshuffle|, |takeEach|, |shuffle| (Fig.~\ref{fig:edenshuffleetc}) originate from an Eden skeleton\footnote{Available on Hackage under \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Map.html}.}.
 
 %\paragraph{Lazy statically load-balancing parallel map}
