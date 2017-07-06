@@ -2,6 +2,9 @@ module Main where
 
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Number
+
+import Text.Regex.PCRE
+
 import Data.String
 import Data.CSV
 
@@ -14,6 +17,7 @@ import System.Environment
 
 data BenchResult = BenchResult {
     name :: String,
+    nCores :: Int,
     mean :: Double,
     meanLB :: Double,
     meanUB :: Double,
@@ -22,6 +26,7 @@ data BenchResult = BenchResult {
     stdDevUB :: Double
 } deriving (Show)
 
+-- this could probably be done prettier (with Parsec, but works)
 convDoubles :: [String] -> Maybe [Double]
 convDoubles strs =
     let
@@ -38,18 +43,25 @@ convToBenchResults :: [[String]] -> [BenchResult]
 convToBenchResults lines = catMaybes $ map convToBenchResult lines
     where
         convToBenchResult :: [String] -> Maybe BenchResult
-        convToBenchResult (name:rest) = go name $ convDoubles rest
-            where go name (Just ([mean,meanLB,meanUB,stdDev,stdDevLB,stdDevUB])) =
-                    Just $ BenchResult {
-                        name = name,
-                        mean = mean,
-                        meanLB = meanLB,
-                        meanUB = meanUB,
-                        stdDev = stdDev,
-                        stdDevLB = stdDevLB,
-                        stdDevUB = stdDevUB
-                    }
+        convToBenchResult (nameStr:rest) = go nameStr $ convDoubles rest
+            where go nameStr (Just ([mean,meanLB,meanUB,stdDev,stdDevLB,stdDevUB])) =
+                    let (name, nCores) = parseName nameStr
+                    in
+                        Just $ BenchResult {
+                            name = name,
+                            nCores = nCores,
+                            mean = mean,
+                            meanLB = meanLB,
+                            meanUB = meanUB,
+                            stdDev = stdDev,
+                            stdDevLB = stdDevLB,
+                            stdDevUB = stdDevUB
+                        }
                   go name Nothing = Nothing
+
+                  parseName :: String -> (String, Int)
+                  parseName str = let (_, _, _, [name, nCores]) = str =~ "(.*) \\+RTS -N([0-9]*).*" :: (String,String,String,[String])
+                                  in traceShowId $ (name, read nCores)
 
 main :: IO ()
 main = do
