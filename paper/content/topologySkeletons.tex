@@ -93,7 +93,6 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 
 Note that the Par Monad version of the |ArrowParallel| version  presented in this paper (Fig.~\ref{fig:ArrowParallelParMonad}) does not work with the looping behaviour in the |ring| skeletons. Whenever |runPar| is invoked, strictness is enforced, which means that the |lazy| operation in the definition of |ring| will not work.
 %Further details on this can be found in \cite{eden_cefp}.
-\olcomment{let's do it?}
 
 
 \begin{figure}[tb]
@@ -121,7 +120,7 @@ ring conf f =
 	\caption{Schematic depiction of the |torus| skeleton.}
 	\label{fig:ringTorusImg}
 \end{figure}
-If we take the concept of a ring from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
+If we take the concept of a |ring| from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
 With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
 
 Similar to the |ring|, we once again start by rotating the input (Fig.~\ref{fig:edenlazyrightrotate}), but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes 
@@ -171,14 +170,14 @@ If we compare the trace from a call using our arrow definition of the torus (Fig
 \olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[Matrix Multiplication with a torus (Parrows)]{Matrix Multiplication with a torus (PArrows).}
+	\caption[Matrix Multiplication with |torus| (Parrows)]{Matrix Multiplication with |torus| (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[tb]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
-	\caption[Matrix Multiplication with a torus (Eden)]{Matrix Multiplication with a torus (Eden).}
+	\caption[Matrix Multiplication with |torus| (Eden)]{Matrix Multiplication with |torus| (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
 

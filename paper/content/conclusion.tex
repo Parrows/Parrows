@@ -10,7 +10,9 @@ This work features multiple parallel backends: the already available parallel Ha
 %
 Performance-wise, Parallel Arrows are on par with existing parallel Haskells, as they do not introduce any notable overhead.
 
-In order to fix the issues of the Par Monad backend with the |torus| and |ring| skeleton as explained in sections \ref{sec:ring} and \ref{sec:torus} - or any looping skeleton for that matter - additional work that fixes the strictness problems of the |ArrowParallel| instance is required.
+The strictness problems of the |Par| Monad backend materializes with |ArrowLoop|. Additional work is required to ensure correct behaviour of the |Par| Monad in this context.
+
+\mbcomment{mention ArrowLoop in Torus and Ring chapters}
 \olcomment{Parrows + accelerate = love? Metion port to Frege.}
 
 
@@ -22,3 +24,4 @@ Our PArrows DSL can be expanded to futher parallel Haskells. More specifically w
 We are looking into more experiences with seamless porting of parallel PArrow-based programs across the backends.
 Of course, we are working on expanding both our skeleton library and the number of skeleton-based parallel programs that use our DSL to be portable across flavours of parallel Haskells.
 It would also be interesting to see a hybrid of PArrows and Accelerate.
+Ports of our approach to other languages like Frege or Java directly are in an early development stage.
