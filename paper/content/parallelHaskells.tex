@@ -31,7 +31,6 @@ parEvalN fs as = let bs = zipWith ($) fs as
 
 In the above definition of |parEvalN| we just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
 We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| (Chap.~\ref{sec:topology-skeletons}), where a wrong execution order would result in deadlock scenarios when executed without |pseq|.
-\olcomment{CAREFUL! is |pseq| REALLY about multiple instances or \emph{merely} order of execution?}
 %
 Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 
@@ -62,7 +61,7 @@ parEvalN fs as = runPar $
 
 The |Par| Monad version of our parallel evaluation function |parEvalN| is defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with Multicore Haskell. % $
 Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| Monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get |[b]|.
-A graphical representation can be found in Fig.~\ref{fig:parEvalNParMonadImg}.
+Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 
 % \begin{figure}[h]
 % \begin{code}
