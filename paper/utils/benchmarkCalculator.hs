@@ -16,6 +16,8 @@ import Debug.Trace
 
 import System.Environment
 
+data Speedup = Speedup (Maybe Double) BenchResult deriving (Show)
+
 data BenchResult = BenchResult {
     name :: String,
     nCores :: Int,
@@ -78,6 +80,33 @@ toMap benchRes =
                     go (Just a) = a
                     go Nothing = []
 
+findSeqRun :: [BenchResult] -> Maybe BenchResult
+findSeqRun results = go $ filter (\res -> nCores res == 1) results
+    where
+        go (res:rest) = Just res
+        go _ = Nothing
+
+calculateSpeedUps :: [BenchResult] -> Maybe [Double]
+calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
+    in
+        fmap (\seqRun -> speedUps seqRun benchResults) maybeSeqRun
+        where
+            speedUps :: BenchResult -> [BenchResult] -> [Double]
+            speedUps seqRun benchResults = map (speedUp seqRun) benchResults
+
+            speedUp :: BenchResult -> BenchResult -> Double
+            speedUp seqRun benchResult = (mean seqRun) / (mean benchResult)
+
+calculateSpeedUpsForMap :: M.Map String [BenchResult] -> M.Map String [Speedup]
+calculateSpeedUpsForMap m = M.map (\benchResults ->
+                                                let
+                                                    maybeSpeedUps = calculateSpeedUps benchResults
+
+                                                    zipToSpeedUp (Just speedUps) = zipWith (Speedup) (map Just speedUps) benchResults
+                                                    zipToSpeedUp Nothing = zipWith Speedup (repeat Nothing) benchResults
+                                                in
+                                                    zipToSpeedUp maybeSpeedUps)
+                            m
 
 
 main :: IO ()
@@ -91,4 +120,5 @@ main = do
         handleParse (Right lines) = do
             let benchResultsPerProgram = toMap $ convToBenchResults lines
             putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
+            putStrLn $ "speedUps: " ++ show (calculateSpeedUpsForMap benchResultsPerProgram)
         handleParse _ = putStrLn "parse Error!"
