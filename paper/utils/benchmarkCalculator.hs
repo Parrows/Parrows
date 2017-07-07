@@ -3,6 +3,9 @@ module Main where
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Number
 
+import Graphics.Rendering.Chart.Easy
+import Graphics.Rendering.Chart.Backend.Cairo
+
 import Text.Regex.PCRE
 
 import Data.String
@@ -16,11 +19,15 @@ import Debug.Trace
 
 import System.Environment
 
-data Speedup = Speedup (Maybe Double) BenchResult deriving (Show)
+data Speedup = Speedup (Maybe SpeedupVal) BenchResult deriving (Show)
+
+type SpeedupsPerProgram = (String, [Speedup])
+type NCores = Int
+type SpeedupVal = Double
 
 data BenchResult = BenchResult {
     name :: String,
-    nCores :: Int,
+    nCores :: NCores,
     mean :: Double,
     meanLB :: Double,
     meanUB :: Double,
@@ -97,16 +104,41 @@ calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
             speedUp :: BenchResult -> BenchResult -> Double
             speedUp seqRun benchResult = (mean seqRun) / (mean benchResult)
 
-calculateSpeedUpsForMap :: M.Map String [BenchResult] -> M.Map String [Speedup]
-calculateSpeedUpsForMap m = M.map (\benchResults ->
+calculateSpeedUpsForMap :: M.Map String [BenchResult] -> [SpeedupsPerProgram]
+calculateSpeedUpsForMap m = foldr (:) [] $ M.mapWithKey (\key benchResults ->
                                                 let
                                                     maybeSpeedUps = calculateSpeedUps benchResults
 
                                                     zipToSpeedUp (Just speedUps) = zipWith (Speedup) (map Just speedUps) benchResults
                                                     zipToSpeedUp Nothing = zipWith Speedup (repeat Nothing) benchResults
                                                 in
-                                                    zipToSpeedUp maybeSpeedUps)
+                                                    (key, zipToSpeedUp maybeSpeedUps))
                             m
+
+
+
+
+toPlottableValues :: [SpeedupsPerProgram] -> [(String, [(NCores, SpeedupVal)])]
+toPlottableValues speedUpsPerPrograms =
+    map (\(name, speedupList) -> (name, catMaybes $ map speedupVal speedupList)) speedUpsPerPrograms
+
+speedupVal :: Speedup -> Maybe (NCores, SpeedupVal)
+speedupVal (Speedup (Just speedup) benchRes) = Just $ (nCores benchRes, speedup)
+speedupVal _ = Nothing
+
+--oFile def (name ++ ".png") $ do
+         --layout_title .= name
+         --
+       --setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
+       --setColors [opaque blue, opaque red]
+
+plotAll :: [(String, [(NCores, SpeedupVal)])] -> EC (Layout NCores SpeedupVal) ()
+plotAll = mapM_ plotOne
+
+plotOne :: (String, [(NCores, SpeedupVal)]) -> EC (Layout NCores SpeedupVal) ()
+plotOne (name, plottableValues) = do
+       plot (line "" $ [plottableValues])
+       plot (points name $ plottableValues)
 
 
 main :: IO ()
@@ -119,6 +151,14 @@ main = do
         handleParse :: Either ParseError [[String]] -> IO ()
         handleParse (Right lines) = do
             let benchResultsPerProgram = toMap $ convToBenchResults lines
+            let speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
+            let plottableValues = toPlottableValues speedUpsPerPrograms
             putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
-            putStrLn $ "speedUps: " ++ show (calculateSpeedUpsForMap benchResultsPerProgram)
+            putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
+            toFile def ("output.png") $ do
+                layout_title .= "output"
+                setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
+                setColors [opaque blue, opaque red]
+                plotAll plottableValues
+
         handleParse _ = putStrLn "parse Error!"
