@@ -204,34 +204,43 @@ chart maxCores plotName lineStyles pointStyles plotValues = toRenderable $ layou
 
 main :: IO ()
 main = do
-    (maxCores:file:output:plotName:rest) <- getArgs
-    putStrLn $ "parsing from file: " ++ file
-    linesOrError <- parseFromFile csvFile file
-    handleParse (read maxCores) output plotName linesOrError
-    where
-        outProps = fo_size .~ (600,600)
-                $ fo_format .~ PDF
-                $ def
+    args <- getArgs
+    if(length args < 6)
+    then
+        do  putStrLn "usage: <program> maxCores file output plotName dimX dimY"
+    else
+        do
+            let (maxCoresStr:file:output:plotName:dimX:dimY:rest) = args
 
-        handleParse :: NCores -> String -> String -> Either ParseError [[String]] -> IO ()
-        handleParse maxCores output plotName (Right lines) = do
-            let benchResultsPerProgram = toMap $ convToBenchResults lines
-            let speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
-            let plottableValues = toPlottableValues speedUpsPerPrograms
-            let pointSize = 5
-            let thickness = 2
-            let pointStyles = cycle [filledCircles pointSize $ opaque black,
-                                        filledPolygon pointSize 3 True $ opaque black,
-                                        plusses pointSize thickness $ opaque black,
-                                        exes pointSize thickness $ opaque black,
-                                        stars pointSize thickness $ opaque black,
-                                        filledPolygon pointSize 3 False $ opaque black,
-                                        hollowPolygon pointSize thickness 3 True $ opaque black,
-                                        hollowCircles pointSize thickness $ opaque black,
-                                        hollowPolygon pointSize thickness 3 False $ opaque black
-                                        ]
-            putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
-            putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
-            renderableToFile outProps output $ chart maxCores plotName (repeat $ (def :: LineStyle)) pointStyles plottableValues
-            putStrLn $ "finished."
-        handleParse _ _ _ _ = putStrLn "parse Error!"
+                maxCores = read maxCoresStr
+
+                outProps = fo_size .~ (read dimX,read dimY)
+                        $ fo_format .~ PDF
+                        $ def
+
+                handleParse :: Either ParseError [[String]] -> IO ()
+                handleParse (Right lines) = do
+                    let benchResultsPerProgram = toMap $ convToBenchResults lines
+                        speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
+                        plottableValues = toPlottableValues speedUpsPerPrograms
+                        pointSize = 5
+                        thickness = 2
+                        pointStyles = cycle [filledCircles pointSize $ opaque black,
+                                                filledPolygon pointSize 3 True $ opaque black,
+                                                plusses pointSize thickness $ opaque black,
+                                                exes pointSize thickness $ opaque black,
+                                                stars pointSize thickness $ opaque black,
+                                                filledPolygon pointSize 3 False $ opaque black,
+                                                hollowPolygon pointSize thickness 3 True $ opaque black,
+                                                hollowCircles pointSize thickness $ opaque black,
+                                                hollowPolygon pointSize thickness 3 False $ opaque black
+                                                ]
+                    putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
+                    putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
+                    renderableToFile outProps output $ chart maxCores plotName (repeat $ (def :: LineStyle)) pointStyles plottableValues
+                    putStrLn $ "finished."
+                handleParse _ = putStrLn "parse Error!"
+
+            putStrLn $ "parsing from file: " ++ file
+            linesOrError <- parseFromFile csvFile file
+            handleParse linesOrError
