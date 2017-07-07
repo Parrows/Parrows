@@ -3,8 +3,12 @@ module Main where
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Number
 
-import Graphics.Rendering.Chart.Easy
+import Graphics.Rendering.Chart
+import Data.Colour
+import Data.Colour.Names
+import Data.Default.Class
 import Graphics.Rendering.Chart.Backend.Cairo
+import Control.Lens
 
 import Text.Regex.PCRE
 
@@ -132,36 +136,60 @@ speedupVal _ = Nothing
        --setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
        --setColors [opaque blue, opaque red]
 
-plotAll :: [(String, [(NCores, SpeedupVal)])] -> EC (Layout NCores SpeedupVal) ()
-plotAll = mapM_ plotOne
+setLinesBlue :: PlotLines a b -> PlotLines a b
+setLinesBlue = plot_lines_style  . line_color .~ opaque blue
 
-plotOne :: (String, [(NCores, SpeedupVal)]) -> EC (Layout NCores SpeedupVal) ()
-plotOne (name, plottableValues) = do
-       plot (line "" $ [plottableValues])
-       plot (points name $ plottableValues)
+chart :: Renderable ()
+chart = toRenderable layout
+  where
+    am :: Double -> Double
+    am x = (sin (x*3.14159/45) + 1) / 2 * (sin (x*3.14159/5))
+
+    sinusoid1 :: PlotLines Double Double
+    sinusoid1 = plot_lines_values .~ [[ (x,(am x)) | x <- [0,(0.5)..400]]]
+              $ plot_lines_style  . line_color .~ opaque blue
+              $ plot_lines_title .~ "am"
+              $ def
+
+    sinusoid2 :: PlotPoints Double Double
+    sinusoid2 = plot_points_style .~ filledCircles 6 (opaque red)
+              $ plot_points_values .~ [ (x,(am x)) | x <- [0,7..400]]
+              $ plot_points_title .~ "am points"
+              $ def
+
+    layout :: Layout Double Double
+    layout = layout_title .~ "Amplitude Modulation"
+           $ layout_plots .~ [toPlot sinusoid1,
+                              toPlot sinusoid2]
+           $ def
+
+--plotAll :: [(String, [(NCores, SpeedupVal)])] -> EC (Layout NCores SpeedupVal) ()
+--plotAll = mapM_ plotOne
+
+--plotOne :: (String, [(NCores, SpeedupVal)]) -> EC (Layout NCores SpeedupVal) ()
+--plotOne (name, plottableValues) = do
+--       plot (line "" $ [plottableValues])
+--       plot (points name $ plottableValues)
 
 
 main :: IO ()
 main = do
-    file:rest <- getArgs
+    (file:output:rest) <- getArgs
     putStrLn $ "parsing from file: " ++ file
     linesOrError <- parseFromFile csvFile file
-    handleParse linesOrError
+    handleParse output linesOrError
     where
         outProps = fo_size .~ (1024,768)
                 $ fo_format .~ PDF
                 $ def
 
-        handleParse :: Either ParseError [[String]] -> IO ()
-        handleParse (Right lines) = do
+        handleParse :: FilePath -> Either ParseError [[String]] -> IO ()
+        handleParse output (Right lines) = do
             let benchResultsPerProgram = toMap $ convToBenchResults lines
             let speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
             let plottableValues = toPlottableValues speedUpsPerPrograms
             putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
             putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
-            toFile outProps ("output.pdf") $ do
-                layout_title .= "output"
-                setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
-                setColors [opaque blue, opaque red]
-                plotAll plottableValues
-        handleParse _ = putStrLn "parse Error!"
+            renderableToFile outProps output chart
+            putStrLn $ "finished."
+        handleParse _ _ = putStrLn "parse Error!"
