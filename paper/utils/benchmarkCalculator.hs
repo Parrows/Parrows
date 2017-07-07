@@ -148,6 +148,10 @@ main = do
     linesOrError <- parseFromFile csvFile file
     handleParse linesOrError
     where
+        outProps = fo_size .~ (1024,768)
+                $ fo_format .~ PDF
+                $ def
+
         handleParse :: Either ParseError [[String]] -> IO ()
         handleParse (Right lines) = do
             let benchResultsPerProgram = toMap $ convToBenchResults lines
@@ -155,10 +159,9 @@ main = do
             let plottableValues = toPlottableValues speedUpsPerPrograms
             putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
             putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
-            toFile def ("output.png") $ do
+            toFile outProps ("output.pdf") $ do
                 layout_title .= "output"
                 setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
                 setColors [opaque blue, opaque red]
                 plotAll plottableValues
-
         handleParse _ = putStrLn "parse Error!"
