@@ -14,6 +14,8 @@ import Control.Lens
 
 import Text.Regex.PCRE
 
+import Data.String.Utils
+
 import Data.String
 import Data.CSV
 import Data.List
@@ -205,12 +207,58 @@ chart maxCores plotName lineStyles pointStyles plotValues = toRenderable $ layou
 main :: IO ()
 main = do
     args <- getArgs
-    if(length args < 6)
+    if(length args < 2)
     then
-        do  putStrLn "usage: <program> maxCores file output plotName dimX dimY"
-    else
+        do  putStrLn "usage: <program> file output maxCores plotName dimX dimY (for pdf output)"
+            putStrLn "    or <program> file output (for tex output)"
+    else if (length args < 6)
+    then
+        -- output to TeX compatible csv file
         do
-            let (maxCoresStr:file:output:plotName:dimX:dimY:rest) = args
+           let (file:output:rest) = args
+               handleParse :: Either ParseError [[String]] -> IO ()
+               handleParse (Right lines) = do
+                   let benchResultsPerProgram = toMap $ convToBenchResults lines
+                       speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
+                       plottableValues = toPlottableValues speedUpsPerPrograms
+
+                       speedups :: [Speedup]
+                       speedups = concat $ map snd speedUpsPerPrograms
+
+                       -- "","name","time","nCores","speedup"
+                       legend :: String
+                       legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\"" ++ "\n"
+
+                       str :: String -> String
+                       str st = "\"" ++ st ++ "\""
+
+                       writeToFile :: String -> [Speedup] -> IO ()
+                       writeToFile output speedups =
+                            writeFile output $
+                                legend ++
+                                (concat $ zipWith ($) (zipWith ($) (repeat speedUpToString) ([1..]::([Int]))) speedups)
+
+                       speedUpToString :: Int -> Speedup -> String
+                       speedUpToString num (Speedup (Just speedupVal) benchRes) =
+                            (str (show num)) ++ "," ++ (str $ name benchRes) ++ "," ++  (show $ mean benchRes) ++ "," ++
+                            (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "\n"
+
+                       sanitizeFileName :: String -> String
+                       sanitizeFileName str = replace " " "_" $ replace "/" "" str
+
+                   putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
+                   putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
+                   mapM_ (\(name, speedups) -> writeToFile (sanitizeFileName $ output ++ "." ++ name ++ ".csv") speedups) speedUpsPerPrograms
+                   putStrLn $ "finished."
+               handleParse _ = putStrLn "parse Error!"
+
+           putStrLn $ "parsing from file: " ++ file
+           linesOrError <- parseFromFile csvFile file
+           handleParse linesOrError
+    else
+        -- directly plot to PDF file
+        do
+            let (file:output:maxCoresStr:plotName:dimX:dimY:rest) = args
 
                 maxCores = read maxCoresStr
 
