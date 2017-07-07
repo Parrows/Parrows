@@ -192,6 +192,8 @@ chart maxCores lineStyles pointStyles plotValues = toRenderable $ layout maxCore
                                                         }
                $ layout_x_axis . laxis_title .~ "# of cores"
                $ layout_y_axis . laxis_title .~ "speedup"
+               -- using the _Just prism, display only one legend element per line
+               $ layout_legend . _Just . legend_orientation .~ LORows 1
                $ def
 
 main :: IO ()
