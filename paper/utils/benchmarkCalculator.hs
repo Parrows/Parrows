@@ -112,18 +112,14 @@ calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
             speedUp seqRun benchResult = (mean seqRun) / (mean benchResult)
 
 calculateSpeedUpsForMap :: M.Map String [BenchResult] -> [SpeedupsPerProgram]
-calculateSpeedUpsForMap m = foldr (:) [] $ M.mapWithKey (\key benchResults ->
+calculateSpeedUpsForMap = foldr (:) [] . (M.mapWithKey (\key benchResults ->
                                                 let
                                                     maybeSpeedUps = calculateSpeedUps benchResults
 
                                                     zipToSpeedUp (Just speedUps) = zipWith (Speedup) (map Just speedUps) benchResults
                                                     zipToSpeedUp Nothing = zipWith Speedup (repeat Nothing) benchResults
                                                 in
-                                                    (key, zipToSpeedUp maybeSpeedUps))
-                            m
-
-
-
+                                                    (key, zipToSpeedUp maybeSpeedUps)))
 
 toPlottableValues :: [SpeedupsPerProgram] -> [(String, [(NCores, SpeedupVal)])]
 toPlottableValues speedUpsPerPrograms =
