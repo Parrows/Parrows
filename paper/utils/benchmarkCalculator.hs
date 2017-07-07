@@ -4,6 +4,8 @@ import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Number
 
 import Graphics.Rendering.Chart
+import Graphics.Rendering.Chart.Drawing
+
 import Data.Colour
 import Data.Colour.Names
 import Data.Default.Class
@@ -14,6 +16,7 @@ import Text.Regex.PCRE
 
 import Data.String
 import Data.CSV
+import Data.List
 
 import Data.Maybe
 import Data.Either
@@ -71,7 +74,7 @@ convToBenchResults lines = catMaybes $ map convToBenchResult lines
                             stdDevLB = stdDevLB,
                             stdDevUB = stdDevUB
                         }
-                  go name Nothing = Nothing
+                  go _ _ = Nothing
 
                   parseName :: String -> (String, Int)
                   -- little hacky with the two Regexes, but who cares?
@@ -130,66 +133,101 @@ speedupVal :: Speedup -> Maybe (NCores, SpeedupVal)
 speedupVal (Speedup (Just speedup) benchRes) = Just $ (nCores benchRes, speedup)
 speedupVal _ = Nothing
 
---oFile def (name ++ ".png") $ do
-         --layout_title .= name
-         --
-       --setShapes [PointShapeCircle, PointShapePlus, PointShapeStar]
-       --setColors [opaque blue, opaque red]
+countTo :: (Num a, Ord a) => a -> [a]
+countTo num = go 0 num
+                where
+                    go cur num
+                        | cur <= num = cur:(go (cur + 1) num)
+                        | cur > num = []
 
 setLinesBlue :: PlotLines a b -> PlotLines a b
 setLinesBlue = plot_lines_style  . line_color .~ opaque blue
 
-chart :: Renderable ()
-chart = toRenderable layout
+chart :: NCores -> [LineStyle] -> [PointStyle] -> [(String, [(NCores, SpeedupVal)])] -> Renderable ()
+chart maxCores lineStyles pointStyles plotValues = toRenderable $ layout maxCores lineStyles pointStyles plotValues
   where
-    am :: Double -> Double
-    am x = (sin (x*3.14159/45) + 1) / 2 * (sin (x*3.14159/5))
+    idLine :: NCores -> PlotLines Int Double
+    idLine maxCores = plot_lines_values .~ [(zipWith (,) (countTo maxCores) (countTo (fromIntegral maxCores)))]
+                          $ plot_lines_style .~ (dashedLine 2 [2, 3] $ opaque black)
+                          $ def
 
-    sinusoid1 :: PlotLines Double Double
-    sinusoid1 = plot_lines_values .~ [[ (x,(am x)) | x <- [0,(0.5)..400]]]
-              $ plot_lines_style  . line_color .~ opaque blue
-              $ plot_lines_title .~ "am"
-              $ def
+    allDifferentNCores :: [NCores] -> [NCores]
+    allDifferentNCores = map head . group . sort
 
-    sinusoid2 :: PlotPoints Double Double
-    sinusoid2 = plot_points_style .~ filledCircles 6 (opaque red)
-              $ plot_points_values .~ [ (x,(am x)) | x <- [0,7..400]]
-              $ plot_points_title .~ "am points"
-              $ def
+    plotOneLines :: LineStyle -> (String, [(NCores, SpeedupVal)]) -> PlotLines Int Double
+    plotOneLines lineStyle (name, renderValues) =
+        plot_lines_values .~ [renderValues]
+             $ plot_lines_style .~ lineStyle
+             $ plot_lines_title .~ name
+             $ def
 
-    layout :: Layout Double Double
-    layout = layout_title .~ "Amplitude Modulation"
-           $ layout_plots .~ [toPlot sinusoid1,
-                              toPlot sinusoid2]
-           $ def
+    plotOnePoints :: PointStyle -> (String, [(NCores, SpeedupVal)]) -> PlotPoints Int Double
+    plotOnePoints pointStyle (name, renderValues) =
+       plot_points_style .~ pointStyle
+             $ plot_points_values .~ renderValues
+             $ plot_points_title .~ name
+             $ def
 
---plotAll :: [(String, [(NCores, SpeedupVal)])] -> EC (Layout NCores SpeedupVal) ()
---plotAll = mapM_ plotOne
-
---plotOne :: (String, [(NCores, SpeedupVal)]) -> EC (Layout NCores SpeedupVal) ()
---plotOne (name, plottableValues) = do
---       plot (line "" $ [plottableValues])
---       plot (points name $ plottableValues)
-
+    layout :: NCores -> [LineStyle] -> [PointStyle] -> [(String, [(NCores, SpeedupVal)])] -> Layout Int Double
+    layout maxCores lineStyles pointStyles plotValues =
+           let
+               differentNCores = allDifferentNCores $ map fst $ concat $ map snd plotValues
+               differentNCoresDouble = map fromIntegral differentNCores
+           in
+               layout_title .~ "output"
+               $ layout_plots .~    ((toPlot $ idLine maxCores) :
+                                    (map toPlot (zipWith ($) (zipWith ($) (repeat plotOneLines) lineStyles) plotValues)
+                                    ++ map toPlot (zipWith ($) (zipWith ($) (repeat plotOnePoints) pointStyles) plotValues)))
+               $ layout_x_axis . laxis_generate .~ const AxisData {
+                                                              _axis_visibility = def,
+                                                              _axis_viewport = vmap (0,maxCores+1),
+                                                              _axis_tropweiv = invmap (0,maxCores+1),
+                                                              _axis_ticks    = [],
+                                                              _axis_grid     = differentNCores,
+                                                              _axis_labels   = [[(l, show l) | l <- differentNCores]]
+                                                         }
+               $ layout_y_axis . laxis_generate .~ const AxisData {
+                                                             _axis_visibility = def,
+                                                             _axis_viewport = vmap (0,fromIntegral (maxCores +1)),
+                                                             _axis_tropweiv = invmap (0,fromIntegral (maxCores +1)),
+                                                             _axis_ticks    = [],
+                                                             _axis_grid     = differentNCoresDouble,
+                                                             _axis_labels   = [[(l, show l) | l <- differentNCoresDouble]]
+                                                        }
+               $ layout_x_axis . laxis_title .~ "# of cores"
+               $ layout_y_axis . laxis_title .~ "speedup"
+               $ def
 
 main :: IO ()
 main = do
-    (file:output:rest) <- getArgs
+    (maxCores:file:output:rest) <- getArgs
     putStrLn $ "parsing from file: " ++ file
     linesOrError <- parseFromFile csvFile file
-    handleParse output linesOrError
+    handleParse (read maxCores) output linesOrError
     where
-        outProps = fo_size .~ (1024,768)
+        outProps = fo_size .~ (600,600)
                 $ fo_format .~ PDF
                 $ def
 
-        handleParse :: FilePath -> Either ParseError [[String]] -> IO ()
-        handleParse output (Right lines) = do
+        handleParse :: NCores -> FilePath -> Either ParseError [[String]] -> IO ()
+        handleParse maxCores output (Right lines) = do
             let benchResultsPerProgram = toMap $ convToBenchResults lines
             let speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
             let plottableValues = toPlottableValues speedUpsPerPrograms
+            let pointSize = 5
+            let thickness = 2
+            let pointStyles = cycle [filledCircles pointSize $ opaque black,
+                                        filledPolygon pointSize 3 True $ opaque black,
+                                        plusses pointSize thickness $ opaque black,
+                                        exes pointSize thickness $ opaque black,
+                                        stars pointSize thickness $ opaque black,
+                                        filledPolygon pointSize 3 False $ opaque black,
+                                        hollowPolygon pointSize thickness 3 True $ opaque black,
+                                        hollowCircles pointSize thickness $ opaque black,
+                                        hollowPolygon pointSize thickness 3 False $ opaque black
+                                        ]
             putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
             putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
-            renderableToFile outProps output chart
+            renderableToFile outProps output $ chart maxCores (repeat $ (def :: LineStyle)) pointStyles plottableValues
             putStrLn $ "finished."
-        handleParse _ _ = putStrLn "parse Error!"
+        handleParse _ _ _ = putStrLn "parse Error!"
