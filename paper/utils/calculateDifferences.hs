@@ -81,6 +81,9 @@ main = do
                         }
                     | otherwise = Nothing
 
+                legend :: String
+                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\"" ++ "\n"
+
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
 
@@ -108,4 +111,4 @@ main = do
                     then
                         putStrLn $ "parse Error!"
                     else
-                        do writeFile output $ concat $ map toString diffs
+                        do writeFile output $ legend ++ (concat $ map toString diffs)
