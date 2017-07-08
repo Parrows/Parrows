@@ -95,8 +95,8 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 
 \speedupSkelRMSM{11213}{64}
 
-\newcommand{\performanceSkelRMDist}[2]{
-\performanceplot{SkelRM #1 #2}{Parrows, Eden}{256}{1,4,8,16,32,64,128,256}{
+\newcommand{\performanceSkelRMDist}[3]{
+\performanceplot{SkelRM #1 #2}{Parrows, Eden}{256}{#3}{
 \addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
 \addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -104,8 +104,8 @@ smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv}
 }
 }
 
-\newcommand{\speedupSkelRMDist}[2]{
-\speedupplot{SkelRM #1 #2}{Parrows, Eden}{256}{1,4,8,16,32,64,128,256}{
+\newcommand{\speedupSkelRMDist}[3]{
+\speedupplot{SkelRM #1 #2}{Parrows, Eden}{256}{#3}{
 \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
 \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -113,21 +113,21 @@ smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv}
 }
 }
 
-\performanceSkelRMDist{9941}{256}
+\performanceSkelRMDist{9941}{256}{16,32,64,128,256}
 
-\speedupSkelRMDist{9941}{256}
-
-
-
-\performanceSkelRMDist{11213}{256}
-
-\speedupSkelRMDist{11213}{256}
+\speedupSkelRMDist{9941}{256}{16,32,64,128,256}
 
 
 
-\performanceSkelRMDist{44497}{256}
+\performanceSkelRMDist{11213}{256}{16,32,64,128,256}
 
-\speedupSkelRMDist{44497}{256}
+\speedupSkelRMDist{11213}{256}{16,32,64,128,256}
+
+
+
+\performanceSkelRMDist{44497}{256}{32,64,128,256}
+
+\speedupSkelRMDist{44497}{256}{32,64,128,256}
 
 
 \end{document}
