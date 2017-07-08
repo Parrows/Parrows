@@ -2,46 +2,150 @@
 \label{sec:benchmarks}
 
 
-%\begin{figure}[ht]
-%	\centering
-	\framebox{
-		\begin{tikzpicture}[thick, scale=0.7]
-		\begin{axis}[
-			xbar, xmin=0,
-			bar width=0.4cm,
-			width=12cm, height=7cm, enlarge y limits=0.1,
-			ylabel={amount of cores},
-			xlabel={mean runtime (seconds)},
-			symbolic y coords={2, 4, 8, 16, 32, 48, 64, 96},
-			ytick=data,
-			nodes near coords, nodes near coords align={horizontal},
-			]
-			\addplot coordinates {(841,2) (248,4) (115,8) (63.9,16) (41.6,32) (34.6,48) (33.0,64) (32.9,96)};
-		\end{axis}
-		\end{tikzpicture}
-	}
-%	\caption[Parallel Matrix Multiplication using Eden (two 1024x1024 matrices)]
-%\end{figure}
-
-\framebox{
-	\begin{tikzpicture}[thick, scale=0.7]
-	\begin{axis}[
-	xbar, xmin=0,
-	bar width=0.4cm,
-	width=12cm, height=7cm, enlarge y limits=0.1,
-	ylabel={amount of cores},
-	xlabel={mean seconds run on torus\_matrix\_parrows (two 1024x1024 matrices)},
-	symbolic y coords={2, 4, 8, 16, 32, 48, 64, 96},
-	ytick=data,
-	nodes near coords, nodes near coords align={horizontal},
-	]
-	\addplot coordinates {(663,2) (205,4) (113,8) (68.5,16) (41.9,32) (35.4,48) (36.3,64) (33.4,96)};
-	\end{axis}
-	\end{tikzpicture}
+\newcommand{\performanceplot}[5]{
+\begin{tikzpicture}
+\begin{axis}[title={#1},
+title style={align=center},
+xlabel=threads,
+xtick={#4},
+ylabel=time (seconds),
+grid=major,
+legend entries={#2},
+legend pos=outer north east,
+xmin=-1,
+xmax=#3+1]
+#5
+\end{axis}
+\end{tikzpicture}
 }
 
+\newcommand{\speedupplot}[5]{
+\begin{tikzpicture}
+\begin{axis}[title={#1},
+title style={align=center},
+xlabel=threads,
+xtick={#4},
+ytick={#4},
+ylabel=speedup,
+grid=major,
+legend entries={#2},
+legend pos=outer north east,
+ymin=-1,
+xmin=-1,
+ymax=#3 + 1,
+xmax=#3 + 1]
+\addplot [domain=0:#3]{x};
+#5
+\end{axis}
+\end{tikzpicture}
+}
 
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "main"
-%%% End:
+\newcommand{\performanceSkelRMSM}[2]{
+\performanceplot{Parallel performance of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{1,4,8,16,32}{
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
+}
+}
+
+\newcommand{\speedupSkelRMSM}[2]{
+\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{1,4,8,16,32}{
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
+}
+}
+
+\performanceSkelRMSM{4423}{32}
+
+\speedupSkelRMSM{4423}{32}
+
+\performanceSkelRMSM{4423}{64}
+
+\speedupSkelRMSM{4423}{64}
+
+
+
+\performanceSkelRMSM{9941}{32}
+
+\speedupSkelRMSM{9941}{32}
+
+\performanceSkelRMSM{9941}{64}
+
+\speedupSkelRMSM{9941}{64}
+
+
+
+\performanceSkelRMSM{11213}{32}
+
+\speedupSkelRMSM{11213}{32}
+
+\performanceSkelRMSM{11213}{64}
+
+\speedupSkelRMSM{11213}{64}
+
+\newcommand{\performanceSkelRMDist}[3]{
+\performanceplot{Parallel performance of \\ SkelRM #1 #2}{PArrows, Eden}{256}{#3}{
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
+}
+}
+
+\newcommand{\performanceSkelRMDistDiff}[3]{
+\performanceplot{Parallel performance \\ difference of SkelRM #1 #2}{(Eden - PArrows)}{256}{#3}{
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
+}
+}
+
+\newcommand{\speedupSkelRMDist}[3]{
+\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{PArrows, Eden}{256}{#3}{
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
+}
+}
+
+\newcommand{\speedupSkelRMDistDiff}[3]{
+\performanceplot{Parallel speedup \\ difference of SkelRM #1 #2}{(Eden - PArrows)}{256}{#3}{
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
+}
+}
+
+\performanceSkelRMDist{9941}{256}{16,32,64,128,256}
+
+\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256}
+
+\speedupSkelRMDist{9941}{256}{16,32,64,128,256}
+
+\speedupSkelRMDistDiff{9941}{256}{16,32,64,128,256}
+
+
+
+\performanceSkelRMDist{11213}{256}{16,32,64,128,256}
+
+\performanceSkelRMDistDiff{11213}{256}{16,32,64,128,256}
+
+\speedupSkelRMDist{11213}{256}{16,32,64,128,256}
+
+\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256}
+
+
+
+\performanceSkelRMDist{44497}{256}{32,64,128,256}
+
+\performanceSkelRMDistDiff{44497}{256}{32,64,128,256}
+
+\speedupSkelRMDist{44497}{256}{32,64,128,256}
+
+\speedupSkelRMDistDiff{44497}{256}{32,64,128,256}
