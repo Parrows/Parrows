@@ -34,30 +34,30 @@ ymin=-1,
 xmin=-1,
 ymax=#3 + 1,
 xmax=#3 + 1]
-\addplot [domain=0:#3]{x};
+\addplot [forget plot, domain=0:#3]{x};
 #5
 \end{axis}
 \end{tikzpicture}
 }
 
 \newcommand{\performanceSkelRMSM}[2]{
-\performanceplot{Parallel performance of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{1,4,8,16,32}{
-\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+\performanceplot{Parallel performance of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{2,4,8,16,32}{
+\addplot+ table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
-\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+\addplot+ table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
-\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+\addplot+ table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 }
 
 \newcommand{\speedupSkelRMSM}[2]{
-\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{1,4,8,16,32}{
-\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{Eden CP, Multicore, Par Monad}{32}{2,4,8,16,32}{
+\addplot+ table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
-\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+\addplot+ table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
-\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+\addplot+ table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 }
