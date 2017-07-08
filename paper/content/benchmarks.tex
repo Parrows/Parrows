@@ -32,7 +32,7 @@ minor tick num=9,
 ylabel=time (seconds),
 grid=both,
 legend entries={#2},
-legend style={at={(0.5,0.01)},anchor=south},
+legend style={at={(0.99,0.99)},anchor=north east},
 max space between ticks=50pt,
 grid style={line width=.1pt, draw=gray!10},
 major grid style={line width=.2pt,draw=gray!50},
@@ -109,23 +109,23 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }{33}
 }
 
-\performanceSkelRMSM{4423}{32}
+%\performanceSkelRMSM{4423}{32}
 
-\speedupSkelRMSM{4423}{32}
+%\speedupSkelRMSM{4423}{32}
 
-\performanceSkelRMSM{4423}{64}
+%\performanceSkelRMSM{4423}{64}
 
-\speedupSkelRMSM{4423}{64}
+%\speedupSkelRMSM{4423}{64}
 
 
 
-\performanceSkelRMSM{9941}{32}
+%\performanceSkelRMSM{9941}{32}
 
-\speedupSkelRMSM{9941}{32}{32}
+%\speedupSkelRMSM{9941}{32}{32}
 
-\performanceSkelRMSM{9941}{64}
+%\performanceSkelRMSM{9941}{64}
 
-\speedupSkelRMSM{9941}{64}
+%\speedupSkelRMSM{9941}{64}
 
 
 
@@ -170,23 +170,23 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 }{#4}
 }
 
-\performanceSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
+%\performanceSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
 
-\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{0.11}{528}
+%\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{0.11}{528}
 
-\speedupSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
+%\speedupSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
 
-\speedupSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{528}
+%\speedupSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{528}
 
 
 
-\performanceSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
+%\performanceSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
 
-\performanceSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{0.1}{528}
+%\performanceSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{0.1}{528}
 
-\speedupSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
+%\speedupSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
 
-\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{528}
+%\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{528}
 
 
 
