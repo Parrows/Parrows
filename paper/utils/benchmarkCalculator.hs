@@ -210,15 +210,19 @@ main = do
     if(length args < 2)
     then
         do  putStrLn "usage: <program> file output maxCores plotName dimX dimY (for pdf output)"
-            putStrLn "    or <program> file output (for tex output)"
+            putStrLn "    or <program> file output ignoreSeq (for tex output)"
     else if (length args < 6)
     then
         -- output to TeX compatible csv file
         do
-           let (file:output:rest) = args
+           let (file:output:ignoreSeqStr:rest) = args
                handleParse :: Either ParseError [[String]] -> IO ()
                handleParse (Right lines) = do
-                   let benchResultsPerProgram = toMap $ convToBenchResults lines
+                   let
+                       ignoreSeq :: Bool
+                       ignoreSeq = read ignoreSeqStr
+
+                       benchResultsPerProgram = toMap $ convToBenchResults lines
                        speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
                        plottableValues = toPlottableValues speedUpsPerPrograms
 
@@ -240,8 +244,10 @@ main = do
 
                        speedUpToString :: Int -> Speedup -> String
                        speedUpToString num (Speedup (Just speedupVal) benchRes) =
-                            (str (show num)) ++ "," ++ (str $ name benchRes) ++ "," ++  (show $ mean benchRes) ++ "," ++
-                            (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "\n"
+                            if (nCores benchRes) == 1 && ignoreSeq
+                            then ""
+                            else (str (show num)) ++ "," ++ (str $ name benchRes) ++ "," ++  (show $ mean benchRes) ++ "," ++
+                                (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "\n"
 
                        sanitizeFileName :: String -> String
                        sanitizeFileName str = replace "_" "-" $ replace " " "_" $ replace "/" "" str
