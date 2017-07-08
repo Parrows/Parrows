@@ -1,20 +1,9 @@
 module Main where
 
-import Util hiding (Speedup, nCores, name)
+import Util
 
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Number
-
-import Graphics.Rendering.Chart
-import Graphics.Rendering.Chart.Drawing
-
-import Data.Colour
-import Data.Colour.Names
-import Data.Default.Class
-import Graphics.Rendering.Chart.Backend.Cairo
-import Control.Lens
-
-import Text.Regex.PCRE
 
 import Data.String.Utils
 
@@ -35,8 +24,11 @@ data Speedup = Speedup {
     name :: String,
     time :: Double,
     nCores :: String,
-    speedup :: Double
+    speedup :: Double,
+    stdDev :: Double
 } deriving (Show)
+
+
 
 main :: IO ()
 main = do
@@ -50,22 +42,23 @@ main = do
             let (file1:file2:output:rest) = args
 
                 lineToSpeedup :: [String] -> Maybe Speedup
-                lineToSpeedup (num:name:numStrings) | (length numStrings) == 3 =
-                                                        let [timeString, nCores, speedupString] = numStrings
-                                                            maybeDoubles = convDoubles [timeString, speedupString]
+                lineToSpeedup (num:name:numStrings) | (length numStrings) == 4 =
+                                                        let [timeString, nCores, speedupString, stdDevString] = numStrings
+                                                            maybeDoubles = convDoubles [timeString, speedupString, stdDevString]
                                                         in
                                                             if (isNothing maybeDoubles)
                                                             then
                                                                 Nothing
                                                             else
-                                                                let (Just [time, speedup]) = maybeDoubles
+                                                                let (Just [time, speedup, stdDev]) = maybeDoubles
                                                                 in
                                                                     Just $ Speedup {
                                                                         num = num,
                                                                         name = name,
                                                                         time = time,
                                                                         nCores = nCores,
-                                                                        speedup = speedup
+                                                                        speedup = speedup,
+                                                                        stdDev = stdDev
                                                                     }
                                                    | otherwise = Nothing
                 lineToSpeedup _ = Nothing
@@ -77,19 +70,20 @@ main = do
                             name = (name x) ++ "-" ++ (name y),
                             time = (time x) - (time y),
                             nCores = nCores x,
-                            speedup = (speedup x) - (speedup y)
+                            speedup = (speedup x) - (speedup y),
+                            stdDev = max (stdDev x) (stdDev y)
                         }
                     | otherwise = Nothing
 
                 legend :: String
-                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\"" ++ "\n"
+                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\"" ++ "\n"
 
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
 
                 toString :: Speedup -> String
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
-                                    (nCores x) ++ "," ++ (show $ speedup x) ++ "\n"
+                                    (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "\n"
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
                 handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines

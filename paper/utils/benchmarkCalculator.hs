@@ -30,6 +30,170 @@ import Debug.Trace
 
 import System.Environment
 
+type SpeedupsPerProgram = (String, [Speedup])
+type NCores = Int
+type SpeedupVal = Double
+
+data BenchResult = BenchResult {
+    name :: String,
+    nCores :: NCores,
+    mean :: Double,
+    meanLB :: Double,
+    meanUB :: Double,
+    stdDev :: Double,
+    stdDevLB :: Double,
+    stdDevUB :: Double
+} deriving (Show)
+
+convToBenchResults :: [[String]] -> [BenchResult]
+convToBenchResults lines = catMaybes $ map convToBenchResult lines
+    where
+        convToBenchResult :: [String] -> Maybe BenchResult
+        convToBenchResult (nameStr:rest) = go nameStr $ convDoubles rest
+            where go nameStr (Just ([mean,meanLB,meanUB,stdDev,stdDevLB,stdDevUB])) =
+                    let (name, nCores) = parseName nameStr
+                    in
+                        Just $ BenchResult {
+                            name = name,
+                            nCores = nCores,
+                            mean = mean,
+                            meanLB = meanLB,
+                            meanUB = meanUB,
+                            stdDev = stdDev,
+                            stdDevLB = stdDevLB,
+                            stdDevUB = stdDevUB
+                        }
+                  go _ _ = Nothing
+
+                  parseName :: String -> (String, Int)
+                  -- little hacky with the two Regexes, but who cares?
+                  parseName str = let (_, _, _, nameWithRTS) = str =~ "(.*) \\+RTS -N[0-9]*.*" :: (String,String,String,[String])
+                                      (_, _, _, nCores) = str =~ ".* \\+RTS -N([0-9]*).*" :: (String,String,String,[String])
+                                  in
+                                    (if length nameWithRTS > 0 then head nameWithRTS else str,
+                                        if length nCores > 0 then read (head nCores) else 1)
+
+toMap :: [BenchResult] -> M.Map String [BenchResult]
+toMap benchRes =
+    foldl (\m bRes -> let name_ = name bRes in M.insert name_ (bRes:(lookup' name_ m)) m) M.empty benchRes
+        where
+            lookup' :: String -> M.Map String [BenchResult] -> [BenchResult]
+            lookup' key map = go $ M.lookup key map
+                where
+                    go (Just a) = a
+                    go Nothing = []
+
+findSeqRun :: [BenchResult] -> Maybe BenchResult
+findSeqRun results = go $ filter (\res -> nCores res == 1) results
+    where
+        go (res:rest) = Just res
+        go _ = Nothing
+
+data Speedup = Speedup (Maybe SpeedupVal) BenchResult deriving (Show)
+
+calculateSpeedUps :: [BenchResult] -> Maybe [Double]
+calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
+    in
+        fmap (\seqRun -> speedUps seqRun benchResults) maybeSeqRun
+        where
+            speedUps :: BenchResult -> [BenchResult] -> [Double]
+            speedUps seqRun benchResults = map (speedUp seqRun) benchResults
+
+            speedUp :: BenchResult -> BenchResult -> Double
+            speedUp seqRun benchResult = (mean seqRun) / (mean benchResult)
+
+calculateSpeedUpsForMap :: M.Map String [BenchResult] -> [SpeedupsPerProgram]
+calculateSpeedUpsForMap = foldr (:) [] . (M.mapWithKey (\key benchResults ->
+                                                let
+                                                    maybeSpeedUps = calculateSpeedUps benchResults
+
+                                                    zipToSpeedUp (Just speedUps) = zipWith (Speedup) (map Just speedUps) benchResults
+                                                    zipToSpeedUp Nothing = zipWith Speedup (repeat Nothing) benchResults
+                                                in
+                                                    (key, zipToSpeedUp maybeSpeedUps)))
+
+toPlottableValues :: [SpeedupsPerProgram] -> [(String, [(NCores, SpeedupVal)])]
+toPlottableValues speedUpsPerPrograms =
+    map (\(name, speedupList) -> (name, catMaybes $ map speedupVal speedupList)) speedUpsPerPrograms
+
+speedupVal :: Speedup -> Maybe (NCores, SpeedupVal)
+speedupVal (Speedup (Just speedup) benchRes) = Just $ (nCores benchRes, speedup)
+speedupVal _ = Nothing
+
+countTo :: (Num a, Ord a) => a -> [a]
+countTo num = go 0 num
+                where
+                    go cur num
+                        | cur <= num = cur:(go (cur + 1) num)
+                        | cur > num = []
+
+setLinesBlue :: PlotLines a b -> PlotLines a b
+setLinesBlue = plot_lines_style  . line_color .~ opaque blue
+
+chart :: NCores -> String -> [LineStyle] -> [PointStyle] -> [(String, [(NCores, SpeedupVal)])] -> Renderable ()
+chart maxCores plotName lineStyles pointStyles plotValues = toRenderable $ layout maxCores plotName lineStyles pointStyles plotValues
+  where
+    idLine :: NCores -> PlotLines Int Double
+    idLine maxCores = plot_lines_values .~ [(zipWith (,) (countTo maxCores) (countTo (fromIntegral maxCores)))]
+                          $ plot_lines_style .~ (dashedLine 2 [2, 3] $ opaque black)
+                          $ def
+
+    allDifferentNCores :: [NCores] -> [NCores]
+    allDifferentNCores = map head . group . sort
+
+    plotOneLines :: LineStyle -> (String, [(NCores, SpeedupVal)]) -> PlotLines Int Double
+    plotOneLines lineStyle (name, renderValues) =
+        plot_lines_values .~ [renderValues]
+             $ plot_lines_style .~ lineStyle
+             $ plot_lines_title .~ name
+             $ def
+
+    plotOnePoints :: PointStyle -> (String, [(NCores, SpeedupVal)]) -> PlotPoints Int Double
+    plotOnePoints pointStyle (name, renderValues) =
+       plot_points_style .~ pointStyle
+             $ plot_points_values .~ renderValues
+             $ plot_points_title .~ name
+             $ def
+
+    layout :: NCores -> String -> [LineStyle] -> [PointStyle] -> [(String, [(NCores, SpeedupVal)])] -> Layout Int Double
+    layout maxCores plotName lineStyles pointStyles plotValues =
+           let
+               differentNCores = allDifferentNCores $ map fst $ concat $ map snd plotValues
+               differentNCoresDouble = map fromIntegral differentNCores
+           in
+               layout_title .~ plotName
+               $ layout_plots .~    ((toPlot $ idLine maxCores) :
+                                    (map toPlot (zipWith ($) (zipWith ($) (repeat plotOneLines) lineStyles) plotValues)
+                                    ++ map toPlot (zipWith ($) (zipWith ($) (repeat plotOnePoints) pointStyles) plotValues)))
+
+               -- make sure we don't plot too much whitespace
+               -- also add gridlines and labels for each relevant numcore/speedup step
+               $ layout_x_axis . laxis_generate .~ const AxisData {
+                                                              _axis_visibility = def,
+                                                              _axis_viewport = vmap (0,maxCores+1),
+                                                              _axis_tropweiv = invmap (0,maxCores+1),
+                                                              _axis_ticks    = [],
+                                                              _axis_grid     = differentNCores,
+                                                              _axis_labels   = [[(l, show l) | l <- differentNCores]]
+                                                         }
+               $ layout_y_axis . laxis_generate .~ const AxisData {
+                                                             _axis_visibility = def,
+                                                             _axis_viewport = vmap (0,fromIntegral (maxCores +1)),
+                                                             _axis_tropweiv = invmap (0,fromIntegral (maxCores +1)),
+                                                             _axis_ticks    = [],
+                                                             _axis_grid     = differentNCoresDouble,
+                                                             _axis_labels   = [[(l, show l) | l <- differentNCoresDouble]]
+                                                        }
+               -- give the axis proper names
+               $ layout_x_axis . laxis_title .~ "# of cores"
+               $ layout_y_axis . laxis_title .~ "speedup"
+
+               -- using the _Just prism, display only one legend element per line
+               $ layout_legend . _Just . legend_orientation .~ LORows 1
+
+               $ def
+
+
 main :: IO ()
 main = do
     args <- getArgs
@@ -57,7 +221,7 @@ main = do
 
                        -- "","name","time","nCores","speedup"
                        legend :: String
-                       legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\"" ++ "\n"
+                       legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"stddev\"" ++ "\n"
 
                        str :: String -> String
                        str st = "\"" ++ st ++ "\""
@@ -73,7 +237,7 @@ main = do
                             if (nCores benchRes) == 1 && ignoreSeq
                             then ""
                             else (str (show num)) ++ "," ++ (str $ name benchRes) ++ "," ++  (show $ mean benchRes) ++ "," ++
-                                (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "\n"
+                                (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "," ++ (show $ stdDev benchRes) ++ "\n"
 
                        sanitizeFileName :: String -> String
                        sanitizeFileName str = replace "_" "-" $ replace " " "_" $ replace "/" "" str
