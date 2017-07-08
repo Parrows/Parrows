@@ -244,7 +244,7 @@ main = do
                             (show $ nCores benchRes) ++ "," ++ (show speedupVal) ++ "\n"
 
                        sanitizeFileName :: String -> String
-                       sanitizeFileName str = replace " " "_" $ replace "/" "" str
+                       sanitizeFileName str = replace "_" "-" $ replace " " "_" $ replace "/" "" str
 
                    putStrLn $ "parsed " ++ show (M.size $ benchResultsPerProgram) ++ " different programs (with different number of cores)"
                    putStrLn $ "speedUps: " ++ show (speedUpsPerPrograms)
