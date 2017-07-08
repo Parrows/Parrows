@@ -89,7 +89,7 @@ main = do
 
                 toString :: Speedup -> String
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
-                                    (str (nCores x)) ++ "," ++ (show $ speedup x) ++ "\n"
+                                    (nCores x) ++ "," ++ (show $ speedup x) ++ "\n"
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
                 handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines
