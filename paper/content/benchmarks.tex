@@ -1,8 +1,7 @@
 \section{Benchmarks}
 \label{sec:benchmarks}
 
-
-\newcommand{\performanceplot}[5]{
+\newcommand{\performanceplot}[6]{
 \begin{tikzpicture}
 \begin{axis}[title={#1},
 title style={align=center},
@@ -11,15 +10,40 @@ xtick={#4},
 ylabel=time (seconds),
 grid=major,
 legend entries={#2},
-legend pos=outer north east,
+legend style={at={(0.99,0.99)},anchor=north east},
+max space between ticks=50pt,
+grid style={line width=.1pt, draw=gray!10},
+major grid style={line width=.2pt,draw=gray!50},
 xmin=-1,
-xmax=#3+1]
+xmax=#6]
 #5
 \end{axis}
 \end{tikzpicture}
 }
 
-\newcommand{\speedupplot}[5]{
+\newcommand{\performancediffplot}[7]{
+\begin{tikzpicture}
+\begin{axis}[title={#1},
+title style={align=center},
+xlabel=threads,
+xtick={#4},
+ytick distance=#6,
+minor tick num=9,
+ylabel=time (seconds),
+grid=both,
+legend entries={#2},
+legend style={at={(0.99,0.99)},anchor=north east},
+max space between ticks=50pt,
+grid style={line width=.1pt, draw=gray!10},
+major grid style={line width=.2pt,draw=gray!50},
+xmin=-1,
+xmax=#7]
+#5
+\end{axis}
+\end{tikzpicture}
+}
+
+\newcommand{\speedupplot}[6]{
 \begin{tikzpicture}
 \begin{axis}[title={#1},
 title style={align=center},
@@ -28,13 +52,36 @@ xtick={#4},
 ytick={#4},
 ylabel=speedup,
 grid=major,
-legend entries={#2},
-legend pos=outer north east,
+legend entries={linear, #2},
+legend style={at={(0.01,0.99)},anchor=north west},
+max space between ticks=50pt,
+grid style={line width=.1pt, draw=gray!10},
+major grid style={line width=.2pt,draw=gray!50},
 ymin=-1,
 xmin=-1,
-ymax=#3 + 1,
-xmax=#3 + 1]
-\addplot [forget plot, domain=0:#3]{x};
+ymax=#6,
+xmax=#6]
+\addplot [domain=0:#3, no markers,dotted,thick]{x};
+#5
+\end{axis}
+\end{tikzpicture}
+}
+
+\newcommand{\speedupdiffplot}[6]{
+\begin{tikzpicture}
+\begin{axis}[title={#1},
+title style={align=center},
+xlabel=threads,
+xtick={#4},
+ylabel=time (seconds),
+grid=major,
+legend entries={#2},
+legend style={at={(0.99,0.99)},anchor=north east},
+max space between ticks=50pt,
+grid style={line width=.1pt, draw=gray!10},
+major grid style={line width=.2pt,draw=gray!50},
+xmin=-1,
+xmax=#6]
 #5
 \end{axis}
 \end{tikzpicture}
@@ -48,7 +95,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
 \addplot+ table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
-}
+}{33}
 }
 
 \newcommand{\speedupSkelRMSM}[2]{
@@ -59,93 +106,94 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
 \addplot+ table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
+}{33}
 }
-}
 
-\performanceSkelRMSM{4423}{32}
+%\performanceSkelRMSM{4423}{32}
 
-\speedupSkelRMSM{4423}{32}
+%\speedupSkelRMSM{4423}{32}
 
-\performanceSkelRMSM{4423}{64}
+%\performanceSkelRMSM{4423}{64}
 
-\speedupSkelRMSM{4423}{64}
-
-
-
-\performanceSkelRMSM{9941}{32}
-
-\speedupSkelRMSM{9941}{32}
-
-\performanceSkelRMSM{9941}{64}
-
-\speedupSkelRMSM{9941}{64}
+%\speedupSkelRMSM{4423}{64}
 
 
 
-\performanceSkelRMSM{11213}{32}
+%\performanceSkelRMSM{9941}{32}
 
-\speedupSkelRMSM{11213}{32}
+%\speedupSkelRMSM{9941}{32}{32}
+
+%\performanceSkelRMSM{9941}{64}
+
+%\speedupSkelRMSM{9941}{64}
+
+
+
+%\performanceSkelRMSM{11213}{32}
+
+%\speedupSkelRMSM{11213}{32}
 
 \performanceSkelRMSM{11213}{64}
 
 \speedupSkelRMSM{11213}{64}
 
-\newcommand{\performanceSkelRMDist}[3]{
-\performanceplot{Parallel performance of \\ SkelRM #1 #2}{PArrows, Eden}{256}{#3}{
+\newcommand{\performanceSkelRMDist}[4]{
+\performanceplot{Parallel performance of \\ SkelRM #1 #2}{PArrows, Eden}{512}{#3}{
 \addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
 \addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
-}
+}{#4}
 }
 
-\newcommand{\performanceSkelRMDistDiff}[3]{
-\performanceplot{Parallel performance \\ difference of SkelRM #1 #2}{(Eden - PArrows)}{256}{#3}{
-\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+\newcommand{\performanceSkelRMDistDiff}[5]{
+\performancediffplot{Parallel performance difference \\ of SkelRM #1 #2}{(Eden - PArrows)}{512}{#3}{
+\addplot+[mark=*,thick,error bars/.cd,
+    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
-}
+}{#4}{#5}
 }
 
-\newcommand{\speedupSkelRMDist}[3]{
-\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{PArrows, Eden}{256}{#3}{
+\newcommand{\speedupSkelRMDist}[4]{
+\speedupplot{Parallel speedup of \\ SkelRM #1 #2}{PArrows, Eden}{512}{#3}{
 \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
 \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
-}
+}{#4}
 }
 
-\newcommand{\speedupSkelRMDistDiff}[3]{
-\performanceplot{Parallel speedup \\ difference of SkelRM #1 #2}{(Eden - PArrows)}{256}{#3}{
+\newcommand{\speedupSkelRMDistDiff}[4]{
+\speedupdiffplot{Parallel speedup difference \\ of SkelRM #1 #2}{(Eden - PArrows)}{512}{#3}{
 \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
+}{#4}
 }
-}
 
-\performanceSkelRMDist{9941}{256}{16,32,64,128,256}
+%\performanceSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
 
-\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256}
+%\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{0.11}{528}
 
-\speedupSkelRMDist{9941}{256}{16,32,64,128,256}
+%\speedupSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
 
-\speedupSkelRMDistDiff{9941}{256}{16,32,64,128,256}
-
-
-
-\performanceSkelRMDist{11213}{256}{16,32,64,128,256}
-
-\performanceSkelRMDistDiff{11213}{256}{16,32,64,128,256}
-
-\speedupSkelRMDist{11213}{256}{16,32,64,128,256}
-
-\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256}
+%\speedupSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{528}
 
 
 
-\performanceSkelRMDist{44497}{256}{32,64,128,256}
+%\performanceSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
 
-\performanceSkelRMDistDiff{44497}{256}{32,64,128,256}
+%\performanceSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{0.1}{528}
 
-\speedupSkelRMDist{44497}{256}{32,64,128,256}
+%\speedupSkelRMDist{11213}{256}{16,32,64,128,256,512}{528}
 
-\speedupSkelRMDistDiff{44497}{256}{32,64,128,256}
+%\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{528}
+
+
+
+\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+
+\performanceSkelRMDistDiff{44497}{256}{32,64,128,256,512}{0.5}{544}
+
+\speedupSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+
+\speedupSkelRMDistDiff{44497}{256}{32,64,128,256,512}{544}
