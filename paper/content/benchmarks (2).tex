@@ -1,0 +1,133 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{microtype} %% looks better
+\usepackage{pgfplots}
+
+\usepackage{pgfplotstable} %% for regression
+
+\begin{document}
+
+\newcommand{\performanceplot}[5]{
+\begin{tikzpicture}
+\begin{axis}[title={Parallel performance of \\ #1},
+title style={align=center},
+xlabel=cores,
+xtick={#4},
+ylabel=time (seconds),
+grid=major,
+legend entries={#2},
+legend pos=outer north east,
+xmin=-1,
+xmax=#3+1]
+#5
+\end{axis}
+\end{tikzpicture}
+}
+
+\newcommand{\speedupplot}[5]{
+\begin{tikzpicture}
+\begin{axis}[title={Parallel speedup of \\ #1},
+title style={align=center},
+xlabel=cores,
+xtick={#4},
+ytick={#4},
+ylabel=speedup,
+grid=major,
+legend entries={#2},
+legend pos=outer north east,
+ymin=-1,
+xmin=-1,
+ymax=#3 + 1,
+xmax=#3 + 1]
+\addplot [domain=0:#3]{x};
+#5
+\end{axis}
+\end{tikzpicture}
+}
+
+\newcommand{\performanceSkelRMSM}[2]{
+\performanceplot{SkelRM #1 #2}{Eden CP, Multicore, ParMonad}{32}{1,4,8,16,32}{
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
+}
+}
+
+\newcommand{\speedupSkelRMSM}[2]{
+\speedupplot{SkelRM #1 #2}{Eden CP, Multicore, ParMonad}{32}{1,4,8,16,32}{
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
+}
+}
+
+\performanceSkelRMSM{4423}{32}
+
+\speedupSkelRMSM{4423}{32}
+
+\performanceSkelRMSM{4423}{64}
+
+\speedupSkelRMSM{4423}{64}
+
+
+
+\performanceSkelRMSM{9941}{32}
+
+\speedupSkelRMSM{9941}{32}
+
+\performanceSkelRMSM{9941}{64}
+
+\speedupSkelRMSM{9941}{64}
+
+
+
+\performanceSkelRMSM{11213}{32}
+
+\speedupSkelRMSM{11213}{32}
+
+\performanceSkelRMSM{11213}{64}
+
+\speedupSkelRMSM{11213}{64}
+
+\newcommand{\performanceSkelRMDist}[2]{
+\performanceplot{SkelRM #1 #2}{Parrows, Eden}{256}{1,4,8,16,32,64,128,256}{
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
+}
+}
+
+\newcommand{\speedupSkelRMDist}[2]{
+\speedupplot{SkelRM #1 #2}{Parrows, Eden}{256}{1,4,8,16,32,64,128,256}{
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.csv};
+\addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
+}
+}
+
+\performanceSkelRMDist{9941}{256}
+
+\speedupSkelRMDist{9941}{256}
+
+
+
+\performanceSkelRMDist{11213}{256}
+
+\speedupSkelRMDist{11213}{256}
+
+
+
+\performanceSkelRMDist{44497}{256}
+
+\speedupSkelRMDist{44497}{256}
+
+
+\end{document}
