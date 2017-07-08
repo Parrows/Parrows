@@ -4,6 +4,7 @@ import Parrows.Definition
 import Parrows.Future
 import Control.Parallel.Eden.Topology
 --import Parrows.Skeletons.Topology
+import Control.Parallel.Eden.Map
 import Parrows.Eden
 import Data.List
 
@@ -68,8 +69,11 @@ randoms2 :: [Int]
 randoms2 = randoms $ mkStdGen 67123
 
 toMatrix :: Int -> [Int] -> Matrix
-toMatrix cnt randoms = chunksOf n $ take (n * n) randoms
+toMatrix cnt randoms = chunksOf n $ take (matrixIntSize n) randoms
         where n = cnt
+
+matrixIntSize :: Int -> Int
+matrixIntSize n = n * n
 
 splitMatrix :: Int -> Matrix -> [[Matrix]]
 splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
@@ -77,12 +81,23 @@ splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size 
 combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
 combine a b = zipWith (\a b -> zipWith (,) a b) a b
 
+
+type MatrixExploded = [[[Matrix]]]
+
+matMultTorus :: Int -> Int -> Matrix -> Matrix -> MatrixExploded
+matMultTorus nodeCountVal problemSizeVal a b =
+    let combined = combine (splitMatrix (problemSizeVal `div` nodeCountVal) a) (splitMatrix (problemSizeVal `div` nodeCountVal) b)
+    in torus (\ x y z -> nodefunction nodeCountVal (x, y, z)) $ combined
+
 main = do
         args <- getArgs
-        let (nodeCount:problemSize:rest) = args
+        let (nodeCount:numCoresStr:problemSize:listSize:rest) = args
         let nodeCountVal = read nodeCount
         let problemSizeVal = read problemSize
-        let aMatrix = toMatrix problemSizeVal randoms1
-        let bMatrix = toMatrix problemSizeVal randoms2
-        let val = torus (\ x y z -> nodefunction nodeCountVal (x, y, z)) $ combine (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix)) (splitMatrix (problemSizeVal `div` nodeCountVal) (aMatrix))
-        print $ length $ (rnf val) `seq` val
+        let listSizeVal = read listSize
+        let numCores = read numCoresStr
+        let aMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms1)
+        let bMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms2)
+
+        let cMatricesExploded = farmS numCores (uncurry $ matMultTorus nodeCountVal problemSizeVal) $ zipWith (,) aMatrices bMatrices
+        print $ length $ (rnf cMatricesExploded) `seq` cMatricesExploded
