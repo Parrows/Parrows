@@ -43,7 +43,8 @@ data Conf a = Conf (Strategy a)
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         listApp fs >>>
-        arr (withStrategy (parList strat))
+        arr (withStrategy (parList strat)) &&& arr id >>>
+        arr snd
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
     parEvalN _ fs = parEvalN (hack fs) fs
