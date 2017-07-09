@@ -37,23 +37,20 @@ class Future fut a | a -> fut where
 Since |RD| is only a type synonym for a communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as Fig.~\ref{fig:RDFuture} shows. %This is due to the same reason we had to introduce a wrapper for |Strategy a| in the Multicore Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
 Technical details are in Appendix, in Section~\ref{app:omitted}.
 
-For our |Par| Monad and Multicore Haskell backends, we can simply use |MVar|s \cite{jones1996concurrent} (Fig.~\ref{fig:MVarFuture}), as in a shared memory setting we do not require Eden's sophisticated communication channels. \fixme{explain MVars}
+For our |Par| Monad and Multicore Haskell backends, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}) which are just simple wrappers around the actual data, as in a shared memory setting we do not require Eden's sophisticated communication channels.
 \begin{figure}[tb]
 \begin{code}
-{-# NOINLINE putUnsafe #-}
+data BasicFuture a = BF a
 
-putUnsafe :: a -> MVar a
-putUnsafe a = unsafePerformIO $ do
-    mVar <- newEmptyMVar
-    putMVar mVar a
-    return mVar
+instance (NFData a) => NFData (BasicFuture a) where
+    rnf (BF a) = rnf a
 
-instance (NFData a) => Future MVar a where
-    put = arr putUnsafe
-    get = arr takeMVar >>> arr unsafePerformIO
+instance (NFData a) => Future BasicFuture a where
+    put = arr BF
+    get = arr (\(BF a) -> a)
 \end{code}
-\caption{A |MVar| instance of the |Future| typeclass for the |Par| Monad and Multicore Haskell backends.}
-\label{fig:MVarFuture}
+\caption{The |BasicFuture| type and its |Future| instance for the |Par| Monad and Multicore Haskell backends.}
+\label{fig:BasicFuture}
 \end{figure} % $
 
 

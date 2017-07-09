@@ -109,34 +109,6 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }{33}
 }
 
-%\performanceSkelRMSM{4423}{32}
-
-%\speedupSkelRMSM{4423}{32}
-
-%\performanceSkelRMSM{4423}{64}
-
-%\speedupSkelRMSM{4423}{64}
-
-
-
-%\performanceSkelRMSM{9941}{32}
-
-%\speedupSkelRMSM{9941}{32}{32}
-
-%\performanceSkelRMSM{9941}{64}
-
-%\speedupSkelRMSM{9941}{64}
-
-
-
-%\performanceSkelRMSM{11213}{32}
-
-%\speedupSkelRMSM{11213}{32}
-
-\performanceSkelRMSM{11213}{64}
-
-\speedupSkelRMSM{11213}{64}
-
 \newcommand{\performanceSkelRMDist}[4]{
 \performanceplot{Parallel performance of \\ SkelRM #1 #2}{PArrows, Eden}{512}{#3}{
 \addplot table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -170,6 +142,48 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 }{#4}
 }
 
+%\performanceSkelRMSM{4423}{32}
+
+%\speedupSkelRMSM{4423}{32}
+
+%\performanceSkelRMSM{4423}{64}
+
+%\speedupSkelRMSM{4423}{64}
+
+
+
+%\performanceSkelRMSM{9941}{32}
+
+%\speedupSkelRMSM{9941}{32}{32}
+
+%\performanceSkelRMSM{9941}{64}
+
+%\speedupSkelRMSM{9941}{64}
+
+
+
+%\performanceSkelRMSM{11213}{32}
+
+%\speedupSkelRMSM{11213}{32}
+
+We will now discuss some benchmarks of our new PArrows DSL. We start by proving that we do not introduce any noteworthy 
+
+\subsection{Comparison with Eden}
+
+\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+
+\performanceSkelRMDistDiff{44497}{256}{32,64,128,256,512}{0.5}{544}
+
+\speedupSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+
+\speedupSkelRMDistDiff{44497}{256}{32,64,128,256,512}{544}
+
+\subsection{Shared Memory Benchmarks}
+
+\performanceSkelRMSM{11213}{64}
+
+\speedupSkelRMSM{11213}{64}
+
 %\performanceSkelRMDist{9941}{256}{16,32,64,128,256,512}{528}
 
 %\performanceSkelRMDistDiff{9941}{256}{16,32,64,128,256,512}{0.11}{528}
@@ -188,12 +202,3 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 
 %\speedupSkelRMDistDiff{11213}{256}{16,32,64,128,256,512}{528}
 
-
-
-\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
-
-\performanceSkelRMDistDiff{44497}{256}{32,64,128,256,512}{0.5}{544}
-
-\speedupSkelRMDist{44497}{256}{32,64,128,256,512}{544}
-
-\speedupSkelRMDistDiff{44497}{256}{32,64,128,256,512}{544}
