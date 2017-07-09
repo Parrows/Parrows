@@ -59,6 +59,10 @@ putUnsafe a = unsafePerformIO $ do
     putMVar mVar a
     return mVar
 
+{-# NOINLINE getUnsafe #-}
+getUnsafe :: MVar a -> a
+getUnsafe = unsafePerformIO . takeMVar
+
 instance (NFData a) => Future MVar a where
     put = arr putUnsafe
-    get = arr takeMVar >>> arr unsafePerformIO
+    get = arr getUnsafe
