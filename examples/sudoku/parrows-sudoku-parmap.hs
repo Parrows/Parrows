@@ -4,7 +4,8 @@ import Control.Exception
 import System.Environment
 import Data.Maybe
 import Parrows.Definition
-import Parrows.ParMonad
+import Parrows.Skeletons.Map
+import Parrows.Multicore
 import Control.DeepSeq
 
 main :: IO ()
