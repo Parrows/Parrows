@@ -86,7 +86,7 @@ torus conf f =
         (arr length >>> arr unshuffle) &&&
             (shuffle >>> parMap conf (ptorus f)) >>>
         app >>>
-        arr (map unzip3) >>> arr unzip3 >>> threetotwo >>> enforceOrder)
+        arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c
@@ -98,9 +98,6 @@ ptorus :: (Arrow arr, Future fut a, Future fut b) =>
           arr (c, a, b) (d, a, b) ->
           arr (c, fut a, fut b) (d, fut a, fut b)
 ptorus f = arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>> arr (\ ~(d, a, b) -> (d, put a, put b))
-
-enforceOrder :: (Arrow arr) => arr (a, b) (a, b)
-enforceOrder = arr $ \ ~(a, b) -> (a, a `pseq` b)
 
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
