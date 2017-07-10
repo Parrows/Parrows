@@ -59,4 +59,4 @@ instance (NFData a) => NFData (BasicFuture a) where
 
 instance (NFData a) => Future BasicFuture a where
     put = arr BF
-    get = arr $ ((BF a) -> a)
+    get = arr $ (\(BF a) -> a)
