@@ -20,8 +20,6 @@ import Data.List.Split
 
 import System.Environment
 
-import System.Random
-
 import Debug.Trace
 
 type Vector = [Int]
@@ -67,10 +65,10 @@ nodefunction n ((bA, bB), rows, cols)
           nextBs = take (n-1) cols
 
 randoms1 :: [Int]
-randoms1 = randoms $ mkStdGen 23586
+randoms1 = cycle [4,5,6]
 
 randoms2 :: [Int]
-randoms2 = randoms $ mkStdGen 67123
+randoms2 = cycle [7,8,9]
 
 toMatrix :: Int -> [Int] -> Matrix
 toMatrix cnt randoms = chunksOf n $ take (matrixIntSize n) randoms
@@ -87,5 +85,5 @@ main = do
         let aMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms1)
         let bMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms2)
 
-        let cMatricesExploded = parMap rdeepseq (uncurry matMult) $ zipWith (,) aMatrices bMatrices
+        let cMatricesExploded = map (uncurry matMult) $ zipWith (,) aMatrices bMatrices
         print $ length $ rnf cMatricesExploded `seq` cMatricesExploded
