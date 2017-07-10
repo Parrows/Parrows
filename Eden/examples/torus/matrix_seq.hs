@@ -10,6 +10,8 @@ import Data.List
 import Control.Arrow
 import Control.DeepSeq
 
+import Control.Parallel.Strategies
+
 import Control.DeepSeq
 
 import Control.Applicative
@@ -85,5 +87,5 @@ main = do
         let aMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms1)
         let bMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms2)
 
-        let cMatricesExploded = map (uncurry matMult) $ zipWith (,) aMatrices bMatrices
-        print $ length $ (rnf cMatricesExploded) `seq` cMatricesExploded
+        let cMatricesExploded = parMap rdeepseq (uncurry matMult) $ zipWith (,) aMatrices bMatrices
+        print $ length $ rnf cMatricesExploded `seq` cMatricesExploded
