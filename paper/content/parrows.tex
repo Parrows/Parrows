@@ -37,7 +37,7 @@ We do not require the |conf| parameter in every implementation. If it is not nee
 \subsection{ArrowParallel instances}
 
 \subsubsection{Multicore Haskell} \label{sec:parrows:multicore}
-The Multicore Haskell implementation of |ArrowParallel| is implemented in a straightforward manner by using |listApp| (Appendix~\ref{utilfns}) combined with the |withStrategy :: Strategy a -> a -> a| and |pseq :: a -> b -> b| combinators from Multicore Haskell, where |withStrategy| is the same as |using :: a -> Strategy a -> a| but with flipped parameters.
+The Multicore Haskell implementation of |ArrowParallel| is implemented in a straightforward manner by using |listApp| (Appendix~\ref{utilfns}) combined with the |withStrategy :: Strategy a -> a -> a| combinators from Multicore Haskell, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters.
 \begin{figure}[t]
 \begin{code}
 data Conf a = Conf (Strategy a)
@@ -45,8 +45,7 @@ data Conf a = Conf (Strategy a)
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
     	parEvalN _ fs =
        		listApp fs >>>
-        	arr (withStrategy (parList rdeepseq)) &&& arr id >>>
-        	arr (uncurry pseq)
+        	arr (withStrategy (parList rdeepseq))
 \end{code}% $ %% formatting
 \caption{Fully evaluating |ArrowParallel| instance for the Multicore Haskell backend.}
 \label{fig:ArrowParallelMulticoreRdeepseq}

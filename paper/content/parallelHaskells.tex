@@ -26,11 +26,11 @@ Multicore Haskell \cite{Marlow2009,Trinder1998a} is a way to do parallel process
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = let bs = zipWith ($) fs as 
-                 in (bs `using` parList rdeepseq) `pseq` bs
+                 in bs `using` parList rdeepseq
 \end{code} %$
 
 In the above definition of |parEvalN| we just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
-We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form. To ensure that programs that use |parEvalN| have the correct evaluation order, we annotate the computation with |pseq :: a -> b -> b| which forces the compiler to not reorder multiple |parEvalN| computations. This is particularly necessary in circular communication topologies like in the |torus| or |ring| (Chap.~\ref{sec:topology-skeletons}), where a wrong execution order would result in deadlock scenarios when executed without |pseq|.
+We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form.
 %
 Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 
@@ -38,7 +38,7 @@ Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 % \begin{code}
 % parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 % parEvalN fs as = let bs = zipWith ($) fs as 
-%                  in (bs `using` parList rdeepseq) `pseq` bs
+%                  in (bs `using` parList rdeepseq)
 % \end{code}
 % \caption{Multicore version of |parEvalN|.}
 % \label{fig:parEvalNMulticore}

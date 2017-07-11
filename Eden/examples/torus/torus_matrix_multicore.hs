@@ -48,10 +48,10 @@ foldl1ZipWith _ _ [] _          = error "First list is empty"
 foldl1ZipWith _ _ _ []          = error "Second list is empty"
 foldl1ZipWith f g (x:xs) (y:ys) = foldlZipWith f g (f x y) xs ys
 
-multAdd:: (NFData a, NFData b, NFData c) => (a -> b -> c) -> (c -> c -> c) -> [[a]] -> [[b]] -> [[c]]
-multAdd f g xs ys = parMap () (\us -> foldl1ZipWith (\u vs -> map (f u) vs) (zipWith g) us ys) xs
+multAdd::(a -> b -> c) -> (c -> c -> c) -> [[a]] -> [[b]] -> [[c]]
+multAdd f g xs ys = map (\us -> foldl1ZipWith (\u vs -> map (f u) vs) (zipWith g) us ys) xs
 
-matMult:: (NFData a, Num a) => [[a]] -> [[a]] -> [[a]]
+matMult:: Num a => [[a]] -> [[a]] -> [[a]]
 matMult xs ys = multAdd (*) (+) xs ys
 
 matAdd :: Matrix -> Matrix -> Matrix
