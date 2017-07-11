@@ -155,7 +155,7 @@ main = do
  args <- getArgs
  let s = read $ head args
      k = read (args!!1)
-     n | length args < 4 =  k
+     n | length args < 4 =  2^k-1
        | read (args!!3) = 2^k-1
        | otherwise = k
      t | length args > 2 && read (args!!2) > 0 = read (args!!2)
