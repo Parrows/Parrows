@@ -77,6 +77,6 @@ data BasicFuture a = BF a
 instance (NFData a) => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (NFData a) => Future BasicFuture a where
+instance Future BasicFuture a where
     put = arr BF
     get = arr (\(BF a) -> a)
