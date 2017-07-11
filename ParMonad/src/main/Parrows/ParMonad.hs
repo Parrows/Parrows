@@ -34,12 +34,6 @@ import Control.Monad.IO.Class
 import Control.Arrow
 import Control.DeepSeq
 
-import Control.Concurrent
-import Control.Concurrent.MVar
-import System.IO.Unsafe
-
-import GHC.Conc
-
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
     parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
                     zipWithArr (app >>> arr spawnP) >>>
@@ -74,9 +68,12 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b co
 
 data BasicFuture a = BF a
 
-instance (NFData a) => NFData (BasicFuture a) where
+instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
+
+instance (Arrow arr, ArrowChoice arr, ArrowApply arr) => FutureEval arr where
+    evalN _ = listApp
 
 instance Future BasicFuture a where
     put = arr BF
-    get = arr (\(BF a) -> a)
+    get = arr $ (\(BF a) -> a)

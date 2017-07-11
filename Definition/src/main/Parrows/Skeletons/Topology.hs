@@ -31,8 +31,6 @@ import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
 
-import GHC.Conc.Sync
-
 import Parrows.Skeletons.Map
 
 -- Ports of Control.Parallel.Eden.Topology to Parrows:
@@ -67,16 +65,17 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> parEvalN conf fs)) >>>
     arr last
 
-ring :: (ArrowLoop arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+ring :: (ArrowLoop arr, FutureEval arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
         arr (uncurry zip) >>>
-        parMap conf (second get >>> f >>> second put) >>>
+        evalN conf (repeat $ second get >>> f >>> second put) >>>
         arr unzip)
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
+            FutureEval arr,
             ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
             Future fut a, Future fut b) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
@@ -84,7 +83,7 @@ torus conf f =
     loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
         arr (uncurry3 (zipWith3 lazyzip3)) >>>
         (arr length >>> arr unshuffle) &&&
-            (shuffle >>> parMap conf (ptorus f)) >>>
+            (shuffle >>> evalN conf (repeat $ ptorus f)) >>>
         app >>>
         arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 

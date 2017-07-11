@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, UndecidableInstances #-}
 module Parrows.Multicore where
 
 import Parrows.Definition
@@ -34,17 +34,12 @@ import Control.Parallel.Strategies
 import Control.Arrow
 import Control.DeepSeq
 
-import Control.Concurrent
-import Control.Concurrent.MVar
-import System.IO.Unsafe
-
 data Conf a = Conf (Strategy a)
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         listApp fs >>>
-        arr (withStrategy (parList strat)) &&& arr id >>>
-        arr (uncurry pseq)
+        arr (withStrategy (parList strat))
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
     parEvalN _ fs = parEvalN (hack fs) fs
@@ -54,8 +49,11 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
 
 data BasicFuture a = BF a
 
-instance (NFData a) => NFData (BasicFuture a) where
+instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
+
+instance (Arrow arr, ArrowChoice arr, ArrowApply arr) => FutureEval arr where
+    evalN _ = listApp
 
 instance Future BasicFuture a where
     put = arr BF

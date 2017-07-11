@@ -32,6 +32,9 @@ class Future fut a | a -> fut where
     put :: (Arrow arr) => arr a (fut a)
     get :: (Arrow arr) => arr (fut a) a
 
+class (Arrow arr) => FutureEval arr where
+    evalN :: (ArrowParallel arr a b conf) => conf -> [arr a b] -> arr [a] [b]
+
 liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
 liftFut f = get >>> f >>> put
 

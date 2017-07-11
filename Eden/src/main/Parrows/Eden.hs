@@ -42,6 +42,9 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 
+instance (ArrowParallel arr a b conf) => FutureEval arr where
+    evalN = parEvalN
+
 -- ArrowParallel Instances
 
 -- FIXME: will this work with (spawnF id bs) with already "computed" bs
