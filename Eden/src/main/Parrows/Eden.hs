@@ -42,7 +42,7 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 
-instance (ArrowParallel arr a b conf) => FutureEval arr a b conf where
+instance ArrowParallel arr a b conf => FutureEval arr a b conf where
     evalN = parEvalN
 
 -- ArrowParallel Instances

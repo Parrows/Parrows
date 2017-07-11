@@ -71,7 +71,7 @@ ring :: (ArrowLoop arr, FutureEval arr (i, fut r) (o, fut r) conf,
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
         arr (uncurry zip) >>>
-        evalN conf (repeat $ second get >>> f >>> second put) >>>
+        evalN conf (repeat (second get >>> f >>> second put)) >>>
         arr unzip)
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
