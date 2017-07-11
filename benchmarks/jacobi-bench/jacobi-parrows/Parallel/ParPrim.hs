@@ -22,12 +22,14 @@ module Parallel.ParPrim(
 	      ) 
    where
 
-import GHC.IOBase(IO(..))
 import GHC.Base(error, Int#, Int(..), (+#), 
-		fork#, expectData#, noPe#, selfPe#,
+		fork#, expectData#,
                 connectToPort#, sendData#
 	       )
 import Control.Parallel.Strategies(NFData(..))
+import Control.Parallel.Eden
+import Control.DeepSeq
+import Control.Monad
 
 ----------------------------------------------------------
 -- IO wrappers for primitive operations:
@@ -37,18 +39,6 @@ import Control.Parallel.Strategies(NFData(..))
 --
 -- (eden implementation can work with unsafePerformIO)
 ---------
-
--- system information
-{-# NOINLINE noPe #-}
-noPe :: IO Int
-noPe = IO ( \s -> case (noPe# s) of 
-	               (# s',r #) -> (# s',I# r #)
-	  )
-{-# NOINLINE selfPe #-}
-selfPe :: IO Int
-selfPe = IO ( \s -> case (selfPe# s) of 
-	                 (# s',r #) -> (# s',I# r #)
-	    )
 
 -- not for export, only abstract type visible outside
 data ChanName' a = Chan Int# Int# Int#
@@ -60,7 +50,7 @@ instance NFData a => NFData (ChanName' a)
 -- tweaking fork primop from concurrent haskell... (not returning threadID)
 {-# NOINLINE fork #-}
 fork :: IO () -> IO ()
-fork action = IO (\s -> case (fork# action s) of 
+fork action = return (\s -> case (fork# action s) of
                           (# s' , _ #) -> (# s' , () #)
                  )
 
@@ -68,8 +58,8 @@ fork action = IO (\s -> case (fork# action s) of
 {-# NOINLINE createC #-}
 -- returns consistent channel type (channel of same type as data)
 createC :: IO ( ChanName' a, a )
-createC = IO (\s -> case (expectData# s) of 
-                     (# s',i,p, bh #) -> case selfPe# s' of
+createC = return (\s -> case (expectData# s) of
+                     (# s',i,p, bh #) -> case selfPe of
                                             (# s'', pe #) ->
                                                 (# s'',(Chan pe p i, bh) #)
              )
@@ -80,7 +70,7 @@ createC = IO (\s -> case (expectData# s) of
 {-# NOINLINE connectToPort #-}
 connectToPort_ :: Int# -> Int# -> Int# -> IO ()
 connectToPort_ pe proc i 
-    = IO (\s -> case (connectToPort# pe proc i s) of
+    = return (\s -> case (connectToPort# pe proc i s) of
 	                   s' -> (# s', () #)
 	 )
 
@@ -104,7 +94,7 @@ decodeMode (Instantiate n) = let k = 4 + n*8
 {-# NOINLINE sendData #-}
 sendData :: Mode -> a -> IO ()
 sendData mode d 
-    = IO (\s -> case (sendData# m d s) of 
+    = return (\s -> case (sendData# m d s) of
 	                   s' -> (# s', () #)
 	 )
       where (I# m) = decodeMode mode

@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                            %
-%  Eden Porting Project, Philipps-Universit‰t Marburg        %
+%  Eden Porting Project, Philipps-Universit√§t Marburg        %
 %                                                            %
 %                                                            %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,6 +17,7 @@ module Parallel.Skel.EdenSkel (-- process schemes :: <varying types>
 		 parMap, farm, dm, workpool, workpoolD,
 		 -- map skeletons :: (a -> b) -> [a] -> [b]
 		 map_par, map_farm, map_dm, map_wp,
+		 map_par', map_farm', map_dm', map_wp'',
 		 -- stateful replicated workers skeleton:
 		 strw,
 		 -- divide&conquer skeletons:
@@ -38,6 +39,7 @@ import Data.List
 import Parallel.Strategies(Strategy, seqList, r0, rwhnf, using)
  -- We restrict the import to avoid all GpH strategies which use "par".
 
+import Debug.Trace
 \end{code}
 
 \section{Eden Map Skeletons}
@@ -184,6 +186,16 @@ map_farm = (farm noPe unshuffleN shuffleN ).mapProc
 map_dm f xs = dm noPe unshuffleN shuffleN procf xs
     where procf xs = process (\() -> map f xs) 
 map_wp f xs = workpoolD noPe 2 f xs
+
+map_par', map_farm', map_dm', map_wp'' :: (Trans a , Trans b) => 
+				         (a -> b) -> [a] -> [b] 
+maxPe = max (noPe - 1) 1
+map_par' f = parMap (process f)
+map_farm' = (farm maxPe unshuffleN shuffleN ).mapProc
+    where mapProc f = process (map f)
+map_dm' f xs = dm maxPe unshuffleN shuffleN procf xs
+    where procf xs = process (\() -> map f xs) 
+map_wp'' f xs = workpoolD maxPe 2 f xs
 
 \end{code}
 
