@@ -1,11 +1,13 @@
 Jacobi sums in parallel.
 
-Simple workpool with reduce seq., now in a skeleton
+Simple workpool with reduce seq., now in a skeleton.
+
+This workpool does NOT sort. We sort the result list manually.
 
 \begin{code}
 {-# OPTIONS -cpp #-}
 #ifdef INTERACTIVE
-module SkelJacobiSum where
+module SortSkelJacobiSum where
 #else 
 module Main where
 #endif
@@ -16,21 +18,25 @@ Modifications for parallelism by: Oleg Lobachev
 \begin{code}
 import ModArithmetik
 import Ringerweiterung 
-import System.Environment (getArgs)
-import Data.Array
+import System (getArgs)
+import Array
 
 import JacobiSum hiding (jacobisumteststep3, jacobisumtest, jacobi)
 import qualified JacobiSum as JS
 
 import Data.Maybe
-import Parallel.Skel.EdenSkel
+-- import Control.Parallel.EdenSkel.MapSkels
+import MapHacks
+import Control.Parallel.Eden (noPe, Trans)
 import FarmUntil
 import Data.List (nub, sort, intersect)
 \end{code}
 
 \begin{code}
 -- import List (elemIndex)
-import Debug.Trace (trace)
+-- import Debug.Trace (trace)
+-- trace _ x = x
+--- trace is imported
 -- loud s x = trace (s ++ " " ++ show x) x
 \end{code}
 \begin{code}
@@ -84,13 +90,29 @@ jacobisumteststep3 0 xs n t lps = JS.jacobisumteststep3 xs n t lps
 
 With new skeleton, using workpool
 \begin{code}
-jacobisumteststep3 4 xs n t lps =
-    let worker (p, q) = jacobisumteststep4 p k q n lps
+jacobisumteststep3 m xs n t lps =
+    let worker (p, q) = jacobisumteststep4 p k q n $ reverse lps
+            -- take the hard tasks first
             where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
-    in mapUntil map_wp unifyMaybe worker xs
+        mymap | m==1 = map
+	      | m==2 = parMap
+	      | m==3 = farm' noPe
+	      | m==4 = workpoolSorted' noPe 2
+	      | m==5 = workpoolSortedNonBlock' noPe 2
+	      | m==6 = map_wp
+    in fixSort m $ mapUntil mymap unifyMaybe worker $ reverse xs
+
+-- the lps list is expected to be sorted
+-- need to sort manually only for unsorting workpool
+fixSort 6 Nothing = Nothing
+fixSort 6 (Just []) = Just []
+fixSort 6 (Just xs) = Just $ sort xs
+fixSort _ Nothing = Nothing
+fixSort _ (Just []) = Just []
+fixSort _ (Just xs) = Just $ reverse xs
 
 -- all other cases
-jacobisumteststep3 _ _ _ _ _ = error "Not implemented"
+-- jacobisumteststep3 _ _ _ _ _ = error "Not implemented"
 \end{code}
 
 
@@ -151,7 +173,9 @@ main = do
             1 -> "sequential map"
             2 -> "parallel map"
             3 -> "parallel farm"
-            4 -> "parallel workpool"
+            4 -> "parallel workpool, sorting, blocking"
+	    5 -> "parallel workpool, sorting, nonblocking"
+	    6 -> "parallel workpool, not sorting"
  putStrLn "------------------------"
  print $ jacobisumtest s n t
  putStrLn "done"

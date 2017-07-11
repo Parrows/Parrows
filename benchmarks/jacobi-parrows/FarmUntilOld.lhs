@@ -4,27 +4,16 @@ Vanilla iterUntil.
 module FarmUntil where
 
 import Data.Maybe
-import Control.Parallel.Eden
--- (noPe, Trans, process)
--- import MapHacks -- old hack
--- import Control.Parallel.Eden.EdenSkel.MapSkels (map_farm, map_wp) -- old interface
-import Control.Parallel.Eden.Map hiding (map_farm)
-import Control.Parallel.Eden.Workpool
+import Parallel.Eden (noPe, Trans, process)
+import Parallel.Skel.EdenSkel (map_farm, map_wp)
 
 import Data.List (intersect, nub)
 
 import Debug.Trace
-
-map_wp :: (Trans a, Trans b) => (a -> b) -> [a] -> [b] 
-map_wp = workpoolSortedNonBlock noPe 2
 \end{code}
 
 Wenn das Ergebnis nicht gebraucht wird, dann wird alles gekillt, inklusive die Kinder, die es produzieren.
 \begin{code}
--- already defined
-map_farm :: (Trans a, Trans b) => (a -> b) -> [a] -> [b]
-map_farm = farmS noPe
-
 farmUntilBool :: Trans a => (a -> Bool) -> [a] -> Bool
 farmUntilBool f xs = and $ map_farm f xs
 \end{code}

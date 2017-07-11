@@ -5,7 +5,7 @@ Simple workpool with reduce seq., now in a skeleton
 \begin{code}
 {-# OPTIONS -cpp #-}
 #ifdef INTERACTIVE
-module SkelJacobiSum where
+module NewSkelJacobiSum where
 #else 
 module Main where
 #endif
@@ -23,14 +23,26 @@ import JacobiSum hiding (jacobisumteststep3, jacobisumtest, jacobi)
 import qualified JacobiSum as JS
 
 import Data.Maybe
-import Parallel.Skel.EdenSkel
+-- import MapHacks -- old verisons
+import Parrows.Eden
+import Parrows.Definition
+import Parrows.Skeletons.Map
+import Control.Parallel.Eden (noPe, Trans)
 import FarmUntil
 import Data.List (nub, sort, intersect)
+import Control.DeepSeq
+\end{code}
+
+Replace MapHacks with up-to-date Eden Skeletons
+\begin{code}
+
 \end{code}
 
 \begin{code}
 -- import List (elemIndex)
-import Debug.Trace (trace)
+-- import Debug.Trace (trace)
+-- trace _ x = x
+--- trace is imported
 -- loud s x = trace (s ++ " " ++ show x) x
 \end{code}
 \begin{code}
@@ -84,13 +96,17 @@ jacobisumteststep3 0 xs n t lps = JS.jacobisumteststep3 xs n t lps
 
 With new skeleton, using workpool
 \begin{code}
-jacobisumteststep3 4 xs n t lps =
+jacobisumteststep3 m xs n t lps =
     let worker (p, q) = jacobisumteststep4 p k q n lps
             where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
-    in mapUntil map_wp unifyMaybe worker xs
+        mymap | m==1 = map
+	      | m==2 = parMap ()
+	      | m==3 = farm () noPe
+	      -- | m==6 = map_wp
+    in mapUntil mymap unifyMaybe worker xs
 
 -- all other cases
-jacobisumteststep3 _ _ _ _ _ = error "Not implemented"
+-- jacobisumteststep3 _ _ _ _ _ = error "Not implemented"
 \end{code}
 
 
@@ -151,7 +167,9 @@ main = do
             1 -> "sequential map"
             2 -> "parallel map"
             3 -> "parallel farm"
-            4 -> "parallel workpool"
+            4 -> "parallel workpool, sorting, SHOULD BE blocking"
+	    5 -> "parallel workpool, sorting, nonblocking (TAKE THIS)"
+	    6 -> "parallel workpool, not sorting (DEPRICATED)"
  putStrLn "------------------------"
  print $ jacobisumtest s n t
  putStrLn "done"

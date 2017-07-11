@@ -1,11 +1,11 @@
 Jacobi sums in parallel.
 
-Simple workpool with reduce seq., now in a skeleton
+Simple farm with reduce seq.
 
 \begin{code}
 {-# OPTIONS -cpp #-}
 #ifdef INTERACTIVE
-module SkelJacobiSum where
+module PostJacobiSum where
 #else 
 module Main where
 #endif
@@ -16,8 +16,8 @@ Modifications for parallelism by: Oleg Lobachev
 \begin{code}
 import ModArithmetik
 import Ringerweiterung 
-import System.Environment (getArgs)
-import Data.Array
+import System (getArgs)
+import Array
 
 import JacobiSum hiding (jacobisumteststep3, jacobisumtest, jacobi)
 import qualified JacobiSum as JS
@@ -69,8 +69,28 @@ a new attempt with unify!
 Unifying the lists of lists
 \begin{code}
 unify :: (Eq a, Ord a, Show a) => [[a]] -> [a]
-unify = foldl1 intersect . nub -- nub gives better performance
+unify = unify' . yell . nub -- nub gives better performance
+    where yell x= trace ("unify: nubbed input before unifying " ++ (show x)) $ x
+                             
+unify'' :: (Eq a, Ord a, Show a) => [[a]] -> [a]
+unify'' [] = []
+unify'' [xs] = xs
+unify'' (xs:ys:xss) = unify' $ (intersect xs ys):xss
+-- unify'' _ = [] -- not needed
 
+unify' :: (Eq a, Ord a, Show a) => [[a]] -> [a]
+unify' = foldl1 intersect 
+
+-- -- lists are sorted
+-- unifyPair :: (Eq a, Ord a) => [a] -> [a] -> [a]
+-- unifyPair [] _ = []
+-- unifyPair _ [] = []
+-- unifyPair xs ys = catMaybes $ zipWith u xs ys
+--     where u x y | x<y = Nothing
+--                 | otherwise = Just x
+\end{code}
+
+\begin{code}
 unifyMaybe :: (Eq a, Ord a, Show a) => [Maybe [a]] -> Maybe [a]
 unifyMaybe xss | hasNothing xss = trace "unifyMaybe: bailing out!" $ 
                                   Nothing
@@ -80,17 +100,30 @@ unifyMaybe xss | hasNothing xss = trace "unifyMaybe: bailing out!" $
           maybeBool Nothing = False
 
 jacobisumteststep3 0 xs n t lps = JS.jacobisumteststep3 xs n t lps
+
+jacobisumteststep3 s xs n t lps
+    = trace (unlines ["Tested total input " ++ show xs,
+                      "Tested complete lp list " ++ show lps,
+--                      "Result lp lists from all steps: " ++ show ress,
+                      "Result lp list after reduce: " ++ show res]) $
+      res
+      where worker (p, q) = trace ("Testing " ++ show (p, q)) $
+                            jacobisumteststep4 p k q n lps
+                where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
+            ress | s==1 = map worker xs
+                 | s==2 = map_par worker xs
+                 | s==3 = map_farm worker xs
+                 | s==4 = map_wp worker xs
+                 | otherwise = error "Dunno such skeleton!"
+            res = unifyMaybe ress
 \end{code}
 
-With new skeleton, using workpool
+The same with new skeleton:
 \begin{code}
-jacobisumteststep3 4 xs n t lps =
+jacobiWorker xs n t lps =
     let worker (p, q) = jacobisumteststep4 p k q n lps
             where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
     in mapUntil map_wp unifyMaybe worker xs
-
--- all other cases
-jacobisumteststep3 _ _ _ _ _ = error "Not implemented"
 \end{code}
 
 

@@ -5,25 +5,23 @@ module FarmUntil where
 
 import Data.Maybe
 import Control.Parallel.Eden
+import Parrows.Eden
+import Parrows.Skeletons.Map
 -- (noPe, Trans, process)
 -- import MapHacks -- old hack
 -- import Control.Parallel.Eden.EdenSkel.MapSkels (map_farm, map_wp) -- old interface
-import Control.Parallel.Eden.Map hiding (map_farm)
-import Control.Parallel.Eden.Workpool
 
 import Data.List (intersect, nub)
 
 import Debug.Trace
 
-map_wp :: (Trans a, Trans b) => (a -> b) -> [a] -> [b] 
-map_wp = workpoolSortedNonBlock noPe 2
 \end{code}
 
 Wenn das Ergebnis nicht gebraucht wird, dann wird alles gekillt, inklusive die Kinder, die es produzieren.
 \begin{code}
 -- already defined
 map_farm :: (Trans a, Trans b) => (a -> b) -> [a] -> [b]
-map_farm = farmS noPe
+map_farm = farm () noPe
 
 farmUntilBool :: Trans a => (a -> Bool) -> [a] -> Bool
 farmUntilBool f xs = and $ map_farm f xs
@@ -52,8 +50,7 @@ farmUntilMaybePass f xs
 \end{code}
 
 \begin{code}
-mwUntilBool :: Trans a => (a -> Bool) -> [a] -> Bool
-mwUntilBool f xs = and $ map_wp f xs
+
 \end{code}
 
 A more generic farmUntil.
@@ -96,17 +93,7 @@ jacobisumteststep3 s xs n t lps
                             jacobisumteststep4 p k q n lps
                 where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
             ress | s==1 = map worker xs
-                 | s==2 = map_par worker xs
                  | s==3 = map_farm worker xs
-                 | s==4 = map_wp worker xs
                  | otherwise = error "Dunno such skeleton!"
             res = unifyMaybe ress
 \end{jcode}
-
-The same with our skeleton:
-\begin{xcode}
-jacobiWorker xs n t lps =
-    let worker (p, q) = jacobisumteststep4 p k q n lps
-          where k = nu (q-1) p  -- Vielfachheit von p in (q-1)
-    in mapUntil map_wp unifyMaybe worker xs
-\end{xcode}
