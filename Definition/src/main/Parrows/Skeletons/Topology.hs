@@ -65,7 +65,8 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> parEvalN conf fs)) >>>
     arr last
 
-ring :: (ArrowLoop arr, FutureEval arr, Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
+ring :: (ArrowLoop arr, FutureEval arr (i, fut r) (o, fut r) conf,
+    Future fut r, ArrowParallel arr (i, fut r) (o, fut r) conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
@@ -75,7 +76,7 @@ ring conf f =
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
-            FutureEval arr,
+            FutureEval arr (c, fut a, fut b) (d, fut a, fut b) conf,
             ArrowParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
             Future fut a, Future fut b) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]

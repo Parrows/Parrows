@@ -22,7 +22,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, MultiParamTypeClasses, FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses, AllowAmbiguousTypes, FunctionalDependencies #-}
 module Parrows.Eden where
 
 import Parrows.Definition
@@ -42,7 +42,7 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 
-instance (ArrowParallel arr a b conf) => FutureEval arr where
+instance (ArrowParallel arr a b conf) => FutureEval arr a b conf where
     evalN = parEvalN
 
 -- ArrowParallel Instances

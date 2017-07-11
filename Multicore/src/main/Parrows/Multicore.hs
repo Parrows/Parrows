@@ -52,7 +52,8 @@ data BasicFuture a = BF a
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (Arrow arr, ArrowChoice arr, ArrowApply arr) => FutureEval arr where
+instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
+    ArrowParallel arr a b conf) => FutureEval arr a b conf where
     evalN _ = listApp
 
 instance Future BasicFuture a where
