@@ -3,29 +3,65 @@
 
 \section{Introduction}
 \label{sec:introduction}
-\olcomment{todo, reuse 5.5, and more}
+% \olcomment{todo, reuse 5.5, and more}
+%
+% \mbcomment{
+% Haskell is Spielwiese für Parallelität; verschiedene Ansätze (Par, Multicore, Eden); Orthogonale Ansätze; Verwenden höchstens eine Monade - manchmal auch nur intern; Wir wollen Parallelität mit Arrows abbilden, was noch niemand gemacht hat;
+% Statt einer eigenen Implementierung definieren wir ein "shallow embedded DSL" (ACHTUNG, ist das der richtige Name? effektiv API);
+% Umsetzung mit verschiedenen parallelen Haskells; We tame the zoo of parallel Haskells und vergewissern uns dass es nicht viel Overhead bringt
+% }
+%
+% blablabla arrows, parallel, haskell.
+%
+% \olcomment{An attempt ---->}
+%%%%%
 
-\mbcomment{
-Haskell is Spielwiese für Parallelität; verschiedene Ansätze (Par, Multicore, Eden); Orthogonale Ansätze; Verwenden höchstens eine Monade - manchmal auch nur intern; Wir wollen Parallelität mit Arrows abbilden, was noch niemand gemacht hat;
-Statt einer eigenen Implementierung definieren wir ein "shallow embedded DSL" (ACHTUNG, ist das der richtige Name? effektiv API);
-Umsetzung mit verschiedenen parallelen Haskells; We tame the zoo of parallel Haskells und vergewissern uns dass es nicht viel Overhead bringt
-}
+Pure functional programming languages have been used
+since longer time as a ``sand box'' for testing novel parallel
+programming approaches. Reasons for this include referential
+transparency and the ease of introducing new sophisticated language
+concepts. Specially for Haskell (on which this paper focuses), various
+approaches reached maturity. The definite parallel Haskell does not
+exist, there are multiple parallel Haskells. We regard here in-depth
+the Multicore Haskell (a SMP implementation of GpH language), the
+|Par| Monad, and Eden, a distributed memory parallel Haskell. These
+languages represent orthogonal approaches. Some use a monad, even if
+only for the internal representation. Some introduce additional
+language constructs. 
+%In this paper we introduce a notion of parallel
+%computations using Arrows.
+We use here Arrows to represent parallel computations. This has not
+been done before.
 
-blablabla arrows, parallel, haskell.
+%Our Arrows-based interface is a high-level one.
+We provide an Arrows-based typeclass and various implementations.
+Instead of 
+introducing a new low-level parallel backend in order to implement our
+Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
+is defined as a common interface and varying implementations in
+existing parallel Haskells: Multicore Haskell, |Par| Monad, and
+Eden. Thus, we not only define a parallel programming interface in a
+novel manner. We tame the zoo of parallel Haskells. We provide a
+common, very low-penalty programming interface that allows to switch
+the parallel Haskell backends at will. Further backends are viable, too.
 
 \paragraph{Contribution}
-
-\olcomment{HIT HERE REALLY STRONG}
-
+%
+%\olcomment{HIT HERE REALLY STRONG}
+%
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
 \mbcomment{different, how?}
-We wrap parallel Haskells inside of our |ArrowParallel| interface, but why do we aim to abstract parallelism this way and what does this approach do better than the other parallel Haskells?
+We wrap parallel Haskells inside of our |ArrowParallel| interface, but
+% why do we aim to abstract parallelism this way and what does this
+% approach do better than the other parallel Haskells?
+ is such a parallelism abstraction of benefit and to what extent does
+ it improve existing approaches?
 \begin{itemize}
 	\item \textbf{Arrow DSL benefits}:
 	With the |ArrowParallel| typeclass we do not lose any benefits of using arrows as |parEvalN| is a yet another Arrow combinator. The resulting Arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the Monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change anything.
 	\item \textbf{Abstraction}:
-	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This leaves us in the beautiful situation of being able to write our code against the interface of the typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the actual |ArrowParallel| instance.
+	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This leaves us in the beautiful situation of being able to write our code against the interface of the typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the current |ArrowParallel| instance.
 \end{itemize}
 
 
