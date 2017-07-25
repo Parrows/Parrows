@@ -84,7 +84,7 @@ Note that extensive use of |pipe2| over |pipe| with a hand-written combination d
 
 Another version of |>>>| is:
 \begin{code}
-f parparcomp g = (f . put) >>> (get . g)
+f parcomp g = (f . put) >>> (get . g)
 \end{code}
 It does not launch both arrows |f| and |g| in parallel, but allows for more smooth data commuinication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
 

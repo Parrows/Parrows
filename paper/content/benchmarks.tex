@@ -334,8 +334,8 @@ in the plots as ``Eden~CP''.
 The PArrows version of \rmtest on a single node of the Glasgow grid
 showed almost linear speedup (Fig.~\ref{fig:bench-rm-sm}). The speedup
 of 64-task PArrows/Eden at 16 real cores version was 13.65, the
-efficiency was 85.3\%.  However, when we increase the number of
-requested cores to be 32---\ie when we use hyperthreading on 16 real
+efficiency was 85.3\%.  However, if we increase the number of
+requested cores to be 32---\ie if we use hyperthreading on 16 real
 cores---the speedup does not increase that well. It is merely 15.99
 for 32 tasks with PArrows/Eden. It is worse for other backends.  As
 for 64 tasks, we obtain the speedup of 16.12 with PArrows/Eden at 32
@@ -343,7 +343,7 @@ hyperthreaded cores and only 13.55 with PArrows/Multicore
 Haskell. Efficiency is 50.4\% and 42.3\%, respectively. The Eden
 version used here was Eden~CP, the ``share nothing'' SMP build.
 
-In the distributed memory setting same effect ensues. We obtain
+In the distributed memory setting the same effect ensues. We obtain
 plummeting speedup of 124.31 at 512 hyperthreaded cores, whereas it was
 213.172 for 256 real cores. Apparently, hyperthreading in the Glasgow
 grid fails to execute two parallel Haskell processes with full-fledged
@@ -378,7 +378,7 @@ time differences that are not relativated \wrt the total execution time.
 
 The error bars ends were computed from pointwise maximum of both standard
 deviations from both measurements for PArrows and non-PArrows
-versions. These are the values provided by |Criterion| package that we
+versions. These are the values provided by the |bench| package that we
 used for benchmarking. We call a difference between two versions
 significant when the border of the error bar of absolute time
 difference is above or below zero. In other words: the time

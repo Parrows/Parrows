@@ -17,12 +17,12 @@
 %%%%%
 
 Pure functional programming languages have been used
-since longer time as a ``sand box'' for testing novel parallel
+since a longer time as a ``sand box'' for testing novel parallel
 programming approaches. Reasons for this include referential
 transparency and the ease of introducing new sophisticated language
 concepts. Specially for Haskell (on which this paper focuses), various
 approaches reached maturity. The definite parallel Haskell does not
-exist, there are multiple parallel Haskells. We regard here in-depth
+exist, there are multiple parallel Haskells \mbcomment{Wortwiederholung? Oder okay so?}. We regard here in-depth
 the Multicore Haskell (a SMP implementation of GpH language), the
 |Par| Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a monad, even if
@@ -30,7 +30,7 @@ only for the internal representation. Some introduce additional
 language constructs. 
 %In this paper we introduce a notion of parallel
 %computations using Arrows.
-We use here Arrows to represent parallel computations. This has not
+Here, we use Arrows to represent parallel computations. This has not
 been done before.
 
 %Our Arrows-based interface is a high-level one.
@@ -41,7 +41,7 @@ Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
 is defined as a common interface and varying implementations in
 existing parallel Haskells: Multicore Haskell, |Par| Monad, and
 Eden. Thus, we not only define a parallel programming interface in a
-novel manner. We tame the zoo of parallel Haskells. We provide a
+novel manner - we tame the zoo of parallel Haskells. We provide a
 common, very low-penalty programming interface that allows to switch
 the parallel Haskell backends at will. Further backends are viable, too.
 
@@ -52,7 +52,7 @@ the parallel Haskell backends at will. Further backends are viable, too.
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
 \mbcomment{different, how?}
-We wrap parallel Haskells inside of our |ArrowParallel| interface, but
+We wrap parallel Haskells inside of our |ArrowParallel| typeclass, but
 % why do we aim to abstract parallelism this way and what does this
 % approach do better than the other parallel Haskells?
  is such a parallelism abstraction of benefit and to what extent does
