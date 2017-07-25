@@ -286,7 +286,7 @@ Name & Area & Type & Origin & Citation \\
 \midrule
 \rmtest & Mathematics & |parMap+reduce| & Eden & \citet{Lobachev2012}\\
 Jacobi sum test & Mathematics & |workpool+reduce| & Eden & \citet{Lobachev2012}\\
-Gentleman & Mathematics & |torus| & Eden & \citet{Loogen2012}\\
+Gentleman & Mathematics & |torus+parMap| & Eden & \citet{Loogen2012}\\
 Sudoku & Puzzle & |parMap| & |Par| Monad & \citet{par-monad}\\
 \bottomrule
 \end{tabular}
@@ -307,7 +307,7 @@ implementation of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 ``Gentleman'' is a standard Eden test program, developed
 for their |torus| skeleton. It implements a parallel matrix
 multiplication \citep{Gentleman1978}. We ported its latest Eden
-version \citep{Loogen2012} to PArrows.
+version \citep{Loogen2012} to PArrows and changed it so that it runs multiple |torus| computations in parallel with |parMap|.
 
 A~parallel Sudoku solver was used by \citet{par-monad} to compare |Par| Monad
 to Multicore Haskell. We ported it to PArrows.
