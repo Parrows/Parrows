@@ -26,6 +26,12 @@ import System.Environment
 
 import Debug.Trace
 
+randoms1 :: [Int]
+randoms1 = cycle [4,5,6]
+
+randoms2 :: [Int]
+randoms2 = cycle [7,8,9]
+
 type Vector = [Int]
 type Matrix = [Vector]
 
@@ -35,44 +41,11 @@ dimX = length
 dimY :: Matrix -> Int
 dimY = length . head
 
---from: https://rosettacode.org/wiki/Matrix_multiplication#Haskell
-foldlZipWith::(a -> b -> c) -> (d -> c -> d) -> d -> [a] -> [b]  -> d
-foldlZipWith _ _ u [] _          = u
-foldlZipWith _ _ u _ []          = u
-foldlZipWith f g u (x:xs) (y:ys) = foldlZipWith f g (g u (f x y)) xs ys
-
-foldl1ZipWith::(a -> b -> c) -> (c -> c -> c) -> [a] -> [b] -> c
-foldl1ZipWith _ _ [] _          = error "First list is empty"
-foldl1ZipWith _ _ _ []          = error "Second list is empty"
-foldl1ZipWith f g (x:xs) (y:ys) = foldlZipWith f g (f x y) xs ys
-
-multAdd::(a -> b -> c) -> (c -> c -> c) -> [[a]] -> [[b]] -> [[c]]
-multAdd f g xs ys = map (\us -> foldl1ZipWith (\u vs -> map (f u) vs) (zipWith g) us ys) xs
-
-matMult:: Num a => [[a]] -> [[a]] -> [[a]]
-matMult xs ys = multAdd (*) (+) xs ys
-
 matAdd :: Matrix -> Matrix -> Matrix
 matAdd x y
     | dimX x /= dimX y = error "dimX x not equal to dimX y"
     | dimY x /= dimY y = error "dimY x not equal to dimY y"
     | otherwise = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
-
--- from: http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf (page 38)
-nodefunction :: Int                         -- torus dimension
-    -> ((Matrix, Matrix), [Matrix], [Matrix]) -- process input
-    -> ([Matrix], [Matrix], [Matrix])       -- process output
-nodefunction n ((bA, bB), rows, cols)
-    = ([bSum], bA:nextAs , bB:nextBs)
-    where bSum = foldl' matAdd (matMult bA bB) (zipWith matMult nextAs nextBs)
-          nextAs = take (n-1) rows
-          nextBs = take (n-1) cols
-
-randoms1 :: [Int]
-randoms1 = cycle [4,5,6]
-
-randoms2 :: [Int]
-randoms2 = cycle [7,8,9]
 
 toMatrix :: Int -> [Int] -> Matrix
 toMatrix cnt randoms = chunksOf n $ take (matrixIntSize n) randoms
@@ -84,25 +57,34 @@ matrixIntSize n = n * n
 splitMatrix :: Int -> Matrix -> [[Matrix]]
 splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
 
-combine :: [[Matrix]] -> [[Matrix]] -> [[(Matrix, Matrix)]]
-combine a b = zipWith (\a b -> zipWith (,) a b) a b
+prMM :: Matrix -> Matrix -> Matrix
+prMM m1 m2 = prMMTr m1 (transpose m2)
+prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
 
-type MatrixExploded = [[[Matrix]]]
+prMM_torus :: Integer -> Int -> Matrix -> Matrix -> Matrix
+prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith (zipWith (,)) (split m1) (split m2)
+    where   torusSize = (floor . sqrt) $ fromIntegral numCores
+            combine = concat . (map (foldr (zipWith (++)) (repeat [])))
+            split = splitMatrix (problemSizeVal `div` torusSize)
 
-matMultTorus :: Int -> Int -> Matrix -> Matrix -> MatrixExploded
-matMultTorus nodeCountVal problemSizeVal a b =
-    let combined = combine (splitMatrix (problemSizeVal `div` nodeCountVal) a) (splitMatrix (problemSizeVal `div` nodeCountVal) b)
-    in torus () (nodefunction nodeCountVal) $ combined
+-- Function performed by each worker
+mult :: Int -> ((Matrix,Matrix),[Matrix],[Matrix]) -> (Matrix,[Matrix],[Matrix])
+mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
+    where toRight = take (size-1) (sm1:sm1s)
+          toBottom = take (size-1) (sm2':sm2s)
+          sm2' = transpose sm2
+          sms = zipWith prMMTr (sm1:sm1s) (sm2':sm2s)
+          result = foldl1' matAdd sms
 
 main = do
         args <- getArgs
         let (nodeCount:numCoresStr:problemSize:listSize:rest) = args
-        let nodeCountVal = read nodeCount
+        --let nodeCountVal = read nodeCount
         let problemSizeVal = read problemSize
-        let listSizeVal = read listSize
+        --let listSizeVal = read listSize
         let numCores = read numCoresStr
-        let aMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms1)
-        let bMatrices = take listSizeVal $ map (toMatrix problemSizeVal) $ (chunksOf (matrixIntSize problemSizeVal) randoms2)
+        let matrixA = toMatrix problemSizeVal randoms1
+        let matrixB = toMatrix problemSizeVal randoms2
 
-        let cMatricesExploded = farm () numCores (uncurry $ matMultTorus nodeCountVal problemSizeVal) $ zipWith (,) aMatrices bMatrices
-        print $ length $ (rnf cMatricesExploded) `seq` cMatricesExploded
+        let matrixC = prMM_torus numCores problemSizeVal matrixA matrixB
+        print $ length $ (rnf matrixC) `seq` matrixC
