@@ -5,6 +5,7 @@ import Parrows.Future
 import Control.Parallel.Eden.Topology
 --import Parrows.Skeletons.Topology
 import Control.Parallel.Eden.Map
+import Control.Parallel.Eden
 import Parrows.Eden
 import Data.List
 
