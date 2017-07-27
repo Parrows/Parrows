@@ -11,6 +11,8 @@ import Parrows.Skeletons.Topology
 import Parrows.Skeletons.Map
 import Data.List
 
+import Control.Parallel.Eden
+
 --import GHC.Conc
 
 import Control.Arrow
@@ -61,7 +63,7 @@ prMM :: Matrix -> Matrix -> Matrix
 prMM m1 m2 = prMMTr m1 (transpose m2)
 prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
 
-prMM_torus :: Integer -> Int -> Matrix -> Matrix -> Matrix
+prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
 prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith (zipWith (,)) (split m1) (split m2)
     where   torusSize = (floor . sqrt) $ fromIntegral numCores
             combine = concat . (map (foldr (zipWith (++)) (repeat [])))
@@ -78,11 +80,9 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
 
 main = do
         args <- getArgs
-        let (nodeCount:numCoresStr:problemSize:listSize:rest) = args
-        --let nodeCountVal = read nodeCount
+        let (problemSize:rest) = args
         let problemSizeVal = read problemSize
-        --let listSizeVal = read listSize
-        let numCores = read numCoresStr
+        let numCores = noPe
         let matrixA = toMatrix problemSizeVal randoms1
         let matrixB = toMatrix problemSizeVal randoms2
 
