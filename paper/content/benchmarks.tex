@@ -4,6 +4,7 @@
 \label{sec:benchmarks}
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
+\newcommand{\torustest}{Torus Matrix Multiplication test\xspace}
 \newlength{\plotwidthSMP}
 \setlength{\plotwidthSMP}{0.39\textwidth}
 \newlength{\plotwidthDist}
@@ -179,7 +180,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 % }
 
 \newcommand{\speedupSkelRMDist}[4]{
-\speedupplot{Speedup of \rmtest ``#2''}{PArrows}{256}{#3}{
+\speedupplot{Speedup of \rmtest ``#1,#2''}{PArrows}{256}{#3}{
 % \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -233,7 +234,7 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 {\performanceSkelRMDistDiff{44497}{256}{32}{0.5}{260}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{44497}-1$, we used 256
-  tasks. Top plot shows absolute speedup in a distributed memory setting. The
+  tasks. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
   (and hence speedup) measurements for PArrows with Eden backend and
   Eden almost coincide. Hence, bottom plot shows
@@ -241,6 +242,39 @@ absolute time differences for this benchmark. The
 lower the value, the better for PArrows\olcomment{CHECKME}.}
 \label{fig:bench-rm-dist}
 \end{figure}
+
+\newcommand{\speedupTorusDist}[3]{
+\speedupplot{Speedup of \torustest ``#1''}{PArrows}{256}{#2}{
+\addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-#1.csv};
+}{#3}{\plotwidthDist}
+}
+
+\newcommand{\performanceTorusDistDiff}[4]{
+\performancediffplot{Run time differences\\for \torustest ``#1''}{(Eden $-$ PArrows)}{256}{#2}{
+\addplot+[mark=*,very thick,error bars/.cd,
+    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+smooth]{benchmarks/distributed-torus/#1-diff.csv};
+}{#3}{#4}{\plotwidthDist}
+}
+
+\begin{figure}
+\centering
+%\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+%
+{\speedupTorusDist{1024}{32}{260}\label{123123123}}%
+%\hfill%
+{\performanceTorusDistDiff{1024}{32}{0.5}{260}\label{12312312312}}
+\caption{Parallel performance of \torustest on the Glasgow grid
+  consisting of 256 cores. Input was a matrix size of $1024$. The top plot shows absolute speedup in a distributed memory setting. The
+  closer to linear speedup the better. Time
+  (and hence speedup) measurements for PArrows with Eden backend and
+  Eden almost coincide. Hence, bottom plot shows
+absolute time differences for this benchmark. The
+lower the value, the better for PArrows\olcomment{CHECKME}.}
+\label{123123123122}
+\end{figure}
+
 
 %\speedupSkelRMDistDiff{44497}{256}{32,64,128,256,512}{544}
 
@@ -286,7 +320,7 @@ Name & Area & Type & Origin & Citation \\
 \midrule
 \rmtest & Mathematics & |parMap+reduce| & Eden & \citet{Lobachev2012}\\
 Jacobi sum test & Mathematics & |workpool+reduce| & Eden & \citet{Lobachev2012}\\
-Gentleman & Mathematics & |torus+parMap| & Eden & \citet{Loogen2012}\\
+Gentleman & Mathematics & |torus| & Eden & \citet{Loogen2012}\\
 Sudoku & Puzzle & |parMap| & |Par| Monad & \citet{par-monad}\\
 \bottomrule
 \end{tabular}
