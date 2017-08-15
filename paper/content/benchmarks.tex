@@ -335,13 +335,13 @@ Jacobi sum test or APRCL is also a primality test, that however,
 guarantees the correctness of the result. It is probabilistic in the
 sense that its run time is not certain. Unlike \rmtest, the subtests
 of Jacobi sum test have very different durations. \citet{lobachev-phd}
-discuss some optimisations of parallel APRCL. Generic parallel
+\olcomment{discuss some optimisations of parallel APRCL.} Generic parallel
 implementation of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 
 ``Gentleman'' is a standard Eden test program, developed
 for their |torus| skeleton. It implements a parallel matrix
 multiplication \citep{Gentleman1978}. We ported its latest Eden
-version \citep{Loogen2012} to PArrows and changed it so that it runs multiple |torus| computations in parallel with |parMap|.
+version \citep{Loogen2012} to PArrows.
 
 A~parallel Sudoku solver was used by \citet{par-monad} to compare |Par| Monad
 to Multicore Haskell. We ported it to PArrows.
