@@ -236,8 +236,21 @@ parEval2 conf f g =
 	arr partitionEithers >>>
 	arr head *** arr head
 \end{code}
-	\caption{Definition of parEval2.}
+	\caption{Definition of |parEval2|.}
 	\label{fig:parEval2}
+\end{figure}
+Furthermore, Fig.~\ref{fig:torus_example_rest} contains the ommited definitions of |prMMTr|, - which calculates $AB^T$ for two matrices $A$ and $B$, |splitMatrix| - which splits the a matrix into chunks, and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
+\begin{figure}[h]
+\begin{code}
+prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
+
+splitMatrix :: Int -> Matrix -> [[Matrix]]
+splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
+
+matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
+\end{code}
+	\caption{Definition of |prMMTr|, |splitMatrix| and |matAdd|.}
+	\label{fig:torus_example_rest}
 \end{figure}
 
 \section{Syntactic Sugar} \label{syntacticSugar}

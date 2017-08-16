@@ -188,15 +188,8 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
           sm2' = transpose sm2
           sms = zipWith prMMTr (sm1:sm1s) (sm2':sm2s)
           result = foldl1' matAdd sms
-
-prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
-
-splitMatrix :: Int -> Matrix -> [[Matrix]]
-splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
-
-matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 \end{code}
-\caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMMTr| calculates $AB^T$ and is used for the (sequential) calculation in the chunks. |splitMatrix| splits the Matrix into chunks. |matAdd| calculates $A + B$.}
+\caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMMTr| calculates $AB^T$ and is used for the (sequential) calculation in the chunks. |splitMatrix| splits the Matrix into chunks. |matAdd| calculates $A + B$. Omitted definitions can be found in \ref{fig:torus_example_rest}. }
 \label{fig:torusMatMult}
 \end{figure}
 If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version and execution times are comparable. We discuss further examples on larger clusters and in a more detail in the next section.
