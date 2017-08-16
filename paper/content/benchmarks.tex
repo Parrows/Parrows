@@ -2,6 +2,7 @@
 \label{sec:benchmarks}
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
+\newcommand{\sudokutest}{Sudoku test\xspace}
 \newcommand{\torustest}{Torus Matrix Multiplication test\xspace}
 \newlength{\plotwidthSMP}
 \setlength{\plotwidthSMP}{0.39\textwidth}
@@ -161,7 +162,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 {\speedupSkelRMSM{11213}{32}}\hfill%
 {\speedupSkelRMSM{11213}{64}}
 \caption{Relative speedup of \rmtest on a multicore machine. We used the same PArrows-based implementation with
-  different backends on the same hardware. Measurements were performed on a single node of Glasgow
+  different backends on the same hardware. Measurements were performed on a single node of the Glasgow
   grid; it has 16 real cores. Input was $2^{11213}-1$, we used 32 (left) or 64 (right)
   tasks. The
   closer to linear speedup the better.}
@@ -287,7 +288,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.t
 }
 
 \newcommand{\speedupSudokuSM}[1]{
-\speedupplot{Speedup of \rmtest ``#1''}{Eden CP, Multicore, Par Monad, Par Monad (vanilla)}{16}{4}{
+\speedupplot{Speedup of \sudokutest ``#1''}{Eden CP, Multicore, Par Monad, Par Monad (vanilla)}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -306,7 +307,10 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.t
 {\speedupSudokuSM{1000}\label{1231231232}}%
 %\hfill%
 {\performanceSudokuSM{1000}\label{1231231123122}}
-\caption{}
+\caption{Relative speedup of \rmtest on a multicore machine. We used the same PArrows-based implementation with
+  different backends on the same hardware and the |parMap| version from the |Par| Monad examples \citet{par-monad}\mbcomment{\\originally from http://community.haskell.org/~simonmar/par-tutorial.pdf}. Measurements were performed on a single node of the Glasgow
+  grid; it has 16 real cores. Input was a file of $1000$ Sudokus. The
+  closer to linear speedup the better.}
 \label{1231231233122}
 \end{figure}
 
@@ -357,7 +361,7 @@ Name & Area & Type & Origin & Citation \\
 \rmtest & Mathematics & |parMap+reduce| & Eden & \citet{Lobachev2012}\\
 Jacobi sum test & Mathematics & |workpool+reduce| & Eden & \citet{Lobachev2012}\\
 Gentleman & Mathematics & |torus| & Eden & \citet{Loogen2012}\\
-Sudoku & Puzzle & |parMap| & |Par| Monad & \citet{par-monad}\\
+Sudoku & Puzzle & |parMap| & |Par| Monad & \citet{par-monad} \mbcomment{originally from: http://community.haskell.org/~simonmar/par-tutorial.pdf}\\
 \bottomrule
 \end{tabular}
 \end{table}
