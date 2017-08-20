@@ -325,22 +325,13 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.t
 
 We have tested our parallel DSL and algorithmic skeletons implemented
 in it. Benchmarks were conducted both in a shared and in a distributed
-memory setting. The hardware was the ``Glasgow grid'', consisting of
-16 machines with 16 cores. \olcomment{insert typical blabla: consisting of
-  Intel XXXYYYY at XX~GHz with XXXX~GB RAM and FOOBAR Linux version
-  XXXX with kernel XXXXXXXX.}
-Each core had a hyperthreading capability,
-so the total number of reported processors per machine was
-32. Non-surprisingly, we found that hyperthreaded 32 cores do not
-behave in the same manner as real 16 cores (numbers here for a single
-machine). We disregarded the hyperthreading ability in most of the
+memory setting. All benchmarks were done on the ``Glasgow grid'', consisting of
+16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyperthreaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyperthreaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyperthreading ability in most of the
 cases.
 
-We used a single machine with 16 real cores as a shared memory testbed
+We used a single node with 16 real cores as a shared memory testbed
 and the whole grid with 256 real cores as a device to test our
 distributed memory software.
-
-\olcomment{only if we do it: list also our i7-6770K machine}
 
 \subsection{Test programs}
 
