@@ -261,9 +261,9 @@ smooth]{benchmarks/distributed-torus/#1-diff.csv};
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupTorusDist{1024}{32}{260}\label{123123123}}%
+{\speedupTorusDist{1024}{32}{260}\label{fig:speedupTorusDist}}%
 %\hfill%
-{\performanceTorusDistDiff{1024}{32}{0.5}{260}\label{12312312312}}
+{\performanceTorusDistDiff{1024}{32}{0.5}{260}\label{fig:performancetorusDistDiff}}
 \caption{Parallel performance of \torustest on the Glasgow grid
   consisting of 256 cores. Input was a matrix size of $1024$. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
@@ -271,7 +271,7 @@ smooth]{benchmarks/distributed-torus/#1-diff.csv};
   Eden almost coincide. Hence, bottom plot shows
 absolute time differences for this benchmark. The
 lower the value, the better for PArrows\olcomment{CHECKME}.}
-\label{123123123122}
+\label{fig:torusBenchmark}
 \end{figure}
 
 \newcommand{\performanceSudokuSM}[1]{
@@ -304,14 +304,14 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.t
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupSudokuSM{1000}\label{1231231232}}%
+{\speedupSudokuSM{1000}\label{fig:speedupSudokuSM}}%
 %\hfill%
-{\performanceSudokuSM{1000}\label{1231231123122}}
+{\performanceSudokuSM{1000}\label{fig:performanceSudokuSM}}
 \caption{Relative speedup of \rmtest on a multicore machine. We used the same PArrows-based implementation with
   different backends on the same hardware and the |parMap| version from the |Par| Monad examples \citet{par-monad}\mbcomment{\\originally from http://community.haskell.org/~simonmar/par-tutorial.pdf}. Measurements were performed on a single node of the Glasgow
   grid; it has 16 real cores. Input was a file of $1000$ Sudokus. The
   closer to linear speedup the better.}
-\label{1231231233122}
+\label{fig:sudokuSMBenchmark}
 \end{figure}
 
 
@@ -413,7 +413,7 @@ plummeting speedup of 124.31 at 512 hyperthreaded cores, whereas it was
 213.172 for 256 real cores. Apparently, hyperthreading in the Glasgow
 grid fails to execute two parallel Haskell processes with full-fledged
 parallelism. For this reason, we did not regard hyperthreaded cores in
-our speedup plots in Figs.~\ref{fig:bench-rm-sm}--XXXXXXXX.
+our speedup plots in Figs.~\ref{fig:bench-rm-sm}-\ref{fig:sudokuSMBenchmark}.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
