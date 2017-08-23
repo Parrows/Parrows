@@ -224,15 +224,14 @@ the Sudoku benchmark in the shared memory setting. It is almost invisible in spe
 (non shown) run time plots. We thus show only the results for the
 PArrows-enabled versions.
 
-To showcase that the induced overhead of
-PArrows is small, we plot execution time differences between measurements for
+To show that PArrows induce very small overhead in a distributed context as well, we compare the original Eden
+versions of the benchmark to its PArrows-enabled counterpart in the \rmtest, \torustest and \jacobitest benchmarks. We plot execution time differences between measurements for
 PArrows and the corresponding backend in a separate plot
-(Figs.~\ref{fig:bench-rm-dist}, \ref{fig:torusBenchmark}). The differences range in
+(Figs.~\ref{fig:bench-rm-dist}, \ref{fig:torusBenchmark}, \ref{fig:bench-jacobi-dist}). As an example, the differences range in
 about 0.5~seconds for the execution time of 46~seconds on 256 cores
-for distributed \rmtest with PArrows and Eden. The plots show absolute
-time differences that are not relativated \wrt the total execution time.
-
-The error bars ends were computed from pointwise maximum of both standard
+for distributed \rmtest with PArrows and Eden. For these comparisons, the plots show absolute
+time differences that are not relative \wrt the total execution time.
+Furthermore, the error bars ends were computed from pointwise maximum of both standard
 deviations from both measurements for PArrows and non-PArrows
 versions. These are the values provided by the |bench| package that we
 used for benchmarking. We call a difference between two versions
@@ -317,24 +316,15 @@ lower the value, the better for PArrows\olcomment{CHECKME}.}
 \olcomment{THE ACTUAL TEXT IS MISSING. What do we see in the plots?
   Why is it good?}
 The multicore version of our parallel \rmtest benchmark is in
-Figure~\ref{fig:bench-rm-sm}. We have executed the test with 32 and 64
+Figure~\ref{fig:bench-rm-sm}. We executed the test with 32 and 64
 tasks. The plot shows the PArrows-enabled versions with corresponding backends.
 The performance of PArrows/Eden~CP in shared memory is slightly better than
 for SMP variants such as PArrows/Multicore Haskell and PArrows/|Par|
-Monad. The reason for this behavior lies in the backend in our reasoning. One
-possible explanation is garbage collection. It is easier to GC
-(independently) $n$ heaps than to GC one large. This agrees with known
-results\olcomment{WHICH EXACTLY?} that motivate the efforts for
-parallel GC in SMP-based Haskells.
+Monad but most of the time the performance is still comparable with the Multicore backend performing slightly worse than the other two in terms of speedup. In particular, the speedups for 16 cores fall behind quite noticeable with 11.69 for 32 tasks as Eden and the |Par| Monad both score 13.05 for 32 tasks. While the Multicore backend scores a bit better in the 64 tasks benchmark, its speedup of 12.70 is still behind the 13.65 and 13.33 of Eden and |Par| Monad, respectively.
 
-To show that PArrows induce very small overhead, we compare the ported
-versions of the benchmark to the PArrows-enabled ones with
-corresponding backend.\olcomment{THE RESULT?}
-
-In the distributed memory setting, we utilize PArrows/Eden. Eden in
-its turn used the MPI backend. We see an almost linear speedup of
-\rmtest with 256 tasks and input $2^444497-1$. The sequential run time
-was computed as mean of three consecutive executions on a single
+Comparing the PArrows version of the \rmtest with the original from Eden with the MPI backend in a distributed memory setting, we see an almost linear speedup of
+\rmtest with 256 tasks and input $2^444497-1$ in both versions. The sequential run time
+was computed as the mean of three consecutive executions on a single
 core---the single run took two hours 43 minutes. The zero difference  between
 PArrows/Eden and Eden almost always lies on the error bar of
 the measurement. The only exceptions, where PArrows version was slower
