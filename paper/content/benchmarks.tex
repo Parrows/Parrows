@@ -345,6 +345,46 @@ version suffers, of course, from the aforementioned hyperthreading
 problem. The PArrows-induced overhead was merely 0.56\% for 256
 cores. The PArrows version was 0.30\% \emph{faster} for 128 cores.
 
+\subsubsection{\jacobitest}
+
+\newcommand{\speedupJacobiDist}[4]{
+\speedupplot{Speedup of \jacobitest ``#2''}{PArrows}{256}{#3}{
+% \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+% smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
+\addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
+% \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+% smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
+}{#4}{\plotwidthDist}
+}
+
+\newcommand{\performanceJacobiDistDiff}[5]{
+\performancediffplot{Run time differences\\for \jacobitest ``#2''}{(Eden $-$ PArrows)}{256}{#3}{
+\addplot+[mark=*,very thick,error bars/.cd,
+    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
+}{#4}{#5}{\plotwidthDist}
+}
+
+\begin{figure}
+\centering
+%\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
+%
+{\speedupJacobiDist{3}{1279}{32}{260}\label{subfig:rm-dist-a}}%
+%\hfill%
+{\performanceJacobiDistDiff{3}{1279}{32}{0.5}{260}\label{subfig:rm-dist-b}}
+\caption{Parallel performance of \rmtest on the Glasgow grid
+  consisting of 256 cores. Input was $2^{1279}-1$, we used 256
+  tasks. The top plot shows absolute speedup in a distributed memory setting. The
+  closer to linear speedup the better. Time
+  (and hence speedup) measurements for PArrows with Eden backend and
+  Eden almost coincide. Hence, bottom plot shows
+absolute time differences for this benchmark. The
+lower the value, the better for PArrows\olcomment{CHECKME}.}
+\label{fig:bench-jacobi-dist}
+\end{figure}
+
+\mbcomment{FIXME: redo this test with $2^{44497}$}
 
 \subsubsection{\torustest}
 
