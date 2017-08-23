@@ -320,10 +320,10 @@ Figure~\ref{fig:bench-rm-sm}. We executed the test with 32 and 64
 tasks. The plot shows the PArrows-enabled versions with corresponding backends.
 The performance of PArrows/Eden~CP in shared memory is slightly better than
 for SMP variants such as PArrows/Multicore Haskell and PArrows/|Par|
-Monad but most of the time the performance is still comparable with the Multicore backend performing slightly worse than the other two in terms of speedup. In particular, the speedups for 16 cores fall behind quite noticeable with 11.69 for 32 tasks as Eden and the |Par| Monad both score 13.05 for 32 tasks. While the Multicore backend scores a bit better in the 64 tasks benchmark, its speedup of 12.70 is still behind the 13.65 and 13.33 of Eden and |Par| Monad, respectively.
+Monad but most of the time the performance is still comparable with the Multicore backend performing slightly worse than the other two in terms of speedup. In particular, the speedups for 16 cores fall behind quite noticeably with 11.69 for 32 tasks as Eden and the |Par| Monad both score 13.05 for 32 tasks. While the Multicore backend scores a bit better in the 64 tasks benchmark, its speedup of 12.70 is still behind the 13.65 and 13.33 of Eden and |Par| Monad, respectively.
 
 Comparing the PArrows version of the \rmtest with the original from Eden with the MPI backend in a distributed memory setting, we see an almost linear speedup of
-\rmtest with 256 tasks and input $2^444497-1$ in both versions. The sequential run time
+\rmtest with 256 tasks and input $2^{444497}-1$ in both versions. The sequential run time
 was computed as the mean of three consecutive executions on a single
 core---the single run took two hours 43 minutes. The zero difference  between
 PArrows/Eden and Eden almost always lies on the error bar of
