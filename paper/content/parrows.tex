@@ -50,7 +50,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
 \caption{Fully evaluating |ArrowParallel| instance for the Multicore Haskell backend.}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|.
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|. With this definition in place, we can provide a delegating version of the non-configurable instance. We show this in Fig.~\ref{fig:actualNonConfigMulticore}.
 % \begin{figure}[h]
 % \caption{Definition of Conf a}
 % \label{fig:confa}

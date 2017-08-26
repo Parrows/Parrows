@@ -76,9 +76,24 @@ Note that  this additionally makes use of the |ArrowApply| typeclass that allows
 \section{Omitted Function Definitions}
 \label{app:omitted}
 We have omitted some function definitions in the main text for
-brevity, and redeem this here. 
+brevity, and redeem this here.
+
+To begin with, we give the actual implementation of the non-configurable instance of the |ArrowParallel| instance:
+
+\begin{figure}
+\begin{code}
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
+    parEvalN _ fs = parEvalN (hack fs) fs
+                    where
+                        hack :: (NFData b) => [arr a b] -> Conf b
+                        hack _ = Conf rdeepseq
+\end{code}
+\caption{The actual default implementation of Multicore's |ArrowParallel|.}
+\label{fig:actualNonConfigMulticore}
+\end{figure}
+
 %
-We warp Eden's build-in Futures in PArrows as in
+Next, we warp Eden's build-in Futures in PArrows as in
 Figure~\ref{fig:RDFuture}, where |rd| is the accessor function for the |RD| wrapped inside |RemoteData|. Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. The |Trans| instance does not have any functions declared as the default implementation suffices here. Furthermore, because |MVar| already ships with a |NFData| instance, we only have to supply a simple delegating |NFData| instance for our |RemoteData| type, where |rd| simply unwraps |RD|. The |Trans| instance does not have any functions declared as the default implementation suffices:
 
 % \begin{figure}[h]
