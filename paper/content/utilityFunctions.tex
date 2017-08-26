@@ -1,17 +1,13 @@
 \section{Utility Arrows}\label{utilfns}
-
-\mbcomment{Text außenrum bauen, siehe Omitted Function Definitions}
-The 
-|second| combinator: 
+Following are definitions of some utility Arrows used in this paper that have been lef out for brevity.
+We start with the |second| combinator from \citet{HughesArrows}, which is a mirrored version of |first|, which is for example used in the definition of |***|: 
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
 second f = arr swap >>> first f >>> arr swap
 	where swap (x, y) = (y, x)
 \end{code}
-is a mirrored version of |first|, used, \eg in
-definition of |***|.
 
-Utility combinators for Parallel Arrows follow. We define |map|, |foldl| and |zipWith| on Arrows.
+Next, we also define |map|, |foldl| and |zipWith| on Arrows.
 The |mapArr| combinator (Fig.~\ref{fig:mapArr}) lifts any arrow |arr a
 b| to an arrow |arr [a] [b]| \cite{programming_with_arrows}. 
 Similarly, we can also define |foldlArr| (Fig.~\ref{fig:foldlArr}) that lifts any arrow |arr (b, a) b| with a neutral element |b| to |arr [a] b|.
@@ -80,9 +76,24 @@ Note that  this additionally makes use of the |ArrowApply| typeclass that allows
 \section{Omitted Function Definitions}
 \label{app:omitted}
 We have omitted some function definitions in the main text for
-brevity, and redeem this here. 
+brevity, and redeem this here.
+
+To begin with, we give the actual implementation of the non-configurable instance of the |ArrowParallel| instance:
+
+\begin{figure}
+\begin{code}
+instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
+    parEvalN _ fs = parEvalN (hack fs) fs
+                    where
+                        hack :: (NFData b) => [arr a b] -> Conf b
+                        hack _ = Conf rdeepseq
+\end{code}
+\caption{The actual default implementation of Multicore's |ArrowParallel|.}
+\label{fig:actualNonConfigMulticore}
+\end{figure}
+
 %
-We warp Eden's build-in Futures in PArrows as in
+Next, we warp Eden's build-in Futures in PArrows as in
 Figure~\ref{fig:RDFuture}, where |rd| is the accessor function for the |RD| wrapped inside |RemoteData|. Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. The |Trans| instance does not have any functions declared as the default implementation suffices here. Furthermore, because |MVar| already ships with a |NFData| instance, we only have to supply a simple delegating |NFData| instance for our |RemoteData| type, where |rd| simply unwraps |RD|. The |Trans| instance does not have any functions declared as the default implementation suffices:
 
 % \begin{figure}[h]
@@ -236,11 +247,25 @@ parEval2 conf f g =
 	arr partitionEithers >>>
 	arr head *** arr head
 \end{code}
-	\caption{Definition of parEval2.}
+	\caption{Definition of |parEval2|.}
 	\label{fig:parEval2}
+\end{figure}
+Furthermore, Fig.~\ref{fig:torus_example_rest} contains the ommited definitions of |prMMTr|, - which calculates $AB^T$ for two matrices $A$ and $B$, |splitMatrix| - which splits the a matrix into chunks, and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
+\begin{figure}[h]
+\begin{code}
+prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
+
+splitMatrix :: Int -> Matrix -> [[Matrix]]
+splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
+
+matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
+\end{code}
+	\caption{Definition of |prMMTr|, |splitMatrix| and |matAdd|.}
+	\label{fig:torus_example_rest}
 \end{figure}
 
 \section{Syntactic Sugar} \label{syntacticSugar}
+Finally, we also give the definitions for some syntactic sugar for PArrows, namely |***| and |&&&|.
 For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |***| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
 ):
 % \begin{figure}[h]
