@@ -348,7 +348,7 @@ smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
 }
 
 \renewcommand{\speedupJacobiDist}[4]{
-
+	\textcolor{red}{benchmark missing. in the works}
 }
 
 \newcommand{\performanceJacobiDistDiff}[5]{
@@ -360,7 +360,7 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 }
 
 \renewcommand{\performanceJacobiDistDiff}[5]{
-
+	\textcolor{red}{benchmark missing. in the works}
 }
 
 \begin{figure}
@@ -394,12 +394,21 @@ smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-
 }{#3}{\plotwidthDist}
 }
 
+\renewcommand{\speedupTorusDist}[3]{
+	\textcolor{red}{benchmark missing. in the works}
+}
+
+
 \newcommand{\performanceTorusDistDiff}[4]{
 \performancediffplot{Run time differences\\for \torustest ``#1''}{(Eden $-$ PArrows)}{256}{#2}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-torus/#1-diff.csv};
 }{#3}{#4}{\plotwidthDist}
+}
+
+\renewcommand{\performanceTorusDistDiff}[4]{
+		\textcolor{red}{benchmark missing. in the works}
 }
 
 \begin{figure}
