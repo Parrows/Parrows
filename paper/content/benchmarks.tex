@@ -3,7 +3,7 @@
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
 \newcommand{\sudokutest}{Sudoku\xspace}
-\newcommand{\jacobitest}{Jacobi sum test\xsp}
+\newcommand{\jacobitest}{Jacobi sum test\xspace}
 \newcommand{\torustest}{Gentleman\xspace}
 \newlength{\plotwidthSMP}
 \setlength{\plotwidthSMP}{0.39\textwidth}
@@ -347,12 +347,20 @@ smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
 }{#4}{\plotwidthDist}
 }
 
+\renewcommand{\speedupJacobiDist}[4]{
+
+}
+
 \newcommand{\performanceJacobiDistDiff}[5]{
 \performancediffplot{Run time differences\\for \jacobitest ``#2''}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 }{#4}{#5}{\plotwidthDist}
+}
+
+\renewcommand{\performanceJacobiDistDiff}[5]{
+
 }
 
 \begin{figure}
@@ -418,7 +426,7 @@ As the last Benchmark in this paper we present the \sudokutest in \ref{fig:sudok
 
 
 \newcommand{\performanceSudokuSM}[1]{
-\performanceplot{Parallel run time of \sudokutest ``#1''}{Eden CP, Multicore, |Par| Monad}{32}{4}{
+\performanceplot{Parallel run time of \sudokutest ``#1''}{Eden CP, Multicore, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -427,11 +435,11 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-mult-su
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sudoku17.#1.txt.csv};
 %\addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 %smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.txt.csv};
-}{33}{\plotwidthSMP}
+}{17}{\plotwidthSMP}
 }
 
 \newcommand{\speedupSudokuSM}[1]{
-\speedupplot{ \sudokutest ``#1''}{Eden CP, Multicore, |Par| Monad}{32}{4}{
+\speedupplot{ Parallel speedup of \sudokutest ``#1''}{Eden CP, Multicore, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -440,7 +448,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-mult-su
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sudoku17.#1.txt.csv};
 %\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 %smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parmonad-sudoku-sudoku17.#1.txt.csv};
-}{33}{\plotwidthSMP}
+}{17}{\plotwidthSMP}
 }
 
 \begin{figure}
