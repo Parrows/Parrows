@@ -30,7 +30,7 @@ do
             cmd="\"./"${progName}" "${parameter}"\""
             benchCmds=${benchCmds}" "${cmd}
         else
-            for (( j=${procCount}; j>=32; j=j/2 ));
+            for (( j=${procCount}; j>=1; j=j/2 ));
             do
                 cmd="\"./"${progName}" "${parameter}" +RTS -N"${j}"\""
 

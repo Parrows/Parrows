@@ -49,7 +49,7 @@ e t = foldr (*) 2 [ (d+1)^( (nu t (d+1) ) +1)  |  d <- (teiler t), isPrime (d+1)
 -- | Bestimme ein t, so dass e(t)^2 > B
 bestimme_t :: Integer  -- ^ obere Schranke B fuer die zu pruefenden Zahlen
          -> Integer  -- ^ Der Parameter t
--- bestimme_t b = hilfsf 2 b
+--bestimme_t b = hilfsf 2 b
 --            where hilfsf = (\x w -> if ((e x)*(e x) > w) then x else (hilfsf (x+1) w))
 bestimme_t n 
         | ( n < 4292870400 ) = 12 
@@ -63,8 +63,10 @@ bestimme_t n
 		 | ( n < 2^1035 ) = 166320
 		 | ( n < 2^1566 ) = 720720
 		 | ( n < 2^2082 ) = 1663200
-		 | ( n < 2^3491 ) = 8648640 
-		 | otherwise = error "The number is too large."
+		 | ( n < 2^3217 ) = 8648640 
+                 | ( n < 2^44497) = 137944178989
+		 | otherwise = hilfsf  137944178989 n 
+            where hilfsf = (\x w -> if ((e x)*(e x) > w) then x else (hilfsf (x + x) w))
 		 
 
 -- | Berechung von f(x) von Vorberechnungsschritt 2.1

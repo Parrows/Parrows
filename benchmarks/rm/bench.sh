@@ -9,7 +9,6 @@ programs=(
 )
 
 parameters=(
-    "11213 256"
     "44497 256"
 )
 
@@ -28,12 +27,14 @@ do
             cmd="\"./"${progName}" "${parameter}"\""
             benchCmds=${benchCmds}" "${cmd}
         else
-            for (( j=${procCount}; j>=32; j=j/2 ));
+            for (( j=${procCount}; j>=16; j=j/2 ));
             do
                 cmd="\"./"${progName}" "${parameter}" +RTS -N"${j}"\""
 
                 benchCmds=${benchCmds}" "${cmd}
             done
+	    cmd="\"./"${progName}" "${parameter}" +RTS -N192\""
+	    benchCmds=${benchCmds}" "${cmd}
         fi
     done
 done

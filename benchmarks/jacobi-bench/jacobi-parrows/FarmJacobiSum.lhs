@@ -77,7 +77,7 @@ bestimme_t n
 		 | ( n < 2^1566 ) = 720720
 		 | ( n < 2^2082 ) = 1663200
 		 | ( n < 2^3491 ) = 8648640 
-		 | otherwise = error "The number is too large."
+		 | otherwise = error "FarmJacobiSum.lhs The number is too large."
 		 
 
 -- | Berechung von f(x) von Vorberechnungsschritt 2.1

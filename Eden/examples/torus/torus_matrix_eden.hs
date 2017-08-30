@@ -56,9 +56,16 @@ prMM :: Matrix -> Matrix -> Matrix
 prMM m1 m2 = prMMTr m1 (transpose m2)
 prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
 
+SizeCalc :: Int -> Int
+torusSizeCalc num
+        | num <= 16 = 16
+        | num <= 64 = 64
+        | num <= 256 = 256
+        | otherwise = (floor . sqrt) $ fromIntegral num
+
 prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
 prMM_torus numCores problemSizeVal m1 m2 = combine $ torus (\x y z -> mult torusSize (x, y, z)) $ zipWith (zipWith (,)) (split m1) (split m2)
-    where   torusSize = (floor . sqrt) $ fromIntegral numCores
+    where   torusSize = torusSizeCalc numCores 
             combine = concat . (map (foldr (zipWith (++)) (repeat [])))
             split = splitMatrix (problemSizeVal `div` torusSize)
 

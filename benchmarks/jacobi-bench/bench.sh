@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./recompile.sh
+
 procCount=256
 
 programs=(
@@ -8,8 +10,10 @@ programs=(
 )
 
 parameters=(
-    "1279"
-    "2203"
+#    "3 1279"
+#    "3 2203"
+#    "3 4423"
+    "3 44497"
 )
 
 # get length of an array
@@ -27,7 +31,7 @@ do
             cmd="\"./"${progName}" "${parameter}"\""
             benchCmds=${benchCmds}" "${cmd}
         else
-            for (( j=${procCount}; j>=32; j=j/2 ));
+            for (( j=${procCount}; j>=1; j=j/2 ));
             do
                 cmd="\"./"${progName}" "${parameter}" +RTS -N"${j}"\""
 

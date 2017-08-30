@@ -12,16 +12,15 @@ rm *.hi
 echo "Compiling..."
 ghc torus_matrix_parrows -parmpi -rtsopts
 ghc torus_matrix_eden -parmpi -rtsopts
-stack ghc torus_matrix_multicore -- -threaded -rtsopts
+#stack ghc torus_matrix_multicore -- -threaded -rtsopts
 echo "done."
 
 procCounts=(
-    "1"
-    "2"
-    "4"
-    "8"
-    "16"
+    "256"
+    "128"
+    "64"
     "32"
+    "1"
 #    "48"
 #    "64"
 #    "80"
@@ -29,27 +28,30 @@ procCounts=(
 )
 
 programs=(
-#    "torus_matrix_parrows"
-#    "torus_matrix_eden"
-    "torus_matrix_multicore" 
+    "torus_matrix_parrows"
+    "torus_matrix_eden"
+    #"torus_matrix_multicore" 
 )
 
 problemSizes=(
     #"32"
     #"64"
-    "128"
-    "256"
-    "512"
+   #"128"
+    #"256"
+    #"512"
+#    "2048"
+    "4096"
+    "8192"
 )
 
 torusSizes=(
-    "1"
-    "2"
-    "4"
-    "8"
-    "16"
-    "32"
-    "64"
+    "256"
+    #"2"
+    #"4"
+    #"8"
+    #"16"
+    #"32"
+    #"64"
 )
 
 # get length of an array
@@ -72,6 +74,6 @@ do
 done
 
 #evalCmd="bench "${benchCmds}" -o probSize=${problemSize}_torusSize=${torusSize}_procCount=${procCount}.html --resamples 1000"
-evalCmd="bench "${benchCmds}" --csv benchResults.csv --resamples 1000"
+evalCmd="bench "${benchCmds}" --csv benchResults.csv" 
 echo "running ${evalCmd}"
 eval "$evalCmd"
