@@ -46,16 +46,16 @@ the parallel Haskell backends at will. Further backends based on HdpH or a Frege
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
 \mbcomment{different, how?}
-We wrap parallel Haskells inside of our |ArrowParallel| typeclass, but
+%We wrap parallel Haskells inside of our |ArrowParallel| typeclass, but
 % why do we aim to abstract parallelism this way and what does this
 % approach do better than the other parallel Haskells?
- is such a parallelism abstraction of benefit and to what extent does
- it improve existing approaches?
+% is such a parallelism abstraction of benefit and to what extent does
+% it improve existing approaches?
 \begin{itemize}
 	\item \textbf{Arrow DSL benefits}:
-	With the |ArrowParallel| typeclass we do not lose any benefits of using arrows as |parEvalN| is a yet another Arrow combinator. The resulting Arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the Monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change anything.
+    To implement parallelism, we do not introduce any new types, but only rely on a typeclass that hosts |parEvalN :: [arr a b] -> arr [a] [b]|, which converts a list of arrows into a new parallel arrow. Therefore, we do not lose any benefits of using arrows as parallelism is just encapsulated in yet another Arrow combinator. The resulting Arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to Monad solutions like the |Par| Monad which require specialized Monad types. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change anything.
 	\item \textbf{Abstraction}:
-	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This leaves us in the beautiful situation of being able to write our code against the interface of the typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the current |ArrowParallel| instance.
+	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This means it is possible to write our code against the interface of a common typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the current |ArrowParallel| instance.
 \end{itemize}
 
 
