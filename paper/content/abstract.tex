@@ -2,11 +2,11 @@
 Arrows are a general interface for computation and therefore form an alternative to Monads for API design. We express parallelism using this concept in a novel way: We define an arrows-based language for parallelism and implement it using multiple parallel Haskells.
 In this manner we are able to bridge across various parallel Haskells.
 
-Additionally, our way of writing parallel programs has the benefit of being portable across flavours of parallel Haskells.
-Furthermore, as each parallel computation is an arrow, which means that they can be composed and transformed as such.
+Additionally, our way of writing parallel programs has the benefit of being portable across multiple parallel Haskell implementations.
+Furthermore, as each parallel computation is an arrow, which means that they can be readily composed and transformed as such.
 We introduce some syntactic sugar to provide parallelism-aware arrow combinators.
 
-To show that our arrow-based language is on par with the existing parallel languages, we also define several parallel skeletons with our framework. 
+To show that our arrow-based language has similar expressiveness to existing parallel languages, we also define several parallel skeletons with our framework. 
 Benchmarks show that our framework does not induce too much overhead
 performance-wise.
 \olcomment{Summarize conclusions}
