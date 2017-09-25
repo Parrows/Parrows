@@ -47,13 +47,13 @@ the parallel Haskell backends at will. Further backends based on HdpH or a Frege
 %\olcomment{move this to Contributions in the front or something}
 We propose a new Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]|, which converts a list of Arrows into a new parallel Arrow. Because of this, we do not lose any benefits of using Arrows as the parallelism is encapsulated as another combinator instead of a different type. The resulting Arrow can be used in the same way as a potential serial version.
 
-This is a big advantage as we do not introduce any new types as Monad solutions like the |Par| Monad do. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change integral parts of the code.
+This is a big advantage as we do not introduce any new types as Monad solutions like the |Par| Monad do. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs and libraries without having to change integral parts of the code. \mbcomment{mention Functions here? We have everything Eden has, but more.}
 
 We host this functionality in the |ArrowParallel| typeclass, which abstracts all parallel implementation logic in a way that the backend easily be swapped. This means it is possible to write code against the interface of a common typeclass without being bound to any specific backend. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance.
 
-We evaluate the expressive power of arrow parallelism further by showing that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}).
+We also show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done} as shown in Section \ref{sec:benchmarks}.
 
-Finally, we demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done} in Section \ref{sec:benchmarks}.
+\mbcomment{Mention Future work here?}
 
 %\ptcomment{* We evaluate the expressive power of  arrow parallelism. Showing that 
 %  + there is no need to introduce additional types
@@ -76,8 +76,8 @@ Finally, we demonstrate that Arrow Parallelism is a viable alternative to existi
 %\end{itemize}
 
 
-\paragraph{Structure}
-The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Sec.~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
+%\paragraph{Structure}
+%The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Sec.~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
 
 %%% Local Variables:
 %%% mode: latex
