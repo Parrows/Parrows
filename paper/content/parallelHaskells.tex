@@ -2,21 +2,7 @@
 \label{sec:parEvalNIntro}
 There are already several ways to write parallel programs in Haskell:
 
-
-\begin{table}[]
-\centering
-\caption{Overview over some parallel Haskells}
-\label{my-label}
-\begin{tabular}{\pipe l \pipe l \pipe l \pipe} 
-Name		& Memory setting & Concepts used \\
-GpH         & shared \& distributed & |par|/|pseq| "hints" \\
-|Par| Monad & shared & deterministic parallel Monad \\
-Eden        & shared \& distributed & special compiler, pure \& monadic interface \\
-HdpH        & \mbcomment{shared?} \& distributed & parallel Monad, Template Haskell \\
-LVish       & shared & parallel Monad, parallel data-structures\\
-\end{tabular}
-\end{table}
-
+\parallelHaskellOverview
 
 As we base our parallel Arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
