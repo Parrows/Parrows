@@ -1,6 +1,24 @@
 \subsection{Short introduction to parallel Haskells}
 \label{sec:parEvalNIntro}
-There are already several ways to write parallel programs in Haskell. As we base our parallel Arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
+There are already several ways to write parallel programs in Haskell:
+
+
+\begin{table}[]
+\centering
+\caption{Overview over some parallel Haskells}
+\label{my-label}
+\begin{tabular}{\pipe l \pipe l \pipe l \pipe} 
+Name		& Memory setting & Concepts used \\
+GpH         & shared \& distributed & |par|/|pseq| "hints" \\
+|Par| Monad & shared & deterministic parallel Monad \\
+Eden        & shared \& distributed & special compiler, pure \& monadic interface \\
+HdpH        & \mbcomment{shared?} \& distributed & parallel Monad, Template Haskell \\
+LVish       & shared & parallel Monad, parallel data-structures\\
+\end{tabular}
+\end{table}
+
+
+As we base our parallel Arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel or |parEvalN :: [a -> b] -> [a] -> [b]|, as also Figure~\ref{fig:parEvalN} symbolically shows.
 \begin{figure}[t]
@@ -16,7 +34,7 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 We implement this non-Arrow version here which will later in this paper be adapted for usage in our Arrow based parallel Haskell. Furthermore, the implementation of |parEvalN| serves as a short demonstration of how the used parallel Haskell backends work.
 
 \subsubsection{Multicore Haskell}
-Multicore Haskell \cite{Marlow2009,Trinder1998a} is a way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|. Let:
+Multicore Haskell \cite{Marlow2009,Trinder1998a} is one of the simplest ways to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} Besides some basic primitives it ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|, which is exactly what is required for an implementation of |parEvalN|.
 
 
 \begin{code}

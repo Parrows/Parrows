@@ -6,14 +6,16 @@ main.pdf : *.tex *.bib Makefile
 	
 	for texFile in $(wildcard *.tex) ; do \
 		buildFile=$$texFile; \
-		lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i custom.fmt ; \
-		if [ "$${buildFile}" != "prelude.tex" ]; then \
-			echo "removing lhs2TeX preamble for $${buildFile}"; \
-			perl -0777 -pe "s/(?s).*\\EndFmtInput//" $${buildFile}.0 > $${buildFile}; \
-		else \
-			echo "keeping lhs2TeX preamble for $${buildFile}"; \
-			cp $${buildFile}.0 $${buildFile}; \
-		fi \
+        if [ "$${buildFile}" != "lhs2TeXSafeCommands.tex" ]; then \
+            lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i custom.fmt ; \
+            if [ "$${buildFile}" != "prelude.tex" ]; then \
+                echo "removing lhs2TeX preamble for $${buildFile}"; \
+                perl -0777 -pe "s/(?s).*\\EndFmtInput//" $${buildFile}.0 > $${buildFile}; \
+            else \
+                echo "keeping lhs2TeX preamble for $${buildFile}"; \
+                cp $${buildFile}.0 $${buildFile}; \
+            fi \
+        fi \
 	done
 	latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main || true
 	cd ${BACKUP_FOLDER} && cp -r `ls . ` ..

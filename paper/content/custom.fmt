@@ -7,6 +7,7 @@
 %format DOLLAR = "\mathbin{\$}"
 %%%% %format ` = "\`"
 %%%% %% works fine without
+%format onePipe = "|"
 %format ||| = "\mathbin{\mid\!\mid\!\mid}"
 %format pipepipepipe = "\mathbin{\mid\!\mid\!\mid}"
 %format |&&&| = "\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}"
