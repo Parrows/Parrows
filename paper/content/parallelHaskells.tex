@@ -1,10 +1,6 @@
-\begin{flushright}
-
-\end{flushright}\section{Background}
-\label{sec:background}
 \subsection{Short introduction to parallel Haskells}
 \label{sec:parEvalNIntro}
-There are already several ways to write parallel programs in Haskell. As we base our parallel arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
+There are already several ways to write parallel programs in Haskell. As we base our parallel Arrows on existing parallel Haskells, we will now give a short introduction to the ones we use as backends in this paper.
 
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions |a -> b| in parallel or |parEvalN :: [a -> b] -> [a] -> [b]|, as also Figure~\ref{fig:parEvalN} symbolically shows.
 \begin{figure}[t]
@@ -17,7 +13,7 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 %for parallel Arrows, as a short introduction to parallelism in
 %Haskell we will now implement |parEvalN| with several different
 %parallel Haskells.
-As a demonstration, we implement here the non-Arrows |parEvalN| in multiple parallel Haskells.
+We implement this non-Arrow version here which will later in this paper be adapted for usage in our Arrow based parallel Haskell. Furthermore, the implementation of |parEvalN| serves as a short demonstration of how the used parallel Haskell backends work.
 
 \subsubsection{Multicore Haskell}
 Multicore Haskell \cite{Marlow2009,Trinder1998a} is a way to do parallel processing found in standard GHC.\footnote{Multicore Haskell on Hackage is available under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} It ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|. Let:
