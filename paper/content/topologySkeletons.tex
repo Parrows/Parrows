@@ -3,7 +3,7 @@
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
-If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the Multicore and Par Monad backends which during runtime would result in the program crashing. This materializes with the usage of |loop| of the |ArrowLoop| typeclass and is probably due to the way their respective parallelism engines work internally. \mbcomment{okay so?} As these skeletons probably do not make any practical sense besides for testing with these backends anyways (because of the shared memory between the threads), we create an extra abstraction layer for the original |parEvalN| in these skeletons called |evalN| in the |FutureEval| typeclass. This allows us for selective enabling and disabling of parallelism.
+If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materializes with the usage of |loop| of the |ArrowLoop| typeclass and is probably due to the way their respective parallelism engines work internally. \mbcomment{okay so?} As these skeletons probably do not make any practical sense besides for testing with these backends anyways (because of the shared memory between the threads), we create an extra abstraction layer for the original |parEvalN| in these skeletons called |evalN| in the |FutureEval| typeclass. This allows us for selective enabling and disabling of parallelism.
 \begin{code}
 class ArrowParallel arr a b conf => FutureEval arr a b conf where
     evalN :: (ArrowParallel arr a b conf) => conf -> [arr a b] -> arr [a] [b]
@@ -13,7 +13,7 @@ As Eden has no problems with the looping skeletons, we declare a delegating inst
 instance ArrowParallel arr a b conf => FutureEval arr a b conf where
     evalN = parEvalN
 \end{code}
-The Par Monad and Multicore backends have parallelism disabled in their instance of |FutureEval|. This way the skeletons can still run without errors on shared-memory machines and still be used to test programs locally.
+The Par Monad and GpH backends have parallelism disabled in their instance of |FutureEval|. This way the skeletons can still run without errors on shared-memory machines and still be used to test programs locally.
 \begin{code}
 instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
     ArrowParallel arr a b conf) => FutureEval arr a b conf where

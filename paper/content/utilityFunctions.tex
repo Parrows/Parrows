@@ -88,7 +88,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
                         hack :: (NFData b) => [arr a b] -> Conf b
                         hack _ = Conf rdeepseq
 \end{code}
-\caption{The actual default implementation of Multicore's |ArrowParallel|.}
+\caption{The actual default implementation of GpH's |ArrowParallel|.}
 \label{fig:actualNonConfigMulticore}
 \end{figure}
 

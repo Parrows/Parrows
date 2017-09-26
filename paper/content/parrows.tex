@@ -32,12 +32,12 @@ class Arrow arr => ArrowParallel arr a b conf where
 % \label{fig:parEvalNArrowTypeClassFinal}
 % \end{figure}
 We do not require the |conf| parameter in every implementation. If it is not needed, we usually just default the |conf| type parameter to |()| and even blank it out in the parameter list of the implemented |parEvalN|.
-% , as we will see in the implementation of the Multicore Haskell and the |Par| Monad backends.
+% , as we will see in the implementation of the GpH Haskell and the |Par| Monad backends.
 
 \subsection{ArrowParallel instances}
 
-\subsubsection{Multicore Haskell} \label{sec:parrows:multicore}
-The Multicore Haskell implementation of |ArrowParallel| is implemented in a straightforward manner by using |listApp| (Appendix~\ref{utilfns}) combined with the |withStrategy :: Strategy a -> a -> a| combinators from Multicore Haskell, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters.
+\subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
+The GpH implementation of |ArrowParallel| is implemented in a straightforward manner by using |listApp| (Appendix~\ref{utilfns}) combined with the |withStrategy :: Strategy a -> a -> a| combinators from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters.
 \begin{figure}[t]
 \begin{code}
 data Conf a = Conf (Strategy a)
@@ -47,10 +47,10 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b ()
        		listApp fs >>>
         	arr (withStrategy (parList rdeepseq))
 \end{code}% $ %% formatting
-\caption{Fully evaluating |ArrowParallel| instance for the Multicore Haskell backend.}
+\caption{Fully evaluating |ArrowParallel| instance for the GpH Haskell backend.}
 \label{fig:ArrowParallelMulticoreRdeepseq}
 \end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the Multicore Haskell interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|. With this definition in place, we can provide a delegating version of the non-configurable instance. We show this in Fig.~\ref{fig:actualNonConfigMulticore}.
+For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the GpH interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|. With this definition in place, we can provide a delegating version of the non-configurable instance. We show this in Fig.~\ref{fig:actualNonConfigMulticore}.
 % \begin{figure}[h]
 % \caption{Definition of Conf a}
 % \label{fig:confa}
@@ -65,7 +65,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
         	arr (withStrategy (parList strat)) &&& arr id >>>
         	arr (uncurry pseq)
 \end{code}
-\caption{Configurable |ArrowParallel| instance for the Multicore Haskell backend.}
+\caption{Configurable |ArrowParallel| instance for the GpH Haskell backend.}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 \subsubsection{|Par| Monad}
@@ -90,7 +90,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{figure}
 
 \subsubsection{Eden}
-For both the Multicore Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
+For both the GpH Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
 % \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
