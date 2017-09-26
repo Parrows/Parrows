@@ -53,9 +53,9 @@ instance Monad m => Arrow (Kleisli m) where
 \label{sec:arrows}
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An Arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
 %
-Its |arr| operation is used to lift an ordinary function to the specified arrow type, similarly to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of the basic Arrow combinators.
+Its |arr| operation is used to lift an ordinary function to the specified arrow type, analogous to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of the basic Arrow combinators.
 The most prominent instances of this interface are regular functions |(->)|
-and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}).
+and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps functions that return monadic values, e.g.  |a -> m b| with |m| being a Monad.
 
 \begin{figure}[h]
 	\centering
@@ -75,7 +75,7 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}).
 	\caption{Visual depiction of syntactic sugar for Arrows.}
 	\label{fig:syntacticSugarArrows}
 \end{figure}
-With this typeclass in place, Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): The combinators |second|, |***| and |&&&|. 
+Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): The combinators |second|, |***| and |&&&|. 
 The combinator |second| is the mirrored version of |first| (Appendix~\ref{utilfns}).
 The |***| function combines |first| and |second| to handle two inputs in one arrow, is defined as
 % \begin{figure}[h]
@@ -89,7 +89,7 @@ f *** g = first f >>> second g
 while the |&&&| combinator, that constructs an arrow which outputs two different values like |***|, but takes only one input, is:
 % \begin{figure}[h]
 \begin{code}
-(&&&) :: Arrow arr => arr a b -> arr a c -> a a (b, c)
+(&&&) :: Arrow arr => arr a b -> arr a c -> arr a (b, c)
 f &&& g = arr (\a -> (a, a)) >>> (f *** g)
 \end{code}
 % \caption{The (\&\&\&) combinator}
@@ -110,7 +110,7 @@ add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 % \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
 
-The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a Monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. One of the major problems in parallel computing is, however, composition of parallel processes.
+The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a Monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. This is exactly one of the key challenges in parallel computing.
 
 
 %%% Local Variables:
