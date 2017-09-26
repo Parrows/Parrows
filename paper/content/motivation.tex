@@ -18,7 +18,7 @@
 
 One particular reason for this is the ease of introducing new sophisticated language
 concepts. Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
-the GpH Haskell (a SMP implementation of GpH language), the
+the GpH (a SMP implementation of GpH language), the
 |Par| Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a monad, even if
 only for the internal representation. Some introduce additional
@@ -33,7 +33,7 @@ Instead of
 introducing a new low-level parallel backend in order to implement our
 Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
 is defined as a common interface and varying implementations in
-existing parallel Haskells: GpH Haskell, |Par| Monad, and
+existing parallel Haskells: GpH, |Par| Monad, and
 Eden. Thus, we not only define a parallel programming interface in a
 novel manner - we tame the zoo of parallel Haskells. We provide a
 common \ptcomment{quantify, e.g. less than 10 \%}, very low-penalty programming interface that allows to switch
@@ -49,9 +49,11 @@ We propose a new Arrow-based encoding for parallelism based on a new Arrow combi
 
 This is a big advantage as we do not introduce any new types as Monad solutions like the |Par| Monad do. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs and libraries without having to change integral parts of the code. \mbcomment{mention Functions here? We have everything Eden has, but more.}
 
-We host this functionality in the |ArrowParallel| typeclass, which abstracts all parallel implementation logic in a way that the backend easily be swapped. This means it is possible to write code against the interface of a common typeclass without being bound to any specific backend. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance.
+\mbcomment{Überleitung auf Related Work hier machen}
 
-We also show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done} as shown in Section \ref{sec:benchmarks}.
+We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| typeclass, which abstracts all parallel implementation logic. This way, we can have multiple backends - currently a GpH, a |Par| Monad and an Eden version are supported - backends can easily be swapped, so we are not bound to any specific one. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant.
+
+We show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done} as shown in Section \ref{sec:benchmarks}.
 
 \mbcomment{Mention Future work here?}
 
