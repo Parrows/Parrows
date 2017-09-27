@@ -9,6 +9,9 @@ cp bench-sudoku-sm.bench.* ../content/benchmarks/sudoku-sm
 ./benchmarkCalculator ../raw_benches/bench_jacobi.csv bench_jacobi True
 cp bench-jacobi.bench.* ../content/benchmarks/distributed-jacobi
 
+./benchmarkCalculator ../raw_benches/bench_distributed_rm.csv bench_distributed True
+cp bench-distributed.bench.* ../content/benchmarks/distributed-rm
+
 ./benchmarkCalculator ../raw_benches/bench_torus.csv bench_torus True
 cp bench-torus.bench.* ../content/benchmarks/torus
 
@@ -17,12 +20,14 @@ cp bench-torus.bench.* ../content/benchmarks/torus
 
 ./calculateDifferences bench-jacobi.bench.jacobi-eden-3-3217.csv bench-jacobi.bench.jacobi-parr-3-3217.csv 3-3217-diff.csv
 #./calculateDifferences bench-distributed.bench.skelrm-eden-11213-256.csv bench-distributed.bench.skelrm-parrows-11213-256.csv 11213-256-diff.csv
-#./calculateDifferences bench-distributed.bench.skelrm-eden-44497-256.csv bench-distributed.bench.skelrm-parrows-44497-256.csv 44497-256-diff.csv
+
+./calculateDifferences bench-distributed.bench.skelrm-eden-44497-256.csv bench-distributed.bench.skelrm-parrows-44497-256.csv 44497-256-diff.csv
 
 cp 1024-diff.csv ../content/benchmarks/distributed-torus
 #cp 32-1024-64-200-diff.csv ../content/benchmarks/distributed-torus
 
 cp 3-3217-diff.csv ../content/benchmarks/distributed-jacobi
-# cp 44497-256-diff.csv ../content/benchmarks/distributed-rm
+
+cp 44497-256-diff.csv ../content/benchmarks/distributed-rm
 
 rm *.csv
