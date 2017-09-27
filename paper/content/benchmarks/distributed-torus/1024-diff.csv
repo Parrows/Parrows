@@ -1,4 +1,0 @@
-"","name","time","nCores","speedup","max stddev"
-"2","bench/./torus_matrix_eden 1024-bench/./torus_matrix_parrows 1024",-0.11611549075071981,16,0.4372684638551032,4.863270796801377e-2
-"3","bench/./torus_matrix_eden 1024-bench/./torus_matrix_parrows 1024",-0.12547141261812644,64,0.8350162239846775,4.569688478806846e-2
-"4","bench/./torus_matrix_eden 1024-bench/./torus_matrix_parrows 1024",-8.612512300412156e-3,256,0.41189358994606096,0.13002980501315511
