@@ -362,7 +362,7 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 %\hfill%
 {\performanceJacobiDistDiff{3}{3217}{32}{0.5}{260}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
-  consisting of 256 cores. Input was $2^{1279}-1$, we used 256
+  consisting of 256 cores. Input was $2^{3217}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
   (and hence speedup) measurements for PArrows with Eden backend and
@@ -385,10 +385,6 @@ smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-
 }{#3}{\plotwidthDist}
 }
 
-\renewcommand{\speedupTorusDist}[3]{
-	\textcolor{red}{benchmark missing. in the works}
-}
-
 
 \newcommand{\performanceTorusDistDiff}[4]{
 \performancediffplot{Run time differences\\for \torustest ``#1''}{(Eden $-$ PArrows)}{256}{#2}{
@@ -398,19 +394,15 @@ smooth]{benchmarks/distributed-torus/#1-diff.csv};
 }{#3}{#4}{\plotwidthDist}
 }
 
-\renewcommand{\performanceTorusDistDiff}[4]{
-		\textcolor{red}{benchmark missing. in the works}
-}
-
 \begin{figure}
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupTorusDist{1024}{32}{260}\label{subfig:speedupTorusDist}}%
+{\speedupTorusDist{4096}{32}{260}\label{subfig:speedupTorusDist}}%
 %\hfill%
-{\performanceTorusDistDiff{1024}{32}{0.5}{260}\label{subfig:performancetorusDistDiff}}
+{\performanceTorusDistDiff{4096}{32}{0.5}{260}\label{subfig:performancetorusDistDiff}}
 \caption{Parallel performance of \torustest on the Glasgow grid
-  consisting of 256 cores. Input was a matrix size of $1024$. The top plot shows absolute speedup in a distributed memory setting. The
+  consisting of 256 cores. Input was a matrix size of $4096$. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
   (and hence speedup) measurements for PArrows with Eden backend and
   Eden almost coincide. Hence, bottom plot shows
