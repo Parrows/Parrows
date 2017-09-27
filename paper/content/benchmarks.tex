@@ -346,10 +346,6 @@ smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
 }{#4}{\plotwidthDist}
 }
 
-\renewcommand{\speedupJacobiDist}[4]{
-	\textcolor{red}{benchmark missing. in the works}
-}
-
 \newcommand{\performanceJacobiDistDiff}[5]{
 \performancediffplot{Run time differences\\for \jacobitest ``#2''}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
@@ -358,17 +354,13 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 }{#4}{#5}{\plotwidthDist}
 }
 
-\renewcommand{\performanceJacobiDistDiff}[5]{
-	\textcolor{red}{benchmark missing. in the works}
-}
-
 \begin{figure}
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupJacobiDist{3}{1279}{32}{260}\label{subfig:rm-dist-a}}%
+{\speedupJacobiDist{3}{3217}{32}{260}\label{subfig:rm-dist-a}}%
 %\hfill%
-{\performanceJacobiDistDiff{3}{1279}{32}{0.5}{260}\label{subfig:rm-dist-b}}
+{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{260}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{1279}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
