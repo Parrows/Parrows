@@ -45,7 +45,7 @@ the parallel Haskell backends at will. Further backends based on HdpH or a Frege
 %
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
-We propose a new Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]|, which converts a list of Arrows into a new parallel Arrow. Because of this, we do not lose any benefits of using Arrows as the parallelism is encapsulated as another combinator instead of a different type. The resulting Arrow can be used in the same way as a potential serial version.
+We propose a new Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]| in Section \ref{sec:parallel-arrows}, which converts a list of Arrows into a new parallel Arrow. Because of this, we do not lose any benefits of using Arrows as the parallelism is encapsulated as another combinator instead of a different type. The resulting Arrow can be used in the same way as a potential serial version.
 
 This is a big advantage as we do not introduce any new types as Monad solutions like the |Par| Monad do. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs and libraries without having to change integral parts of the code. \mbcomment{mention Functions here? We have everything Eden has, but more.}
 
@@ -53,9 +53,13 @@ This is a big advantage as we do not introduce any new types as Monad solutions 
 
 We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| typeclass, which abstracts all parallel implementation logic. This way, we can have multiple backends - currently a GpH, a |Par| Monad and an Eden version are supported - backends can easily be swapped, so we are not bound to any specific one. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant.
 
-We show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done} as shown in Section \ref{sec:benchmarks}.
+We introduce a |Future| typeclass in Section \ref{sec:futures} to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because they allow for inter-node communication without blocking the master-node. As the |Par| Monad and GpH backends (in their current form) only support shared memory execution and do not have to fix any communication problems, we only use a wrapping dummy |BasicFuture|.
+
+We show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced in Section \ref{sec:benchmarks}, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done}.
 
 \mbcomment{Mention Future work here?}
+
+\mbcomment{Conclusion?}
 
 %\ptcomment{* We evaluate the expressive power of  arrow parallelism. Showing that 
 %  + there is no need to introduce additional types
