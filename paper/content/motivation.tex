@@ -16,25 +16,24 @@
 % \olcomment{An attempt ---->}
 %%%%%
 
-One particular reason for this is the ease of introducing new sophisticated language
-concepts. Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
-the GpH (a SMP implementation of GpH language), the
+Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
+Glasgow parallel Haskell or short GpH (its Multicore SMP implementation, in particular), the
 |Par| Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a monad, even if
 only for the internal representation. Some introduce additional
-language constructs. 
+language constructs.
+
 %In this paper we introduce a notion of parallel
 %computations using Arrows.
-A key novelty here is to use Arrows to represent parallel computations. They seem a natural fit as they are a generalization of the function |->| and serve as general interface to computations.
+A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they are a generalization of the function |->| and serve as general interface to computations.
 
 %Our Arrows-based interface is a high-level one.
-We provide an Arrows-based typeclass and implementations for three parallel Haskells.
+We provide an Arrows-based typeclass and implementations for the three above mentioned parallel Haskells.
 Instead of 
 introducing a new low-level parallel backend in order to implement our
 Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
-is defined as a common interface and varying implementations in
-existing parallel Haskells: GpH, |Par| Monad, and
-Eden. Thus, we not only define a parallel programming interface in a
+is defined as a common interface with varying implementations in
+the existing parallel Haskells. Thus, we not only define a parallel programming interface in a
 novel manner - we tame the zoo of parallel Haskells. We provide a
 common \ptcomment{quantify, e.g. less than 10 \%}, very low-penalty programming interface that allows to switch
 the parallel backends at will. Further backends based on HdpH or a Frege implementation (on the Java Virtual Machine) are viable, too.
