@@ -19,7 +19,7 @@ instance Monad m => Arrow (Kleisli m) where
 	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
 \end{code}
 \vfill
-\caption{The definition of |Arrow| type class and its two most typical instances.}
+\caption{The definition of the |Arrow| type class and its two most typical instances.}
 \label{fig:ArrowDefinition}
 \end{figure}
 
@@ -43,7 +43,7 @@ instance Monad m => Arrow (Kleisli m) where
 %\caption{Schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
 %\label{fig:arrows-viz}
 }
-\caption{Schematic depiction of Arrow (left) and its basic
+\caption{Schematic depiction of  an Arrow (left) and its basic
   combinators |arr|, |>>>| and |first| (right).}
 \label{fig:arrow-sch}
 \label{fig:arrows-viz}
@@ -53,9 +53,9 @@ instance Monad m => Arrow (Kleisli m) where
 \label{sec:arrows}
 Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An Arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
 %
-Its |arr| operation is used to lift an ordinary function to the specified arrow type, analogous to the monadic |return|. The |>>>| operator is analogous to the monadic composition  |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator  takes the input arrow from |b| to |c| and converts it into an arrow on pairs with the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of the basic Arrow combinators.
+To lift an ordinary function to an Arrow, |arr| is used, analogous to the monadic |return|. Similarly, the composition operator |>>>| is analogous to the monadic composition |>>=| and combines two arrows |arr a b| and |arr b c| by "wiring" the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator takes the input Arrow |arr a b| and converts it into an arrow on pairs |arr (a, c) (b, c)| that leaves the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of these basic Arrow combinators.
 The most prominent instances of this interface are regular functions |(->)|
-and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps functions that return monadic values, e.g.  |a -> m b| with |m| being a Monad.
+and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic functions, e.g.  |a -> m b| (with |m| being a Monad).
 
 \begin{figure}[h]
 	\centering
@@ -75,9 +75,9 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps functions tha
 	\caption{Visual depiction of syntactic sugar for Arrows.}
 	\label{fig:syntacticSugarArrows}
 \end{figure}
-Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): The combinators |second|, |***| and |&&&|. 
-The combinator |second| is the mirrored version of |first| (Appendix~\ref{utilfns}).
-The |***| function combines |first| and |second| to handle two inputs in one arrow, is defined as
+Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): |second|, |***| and |&&&|. 
+|second| is the mirrored version of |first| (Appendix~\ref{utilfns}).
+|***| combines |first| and |second| to handle two inputs in one arrow, and is defined as follows:
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -86,7 +86,7 @@ f *** g = first f >>> second g
 % \caption{The (***) combinator}
 % \label{fig:***}
 % \end{figure}
-while the |&&&| combinator, that constructs an arrow which outputs two different values like |***|, but takes only one input, is:
+The |&&&| combinator, which constructs an Arrow that outputs two different values like |***|, but takes only one input, is:
 % \begin{figure}[h]
 \begin{code}
 (&&&) :: Arrow arr => arr a b -> arr a c -> arr a (b, c)
