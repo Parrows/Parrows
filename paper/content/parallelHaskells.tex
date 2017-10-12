@@ -9,11 +9,11 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 	\label{fig:parEvalN}
 \end{figure}
 
-In this section, we will implement this non-Arrow version which will later be adapted for usage in our Arrow based parallel Haskell.
+In this section, we will implement this non-Arrow version which will later be adapted for usage in our Arrow-based parallel Haskell.
 
-There exist several parallel Haskells already. Among the most important are probably GpH  (based on |par| \& |pseq| "hints") \cite{Trinder1996,Trinder1998a}, the |Par| Monad (a monad for deterministic parallelism) \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, Eden \cite{eden,Loogen2012} (a parallel Haskell for distributed memory), HdpH (a Template Haskell based parallel Haskell for distributed memory) \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} and LVish (a |Par| extension with focus on communication) \cite{Kuper:2014:TPE:2666356.2594312}.
+There exist several parallel Haskells already. Among the most important are probably GpH  (based on |par| \& |pseq| "hints") \cite{Trinder1996,Trinder1998a}, the |Par| Monad (a monad for deterministic parallelism) \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, Eden (a parallel Haskell for distributed memory) \cite{eden,Loogen2012}, HdpH (a Template Haskell based parallel Haskell for distributed memory) \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} and LVish (a |Par| extension with focus on communication) \cite{Kuper:2014:TPE:2666356.2594312}.
 
-As the goal of this paper is not to reimplement yet another parallel runtime, but to represent parallelism with Arrows, we base our efforts on existing work which we wrap as backends behind a common interface. For this paper we chose GpH - for its simplicity, the |Par| Monad - to represent a monadic DSL, and Eden - as a distributed parallel Haskell.
+As the goal of this paper is not to reimplement yet another parallel runtime, but to represent parallelism with Arrows, we base our efforts on existing work which we wrap as backends behind a common interface. For this paper we chose GpH for its simplicity, the |Par| Monad to represent a monadic DSL, and Eden as a distributed parallel Haskell.
 
 LVish and HdpH were not chosen as the former does not differ from the original |Par| Monad with regard to how we would have used it in this paper, while the latter (at least in its current form) does not comply with our representation of parallelism due to its heavy reliance on TemplateHaskell.
 
@@ -84,9 +84,9 @@ Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 \end{figure}
 
 \subsubsection{Eden}
-Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{The projects homepage can be found at \url{http://www.mathematik.uni-marburg.de/~eden/}. The Hackage page is at \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} It is targeted towards clusters, but also functions well in a shared-memory setting with a further simple backend. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results also on multicores \cite{arcs-dc,aswad2009low}.
+Eden \cite{eden,Loogen2012} is a parallel Haskell for distributed memory and comes with a MPI and a PVM backends.\footnote{The projects homepage can be found at \url{http://www.mathematik.uni-marburg.de/~eden/}. The Hackage page is at \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/}.} It is targeted towards clusters, but also functions well in a shared-memory setting with a further simple backend. However, in contrast to many other parallel Haskells, in Eden each process has its own heap. This seems to be a waste of memory, but with distributed programming paradigm and individual GC per process, Eden yields good performance results on multicores, as well \cite{arcs-dc,aswad2009low}.
 
-While Eden also comes with a Monad |PA| for parallel evaluation, it also ships with a completely functional interface that includes
+While Eden comes with a Monad |PA| for parallel evaluation, it also ships with a completely functional interface that includes
 %\\
 a |spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]|
 %\\

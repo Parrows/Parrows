@@ -128,14 +128,14 @@ distributed memory software.
 
 We used multiple tests that originated from different
 sources. Most of them are parallel mathematical computations, initially
-implemented in Eden. Table~\ref{tab:benches} summarizes.
+implemented in Eden. Table~\ref{tab:benches} summarises.
 
 \begin{table}
 \caption{The benchmarks we use in this paper.}
 \label{tab:benches}
 \centering
 %% something was wrong with separators in table
-\renewcommand{\tabcolsep}{1em}
+\renewcommand{\tabcolsep}{0.5em}
 \begin{tabular}{lccll}
 \toprule
 Name & Area & Type & Origin & Citation \\
@@ -158,8 +158,8 @@ Jacobi sum test or APRCL is also a primality test, that however,
 guarantees the correctness of the result. It is probabilistic in the
 sense that its run time is not certain. Unlike \rmtest, the subtests
 of Jacobi sum test have very different durations. \citet{lobachev-phd}
-\olcomment{discuss some optimisations of parallel APRCL.} Generic parallel
-implementation of \rmtest and APRCL were presented in \citet{Lobachev2012}.
+discusses some optimisations of parallel APRCL. Generic parallel
+implementations of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 
 ``Gentleman'' is a standard Eden test program, developed
 for their |torus| skeleton. It implements a parallel matrix
@@ -179,7 +179,7 @@ current support of distributed memory in PArrows is limited to
 Eden. We used the MPI backend of Eden in a distributed memory
 setting. However, for shared memory Eden features a ``CP'' backend
 that merely copies the memory blocks between distributed heaps. In
-this mode Eden still operates in the ``nothing shared'' setting, but
+this mode, Eden still operates in the ``nothing shared'' setting, but
 is adapted better to multicore machines. We label this version of Eden
 in the plots as ``Eden~CP''.
 
@@ -203,7 +203,7 @@ plummeting speedup of 124.31 at 512 hyperthreaded cores, whereas it was
 213.172 for 256 real cores. Apparently, hyperthreading in the Glasgow
 grid fails to execute two parallel Haskell processes with full-fledged
 parallelism. For this reason, we did not regard hyperthreaded cores in
-our speedup plots in Figs.~\ref{fig:bench-rm-sm}-\ref{fig:sudokuSMBenchmark}.
+our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
@@ -226,7 +226,7 @@ PArrows-enabled versions.
 To show that PArrows induce very small overhead in a distributed context as well, we compare the original Eden
 versions of the benchmark to its PArrows-enabled counterpart in the \rmtest, \torustest and \jacobitest benchmarks. We plot execution time differences between measurements for
 PArrows and the corresponding backend in a separate plot
-(Figs.~\ref{fig:bench-rm-dist}, \ref{fig:torusBenchmark}, \ref{fig:bench-jacobi-dist}). As an example, the differences range in
+(Figs.~\ref{fig:bench-rm-dist}--\ref{fig:torusBenchmark}). As an example, the differences range in
 about 0.5~seconds for the execution time of 46~seconds on 256 cores
 for distributed \rmtest with PArrows and Eden. For these comparisons, the plots show absolute
 time differences that are not relative \wrt the total execution time.
@@ -263,7 +263,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 
 \newcommand{\speedupSkelRMDist}[4]{
-\speedupplot{Speedup of \rmtest ``#2''}{PArrows}{256}{#3}{
+\speedupplot{Speedup of \rmtest ``#1 #2''}{PArrows}{256}{#3}{
 % \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -274,7 +274,7 @@ smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.c
 }
 
 \newcommand{\performanceSkelRMDistDiff}[5]{
-\performancediffplot{Run time differences\\for \rmtest ``#2''}{(Eden $-$ PArrows)}{256}{#3}{
+\performancediffplot{Run time differences\\for \rmtest ``#1 #2''}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
@@ -298,9 +298,9 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupSkelRMDist{44497}{256}{32}{260}\label{subfig:rm-dist-a}}%
+{\speedupSkelRMDist{44497}{256}{32}{272}\label{subfig:rm-dist-a}}%
 %\hfill%
-{\performanceSkelRMDistDiff{44497}{256}{32}{0.5}{260}\label{subfig:rm-dist-b}}
+{\performanceSkelRMDistDiff{44497}{256}{32}{0.5}{272}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{44497}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
@@ -319,15 +319,14 @@ Figure~\ref{fig:bench-rm-sm}. We executed the test with 32 and 64
 tasks. The plot shows the PArrows-enabled versions with corresponding backends.
 The performance of PArrows/Eden~CP in shared memory is slightly better than
 for SMP variants such as PArrows/GpH and PArrows/|Par|
-Monad but most of the time the performance is still comparable with the GpH backend performing slightly worse than the other two in terms of speedup. In particular, the speedups for 16 cores fall behind quite noticeably with 11.69 for 32 tasks as Eden and the |Par| Monad both score 13.05 for 32 tasks. While the GpH backend scores a bit better in the 64 tasks benchmark, its speedup of 12.70 is still behind the 13.65 and 13.33 of Eden and |Par| Monad, respectively.
+Monad but most of the time the performance is still comparable with the GpH backend performing slightly worse than the other two in terms of speedup.
 
 Comparing the PArrows version of the \rmtest with the original from Eden with the MPI backend in a distributed memory setting, we see an almost linear speedup of
-\rmtest with 256 tasks and input $2^{444497}-1$ in both versions. The sequential run time
+\rmtest with 256 tasks and input $2^{44497}-1$ in both versions. The sequential run time
 was computed as the mean of three consecutive executions on a single
-core---the single run took two hours 43 minutes. The zero difference  between
-PArrows/Eden and Eden almost always lies on the error bar of
-the measurement. The only exception, where the PArrows and Eden versions differ and it was it was significant, was for 64 cores, where it performed 0.49s better. This corresponds to
-0.30\% relative time difference. Otherwise, PArrows was 0.23s (or 0.0007\%) slower for 32 cores, 0.26s (or 0.0030\%) slower for 128 cores, and 0.09s faster (or 0.0019\%) faster for 256 cores.
+core---the single run took two hours 43 minutes. The difference between
+PArrows/Eden and Eden almost always lies inside the error bar of
+the measurement.
 
 %As the PArrows version uses Eden in the backend, these numbers suggest that there is no real performance difference between using PArrows or Eden for this task as they trade blows in this benchmark. Additionally, PArrows with an Eden-based backend performing better than what it is based upon suggests that any difference in runtime between the two is more of an anomaly than a real difference.
 
@@ -358,9 +357,9 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupJacobiDist{3}{3217}{32}{260}\label{subfig:rm-dist-a}}%
+{\speedupJacobiDist{3}{3217}{32}{272}\label{subfig:rm-dist-a}}%
 %\hfill%
-{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{260}\label{subfig:rm-dist-b}}
+{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{272}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{3217}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
@@ -376,7 +375,7 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 
 \subsubsection{\torustest}
 
-Next is the \torustest benchmark. The results of the comparison of vanilla Eden to our PArrows-based version can be found in \ref{fig:torusBenchmark}. While we do not see too much speedup for more than 16 cores, we can prove that the difference between the Eden and PArrows version are again marginal. The difference between PArrows and Eden is only significant for 16 and 64 cores where it ran 1.7\% and 2.7\% slower which corresponds to a real-time difference of 0.12s and 0.13s. For 256 cores PArrows performed 0.2\% slower which corresponds to 0.01s overhead.
+Next is the \torustest benchmark. The results of the comparison of vanilla Eden to our PArrows-based version can be found in Fig.~\ref{fig:torusBenchmark}. While we do not see too much speedup for more than 16 cores, we can prove that the difference between the Eden and PArrows version are again marginal. %The difference between PArrows and Eden is only significant for 16 and 64 cores where it ran 1.7\% and 2.7\% slower which corresponds to a real-time difference of 0.12s and 0.13s. For 256 cores PArrows performed 0.2\% slower which corresponds to 0.01s overhead.
 
 \newcommand{\speedupTorusDist}[3]{
 \speedupplot{Speedup of \torustest ``#1''}{PArrows}{256}{#2}{
@@ -398,9 +397,9 @@ smooth]{benchmarks/distributed-torus/#1-diff.csv};
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupTorusDist{4096}{32}{260}\label{subfig:speedupTorusDist}}%
+{\speedupTorusDist{4096}{32}{272}\label{subfig:speedupTorusDist}}%
 %\hfill%
-{\performanceTorusDistDiff{4096}{32}{0.5}{260}\label{subfig:performancetorusDistDiff}}
+{\performanceTorusDistDiff{4096}{32}{0.5}{272}\label{subfig:performancetorusDistDiff}}
 \caption{Parallel performance of \torustest on the Glasgow grid
   consisting of 256 cores. Input was a matrix size of $4096$. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
@@ -414,7 +413,7 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 
 \subsubsection{\sudokutest}
 
-As the last Benchmark in this paper we present the \sudokutest in \ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark}-\ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input \ref{fig:sudokuSMBenchmark16000}. This is due to the benchmark only using |parMap| instead of a chunking variant (however we did not change that for simplicity's sake) and is reflected by debug output which shows, that of 16000 sparks being created (one for each sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lack behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
+As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark} and \ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input (Fig.~\ref{fig:sudokuSMBenchmark16000}). This is due to the benchmark only using |parMap| instead of a chunking variant -- however we did not change that for simplicity's sake. This issue is reflected by debug output which shows that of 16000 sparks being created (one for each sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lag behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
 
 
 \newcommand{\performanceSudokuSM}[1]{
