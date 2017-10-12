@@ -22,9 +22,9 @@ Arrows were introduced by \citet{HughesArrows}, basically they are a generalised
 \citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of Arrows that capsule the computation more than regular arrows do and thus enable optimizations. Their approach would allow parallel composition, as their special Arrows would not interfere with each other in concurrent execution. In contrast, we capture a whole parallel computation as a single entity: our main instantiation function |parEvalN| makes a single (parallel) Arrow out of list of Arrows. \citet{Huang2007} utilise Arrows for parallelism, but strikingly different from our approach. They use Arrows to orchestrate several tasks in robotics. We, however, propose a general interface for parallel programming, while remaining completely in Haskell.
 
 \paragraph{Other languages.}
-Although this work is centered on Haskell implementation of Arrows, it is applicable to any functional programming language where parallel evaluation and Arrows can be defined. Experiments with our approach in Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (which is basically Haskell on the JVM) were quite successful. However, it is beyond the scope of this work.
+Although this work is centered on Haskell implementation of Arrows, it is applicable to any functional programming language where parallel evaluation and Arrows can be defined. Experiments with our approach in Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (which is basically Haskell on the JVM) were quite successful. A new approach to Haskell on the JVM is the Eta language\footnote{Eta project page at \url{eta-lang.org}}. However, both are beyond the scope of this work.
 
-\citet{achten2004arrows,achten2007arrow} use an arrow implementation in Clean for better handling of typical GUI tasks. \citet{Dagand:2009:ORD:1481861.1481870} used arrows in OCaml in the implementation of a distributed system.
+\citet{achten2004arrows,achten2007arrow} use an Arrow implementation in Clean for better handling of typical GUI tasks. \citet{Dagand:2009:ORD:1481861.1481870} used Arrows in OCaml in the implementation of a distributed system.
 
 
 %%% Local Variables:
