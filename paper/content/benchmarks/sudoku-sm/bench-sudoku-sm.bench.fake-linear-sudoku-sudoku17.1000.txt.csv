@@ -1,0 +1,5 @@
+"","name","time","nCores","speedup","stddev"
+"2","bench/./fake-linear-sudoku sudoku17.1000.txt",3.2830550708,2,2,1.44E-02
+"3","bench/./fake-linear-sudoku sudoku17.1000.txt",1.6415275354,4,4,9.58E-03
+"4","bench/./fake-linear-sudoku sudoku17.1000.txt",0.8207637677,8,8,1.04E-03
+"5","bench/./fake-linear-sudoku sudoku17.1000.txt",0.4103818838,16,16,1.28E-02

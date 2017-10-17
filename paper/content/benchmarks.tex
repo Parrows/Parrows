@@ -417,7 +417,9 @@ As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:
 
 
 \newcommand{\performanceSudokuSM}[1]{
-\performanceplot{Parallel run time of \sudokutest ``#1''}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \sudokutest ``#1''}{linear, Eden CP, GpH, |Par| Monad}{16}{4}{
+\addplot [no markers,dotted,thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
+smooth] {benchmarks/sudoku-sm/bench-sudoku-sm.bench.fake-linear-sudoku-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -430,7 +432,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 }
 
 \newcommand{\speedupSudokuSM}[1]{
-\speedupplot{ Parallel speedup of \sudokutest ``#1''}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\speedupplot{Parallel speedup of \sudokutest ``#1''}{Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
