@@ -24,7 +24,7 @@ We will now go into some detail on GpH, the |Par| Monad and Eden, and also give 
 %Haskell we will now implement |parEvalN| with several different
 %parallel Haskells.
 
-\subsubsection{Glasgow parallel Haskell - GpH}
+\subsubsection{Glasgow parallel Haskell -- GpH}
 GpH \cite{Marlow2009,Trinder1998a} is one of the simplest ways to do parallel processing found in standard GHC.\footnote{The Multicore implementation of GpH is available on Hackage under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} Besides some basic primitives (|par| \& |pseq| hints), it ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|, which is exactly what is required for an implementation of |parEvalN|.
 
 

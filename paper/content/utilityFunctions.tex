@@ -250,7 +250,7 @@ parEval2 conf f g =
 	\caption{Definition of |parEval2|.}
 	\label{fig:parEval2}
 \end{figure}
-Furthermore, Fig.~\ref{fig:torus_example_rest} contains the ommited definitions of |prMMTr|, - which calculates $AB^T$ for two matrices $A$ and $B$, |splitMatrix| - which splits the a matrix into chunks, and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
+Furthermore, Fig.~\ref{fig:torus_example_rest} contains the ommited definitions of |prMMTr| (which calculates $AB^T$ for two matrices $A$ and $B$), |splitMatrix| (which splits the a matrix into chunks), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
 \begin{figure}[h]
 \begin{code}
 prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
