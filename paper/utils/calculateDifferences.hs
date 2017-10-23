@@ -25,7 +25,8 @@ data Speedup = Speedup {
     time :: Double,
     nCores :: String,
     speedup :: Double,
-    stdDev :: Double
+    stdDev :: Double,
+    factor :: Double
 } deriving (Show)
 
 
@@ -58,7 +59,8 @@ main = do
                                                                         time = time,
                                                                         nCores = nCores,
                                                                         speedup = speedup,
-                                                                        stdDev = stdDev
+                                                                        stdDev = stdDev,
+                                                                        factor = 1
                                                                     }
                                                    | otherwise = Nothing
                 lineToSpeedup _ = Nothing
@@ -71,19 +73,21 @@ main = do
                             time = (time x) - (time y),
                             nCores = nCores x,
                             speedup = (speedup x) - (speedup y),
-                            stdDev = max (stdDev x) (stdDev y)
+                            stdDev = max (stdDev x) (stdDev y),
+                            factor = (time y) / (time x)
                         }
                     | otherwise = Nothing
 
                 legend :: String
-                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\"" ++ "\n"
+                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\",\"factor\"" ++ "\n"
 
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
 
                 toString :: Speedup -> String
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
-                                    (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "\n"
+                                    (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "," ++
+                                    (show $ factor x) ++ "\n"
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
                 handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines
