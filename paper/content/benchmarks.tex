@@ -332,9 +332,12 @@ the measurement.
 
 \subsubsection{\jacobitest}
 
-Continuing, the results of the \jacobitest in \ref{fig:bench-jacobi-dist} are as follows: 
+Continuing, the results of the \jacobitest (MPI only) in Fig.~\ref{fig:bench-jacobi-dist} are as follows:
+The program does not seem to scale well beyond 16-32 tasks with input $2^{3217}-1$. Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores because of the long running time. For demonstration purposes in Fig.~\ref{fig:bench-jacobi-dist}, we chose a simulated speedup of 22 for 128 cores. For 256 cores, this results in a superlinear speedup of \~122.63, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores.
 
-Not pictured: difference between Eden and PArrows with 4253
+We once again compare the Eden version with the PArrrows version in Fig.~\ref{fig:bench-jacobi-dist}. We see similar behaviour to the MPI version of the \rmtest: The difference once again almost always remains within the bounds of the error bar of the measurement.
+
+Not pictured are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are -1005.18\seconds and -94.33\seconds in favour of Eden. This maximum of 12.27\% slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
 
 \newcommand{\speedupJacobiDist}[5]{
 \speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
@@ -374,8 +377,6 @@ absolute time differences for this benchmark. The
 higher the value, the better for PArrows\olcomment{CHECKME}.}
 \label{fig:bench-jacobi-dist}
 \end{figure}
-
-\mbcomment{FIXME: redo this test with $2^{44497}$}
 
 \subsubsection{\torustest}
 
@@ -479,4 +480,4 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 \subsection{Byline}
 
 In our distributed memory tests on the full grid we were unable to detect any performance deficiencies of PArrows \wrt Eden that were above of the error margin.
-In our distributed memory tests on the full grid the difference between PArrows and Eden was always below the error margin.
+In our distributed memory tests on the full grid the difference between PArrows and Eden was always below the error margin if PArrows performed worse. Even the biggest difference of 12.27\% in the \jacobitest for input $2^{4253}-1$ and 128 cores remained in line with these findings.
