@@ -241,7 +241,7 @@ difference is significant if it is above measurement error.
 \subsubsection{\rmtest}\label{sec:rmtest}
 
 \newcommand{\performanceSkelRMSM}[2]{
-\performanceplot{Parallel run time of \rmtest ``#2''}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \rmtest \enquote{#2}}{Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -252,7 +252,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 
 \newcommand{\speedupSkelRMSM}[2]{
-\speedupplot{Speedup of \rmtest ``#2''}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\speedupplot{Speedup of \rmtest \enquote{#2}}{Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -263,7 +263,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 
 \newcommand{\speedupSkelRMDist}[4]{
-\speedupplot{Speedup of \rmtest ``#1 #2''}{PArrows}{256}{#3}{
+\speedupplot{Speedup of \rmtest \enquote{#1 #2}}{PArrows}{256}{#3}{
 % \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -274,7 +274,7 @@ smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.c
 }
 
 \newcommand{\performanceSkelRMDistDiff}[5]{
-\performancediffplot{Run time differences\\for \rmtest ``#1 #2''}{(Eden $-$ PArrows)}{256}{#3}{
+\performancediffplot{Run time differences\\for \rmtest \enquote{#1 #2}}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
@@ -332,24 +332,29 @@ the measurement.
 
 \subsubsection{\jacobitest}
 
-Continuing, the results of the \jacobitest in \ref{fig:bench-jacobi-dist} are as follows:
+Continuing, the results of the \jacobitest in \ref{fig:bench-jacobi-dist} are as follows: 
 
-\newcommand{\speedupJacobiDist}[4]{
-\speedupplot{Speedup of \jacobitest ``#2''}{PArrows}{256}{#3}{
+\newcommand{\speedupJacobiDist}[5]{
+\speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
 % \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
+\addplot [mark=x,very thick,red] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
 % \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
 }{#4}{\plotwidthDist}
 }
 
-\newcommand{\performanceJacobiDistDiff}[5]{
-\performancediffplot{Run time differences\\for \jacobitest ``#2''}{(Eden $-$ PArrows)}{256}{#3}{
+\newcommand{\performanceJacobiDistDiff}[6]{
+\performancediffplot{Run time differences\\for \jacobitest \enquote{#2}}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
+\addplot+[mark=*,very thick,error bars/.cd,
+    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+smooth]{benchmarks/distributed-jacobi/#1-#6-diff.csv};
 }{#4}{#5}{\plotwidthDist}
 }
 
@@ -357,9 +362,9 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 \centering
 %\performanceSkelRMDist{44497}{256}{32,64,128,256,512}{544}
 %
-{\speedupJacobiDist{3}{3217}{32}{272}\label{subfig:rm-dist-a}}%
+{\speedupJacobiDist{3}{3217}{32}{272}{4253}\label{subfig:rm-dist-a}}%
 %\hfill%
-{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{272}\label{subfig:rm-dist-b}}
+{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{272}{4253}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{3217}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
@@ -378,7 +383,7 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 Next is the \torustest benchmark. The results of the comparison of vanilla Eden to our PArrows-based version can be found in Fig.~\ref{fig:torusBenchmark}. While we do not see too much speedup for more than 16 cores, we can prove that the difference between the Eden and PArrows version are again marginal. %The difference between PArrows and Eden is only significant for 16 and 64 cores where it ran 1.7\% and 2.7\% slower which corresponds to a real-time difference of 0.12s and 0.13s. For 256 cores PArrows performed 0.2\% slower which corresponds to 0.01s overhead.
 
 \newcommand{\speedupTorusDist}[3]{
-\speedupplot{Speedup of \torustest ``#1''}{PArrows}{256}{#2}{
+\speedupplot{Speedup of \torustest \enquote{#1}}{PArrows}{256}{#2}{
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-#1.csv};
 }{#3}{\plotwidthDist}
@@ -386,7 +391,7 @@ smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-
 
 
 \newcommand{\performanceTorusDistDiff}[4]{
-\performancediffplot{Run time differences\\for \torustest ``#1''}{(Eden $-$ PArrows)}{256}{#2}{
+\performancediffplot{Run time differences\\for \torustest \enquote{#1}}{(Eden $-$ PArrows)}{256}{#2}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-torus/#1-diff.csv};
@@ -417,7 +422,7 @@ As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:
 
 
 \newcommand{\performanceSudokuSM}[1]{
-\performanceplot{Parallel run time of \sudokutest ``#1''}{linear, Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \sudokutest \enquote{#1}}{linear, Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot [no markers,dotted,thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth] {benchmarks/sudoku-sm/bench-sudoku-sm.bench.fake-linear-sudoku-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -432,7 +437,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 }
 
 \newcommand{\speedupSudokuSM}[1]{
-\speedupplot{Parallel speedup of \sudokutest ``#1''}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\speedupplot{Parallel speedup of \sudokutest \enquote{#1}}{Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
