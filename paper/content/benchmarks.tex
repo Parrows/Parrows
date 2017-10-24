@@ -172,7 +172,7 @@ to GpH Haskell. We ported it to PArrows.
 
 \subsection{What parallel Haskells run where}
 
-The \ensuremath{\Conid{Par}} monad and GpH Haskell -- in its multicore version (\cite{Marlow2009}) --  can be executed on a shared
+The |Par| monad and GpH Haskell -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
 memory machines only. Although GpH is available on distributed memory
 clusters, and newer distributed memory Haskells such as HdpH exist,
 current support of distributed memory in PArrows is limited to
@@ -218,7 +218,7 @@ our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
 
 The difference between, say, PArrows with |Par| Monad backend and a
 genuine |Par|
-Monad benchmark is very small. To give an example, it is ~0.4\seconds in favour of PArrows for 16 cores (10.8\seconds vs. 11.2\seconds) and ~-0.8\seconds in favour of the |Par| monad for 8 cores (16.1\seconds vs. 16.9\seconds) for
+Monad benchmark is very small. To give an example, it is $0.4\seconds$ in favour of PArrows for 16 cores ($10.8\seconds$ vs. $11.2\seconds$) and $-0.8\seconds$ in favour of the |Par| monad for 8 cores ($16.1\seconds$ vs. $16.9\seconds$) for
 the Sudoku benchmark in the shared memory setting. It is almost invisible in speedup and
 (non shown) run time plots. We thus show only the results for the
 PArrows-enabled versions.
@@ -227,7 +227,7 @@ To show that PArrows induce very small overhead in a distributed context as well
 versions of the benchmark to its PArrows-enabled counterpart in the \rmtest, \torustest and \jacobitest benchmarks. We plot execution time differences between measurements for
 PArrows and the corresponding backend in a separate plot
 (Figs.~\ref{fig:bench-rm-dist}--\ref{fig:torusBenchmark}). As an example, the differences range in
-about 0.5\seconds for the execution time of 46\seconds on 256 cores
+about $0.5\seconds$ for the execution time of $46\seconds$ on 256 cores
 for distributed \rmtest with PArrows and Eden. For these comparisons, the plots show absolute
 time differences that are not relative \wrt the total execution time.
 Furthermore, the error bars ends were computed from point-wise maximum of both standard
@@ -301,7 +301,7 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 {\speedupSkelRMDist{44497}{256}{32}{272}\label{subfig:rm-dist-a}}%
 %\hfill%
 {\performanceSkelRMDistDiff{44497}{256}{32}{0.5}{272}\label{subfig:rm-dist-b}}
-\caption{Parallel performance of \rmtest on the Glasgow grid
+\caption{Parallel performance of the \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{44497}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
@@ -333,11 +333,11 @@ the measurement.
 \subsubsection{\jacobitest}
 
 Continuing, the results of the \jacobitest (MPI only) in Fig.~\ref{fig:bench-jacobi-dist} are as follows:
-The program does not seem to scale well beyond 16-32 tasks with input $2^{3217}-1$. Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores because of the long running time. For demonstration purposes in Fig.~\ref{fig:bench-jacobi-dist}, we chose a simulated speedup of 22 for 128 cores. For 256 cores, this results in a superlinear speedup of \~122.63, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores.
+The program does not seem to scale well beyond 64 cores with input $2^{3217}-1$. Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores because of the long running time. For demonstration purposes in Fig.~\ref{fig:bench-jacobi-dist}, we chose a \enquote{simulated} speedup of 22 for 128 cores. This was obtained by taking the speedup value of 64 cores (approx. 11) of the $2^{3217}-1$ and assuming optimal \enquote{linear} speedup between 64 and 128 cores. For 256 cores, this results in a superlinear \enquote{speedup} of \~122.63 relative to 128 cores, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores.
 
 We once again compare the Eden version with the PArrrows version in Fig.~\ref{fig:bench-jacobi-dist}. We see similar behaviour to the MPI version of the \rmtest: The difference once again almost always remains within the bounds of the error bar of the measurement.
 
-Not pictured are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are -1005.18\seconds and -94.33\seconds in favour of Eden. This maximum of 12.27\% slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
+Not pictured are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are $-1005.18\seconds$ and $-94.33\seconds$ in favour of Eden. This maximum of $12.27\%$ slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
 
 \newcommand{\speedupJacobiDist}[5]{
 \speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
@@ -367,7 +367,7 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 {\speedupJacobiDist{3}{3217}{32}{272}{4253}\label{subfig:rm-dist-a}}%
 %\hfill%
 {\performanceJacobiDistDiff{3}{3217}{32}{5}{272}\label{subfig:rm-dist-b}}
-\caption{Parallel performance of \rmtest on the Glasgow grid
+\caption{Parallel performance of the \jacobitest on the Glasgow grid
   consisting of 256 cores. Input was $2^{3217}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting compared to a simulated speedup for input $2^{4253}-1$. The
   closer to linear speedup the better. Time
@@ -422,7 +422,7 @@ As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:
 
 
 \newcommand{\performanceSudokuSM}[1]{
-\performanceplot{Parallel run time of \sudokutest \enquote{#1}}{linear, Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \sudokutest \enquote{#1}}{linear speedup, Eden CP, GpH, |Par| Monad}{16}{4}{
 \addplot [no markers,dotted,thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth] {benchmarks/sudoku-sm/bench-sudoku-sm.bench.fake-linear-sudoku-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
