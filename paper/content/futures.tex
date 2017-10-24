@@ -24,20 +24,20 @@ for larger amount of data and number of processes \citep[as e.g.][showcases]{Ber
 \end{figure}
 
 This is in fact only a problem in distributed memory (in the scope of this paper) and we should  allow nodes to communicate directly with each other. Eden already ships with \enquote{remote data} that enable this \cite{AlGo03a,Dieterle2010}.
-But as we want code with our DSL to be implementation agnostic, we have to wrap this context. We do this with the |Future| typeclass (Fig.~\ref{fig:future}).
+But as we want code with our DSL to be implementation agnostic, we have to wrap this context. We do this with the |Future| type class (Fig.~\ref{fig:future}).
 \begin{figure}[h]
 \begin{code}
 class Future fut a | a -> fut where
     put :: (Arrow arr) => arr a (fut a)
     get :: (Arrow arr) => arr (fut a) a
 \end{code}
-\caption{Definition of the |Future| typeclass.}
+\caption{Definition of the |Future| type class.}
 \label{fig:future}
 \end{figure}
 Since |RD| is only a type synonym for a communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as Fig.~\ref{fig:RDFuture} shows. %This is due to the same reason we had to introduce a wrapper for |Strategy a| in the GpH Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
 Technical details are in Appendix, in Section~\ref{app:omitted}.
 
-For the |Par| Monad and GpH Haskell backends, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}), which are just simple wrappers around the actual data with boiler-plate logic so that the typeclass is satisfied. This is because the concept of a |Future| does not change anything for shared-memory execution as there are no communication problems to fix. Nevertheless, we require a common interface so the parallel Arrows are portable across backends.
+For the |Par| Monad and GpH Haskell backends, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}), which are just simple wrappers around the actual data with boiler-plate logic so that the type class is satisfied. This is because the concept of a |Future| does not change anything for shared-memory execution as there are no communication problems to fix. Nevertheless, we require a common interface so the parallel Arrows are portable across backends.
 \begin{figure}[tb]
 \begin{code}
 data BasicFuture a = BF a

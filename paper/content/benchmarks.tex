@@ -117,7 +117,7 @@ xmax=#6]
 We have tested our parallel DSL and algorithmic skeletons implemented
 in it. Benchmarks were conducted both in a shared and in a distributed
 memory setting. All benchmarks were done on the ``Glasgow grid'', consisting of
-16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyperthreaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyperthreaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyperthreading ability in most of the
+16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the
 cases.
 
 We used a single node with 16 real cores as a shared memory testbed
@@ -185,24 +185,24 @@ in the plots as ``Eden~CP''.
 
 
 
-\subsection{Effect of hyperthreading}
+\subsection{Effect of hyper-threading}
 
 The PArrows version of \rmtest on a single node of the Glasgow grid
 showed almost linear speedup (Fig.~\ref{fig:bench-rm-sm}). The speedup
 of 64-task PArrows/Eden at 16 real cores version was 13.65, the
 efficiency was 85.3\%. However, if we increase the number of
-requested cores to be 32 -- \ie if we use hyperthreading on 16 real
+requested cores to be 32 -- \ie if we use hyper-threading on 16 real
 cores -- the speedup does not increase that well. It is merely 15.99
 for 32 tasks with PArrows/Eden. It is worse for other backends.  As
 for 64 tasks, we obtain the speedup of 16.12 with PArrows/Eden at 32
-hyperthreaded cores and only 13.55 with PArrows/GpH. Efficiency is 50.4\% and 42.3\%, respectively. The Eden
+hyper-threaded cores and only 13.55 with PArrows/GpH. Efficiency is 50.4\% and 42.3\%, respectively. The Eden
 version used here was Eden~CP, the \enquote{share nothing} SMP build.
 
 In the distributed memory setting the same effect ensues. We obtain
-plummeting speedup of 124.31 at 512 hyperthreaded cores, whereas it was
-213.172 for 256 real cores. Apparently, hyperthreading in the Glasgow
+plummeting speedup of 124.31 at 512 hyper-threaded cores, whereas it was
+213.172 for 256 real cores. Apparently, hyper-threading in the Glasgow
 grid fails to execute two parallel Haskell processes with full-fledged
-parallelism. For this reason, we did not regard hyperthreaded cores in
+parallelism. For this reason, we did not regard hyper-threaded cores in
 our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
 
 
@@ -230,10 +230,10 @@ PArrows and the corresponding backend in a separate plot
 about 0.5\seconds for the execution time of 46\seconds on 256 cores
 for distributed \rmtest with PArrows and Eden. For these comparisons, the plots show absolute
 time differences that are not relative \wrt the total execution time.
-Furthermore, the error bars ends were computed from pointwise maximum of both standard
+Furthermore, the error bars ends were computed from point-wise maximum of both standard
 deviations from both measurements for PArrows and non-PArrows
 versions. These are the values provided by the |bench| package that we
-used for benchmarking. We call a difference between two versions
+used for bench-marking. We call a difference between two versions
 significant when the border of the error bar of absolute time
 difference is above or below zero. In other words: the time
 difference is significant if it is above measurement error.
@@ -413,7 +413,7 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 
 \subsubsection{\sudokutest}
 
-As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark} and \ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input (Fig.~\ref{fig:sudokuSMBenchmark16000}). This is due to the benchmark only using |parMap| instead of a chunking variant -- however we did not change that for simplicity's sake. This issue is reflected by debug output which shows that of 16000 sparks being created (one for each sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lag behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
+As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark} and \ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input (Fig.~\ref{fig:sudokuSMBenchmark16000}). This is due to the benchmark only using |parMap| instead of a chunking variant -- however we did not change that for simplicity's sake. This issue is reflected by debug output which shows that of 16000 sparks being created (one for each Sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lag behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
 
 
 \newcommand{\performanceSudokuSM}[1]{

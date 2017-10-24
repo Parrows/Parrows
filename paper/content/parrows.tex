@@ -1,7 +1,7 @@
 \section{Parallel Arrows}
 \label{sec:parallel-arrows}
-Arrows are a general interface to computation. Here we introduce special Arrows as general interface to \textit{parallel computations}. First, we present the interface and explain the reasonings behind it. Then, we discuss some implementations using exisiting parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
-\subsection{The ArrowParallel typeclass}
+Arrows are a general interface to computation. Here we introduce special Arrows as general interface to \textit{parallel computations}. First, we present the interface and explain the reasonings behind it. Then, we discuss some implementations using existing parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
+\subsection{The ArrowParallel type class}
 A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Sec.~\ref{sec:parEvalNIntro}).
 Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
 This combinator is similar to our utility function |listApp| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
@@ -12,7 +12,7 @@ parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 % \caption{parEvalN Arrow combinator as a function}
 % \label{fig:parEvalNArrowFn}
 % \end{figure}
-With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| and we want this to be an interface for different backends, we introduce a new typeclass |ArrowParallel arr a b|: %(Fig.~\ref{fig:parEvalNArrowTypeClass1}).
+With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| and we want this to be an interface for different backends, we introduce a new type class |ArrowParallel arr a b|: %(Fig.~\ref{fig:parEvalNArrowTypeClass1}).
 % \begin{figure}[h]
 \begin{code}
 class Arrow arr => ArrowParallel arr a b where
@@ -90,7 +90,7 @@ instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
 \end{figure}
 
 \subsubsection{Eden}
-For both the GpH Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| typeclasses. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a typeclass: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
+For both the GpH Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| type classes. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a type class: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
 % \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
@@ -100,7 +100,7 @@ class (Arrow arr) => ArrowUnwrap arr where
 % \label{fig:ArrowUnwrap}
 % \end{figure}
 % We don't do it here
-However, we avoid doing so for aesthetic resons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
+However, we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
 % \begin{figure}[h]
 \begin{code}
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where

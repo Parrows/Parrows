@@ -1,5 +1,5 @@
 \section{Utility Arrows}\label{utilfns}
-Following are definitions of some utility Arrows used in this paper that have been lef out for brevity.
+Following are definitions of some utility Arrows used in this paper that have been left out for brevity.
 We start with the |second| combinator from \citet{HughesArrows}, which is a mirrored version of |first|, which is for example used in the definition of |***|: 
 \begin{code}
 second :: Arrow arr => arr a b -> arr (c, a) (c, b)
@@ -69,7 +69,7 @@ listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
 % \label{fig:listApp}
 % \end{figure}
 % $ %% formatting
-Note that  this additionally makes use of the |ArrowApply| typeclass that allows us to evaluate arrows with |app :: arr (arr a b, a) c|.
+Note that  this additionally makes use of the |ArrowApply| type class that allows us to evaluate arrows with |app :: arr (arr a b, a) c|.
 
 % $ %% formatting
 
@@ -250,7 +250,7 @@ parEval2 conf f g =
 	\caption{Definition of |parEval2|.}
 	\label{fig:parEval2}
 \end{figure}
-Furthermore, Fig.~\ref{fig:torus_example_rest} contains the ommited definitions of |prMMTr| (which calculates $AB^T$ for two matrices $A$ and $B$), |splitMatrix| (which splits the a matrix into chunks), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
+Furthermore, Fig.~\ref{fig:torus_example_rest} contains the omitted definitions of |prMMTr| (which calculates $AB^T$ for two matrices $A$ and $B$), |splitMatrix| (which splits the a matrix into chunks), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
 \begin{figure}[h]
 \begin{code}
 prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]

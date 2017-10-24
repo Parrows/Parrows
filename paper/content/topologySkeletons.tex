@@ -3,7 +3,7 @@
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
-If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materializes with the usage of |loop| of the |ArrowLoop| typeclass and is probably due to the way their respective parallelism engines work internally. \mbcomment{okay so?} As these skeletons probably do not make any practical sense besides for testing with these backends anyways (because of the shared memory between the threads), we create an extra abstraction layer for the original |parEvalN| in these skeletons called |evalN| in the |FutureEval| typeclass. This allows us for selective enabling and disabling of parallelism.
+If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materializes with the usage of |loop| of the |ArrowLoop| type class and is probably due to the way their respective parallelism engines work internally. \mbcomment{okay so?} As these skeletons probably do not make any practical sense besides for testing with these backends anyways (because of the shared memory between the threads), we create an extra abstraction layer for the original |parEvalN| in these skeletons called |evalN| in the |FutureEval| type class. This allows us for selective enabling and disabling of parallelism.
 \begin{code}
 class ArrowParallel arr a b conf => FutureEval arr a b conf where
     evalN :: (ArrowParallel arr a b conf) => conf -> [arr a b] -> arr [a] [b]
@@ -22,7 +22,7 @@ instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
 
 \subsection{Parallel pipe}\label{sec:pipe}
 
-The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| typeclass which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
+The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| type class which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \begin{code}
 loop (arr (\(a, b) -> (b, a:b)))
 \end{code}
@@ -86,7 +86,7 @@ Another version of |>>>| is:
 \begin{code}
 f parcomp g = (f . put) >>> (get . g)
 \end{code}
-It does not launch both arrows |f| and |g| in parallel, but allows for more smooth data commuinication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
+It does not launch both arrows |f| and |g| in parallel, but allows for more smooth data communication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
 
 \subsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
@@ -135,8 +135,8 @@ ring conf f =
 	\caption{Schematic depiction of the |torus| skeleton.}
 	\label{fig:ringTorusImg}
 \end{figure}
-If we take the concept of a |ring| from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends ands receives data from horizontal and vertical neighbours in each communication round.
-With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| typeclass.
+If we take the concept of a |ring| from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends and receives data from horizontal and vertical neighbours in each communication round.
+With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| type class.
 
 Similar to the |ring|, we once again start by rotating the input (Fig.~\ref{fig:edenlazyrightrotate}), but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes 
 \begin{code}
@@ -148,7 +148,7 @@ arr (uncurry3 zipWith3 lazyzip3)
 \end{code}
 from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 
-This action is, however,  more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |evalN conf (repeat (ptorus f))| which yields |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| typeclass. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
+This action is, however,  more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |evalN conf (repeat (ptorus f))| which yields |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| type class. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
 
 \begin{figure}[tb]
 \begin{code}

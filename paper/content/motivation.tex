@@ -28,7 +28,7 @@ language constructs. Section \ref{sec:parallelHaskells} gives a short overview o
 A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they are a generalization of the function arrow (|->|) and serve as general interface to computations. Section \ref{sec:arrows} gives a short introduction to Arrows.
 
 %Our Arrows-based interface is a high-level one.
-We provide an Arrows-based typeclass and implementations for the three above mentioned parallel Haskells.
+We provide an Arrows-based type class and implementations for the three above mentioned parallel Haskells.
 Instead of 
 introducing a new low-level parallel backend in order to implement our
 Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
@@ -50,9 +50,9 @@ This is a big advantage as we do not introduce any new types as Monad solutions 
 
 \mbcomment{Überleitung auf Related Work hier machen}
 
-We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| typeclass, which abstracts all parallel implementation logic. This way, we can have multiple backends -- currently a GpH, a |Par| Monad and an Eden version are supported. The backends can easily be swapped, so we are not bound to any specific one. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant.
+We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. This way, we can have multiple backends -- currently a GpH, a |Par| Monad and an Eden version are supported. The backends can easily be swapped, so we are not bound to any specific one. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant.
 
-We introduce a |Future| typeclass in Section \ref{sec:futures} to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because they allow for inter-node communication without blocking the master-node. As the |Par| Monad and GpH backends (in their current form) only support shared memory execution and do not have to fix any communication problems, we only use a wrapping dummy |BasicFuture|.
+We introduce a |Future| type class in Section \ref{sec:futures} to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because they allow for inter-node communication without blocking the master-node. As the |Par| Monad and GpH backends (in their current form) only support shared memory execution and do not have to fix any communication problems, we only use a wrapping dummy |BasicFuture|.
 
 We show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced in Section \ref{sec:benchmarks}, i.e. less than x\% \mbcomment{fix this after benchmarks are finally done}.
 

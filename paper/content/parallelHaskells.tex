@@ -35,7 +35,7 @@ parEvalN fs as = let bs = zipWith ($) fs as
 \end{code} %$
 
 In the above definition of |parEvalN| we just apply the list of functions |[a -> b]| to the list of inputs |[a]| by zipping them with the application operator |$|. % $
-We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evalutes to normal form.
+We then evaluate this lazy list |[b]| according to a |Strategy [b]| with the |using :: a -> Strategy a -> a| operator. We construct this strategy with |parList :: Strategy a -> Strategy [a]| and |rdeepseq :: NFData a => Strategy a| where the latter is a strategy which evaluates to normal form.
 %
 Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 
@@ -51,7 +51,7 @@ Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 
 \begin{figure}[t]
 	\includegraphics[scale=0.5]{images/parEvalNMulticore}
-	\caption{Dataflow of the GpH |parEvalN| version.}
+	\caption{Data flow of the GpH |parEvalN| version.}
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
 
@@ -79,7 +79,7 @@ Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 % \end{figure}
 \begin{figure}[t]
 	\includegraphics[scale=0.5]{images/parEvalNParMonad}
-	\caption{Dataflow of the |Par| Monad |parEvalN| version.}
+	\caption{Data flow of the |Par| Monad |parEvalN| version.}
 	\label{fig:parEvalNParMonadImg}
 \end{figure}
 
@@ -110,7 +110,7 @@ parEvalN = spawnF
 \label{sec:edentv}
 To comprehend the efficiency and the lack thereof in a parallel program, an inspection of its execution is extremely helpful. While some large-scale solutions exist \cite{Geimer2010}, the parallel Haskell community mainly utilises the tools Threadscope \cite{Wheeler2009} and Eden TraceViewer\footnote{See \url{http://hackage.haskell.org/package/edentv} on Hackage for the last available version of Eden TraceViewer.} \cite{Berthold2007a}. In the next sections we will present some \emph{trace visualizations}, the post-mortem process diagrams of Eden processes and their activity.
 
-The trace visualizations are color-coded. In such a visualization (Fig.~\ref{fig:withoutFutures}), the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. The visualization shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for this is GC. An inactive machine, where no processes are started yet, or all are already terminated, shows as a blue bar. A~comminication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes.
+The trace visualizations are color-coded. In such a visualization (Fig.~\ref{fig:withoutFutures}), the $x$ axis shows the time, the $y$ axis enumerates the machines and processes. The visualization shows a running process in green, a blocked process is red. If the process is \enquote{runnable}, \ie it may run, but does not, it is yellow. The typical reason for this is GC. An inactive machine, where no processes are started yet, or all are already terminated, shows as a blue bar. A~communication from one process to another is represented with a black arrow. A~stream of communications, \eg a transmitted list is shows as a dark shading between sender and receiver processes.
 
 
 %%% Local Variables:
