@@ -334,6 +334,8 @@ the measurement.
 
 Continuing, the results of the \jacobitest in \ref{fig:bench-jacobi-dist} are as follows: 
 
+Not pictured: difference between Eden and PArrows with 4253
+
 \newcommand{\speedupJacobiDist}[5]{
 \speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
 % \addplot [mark=*,very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -347,14 +349,11 @@ smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
 }{#4}{\plotwidthDist}
 }
 
-\newcommand{\performanceJacobiDistDiff}[6]{
-\performancediffplot{Run time differences\\for \jacobitest \enquote{#2}}{(Eden $-$ PArrows)}{256}{#3}{
+\newcommand{\performanceJacobiDistDiff}[5]{
+\performancediffplot{Run time differences\\for \jacobitest \enquote{#2}}{(Eden $-$ PArrows) #2}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
     y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
-\addplot+[mark=*,very thick,error bars/.cd,
-    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
-smooth]{benchmarks/distributed-jacobi/#1-#6-diff.csv};
 }{#4}{#5}{\plotwidthDist}
 }
 
@@ -364,10 +363,10 @@ smooth]{benchmarks/distributed-jacobi/#1-#6-diff.csv};
 %
 {\speedupJacobiDist{3}{3217}{32}{272}{4253}\label{subfig:rm-dist-a}}%
 %\hfill%
-{\performanceJacobiDistDiff{3}{3217}{32}{0.5}{272}{4253}\label{subfig:rm-dist-b}}
+{\performanceJacobiDistDiff{3}{3217}{32}{5}{272}\label{subfig:rm-dist-b}}
 \caption{Parallel performance of \rmtest on the Glasgow grid
   consisting of 256 cores. Input was $2^{3217}-1$, we used 256
-  tasks. The top plot shows absolute speedup in a distributed memory setting. The
+  tasks. The top plot shows absolute speedup in a distributed memory setting compared to a simulated speedup for input $2^{4253}-1$. The
   closer to linear speedup the better. Time
   (and hence speedup) measurements for PArrows with Eden backend and
   Eden almost coincide. Hence, bottom plot shows
