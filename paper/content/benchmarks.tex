@@ -380,7 +380,7 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 
 \subsubsection{\torustest}
 
-Next is the \torustest benchmark. The results of the comparison of vanilla Eden to our PArrows-based version can be found in Fig.~\ref{fig:torusBenchmark}. While we do not see too much speedup for more than 16 cores, we can prove that the difference between the Eden and PArrows version are again marginal. %The difference between PArrows and Eden is only significant for 16 and 64 cores where it ran 1.7\% and 2.7\% slower which corresponds to a real-time difference of 0.12s and 0.13s. For 256 cores PArrows performed 0.2\% slower which corresponds to 0.01s overhead.
+Next is the \torustest benchmark. The results of the comparison of vanilla Eden to our PArrows-based version can be found in Fig.~\ref{fig:torusBenchmark}. We see that the benchmark scales quite well with more cores until 64 cores. For more cores (>=96) we still have considerable speedup, but it increases slower. We also prove that the difference between the Eden and PArrows version are only again marginal with PArrows only being a maximum of $1.7\%$ slower -- for 160 cores -- when outside of the error bar.  %The difference between PArrows and Eden is only significant for 16 and 64 cores where it ran 1.7\% and 2.7\% slower which corresponds to a real-time difference of 0.12s and 0.13s. For 256 cores PArrows performed 0.2\% slower which corresponds to 0.01s overhead.
 
 \newcommand{\speedupTorusDist}[3]{
 \speedupplot{Speedup of \torustest \enquote{#1}}{PArrows}{256}{#2}{
