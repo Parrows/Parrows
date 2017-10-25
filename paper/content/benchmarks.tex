@@ -114,9 +114,8 @@ xmax=#6]
 
 \subsection{Hardware}
 
-We have tested our parallel DSL and algorithmic skeletons implemented
-in it. Benchmarks were conducted both in a shared and in a distributed
-memory setting. All benchmarks were done on the ``Glasgow grid'', consisting of
+In the following we describe the benchmarks of our parallel DSL and algorithmic skeletons we conducted. They were run both in a shared and in a distributed
+memory setting. All benchmarks were done on the \enquote{Glasgow grid}, consisting of
 16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the
 cases.
 
@@ -221,9 +220,9 @@ genuine |Par|
 Monad benchmark is very small. To give an example, it is $0.4\seconds$ in favour of PArrows for 16 cores ($10.8\seconds$ vs. $11.2\seconds$) and $-0.8\seconds$ in favour of the |Par| monad for 8 cores ($16.1\seconds$ vs. $16.9\seconds$) for
 the Sudoku benchmark in the shared memory setting. It is almost invisible in speedup and
 (non shown) run time plots. We thus show only the results for the
-PArrows-enabled versions.
+PArrows-enabled versions in the backend-comparison.
 
-To show that PArrows induce very small overhead in a distributed context as well, we compare the original Eden
+To show that PArrows induce very small overhead even in a distributed context (and in general as well), we compare the original Eden
 versions of the benchmark to its PArrows-enabled counterpart in the \rmtest, \torustest and \jacobitest benchmarks. We plot execution time differences between measurements for
 PArrows and the corresponding backend in a separate plot
 (Figs.~\ref{fig:bench-rm-dist}--\ref{fig:torusBenchmark}). As an example, the differences range in
@@ -236,7 +235,7 @@ versions. These are the values provided by the |bench| package that we
 used for bench-marking. We call a difference between two versions
 significant when the border of the error bar of absolute time
 difference is above or below zero. In other words: the time
-difference is significant if it is above measurement error.
+difference is significant if it is outside of the measurement error.
 
 \subsubsection{\rmtest}\label{sec:rmtest}
 
