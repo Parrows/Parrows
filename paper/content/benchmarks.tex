@@ -1,3 +1,5 @@
+
+%
 \section{Performance results}
 \label{sec:benchmarks}
 
@@ -139,10 +141,10 @@ implemented in Eden. Table~\ref{tab:benches} summarises.
 \toprule
 Name & Area & Type & Origin & Citation \\
 \midrule
-\rmtest & Mathematics & |parMap+reduce| & Eden & \citet{Lobachev2012}\\
-\jacobitest & Mathematics & |workpool+reduce| & Eden & \citet{Lobachev2012}\\
-\torustest & Mathematics & |torus| & Eden & \citet{Eden:SkeletonBookChapter02}\\
-\sudokutest & Puzzle & |parMap| & |Par| Monad & \citet{par-monad} 
+\rmtest & Mathematics & \ensuremath{\Varid{parMap}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
+\jacobitest & Mathematics & \ensuremath{\Varid{workpool}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
+\torustest & Mathematics & \ensuremath{\Varid{torus}} & Eden & \citet{Eden:SkeletonBookChapter02}\\
+\sudokutest & Puzzle & \ensuremath{\Varid{parMap}} & \ensuremath{\Conid{Par}} Monad & \citet{par-monad} 
 \tablefootnote{actual code from: http://community.haskell.org/~simonmar/par-tutorial.pdf and https://github.com/simonmar/parconc-examples}\\
 \bottomrule
 \end{tabular}
@@ -161,17 +163,17 @@ discusses some optimisations of parallel APRCL. Generic parallel
 implementations of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 
 ``Gentleman'' is a standard Eden test program, developed
-for their |torus| skeleton. It implements a parallel matrix
+for their \ensuremath{\Varid{torus}} skeleton. It implements a parallel matrix
 multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Eden:SkeletonBookChapter02} to PArrows.
 
-A~parallel Sudoku solver was used by \citet{par-monad} to compare |Par| Monad
+A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
 to GpH Haskell. We ported it to PArrows.
 
 
 
 \subsection{What parallel Haskells run where}
 
-The |Par| monad and GpH Haskell -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
+The \ensuremath{\Conid{Par}} monad and GpH Haskell -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
 memory machines only. Although GpH is available on distributed memory
 clusters, and newer distributed memory Haskells such as HdpH exist,
 current support of distributed memory in PArrows is limited to
@@ -215,9 +217,9 @@ our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
 
 \subsection{Benchmark results}
 
-The difference between, say, PArrows with |Par| Monad backend and a
-genuine |Par|
-Monad benchmark is very small. To give an example, it is $0.4\seconds$ in favour of PArrows for 16 cores ($10.8\seconds$ vs. $11.2\seconds$) and $-0.8\seconds$ in favour of the |Par| monad for 8 cores ($16.1\seconds$ vs. $16.9\seconds$) for
+The difference between, say, PArrows with \ensuremath{\Conid{Par}} Monad backend and a
+genuine \ensuremath{\Conid{Par}}
+Monad benchmark is very small. To give an example, it is $0.4\seconds$ in favour of PArrows for 16 cores ($10.8\seconds$ vs. $11.2\seconds$) and $-0.8\seconds$ in favour of the \ensuremath{\Conid{Par}} monad for 8 cores ($16.1\seconds$ vs. $16.9\seconds$) for
 the Sudoku benchmark in the shared memory setting. It is almost invisible in speedup and
 (non shown) run time plots. We thus show only the results for the
 PArrows-enabled versions in the backend-comparison.
@@ -231,7 +233,7 @@ for distributed \rmtest with PArrows and Eden. For these comparisons, the plots 
 time differences that are not relative \wrt the total execution time.
 Furthermore, the error bars ends were computed from point-wise maximum of both standard
 deviations from both measurements for PArrows and non-PArrows
-versions. These are the values provided by the |bench| package that we
+versions. These are the values provided by the \ensuremath{\Varid{bench}} package that we
 used for bench-marking. We call a difference between two versions
 significant when the border of the error bar of absolute time
 difference is above or below zero. In other words: the time
@@ -240,7 +242,7 @@ difference is significant if it is outside of the measurement error.
 \subsubsection{\rmtest}\label{sec:rmtest}
 
 \newcommand{\performanceSkelRMSM}[2]{
-\performanceplot{Parallel run time of \rmtest \enquote{#2}}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \rmtest \enquote{#2}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -251,7 +253,7 @@ smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-par-#1-#2.csv};
 }
 
 \newcommand{\speedupSkelRMSM}[2]{
-\speedupplot{Speedup of \rmtest \enquote{#2}}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\speedupplot{Speedup of \rmtest \enquote{#2}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-#1-#2.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -311,13 +313,13 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 \label{fig:bench-rm-dist}
 \end{figure}
 
-\olcomment{THE ACTUAL TEXT IS MISSING. What do we see in the plots?
-  Why is it good?}
+%\olcomment{THE ACTUAL TEXT IS MISSING. What do we see in the plots?
+%  Why is it good?}
 The multicore version of our parallel \rmtest benchmark is depicted in
 Figure~\ref{fig:bench-rm-sm}. We executed the test with 32 and 64
 tasks. The plot shows the PArrows-enabled versions with corresponding backends.
 The performance of PArrows/Eden~CP in shared memory is slightly better than
-for SMP variants such as PArrows/GpH and PArrows/|Par|
+for SMP variants such as PArrows/GpH and PArrows/\ensuremath{\Conid{Par}}
 Monad but most of the time the performance is still comparable with the GpH backend performing slightly worse than the other two in terms of speedup.
 
 Comparing the PArrows version of the \rmtest with the original from Eden with the MPI backend in a distributed memory setting, we see an almost linear speedup of
@@ -332,11 +334,13 @@ the measurement.
 \subsubsection{\jacobitest}
 
 Continuing, the results of the \jacobitest (MPI only) in Fig.~\ref{fig:bench-jacobi-dist} are as follows:
-The program does not seem to scale well beyond 64 cores with input $2^{3217}-1$. Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores because of the long running time. For demonstration purposes in Fig.~\ref{fig:bench-jacobi-dist}, we chose a \enquote{simulated} speedup of 22 for 128 cores. This was obtained by taking the speedup value of 64 cores (approx. 11) of the $2^{3217}-1$ and assuming optimal \enquote{linear} speedup between 64 and 128 cores. For 256 cores, this results in a superlinear \enquote{speedup} of \~122.63 relative to 128 cores, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores.
+The program does not seem to scale well beyond 64 cores with input $2^{3217}-1$.
+
+Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores (and therefore not pictured in the speedup figure) because of the long running time. For 128 threads, the benchmark took a mean of 9192.9\seconds, while with 256 threads, it only took a mean of 1649.1\seconds. This means that the 128 thread version ran more than 5.5 times slower than the 256 one, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores. However it shows that PArrows continue to scale, even if not perfectly for this test program.
 
 We once again compare the Eden version with the PArrrows version in Fig.~\ref{fig:bench-jacobi-dist}. We see similar behaviour to the MPI version of the \rmtest: The difference once again almost always remains within the bounds of the error bar of the measurement.
 
-Not pictured are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are $-1005.18\seconds$ and $-94.33\seconds$ in favour of Eden. This maximum of $12.27\%$ slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
+Not pictured again are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are $-1005.18\seconds$ and $-94.33\seconds$ in favour of Eden. This maximum of $12.27\%$ slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
 
 \newcommand{\speedupJacobiDist}[5]{
 \speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
@@ -344,8 +348,8 @@ Not pictured are the slightly bigger differences between Eden and PArrows for th
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
-\addplot [mark=x,very thick,red] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
+%\addplot [mark=x,very thick,red] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+%smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
 % \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
 }{#4}{\plotwidthDist}
@@ -417,11 +421,11 @@ higher the value, the better for PArrows\olcomment{CHECKME}.}
 
 \subsubsection{\sudokutest}
 
-As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark} and \ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input (Fig.~\ref{fig:sudokuSMBenchmark16000}). This is due to the benchmark only using |parMap| instead of a chunking variant -- however we did not change that for simplicity's sake. This issue is reflected by debug output which shows that of 16000 sparks being created (one for each Sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lag behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
+As the last benchmark in this paper we present the \sudokutest in Fig.~\ref{fig:sudokuSMBenchmark} running in a shared memory setting. Here we see all three SM backends performing similarly again like in the \rmtest SM benchmarks in Figs.~\ref{fig:sudokuSMBenchmark} and \ref{fig:sudokuSMBenchmark16000}. However, we notice that the GpH backend seems to choke on a bigger input (Fig.~\ref{fig:sudokuSMBenchmark16000}). This is due to the benchmark only using \ensuremath{\Varid{parMap}} instead of a chunking variant -- however we did not change that for simplicity's sake. This issue is reflected by debug output which shows that of 16000 sparks being created (one for each Sudoku) only 8365 were converted (executed) with the rest (7635) overflowing the runtime spark pool. Another remarkable finding is that the Eden backend seems to lag behind for $\leq$16 threads, but manages to pull ahead noticeably with all 32 threads of the system in use.
 
 
 \newcommand{\performanceSudokuSM}[1]{
-\performanceplot{Parallel run time of \sudokutest \enquote{#1}}{linear speedup, Eden CP, GpH, |Par| Monad}{16}{4}{
+\performanceplot{Parallel run time of \sudokutest \enquote{#1}}{linear speedup, Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot [no markers,dotted,thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
 smooth] {benchmarks/sudoku-sm/bench-sudoku-sm.bench.fake-linear-sudoku-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="time", col sep=comma, mark=none,
@@ -436,7 +440,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 }
 
 \newcommand{\speedupSudokuSM}[1]{
-\speedupplot{Parallel speedup of \sudokutest \enquote{#1}}{Eden CP, GpH, |Par| Monad}{16}{4}{
+\speedupplot{Parallel speedup of \sudokutest \enquote{#1}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden-sudoku17.#1.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -456,7 +460,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 %\hfill%
 {\performanceSudokuSM{1000}\label{subfig:performanceSudokuSM}}
 \caption{Relative speedup of \sudokutest on a multicore machine. We used the same PArrows-based implementation with
-  different backends on the same hardware and the |parMap| version from the |Par| Monad examples. Measurements were performed on a single node of the Glasgow
+  different backends on the same hardware and the \ensuremath{\Varid{parMap}} version from the \ensuremath{\Conid{Par}} Monad examples. Measurements were performed on a single node of the Glasgow
   grid; it has 16 real cores and 32 threads. Input was a file of $1000$ Sudokus. The
   closer to linear speedup the better.}
 \label{fig:sudokuSMBenchmark}
@@ -470,7 +474,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 %\hfill%
 {\performanceSudokuSM{16000}\label{subfig:performanceSudokuSM16000}}
 \caption{Relative speedup of \sudokutest on a multicore machine. We used the same PArrows-based implementation with
-  different backends on the same hardware and the |parMap| version from the |Par| Monad examples. Measurements were performed on a single node of the Glasgow
+  different backends on the same hardware and the \ensuremath{\Varid{parMap}} version from the \ensuremath{\Conid{Par}} Monad examples. Measurements were performed on a single node of the Glasgow
   grid; it has 16 real cores and 32 threads. Input was a file of $16000$ Sudokus. The
   closer to linear speedup the better. The GpH version shows signs of choking with too many sparks being created.}
 \label{fig:sudokuSMBenchmark16000}
