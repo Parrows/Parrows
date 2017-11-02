@@ -334,13 +334,10 @@ the measurement.
 \subsubsection{\jacobitest}
 
 Continuing, the results of the \jacobitest (MPI only) in Fig.~\ref{fig:bench-jacobi-dist} are as follows:
-The program does not seem to scale well beyond 64 cores with input $2^{3217}-1$.
+The program does not seem to scale well beyond 64 threads with input $2^{3217}-1$. We once again compare the Eden version with the PArrrows version in Fig.~\ref{fig:bench-jacobi-dist}. We see similar behaviour to the MPI version of the \rmtest: The difference once again almost always remains within the bounds of the error bar of the measurement.
 
-Because of this, we also ran tests with input $2^{4253}-1$, but only for the 128 and 256 cores (and therefore not pictured in the speedup figure) because of the long running time. For 128 threads, the benchmark took a mean of 9192.9\seconds, while with 256 threads, it only took a mean of 1649.1\seconds. This means that the 128 thread version ran more than 5.5 times slower than the 256 one, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores. However it shows that PArrows continue to scale, even if not perfectly for this test program.
-
-We once again compare the Eden version with the PArrrows version in Fig.~\ref{fig:bench-jacobi-dist}. We see similar behaviour to the MPI version of the \rmtest: The difference once again almost always remains within the bounds of the error bar of the measurement.
-
-Not pictured again are the slightly bigger differences between Eden and PArrows for the larger input of $2^{4253}-1$: For 128 and 256 cores the differences are $-1005.18\seconds$ and $-94.33\seconds$ in favour of Eden. This maximum of $12.27\%$ slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
+Because of the bad scaling behaviour for $2^{3217}-1$ beyond 64 threads, we also ran tests with input $2^{4253}-1$. Because of the long running time, we could do this only for the 128 and 256 threads. Therefore we do not show these results in Fig.~\ref{fig:bench-jacobi-dist} as we cannot properly compute a speedup without results for 1 thread. Nonetheless, for 128 threads, the benchmark took a mean of 9192.9\seconds, while with 256 threads, it only took a mean of 1649.1\seconds. This means that the 128 thread version ran more than 5.5 times slower than the 256 one, which suggests an IO limitation for this big input that is somewhat mitigated by adding more cores. However it still proves that PArrows continue to scale, even if not perfectly for this test program.
+Comparing PArrows with Eden, for the larger input of $2^{4253}-1$, we see slightly bigger differences between Eden and PArrows: The differences for 128 and 256 coresare $-1005.18\seconds$ and $-94.33\seconds$ in favour of Eden, respectively. This maximum of $12.27\%$ slower PArrows runtime, however, was still in the (quite big) error bar of our measurements.
 
 \newcommand{\speedupJacobiDist}[5]{
 \speedupplot{Speedup of \jacobitest \enquote{#2} vs simulated \enquote{#5}}{PArrows #2, simulated PArrows #5}{256}{#3}{
