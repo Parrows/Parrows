@@ -2,7 +2,7 @@
 \label{sec:related-work}
 
 \paragraph{Parallel Haskells.}
-Of course, the three parallel Haskell flavours we have presented above: the GpH \cite{Trinder1996,Trinder1998a} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the |Par| Monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012} are related to this work. We use these languages as backends: our DSL can switch from one to other at user's command.
+Of course, the three parallel Haskell flavours we use as backends: the GpH \cite{Trinder1996,Trinder1998a} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the |Par| Monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012} are related to this work. We use these languages as backends: our DSL can switch from one to other at user's command.
 
 HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an extension of |Par| Monad to heterogeneous clusters. LVish \cite{Kuper:2014:TPE:2666356.2594312} is a communication-centred extension of |Par| Monad.
 %
@@ -19,12 +19,12 @@ The effort is ongoing, including topological skeletons \cite{Eden:PARCO05}, spec
 
 \paragraph{Arrows.}
 Arrows were introduced by \citet{HughesArrows}, basically they are a generalised function arrow~|->|. \citet{Hughes2005} presents a tutorial on Arrows. Some theoretical details on Arrows \cite{jacobs_heunen_hasuo_2009,LINDLEY201197,ATKEY201119} are viable. \citet{Paterson:2001:NNA:507669.507664} introduced a new notation for Arrows. Arrows have applications in information flow research \cite{1648705,LI20101974,Russo:2008:LLI:1411286.1411289}, invertible programming \cite{Alimarine:2005:BAA:1088348.1088357}, and quantum computer simulation \cite{vizzotto_altenkirch_sabry_2006}. But probably most prominent application of Arrows is Arrow-based functional reactive programming, AFRP \cite{Nilsson:2002:FRP:581690.581695,Hudak2003,Czaplicki:2013:AFR:2499370.2462161}.
-\citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of Arrows that capsule the computation more than regular arrows do and thus enable optimizations. Their approach would allow parallel composition, as their special Arrows would not interfere with each other in concurrent execution. In contrast, we capture a whole parallel computation as a single entity: our main instantiation function |parEvalN| makes a single (parallel) Arrow out of list of Arrows.\citet{Huang2007} utilise Arrows for parallelism, but strikingly different from our approach. They basically use Arrows to orchestrate several tasks in robotics. We, however, propose a general interface for parallel programming, while remaining completely in Haskell.
+\citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of Arrows that capsule the computation more than regular arrows do and thus enable optimizations. Their approach would allow parallel composition, as their special Arrows would not interfere with each other in concurrent execution. In contrast, we capture a whole parallel computation as a single entity: our main instantiation function |parEvalN| makes a single (parallel) Arrow out of list of Arrows. \citet{Huang2007} utilise Arrows for parallelism, but strikingly different from our approach. They use Arrows to orchestrate several tasks in robotics. We, however, propose a general interface for parallel programming, while remaining completely in Haskell.
 
 \paragraph{Other languages.}
-Although this work is centred on Haskell implementation of arrows, it is applicable to any functional programming language where parallel evaluation and arrows can be defined. Experiments with our approach in Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (which is basically Haskell on the JVM) were quite successful. However, it is beyond the scope of this work.
+Although this work is centered on Haskell implementation of Arrows, it is applicable to any functional programming language where parallel evaluation and Arrows can be defined. Experiments with our approach in Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (which is basically Haskell on the JVM) were quite successful. A new approach to Haskell on the JVM is the Eta language\footnote{Eta project page at \url{eta-lang.org}}. However, both are beyond the scope of this work.
 
-\citet{achten2004arrows,achten2007arrow} use an arrow implementation in Clean for better handling of typical GUI tasks. \citet{Dagand:2009:ORD:1481861.1481870} used arrows in OCaml in the implementation of a distributed system.
+\citet{achten2004arrows,achten2007arrow} use an Arrow implementation in Clean for better handling of typical GUI tasks. \citet{Dagand:2009:ORD:1481861.1481870} used Arrows in OCaml in the implementation of a distributed system.
 
 
 %%% Local Variables:

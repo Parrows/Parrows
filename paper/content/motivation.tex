@@ -16,57 +16,73 @@
 % \olcomment{An attempt ---->}
 %%%%%
 
-Pure functional programming languages have been used
-since a longer time as a ``sand box'' for testing novel parallel
-programming approaches. Reasons for this include referential
-transparency and the ease of introducing new sophisticated language
-concepts. Specially for Haskell (on which this paper focuses), various
-approaches reached maturity. The definite parallel Haskell does not
-exist, there are multiple parallel Haskells \mbcomment{Wortwiederholung? Oder okay so?}. We regard here in-depth
-the Multicore Haskell (a SMP implementation of GpH language), the
+Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
+Glasgow parallel Haskell or short GpH (its Multicore SMP implementation, in particular), the
 |Par| Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a monad, even if
 only for the internal representation. Some introduce additional
-language constructs. 
+language constructs. Section \ref{sec:parallelHaskells} gives a short overview over these languages.
+
 %In this paper we introduce a notion of parallel
 %computations using Arrows.
-Here, we use Arrows to represent parallel computations. This has not
-been done before.
+A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they are a generalization of the function arrow (|->|) and serve as general interface to computations. Section \ref{sec:arrows} gives a short introduction to Arrows.
 
 %Our Arrows-based interface is a high-level one.
-We provide an Arrows-based typeclass and various implementations.
+We provide an Arrows-based type class and implementations for the three above mentioned parallel Haskells.
 Instead of 
 introducing a new low-level parallel backend in order to implement our
 Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
-is defined as a common interface and varying implementations in
-existing parallel Haskells: Multicore Haskell, |Par| Monad, and
-Eden. Thus, we not only define a parallel programming interface in a
+is defined as a common interface with varying implementations in
+the existing parallel Haskells. Thus, we not only define a parallel programming interface in a
 novel manner - we tame the zoo of parallel Haskells. We provide a
-common, very low-penalty programming interface that allows to switch
-the parallel Haskell backends at will. Further backends are viable, too.
+common \ptcomment{quantify, e.g. less than 10 \%} \mbcomment{we do this in the contributions section of the Introduction, enough?}, very low-penalty programming interface that allows to switch
+the parallel backends at will. Further backends based on HdpH or a Frege implementation (on the Java Virtual Machine) are viable, too.
 
-\paragraph{Contribution}
+\paragraph{Contributions}
 %
 %\olcomment{HIT HERE REALLY STRONG}
 %
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
-\mbcomment{different, how?}
-We wrap parallel Haskells inside of our |ArrowParallel| typeclass, but
+We propose a new Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]| in Section \ref{sec:parallel-arrows}, which converts a list of Arrows into a new parallel Arrow. Because of this, we do not lose any benefits of using Arrows as the parallelism is encapsulated as another combinator instead of a different type. The resulting Arrow can be used in the same way as a potential serial version.
+
+This is a big advantage as we do not introduce any new types as Monad solutions like the |Par| Monad do. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs and libraries without having to change integral parts of the code. \mbcomment{mention Functions here? We have everything Eden has, but more.}
+
+\mbcomment{Überleitung auf Related Work hier machen}
+
+We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. This way, we can have multiple backends -- currently a GpH, a |Par| Monad and an Eden version are supported. The backends can easily be swapped, so we are not bound to any specific one. So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant.
+
+We introduce a |Future| type class in Section \ref{sec:futures} to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because they allow for inter-node communication without blocking the master-node. As the |Par| Monad and GpH backends (in their current form) only support shared memory execution and do not have to fix any communication problems, we only use a wrapping dummy |BasicFuture|.
+
+We show that it is possible to define algorithmic skeletons with Arrows (Sections \ref{sec:map-skeletons},~\ref{sec:topology-skeletons}) and finally demonstrate that Arrow Parallelism is a viable alternative to existing approaches and prove that only low overhead is introduced in Section \ref{sec:benchmarks}, i.e. less than $1.7\%$ in cases outside of the error bar of the measurement. \mbcomment{fix this after benchmarks are finally done}.
+
+\mbcomment{Mention Future work here?}
+
+\mbcomment{Conclusion?}
+
+%\ptcomment{* We evaluate the expressive power of  arrow parallelism. Showing that 
+%  + there is no need to introduce additional types
+%  + that it is possible to define algorthmic skeletons (Section 6,7)
+%  + ...
+
+%* We demonstrate that Arrow Parallelism can exploit multiple parallel %Haskell implementations, and with low overhead, i.e. less than X%. 
+%... (Section 8) }
+
+%We wrap parallel Haskells inside of our |ArrowParallel| typeclass, but
 % why do we aim to abstract parallelism this way and what does this
 % approach do better than the other parallel Haskells?
- is such a parallelism abstraction of benefit and to what extent does
- it improve existing approaches?
-\begin{itemize}
-	\item \textbf{Arrow DSL benefits}:
-	With the |ArrowParallel| typeclass we do not lose any benefits of using arrows as |parEvalN| is a yet another Arrow combinator. The resulting Arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to the Monad solutions as we do not introduce any new types. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change anything.
-	\item \textbf{Abstraction}:
-	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This leaves us in the beautiful situation of being able to write our code against the interface of the typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the current |ArrowParallel| instance.
-\end{itemize}
+% is such a parallelism abstraction of benefit and to what extent does
+% it improve existing approaches?
+%\begin{itemize}
+%	\item \textbf{Arrow DSL benefits}:
+%    To implement parallelism, we do not introduce any new types, but only rely on a typeclass that hosts |parEvalN :: [arr a b] -> arr [a] [b]|, which converts a list of arrows into a new parallel arrow. Therefore, we do not lose any benefits of using arrows as parallelism is just encapsulated in yet another Arrow combinator. The resulting Arrow can be used in the same way a potential serial version could be used. This is a big advantage of this approach, especially compared to Monad solutions like the |Par| Monad which require specialized Monad types. We can just \enquote{plug} in parallel parts into sequential Arrow-based programs without having to change anything.
+%	\item \textbf{Abstraction}:
+%	With the |ArrowParallel| typeclass, we abstract all parallel implementation logic away from the business logic. This means it is possible to write code against the interface of a common typeclass without being bound to any parallel Haskell. So as an example, during development, we can run the program in a simple GHC-compiled variant and afterwards deploy it on a cluster by converting it into an Eden version, by just replacing the current |ArrowParallel| instance.
+%\end{itemize}
 
 
-\paragraph{Structure}
-The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Sec.~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
+%\paragraph{Structure}
+%The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Sec.~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
 
 %%% Local Variables:
 %%% mode: latex

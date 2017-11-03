@@ -25,6 +25,7 @@
 
 %\newtheorem{lemma}{Lemma}[section]
 
+\input{lhs2TeXSafeCommands}
 \input{prelude}
 
 
@@ -62,13 +63,16 @@
 	%%include abstract.lhs
 	%
 	%\newpage
-	\tableofcontents
 	%\pagebreak
 	\input{motivation}
-	\input{parallelHaskells}
-	\input{arrows}
-	%\pagebreak
 	\input{relwork}
+	\begin{flushright}
+	
+	\end{flushright}\section{Background}
+	\label{sec:background}
+	\input{arrows}
+	\input{parallelHaskells}
+	%\pagebreak
 	%\pagebreak
 	%\pagebreak
 	\input{parrows}

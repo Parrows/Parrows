@@ -1,0 +1,10 @@
+"","name","time","nCores","speedup","max stddev"
+"2","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-2.0670063517367225,16,8.370997393661384e-2,1.6727159083846082
+"3","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-2.567121752123853,32,0.40220076701640295,1.158089798724921
+"4","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-2.141392399039546,64,0.9481993553221812,1.1173181856765932
+"5","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-0.800837905249665,96,0.5454941320969624,1.048419576885694
+"6","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-1.178482836940205,128,1.2556222698982822,0.7294386979080415
+"7","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-1.4343993057393334,160,1.6792071368829085,0.10576792575580032
+"8","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-0.6826231359607675,192,0.7962634000311226,0.3211540155517387
+"9","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-0.5081004642157012,224,0.6057256910079616,0.5247655401424386
+"10","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-0.3153773026747899,256,0.6267581822921784,0.9618207928358802
