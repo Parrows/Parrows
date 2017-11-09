@@ -48,7 +48,7 @@ farm conf numCores f = unshuffle numCores >>>
                        parEvalN conf (repeat (mapArr f)) >>>
                        shuffle
 
--- farmChunk and parMapStream combined. divide the input list and inside work in chunks
+-- farm and parMapStream combined. divide the input list and inside work in chunks
 farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
 farmChunk conf chunkSize numCores f = unshuffle numCores >>>
                                       parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
