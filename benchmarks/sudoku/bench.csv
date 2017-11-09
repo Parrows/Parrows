@@ -128,3 +128,7 @@ Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB
 "bench/./parrows-sudoku-parmap-par sudoku17.16000.txt +RTS -N2",49.955246152516565,49.88672425440766,49.991931237799655,5.978566566017458e-2,0.0,6.354043159030391e-2
 "bench/./parrows-sudoku-parmap-par sudoku17.16000.txt +RTS -N1",93.90818546728428,93.87991026366974,93.9295553427754,3.27164698328803e-2,0.0,3.701371010203694e-2
 "bench/./sudoku-seq sudoku17.16000.txt",94.64023743606576,94.58272999475624,94.67134792813823,5.030227328972036e-2,0.0,5.388495291798964e-2
+Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB
+Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB
+Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB
+Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB

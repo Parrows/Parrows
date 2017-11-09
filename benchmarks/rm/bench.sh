@@ -17,6 +17,8 @@ programCount=${#programs[@]}
 
 benchCmds=""
 
+./compile.sh
+
 for parameter in "${parameters[@]}"
 do
     for (( i=0; i < ${programCount}; i++ ));

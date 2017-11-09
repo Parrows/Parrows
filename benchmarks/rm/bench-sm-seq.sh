@@ -20,6 +20,8 @@ programCount=${#programs[@]}
 
 benchCmds=""
 
+./compile.sh
+
 for parameter in "${parameters[@]}"
 do
     for (( i=0; i < ${programCount}; i++ ));
@@ -40,6 +42,6 @@ do
     done
 done
 
-echo "running: bench"${benchCmds}" -L 1000 --csv bench.sm.seq.csv"
+echo "running: bench"${benchCmds}" --csv bench.sm.seq.csv"
 
-eval "bench"${benchCmds}" -L 1000 --csv bench.sm.seq.csv"
+eval "bench"${benchCmds}" --csv bench.sm.seq.csv"

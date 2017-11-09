@@ -15,10 +15,14 @@ import Debug.Trace (trace)
 import Text.Printf (printf)
 \end{code}
 \begin{code}
-import Parrows.Definition
-import Parrows.Eden
-import Parrows.Skeletons.Map
-import Control.Parallel.Eden(noPe)
+import GHC.Conc (numCapabilities)
+import Parrows.Util
+import Control.Parallel.Strategies
+
+noPe = numCapabilities
+
+farm :: (NFData b) => Int -> (a -> b) -> [a] -> [b]
+farm numCores f x = shuffle $ parMap rdeepseq (map f) $ unshuffle numCores x
 
 mapUntil :: ((a -> b) -> [a] -> [b]) ->    -- ^ map
             ([b] -> c) ->                  -- ^ reduce
@@ -53,7 +57,7 @@ listRabinMillerP2 n as k = let f :: (Integer, Integer) -> Bool
                                reduce :: Integer -> [Bool] -> Maybe Integer
                                reduce n bs | and bs = Just n
                                            | otherwise = Nothing
-                           in mapUntil (\fn tsks -> farm () noPe fn $ tsks) (reduce n) f tasks
+                           in mapUntil (\fn tsks -> farm noPe fn $ tsks) (reduce n) f tasks
 \end{code}
 Sequentielles Code.
 \begin{code}

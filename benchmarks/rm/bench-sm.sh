@@ -3,16 +3,16 @@
 procCount=32
 
 programs=(
-    "skelrm-parr-eden-cp"
-    "skelrm-parr-mult"
-    "skelrm-parr-par"
+#    "skelrm-parr-eden-cp"
+#    "skelrm-parr-mult"
+#1    "skelrm-parr-par"
 )
 
 parameters=(
-    "4423 32"
-    "4423 64"
-    "9941 32" 
-    "9941 64"
+#    "4423 32"
+#    "4423 64"
+#    "9941 32" 
+#    "9941 64"
     "11213 32" 
     "11213 64"
 )
@@ -21,6 +21,8 @@ parameters=(
 programCount=${#programs[@]}
 
 benchCmds=""
+
+./compile.sh
 
 for parameter in "${parameters[@]}"
 do
@@ -42,6 +44,6 @@ do
     done
 done
 
-echo "running: bench"${benchCmds}" -L 1000 --csv bench.sm.csv"
+echo "running: bench"${benchCmds}" --csv bench.sm.csv"
 
-eval "bench"${benchCmds}" -L 1000 --csv bench.sm.csv"
+eval "bench"${benchCmds}" --csv bench.sm.csv"

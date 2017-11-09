@@ -1,4 +1,4 @@
-Paralleles Rabin-Miller. Old Code.
+Paralleles Rabin-Miller. Jetzt mit map+reduce Skelett.
 
 This is -*- Literate Haskell -*-
 
@@ -7,7 +7,6 @@ Autor: Oleg Lobachev
 module Main where
 
 import RabinMiller
-import FarmUntil
 
 import System.IO.Unsafe (unsafePerformIO)
 import System.Environment (getArgs)
@@ -16,9 +15,15 @@ import Debug.Trace (trace)
 import Text.Printf (printf)
 \end{code}
 \begin{code}
-import Control.Parallel.Eden.Map (farmS)
-import FarmUntil (mapUntil)
-import Control.Parallel.Eden (noPe)
+import Control.Parallel.Eden
+import Control.Parallel.Eden.Map
+
+mapUntil :: ((a -> b) -> [a] -> [b]) ->    -- ^ map
+            ([b] -> c) ->                  -- ^ reduce
+            (a -> b) ->                    -- ^ worker function
+            [a] -> c
+mapUntil amap areduce f xs = areduce $ amap f xs -- meh.
+
 
 \end{code}
 \begin{code}
@@ -33,6 +38,7 @@ listRabinMillerP k n as
       | (n `mod` 2 == 0) = error "N must be odd."  
       | otherwise        = listRabinMillerP2 n as k
 \end{code}
+-- new skeletal code
 \begin{code}
 listRabinMillerP2 :: Integer        -- ^ n ist der Primzahlkandidat
                   -> [Integer]      -- ^ die Liste mit den Basen fuer RabinMiller
@@ -42,13 +48,12 @@ listRabinMillerP2 n as k = let f :: (Integer, Integer) -> Bool
                                f (n, a) = singleRabinMillerBool n t 0 b
                                    where ((q,t),b) = (zerlege(n-1,0) , powermod a q n)
                                tasks = take k $ [(n, a) | a<-as]
-                               res = trace ("Need to do " ++ (show k) ++ " iterations, " 
-                                     ++ "have data for " ++ (show $ length tasks) ) $ 
-                                     farmUntilBool f tasks
-                           in case res of
-                                True -> Just n
-                                False -> Nothing
+                               reduce :: Integer -> [Bool] -> Maybe Integer
+                               reduce n bs | and bs = Just n
+                                           | otherwise = Nothing
+                           in mapUntil (\fn tsks -> farmS noPe fn $ tsks) (reduce n) f tasks
 \end{code}
+Sequentielles Code.
 \begin{code}
 -- | Pruefe ob n Primzahl        
 rabinMillerPIO         :: Integer            -- ^ n ist der Primzahlkandidat
@@ -76,7 +81,7 @@ main = do
   let n = createCandidate $ read k
       res = doIt n (read nTests)
   putStrLn $ "Testing " ++ show n
-  putStrLn $ "Working " ++  " at " ++ show noPe ++ " PEs."
+  putStrLn $ "nTests " ++ nTests
   print res
   putStrLn "done"
 \end{code}

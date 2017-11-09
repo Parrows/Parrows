@@ -1,19 +1,23 @@
 #!/bin/bash
 
-procCount=32
+procCount=16
 
 programs=(
-    "parmonad-sudoku"
-    "parrows-sudoku-parmap-eden"
-    "parrows-sudoku-parmap-mult"
-    "parrows-sudoku-parmap-par"
-    "sudoku-seq"
+#    "parmonad-sudoku"
+#    "parrows-sudoku-parmap-eden"
+#    "parrows-sudoku-parmap-mult"
+#    "parrows-sudoku-parmap-par"
+#    "sudoku-seq"
+     "multicore-sudoku"
+     "eden-sudoku"
 )
 
 parameters=(
     "sudoku17.1000.txt"
     "sudoku17.16000.txt"
 )
+
+./recompile.sh
 
 # get length of an array
 programCount=${#programs[@]}

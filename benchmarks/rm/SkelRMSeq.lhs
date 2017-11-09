@@ -7,7 +7,7 @@ Autor: Oleg Lobachev
 module Main where
 
 import RabinMiller
-import FarmUntil
+--import FarmUntil
 
 import System.IO.Unsafe (unsafePerformIO)
 import System.Environment (getArgs)
@@ -16,9 +16,9 @@ import Debug.Trace (trace)
 import Text.Printf (printf)
 \end{code}
 \begin{code}
-import Control.Parallel.Eden.Map (farmS)
-import FarmUntil (mapUntil)
-import Control.Parallel.Eden (noPe)
+--import Control.Parallel.Eden.Map (farmS)
+--import FarmUntil (mapUntil)
+--import Control.Parallel.Eden (noPe)
 
 -- Autor: Kent Kwee
 -- [...]
@@ -73,7 +73,7 @@ main = do
   let n = createCandidate $ read k
       res = doIt n (read nTests)
   putStrLn $ "Testing " ++ show n
-  putStrLn $ "Working " ++  " at " ++ show noPe ++ " PEs."
+  --putStrLn $ "Working " ++  " at " ++ show noPe ++ " PEs."
   print res
   putStrLn "done"
 \end{code}
