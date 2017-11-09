@@ -3,9 +3,13 @@
 procCount=32
 
 programs=(
-#    "skelrm-parr-eden-cp"
-#    "skelrm-parr-mult"
-#1    "skelrm-parr-par"
+    "skelrm-seq"
+    "skelrm-eden-cp"
+    "skelrm-par"
+    "skelrm-mult"
+    "skelrm-parr-eden-cp"
+    "skelrm-parr-mult"
+    "skelrm-parr-par"
 )
 
 parameters=(
