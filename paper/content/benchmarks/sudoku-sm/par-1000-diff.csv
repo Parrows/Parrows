@@ -1,0 +1,6 @@
+"","name","time","nCores","speedup","max stddev","factor"
+"2","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",0.14461486310594607,2,-7.816873427336013e-2,1.4433615064484874e-2,0.9593594476371443
+"3","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",9.16297991449635e-2,4,-0.16235543473227398,1.5512204397164586e-2,0.9535203672341445
+"4","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",4.8995137835542435e-2,8,-0.25843465175603697,3.5718584648403873e-3,0.9570401398217709
+"5","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",2.5024930843048576e-2,16,-0.301576267177877,1.2767611587738788e-2,0.9666673783026057
+"6","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",-3.127648588269949e-2,32,0.37329779437666133,4.4825256395772055e-2,1.0430664014190012
