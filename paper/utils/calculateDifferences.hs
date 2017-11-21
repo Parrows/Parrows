@@ -11,6 +11,8 @@ import Data.String
 import Data.CSV
 import Data.List
 
+import Data.Ord
+
 import Data.Maybe
 import Data.Either
 import qualified Data.Map.Strict as M
@@ -37,7 +39,7 @@ main = do
     if (length args < 3)
     then
         do
-            putStrLn $ "usage: <program> file1 file2 output"
+            putStrLn $ "usage: <program> file1 file2 output [calculateWorst]"
     else
         do
             let (file1:file2:output:rest) = args
@@ -109,4 +111,22 @@ main = do
                     then
                         putStrLn $ "parse Error!"
                     else
-                        do writeFile output $ legend ++ (concat $ map toString diffs)
+                        if (length args == 5)
+                        then
+                            let
+                                -- hacky, but nvm
+                                (_:useWorstStr:restOfRest) = rest
+
+                                readBool :: String -> Bool
+                                readBool = read
+
+                                useWorst = readBool useWorstStr
+
+                                wholeOutputStr :: Bool -> Speedup
+                                wholeOutputStr True = maximumBy (comparing factor) diffs
+                                wholeOutputStr False = minimumBy (comparing factor) diffs
+                            in
+                                do appendFile output $ toString $ wholeOutputStr useWorst
+
+                        else
+                            do writeFile output $ legend ++ (concat $ map toString diffs)
