@@ -32,11 +32,13 @@ outFileNames=(
     "par-16000-diff.csv"
 )
 
-worstFileName="worstAndBestSudoku.csv"
+worstFileName="worstSudoku.csv"
+bestFileName="bestSudoku.csv"
 
 count=${#originalBenchmarks[@]}
 
 touch ${worstFileName}
+touch ${bestFileName}
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
@@ -44,9 +46,10 @@ do
     cp ${outFileNames[i]} ../content/benchmarks/sudoku-sm
 
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True True
-    ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True False
+    ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
 cp ${worstFileName} ../content/benchmarks/sudoku-sm
+cp ${bestFileName} ../content/benchmarks/sudoku-sm
 
 rm *.csv
