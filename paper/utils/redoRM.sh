@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+./preCalculate.sh
+
 ./benchmarkCalculator ../raw_benches/bench_distributed_rm.csv bench_distributed True
 cp bench-distributed.bench.* ../content/benchmarks/distributed-rm
 
