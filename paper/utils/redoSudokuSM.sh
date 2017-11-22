@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm *.csv
+./preCalculate.sh
 
 ./benchmarkCalculator ../raw_benches/sudoku_sm.csv bench_sudoku_sm True
 cp bench-sudoku-sm.bench.* ../content/benchmarks/sudoku-sm
@@ -35,6 +35,8 @@ outFileNames=(
 worstFileName="worstSudoku.csv"
 bestFileName="bestSudoku.csv"
 
+outputFolder="../content/benchmarks/sudoku-sm"
+
 count=${#originalBenchmarks[@]}
 
 touch ${worstFileName}
@@ -43,13 +45,13 @@ touch ${bestFileName}
 for i in $(seq 0 $(expr ${count} - 1));
 do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${outFileNames[i]}
-    cp ${outFileNames[i]} ../content/benchmarks/sudoku-sm
+    cp ${outFileNames[i]} ${outputFolder}
 
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True True
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
-cp ${worstFileName} ../content/benchmarks/sudoku-sm
-cp ${bestFileName} ../content/benchmarks/sudoku-sm
+cp ${worstFileName} ${outputFolder}
+cp ${bestFileName} ${outputFolder}
 
 rm *.csv
