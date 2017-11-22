@@ -32,6 +32,13 @@ outFileNames=(
     "par-11213-64-diff.csv"
 )
 
+displayNames=(
+    "\"Eden vs. PArrows 3217\""
+    "\"Eden vs. PArrows 4253\""
+)
+
+benchmark="\"Jacobi (Distributed)\""
+
 worstFileName="worstRMSM.csv"
 bestFileName="bestRMSM.csv"
 
@@ -47,7 +54,10 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${outFileNames[i]}
     cp ${outFileNames[i]} ${outputFolder}
 
+     echo -n "${benchmark},${displayNames[i]}," >> ${worstFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True True
+
+    echo -n "${benchmark},${displayNames[i]}," >> ${bestFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
