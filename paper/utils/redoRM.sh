@@ -39,6 +39,4 @@ done
 cp ${worstFileName} ${outputFolder}
 cp ${bestFileName} ${outputFolder}
 
-cp 44497-256-diff.csv ../content/benchmarks/distributed-rm
-
 rm *.csv
