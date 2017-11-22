@@ -24,8 +24,8 @@ outputFolder="../content/benchmarks/distributed-torus"
 
 count=${#originalBenchmarks[@]}
 
-touch ${worstFileName}
-touch ${bestFileName}
+cp header.txt ${worstFileName}
+cp header.txt ${bestFileName}
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
