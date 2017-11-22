@@ -33,15 +33,15 @@ outFileNames=(
 )
 
 displayNames=(
-    "Eden CP vs. PArrows 1000"
-    "Eden CP vs. PArrows 16000"
-    "GpH vs. PArrows 1000"
-    "GpH vs. PArrows 16000"
-    "Par Monad vs. PArrows 1000"
-    "Par Monad vs. PArrows 16000"
+    "\"Eden CP vs. PArrows 1000\""
+    "\"Eden CP vs. PArrows 16000\""
+    "\"GpH vs. PArrows 1000\""
+    "\"GpH vs. PArrows 16000\""
+    "\"Par Monad vs. PArrows 1000\""
+    "\"Par Monad vs. PArrows 16000\""
 )
 
-benchmark="Sudoku (Shared-Memory)"
+benchmark="\"Sudoku (Shared-Memory)\""
 
 worstFileName="worstSudoku.csv"
 bestFileName="bestSudoku.csv"

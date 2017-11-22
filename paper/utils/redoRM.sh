@@ -18,10 +18,10 @@ outFileNames=(
 )
 
 displayNames=(
-    "Eden vs. PArrows 44497 256"
+    "\"Eden vs. PArrows 44497 256\""
 )
 
-benchmark="Rabin-Miller (Distributed)"
+benchmark="\"Rabin-Miller (Distributed)\""
 
 worstFileName="worstRM.csv"
 bestFileName="bestRM.csv"
