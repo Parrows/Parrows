@@ -22,11 +22,11 @@ outFileNames=(
 )
 
 displayNames=(
-    "\"Eden vs. PArrows 3217\""
-    "\"Eden vs. PArrows 4253\""
+    "Eden vs. PArrows 3217"
+    "Eden vs. PArrows 4253"
 )
 
-benchmark="\"Jacobi (Distributed)\""
+benchmark="Jacobi (Distributed)"
 
 worstFileName="worstJacobi.csv"
 bestFileName="bestJacobi.csv"

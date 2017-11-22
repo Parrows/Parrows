@@ -33,15 +33,15 @@ outFileNames=(
 )
 
 displayNames=(
-    "\"Eden CP vs. PArrows 11213 32\""
-    "\"Eden CP vs. PArrows 11213 64\""
-    "\"GpH vs. PArrows 11213 32\""
-    "\"GpH vs. PArrows 11213 64\""
-    "\"Par Monad vs. PArrows 11213 32\""
-    "\"Par Monad vs. PArrows 11213 64\""
+    "Eden CP vs. PArrows 11213 32"
+    "Eden CP vs. PArrows 11213 64"
+    "GpH vs. PArrows 11213 32"
+    "GpH vs. PArrows 11213 64"
+    "Par Monad vs. PArrows 11213 32"
+    "Par Monad vs. PArrows 11213 64"
 )
 
-benchmark="\"Rabin-Miller (Shared-Memory)\""
+benchmark="Rabin-Miller (Shared-Memory)"
 
 worstFileName="worstRMSM.csv"
 bestFileName="bestRMSM.csv"
