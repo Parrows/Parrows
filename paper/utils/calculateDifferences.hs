@@ -122,11 +122,22 @@ main = do
 
                                 useWorst = readBool useWorstStr
 
-                                wholeOutputStr :: Bool -> Speedup
-                                wholeOutputStr True = maximumBy (comparing factor) diffs
-                                wholeOutputStr False = minimumBy (comparing factor) diffs
+                                wholeOutput :: Bool -> Speedup
+                                wholeOutput True = maximumBy (comparing factor) diffs
+                                wholeOutput False = minimumBy (comparing factor) diffs
+
+                                rnd :: Speedup -> Speedup
+                                rnd x = Speedup {
+                                                    num = num x,
+                                                    name = name x,
+                                                    time = time x,
+                                                    nCores = nCores x,
+                                                    speedup = speedup x,
+                                                    stdDev = stdDev x,
+                                                    factor = (fromIntegral $ round ((factor x) * 100000)) / 100000
+                                                }
                             in
-                                do appendFile output $ toString $ wholeOutputStr useWorst
+                                do appendFile output $ toString $ rnd $ wholeOutput useWorst
 
                         else
                             do writeFile output $ legend ++ (concat $ map toString diffs)
