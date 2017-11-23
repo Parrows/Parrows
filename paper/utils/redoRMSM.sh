@@ -41,6 +41,24 @@ displayNames=(
     "\"Par Monad vs. PArrows 11213 64\""
 )
 
+vs=(
+    "\"Eden CP\""
+    "\"Eden CP\""
+    "\"GpH\""
+    "\"GpH\""
+    "\"Par Monad \""
+    "\"Par Monad \""
+)
+
+params=(
+    "\"11213 32\""
+    "\"11213 64\""
+    "\"11213 32\""
+    "\"11213 64\""
+    "\"11213 32\""
+    "\"11213 64\""
+)
+
 benchmark="\"Rabin-Miller (Shared-Memory)\""
 
 worstFileName="worstRMSM.csv"
@@ -58,10 +76,10 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${outFileNames[i]}
     cp ${outFileNames[i]} ${outputFolder}
 
-     echo -n "${benchmark},${displayNames[i]}," >> ${worstFileName}
+    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${worstFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True True
 
-    echo -n "${benchmark},${displayNames[i]}," >> ${bestFileName}
+    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${bestFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 

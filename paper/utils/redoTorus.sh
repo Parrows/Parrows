@@ -21,6 +21,14 @@ displayNames=(
     "\"Eden vs. PArrows 4096\""
 )
 
+vs=(
+    "\"Eden\""
+)
+
+params=(
+    "\"4096\""
+)
+
 benchmark="\"Torus (Distributed)\""
 
 worstFileName="worstTorus.csv"
@@ -38,10 +46,10 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${outFileNames[i]}
     cp ${outFileNames[i]} ${outputFolder}
 
-     echo -n "${benchmark},${displayNames[i]}," >> ${worstFileName}
+    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${worstFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName} True True
 
-    echo -n "${benchmark},${displayNames[i]}," >> ${bestFileName}
+    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${bestFileName}
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
