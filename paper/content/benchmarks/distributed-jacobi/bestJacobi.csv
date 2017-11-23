@@ -1,3 +1,3 @@
-benchmark,displayName,"","name","time","nCores","speedup","max stddev","factor"
+"benchmark","displayName","","name","time","nCores","speedup","max stddev","factor"
 "Jacobi (Distributed)","Eden vs. PArrows 3217","5","bench/./jacobi-eden 3 3217-bench/./jacobi-parr 3 3217",21.088397991326133,16,-0.36751046420930855,6.601216965606701,0.9535128567159062
 "Jacobi (Distributed)","Eden vs. PArrows 4253","3","bench/./jacobi-eden 3 4253-bench/./jacobi-parr 3 4253",-94.33355610324907,256,-6.782322444655065,246.35074118159503,1.0606738145747254
