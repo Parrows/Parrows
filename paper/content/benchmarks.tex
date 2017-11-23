@@ -151,7 +151,7 @@ Name & Area & Type & Origin & Citation \\
 \end{table}
 
 \rmtest is a probabilistic primality test that iterates multiple (32--256 here)
-``subtests''. Should a subtest fail, the input is definitely not a
+\enquote{subtests}. Should a subtest fail, the input is definitely not a
 prime. If all $n$ subtest pass, the input is composite with the
 probability of $1/4^{n}$. 
 
@@ -162,12 +162,30 @@ of Jacobi sum test have very different durations. \citet{lobachev-phd}
 discusses some optimisations of parallel APRCL. Generic parallel
 implementations of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 
-``Gentleman'' is a standard Eden test program, developed
+\enquote{Gentleman} is a standard Eden test program, developed
 for their \ensuremath{\Varid{torus}} skeleton. It implements a parallel matrix
 multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Eden:SkeletonBookChapter02} to PArrows.
 
 A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
 to GpH Haskell. We ported it to PArrows.
+
+
+\begin{table}[]
+\centering
+\label{my-label}
+\begin{subtable}[t]{.5\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{1cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores	& params   & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/sudoku-sm/worstSudoku.csv}{}{\vs & \nCores & \params & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{Sudoku}\label{table1}
+\end{subtable}
+\caption{Worst Benchmark results}
+\end{table}
 
 
 
@@ -345,8 +363,8 @@ Comparing PArrows with Eden, for the larger input of $2^{4253}-1$, we see slight
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-11213-#2.csv};
 \addplot [mark=*,very thick,blue] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#2.csv};
-%\addplot [mark=x,very thick,red] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-%smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
+\addplot [mark=x,very thick,red] table [scatter, x="nCores", y="speedup"/, col sep=comma, mark=none,
+smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
 % \addplot table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 % smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-eden-#1-#2.csv};
 }{#4}{\plotwidthDist}
