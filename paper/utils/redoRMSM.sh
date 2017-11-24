@@ -61,15 +61,33 @@ params=(
 
 benchmark="\"Rabin-Miller (Shared-Memory)\""
 
-worstFileName="worstRMSM.csv"
-bestFileName="bestRMSM.csv"
+worstFileName=(
+    "worstRMSM-11213-32.csv"
+    "worstRMSM-11213-64.csv"
+    "worstRMSM-11213-32.csv"
+    "worstRMSM-11213-64.csv"
+    "worstRMSM-11213-32.csv"
+    "worstRMSM-11213-64.csv"
+)
+
+bestFileName=(
+    "bestRMSM-11213-32.csv"
+    "bestRMSM-11213-64.csv"
+    "bestRMSM-11213-32.csv"
+    "bestRMSM-11213-64.csv"
+    "bestRMSM-11213-32.csv"
+    "bestRMSM-11213-64.csv"
+)
 
 outputFolder="../content/benchmarks/sm-rm"
 
 count=${#originalBenchmarks[@]}
 
-cp header.txt ${worstFileName}
-cp header.txt ${bestFileName}
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp header.txt ${worstFileName[i]}
+    cp header.txt ${bestFileName[i]}
+done
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
@@ -83,7 +101,11 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
-cp ${worstFileName} ${outputFolder}
-cp ${bestFileName} ${outputFolder}
+
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp ${worstFileName[i]} ${outputFolder}
+    cp ${bestFileName[i]} ${outputFolder}
+done
 
 rm *.csv

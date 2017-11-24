@@ -38,15 +38,25 @@ params=(
 
 benchmark="\"Jacobi (Distributed)\""
 
-worstFileName="worstJacobi.csv"
-bestFileName="bestJacobi.csv"
+worstFileName=(
+    "worstJacobi-3217.csv"
+    "worstJacobi-4253.csv"
+)
+
+bestFileName=(
+    "bestJacobi-3217.csv"
+    "bestJacobi-4253.csv"
+)
 
 outputFolder="../content/benchmarks/distributed-jacobi"
 
 count=${#originalBenchmarks[@]}
 
-cp header.txt ${worstFileName}
-cp header.txt ${bestFileName}
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp header.txt ${worstFileName[i]}
+    cp header.txt ${bestFileName[i]}
+done
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
@@ -60,7 +70,11 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
-cp ${worstFileName} ${outputFolder}
-cp ${bestFileName} ${outputFolder}
+
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp ${worstFileName[i]} ${outputFolder}
+    cp ${bestFileName[i]} ${outputFolder}
+done
 
 rm *.csv

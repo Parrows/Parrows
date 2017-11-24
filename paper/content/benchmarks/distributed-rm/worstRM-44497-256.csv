@@ -1,0 +1,2 @@
+"benchmark","vs","params","displayName","","name","time","nCores","speedup","max stddev","factor"
+"Rabin-Miller (Distributed)","Eden","44497 256","Eden vs. PArrows 44497 256","2","bench/./skelrm-eden 44497 256-bench/./skelrm-parrows 44497 256",-0.6894443530796366,192,0.8906066370807082,0.919200912427753,1.00795

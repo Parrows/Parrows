@@ -61,15 +61,33 @@ params=(
 
 benchmark="\"Sudoku (Shared-Memory)\""
 
-worstFileName="worstSudoku.csv"
-bestFileName="bestSudoku.csv"
+worstFileName=(
+    "worstSudoku-1000.csv"
+    "worstSudoku-16000.csv"
+    "worstSudoku-1000.csv"
+    "worstSudoku-16000.csv"
+    "worstSudoku-1000.csv"
+    "worstSudoku-16000.csv"
+)
+
+bestFileName=(
+    "bestSudoku-1000.csv"
+    "bestSudoku-1600.csv"
+    "bestSudoku-1000.csv"
+    "bestSudoku-1600.csv"
+    "bestSudoku-1000.csv"
+    "bestSudoku-1600.csv"
+)
 
 outputFolder="../content/benchmarks/sudoku-sm"
 
 count=${#originalBenchmarks[@]}
 
-cp header.txt ${worstFileName}
-cp header.txt ${bestFileName}
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp header.txt ${worstFileName[i]}
+    cp header.txt ${bestFileName[i]}
+done
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
@@ -83,7 +101,11 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
-cp ${worstFileName} ${outputFolder}
-cp ${bestFileName} ${outputFolder}
+
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp ${worstFileName[i]} ${outputFolder}
+    cp ${bestFileName[i]} ${outputFolder}
+done
 
 rm *.csv

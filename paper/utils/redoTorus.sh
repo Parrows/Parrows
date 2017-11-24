@@ -31,15 +31,23 @@ params=(
 
 benchmark="\"Torus (Distributed)\""
 
-worstFileName="worstTorus.csv"
-bestFileName="bestTorus.csv"
+worstFileName=(
+    "worstTorus-4096.csv"
+)
+
+bestFileName=(
+    "bestTorus-4096.csv"
+)
 
 outputFolder="../content/benchmarks/distributed-torus"
 
 count=${#originalBenchmarks[@]}
 
-cp header.txt ${worstFileName}
-cp header.txt ${bestFileName}
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp header.txt ${worstFileName[i]}
+    cp header.txt ${bestFileName[i]}
+done
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
@@ -53,7 +61,11 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName} True False
 done
 
-cp ${worstFileName} ${outputFolder}
-cp ${bestFileName} ${outputFolder}
+
+for i in $(seq 0 $(expr ${count} - 1));
+do
+    cp ${worstFileName[i]} ${outputFolder}
+    cp ${bestFileName[i]} ${outputFolder}
+done
 
 rm *.csv
