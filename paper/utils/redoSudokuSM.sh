@@ -72,11 +72,11 @@ worstFileName=(
 
 bestFileName=(
     "bestSudoku-1000.csv"
-    "bestSudoku-1600.csv"
+    "bestSudoku-16000.csv"
     "bestSudoku-1000.csv"
-    "bestSudoku-1600.csv"
+    "bestSudoku-16000.csv"
     "bestSudoku-1000.csv"
-    "bestSudoku-1600.csv"
+    "bestSudoku-16000.csv"
 )
 
 outputFolder="../content/benchmarks/sudoku-sm"
