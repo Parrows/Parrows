@@ -6,7 +6,7 @@ main.pdf : *.tex *.bib Makefile
 	
 	for texFile in $(wildcard *.tex) ; do \
 		buildFile=$$texFile; \
-        if [ "$${buildFile}" != "lhs2TeXSafeCommands.tex" ]; then \
+        if ( [ "$${buildFile}" != "lhs2TeXSafeCommands.tex" ] && [ "$${buildFile}" != "bestAndWorstBenchmarks.tex" ] ); then \
             lhs2TeX $${texFile} -o $${buildFile}.0 --poly -i custom.fmt ; \
             if [ "$${buildFile}" != "prelude.tex" ]; then \
                 echo "removing lhs2TeX preamble for $${buildFile}"; \
