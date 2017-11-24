@@ -86,10 +86,13 @@ main = do
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
 
+                toStringLn :: Speedup -> String
+                toStringLn x = (toString x) ++ "\n"
+
                 toString :: Speedup -> String
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
                                     (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "," ++
-                                    (show $ factor x) ++ "\n"
+                                    (show $ factor x)
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
                 handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines
@@ -111,20 +114,18 @@ main = do
                     then
                         putStrLn $ "parse Error!"
                     else
-                        if (length args == 5)
+                        if (length args >= 4)
                         then
                             let
                                 -- hacky, but nvm
-                                (_:useWorstStr:restOfRest) = rest
+                                (_:restOfRest) = rest
 
                                 readBool :: String -> Bool
                                 readBool = read
 
-                                useWorst = readBool useWorstStr
-
-                                wholeOutput :: Bool -> Speedup
-                                wholeOutput True = maximumBy (comparing factor) diffs
-                                wholeOutput False = minimumBy (comparing factor) diffs
+                                calcOutput :: Bool -> Speedup
+                                calcOutput True = maximumBy (comparing factor) diffs
+                                calcOutput False = minimumBy (comparing factor) diffs
 
                                 rnd :: Speedup -> Speedup
                                 rnd x = Speedup {
@@ -137,7 +138,9 @@ main = do
                                                     factor = (fromIntegral $ round ((factor x) * 100000)) / 100000
                                                 }
                             in
-                                do appendFile output $ toString $ rnd $ wholeOutput useWorst
+                                do appendFile output $ (toString $ rnd $ calcOutput True)
+                                    ++ ","
+                                    ++ (toStringLn $ rnd $ calcOutput False)
 
                         else
-                            do writeFile output $ legend ++ (concat $ map toString diffs)
+                            do writeFile output $ legend ++ (concat $ map toStringLn diffs)

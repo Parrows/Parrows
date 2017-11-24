@@ -61,22 +61,13 @@ params=(
 
 benchmark="\"Sudoku (Shared-Memory)\""
 
-worstFileName=(
-    "worstSudoku-1000.csv"
-    "worstSudoku-16000.csv"
-    "worstSudoku-1000.csv"
-    "worstSudoku-16000.csv"
-    "worstSudoku-1000.csv"
-    "worstSudoku-16000.csv"
-)
-
-bestFileName=(
-    "bestSudoku-1000.csv"
-    "bestSudoku-16000.csv"
-    "bestSudoku-1000.csv"
-    "bestSudoku-16000.csv"
-    "bestSudoku-1000.csv"
-    "bestSudoku-16000.csv"
+bestAndWorstFileName=(
+    "bestAndWorstSudoku-1000.csv"
+    "bestAndWorstSudoku-16000.csv"
+    "bestAndWorstSudoku-1000.csv"
+    "bestAndWorstSudoku-16000.csv"
+    "bestAndWorstSudoku-1000.csv"
+    "bestAndWorstSudoku-16000.csv"
 )
 
 outputFolder="../content/benchmarks/sudoku-sm"
@@ -85,8 +76,7 @@ count=${#originalBenchmarks[@]}
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
-    cp header.txt ${worstFileName[i]}
-    cp header.txt ${bestFileName[i]}
+    cp header.txt ${bestAndWorstFileName[i]}
 done
 
 for i in $(seq 0 $(expr ${count} - 1));
@@ -94,18 +84,14 @@ do
     ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${outFileNames[i]}
     cp ${outFileNames[i]} ${outputFolder}
 
-    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${worstFileName[i]}
-    ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${worstFileName[i]} True True
-
-    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${bestFileName[i]}
-    ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestFileName[i]} True False
+    echo -n "${benchmark},${vs[i]},${params[i]},${displayNames[i]}," >> ${bestAndWorstFileName[i]}
+    ./calculateDifferences ${originalBenchmarks[i]} ${parrowsBenchmarks[i]} ${bestAndWorstFileName[i]} True
 done
 
 
 for i in $(seq 0 $(expr ${count} - 1));
 do
-    cp ${worstFileName[i]} ${outputFolder}
-    cp ${bestFileName[i]} ${outputFolder}
+    cp ${bestAndWorstFileName[i]} ${outputFolder}
 done
 
 rm *.csv

@@ -1,0 +1,2 @@
+"benchmark","vs","params","displayName","","worstName","worstTime","worstNCores","worstSpeedup","worstMaxstddev","worstFactor","","bestName","bestTime","bestNCores","bestSpeedup","bestMaxstddev","bestFactor"
+"Torus (Distributed)","Eden","4096","Eden vs. PArrows 4096","7","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-1.4343993057393334,160,1.6792071368829085,0.10576792575580032,1.01717,"2","bench/./torus_matrix_eden 4096-bench/./torus_matrix_parrows 4096",-2.0670063517367225,16,8.370997393661384e-2,1.6727159083846082,1.00457

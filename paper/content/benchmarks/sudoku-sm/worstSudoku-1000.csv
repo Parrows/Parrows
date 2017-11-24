@@ -1,4 +1,0 @@
-"benchmark","vs","params","displayName","","name","time","nCores","speedup","max stddev","factor"
-"Sudoku (Shared-Memory)","Eden CP","1000","Eden CP vs. PArrows 1000","4","bench/./eden-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-eden sudoku17.1000.txt",-7.291202576927192e-2,8,0.33233523548213384,8.493339632732928e-3,1.06262
-"Sudoku (Shared-Memory)","GpH","1000","GpH vs. PArrows 1000","2","bench/./multicore-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-mult sudoku17.1000.txt",-1.2424573495704472e-2,2,6.333463066652278e-3,1.8591769705399604e-2,1.00347
-"Sudoku (Shared-Memory)","Par Monad ","1000","Par Monad vs. PArrows 1000","5","bench/./parmonad-sudoku sudoku17.1000.txt-bench/./parrows-sudoku-parmap-par sudoku17.1000.txt",2.5024930843048576e-2,16,-0.301576267177877,1.2767611587738788e-2,0.96667

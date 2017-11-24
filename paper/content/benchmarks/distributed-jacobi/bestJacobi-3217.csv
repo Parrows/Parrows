@@ -1,2 +1,0 @@
-"benchmark","vs","params","displayName","","name","time","nCores","speedup","max stddev","factor"
-"Jacobi (Distributed)","Eden","3217","Eden vs. PArrows 3217","5","bench/./jacobi-eden 3 3217-bench/./jacobi-parr 3 3217",21.088397991326133,16,-0.36751046420930855,6.601216965606701,0.95351

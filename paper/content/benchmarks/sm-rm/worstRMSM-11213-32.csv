@@ -1,4 +1,0 @@
-"benchmark","vs","params","displayName","","name","time","nCores","speedup","max stddev","factor"
-"Rabin-Miller (Shared-Memory)","Eden CP","11213 32","Eden CP vs. PArrows 11213 32","3","bench/./skelrm-eden-cp 11213 32-bench/./skelrm-parr-eden-cp 11213 32",-6.077445505393797e-2,4,2.295393279422342e-2,1.018105027869828e-2,1.0061
-"Rabin-Miller (Shared-Memory)","GpH","11213 32","GpH vs. PArrows 11213 32","5","bench/./skelrm-mult 11213 32-bench/./skelrm-parr-mult 11213 32",-0.19138081071691415,16,0.7394780462941295,0.10304005465683112,1.06316
-"Rabin-Miller (Shared-Memory)","Par Monad ","11213 32","Par Monad vs. PArrows 11213 32","6","bench/./skelrm-par 11213 32-bench/./skelrm-parr-par 11213 32",-8.043571892712098e-3,32,4.7864741705131664e-2,2.039580092330975e-2,1.0032

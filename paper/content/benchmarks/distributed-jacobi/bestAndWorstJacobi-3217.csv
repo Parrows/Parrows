@@ -1,0 +1,2 @@
+"benchmark","vs","params","displayName","","worstName","worstTime","worstNCores","worstSpeedup","worstMaxstddev","worstFactor","","bestName","bestTime","bestNCores","bestSpeedup","bestMaxstddev","bestFactor"
+"Jacobi (Distributed)","Eden","3217","Eden vs. PArrows 3217","8","bench/./jacobi-eden 3 3217-bench/./jacobi-parr 3 3217",-0.6470000159202414,128,3.638989826738559e-2,1.2613705550803067,1.00203,"5","bench/./jacobi-eden 3 3217-bench/./jacobi-parr 3 3217",21.088397991326133,16,-0.36751046420930855,6.601216965606701,0.95351
