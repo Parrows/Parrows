@@ -1,0 +1,89 @@
+\begin{table}[]
+\centering
+\label{bestResults}
+\captionsetup[subtable]{justification=centering}
+\begin{subtable}[t]{.49\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/sudoku-sm/bestSudoku-1000.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\sudokutest \\ 1000}\label{sudokuBest-1000}
+\end{subtable}
+\begin{subtable}[t]{.49\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/sudoku-sm/bestSudoku-16000.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\sudokutest \\ 16000}\label{sudokuBest-16000}
+\end{subtable}
+\newline
+\vspace*{1 cm}
+\newline
+\begin{subtable}[t]{.49\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/sm-rm/bestRMSM-11213-32.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\rmtest \\ 11213 32}\label{sm-rmBest-11213-32}
+\end{subtable}
+\begin{subtable}[t]{.49\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/sm-rm/bestRMSM-11213-64.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\rmtest \\ 11213 64}\label{sm-rmBest-11213-64}
+\end{subtable}
+\newline
+\vspace*{1 cm}
+\newline
+\begin{subtable}[t]{.32\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/distributed-torus/bestTorus-4096.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\torustest (dist) 4096}\label{torusBest-4096}
+\end{subtable}
+\begin{subtable}[t]{.32\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/distributed-rm/bestRM-44497-256.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\rmtest \\ (dist) 44497 256}\label{dist-rmBest-44497}
+\end{subtable}
+\begin{subtable}[t]{.32\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{l R{0.7cm} R{1.3cm} R{1.3cm}}
+		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+		vs.             & cores & factor \\ \hline
+		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestJacobi-4253.csv}{}{\vs & \nCores & \factor \\}
+	\end{tabular}
+	\endgroup
+    \caption{\jacobitest \\ (dist) 4253}\label{jacobiBest-4253}
+\end{subtable}
+\caption{Best Benchmark results}
+\end{table}

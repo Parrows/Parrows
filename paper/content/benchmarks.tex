@@ -169,25 +169,9 @@ multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Ede
 A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
 to GpH Haskell. We ported it to PArrows.
 
+\input{worstBenchmarks}
 
-\begin{table}[]
-\centering
-\label{my-label}
-\begin{subtable}[t]{.5\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{l R{1cm} R{1.3cm} R{1.3cm}}
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
-		vs.             & cores	& params   & factor \\ \hline
-		\csvreader[head to column names]{benchmarks/sudoku-sm/worstSudoku.csv}{}{\vs & \nCores & \params & \factor \\}
-	\end{tabular}
-	\endgroup
-    \caption{Sudoku}\label{table1}
-\end{subtable}
-\caption{Worst Benchmark results}
-\end{table}
-
-
+\input{bestBenchmarks}
 
 \subsection{What parallel Haskells run where}
 
