@@ -1,1 +1,1 @@
-"benchmark","vs","params","displayName","","worstName","worstTime","worstNCores","worstSpeedup","worstMaxstddev","worstFactor","","bestName","bestTime","bestNCores","bestSpeedup","bestMaxstddev","bestFactor"
+"benchmark","vs","params","displayName","","worstName","worstTime","worstNCores","worstSpeedup","worstMaxstddev","worstFactor","","bestName","bestTime","bestNCores","bestSpeedup","bestMaxstddev","bestFactor","meanFactor","maxStdDevFactor"

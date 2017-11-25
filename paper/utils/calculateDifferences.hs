@@ -13,6 +13,9 @@ import Data.List
 
 import Data.Ord
 
+import Statistics.Sample as S hiding(stdDev)
+import Data.Vector(fromList)
+
 import Data.Maybe
 import Data.Either
 import qualified Data.Map.Strict as M
@@ -28,7 +31,8 @@ data Speedup = Speedup {
     nCores :: String,
     speedup :: Double,
     stdDev :: Double,
-    factor :: Double
+    factor :: Double,
+    factorStdDev :: Double
 } deriving (Show)
 
 
@@ -62,7 +66,8 @@ main = do
                                                                         nCores = nCores,
                                                                         speedup = speedup,
                                                                         stdDev = stdDev,
-                                                                        factor = 1
+                                                                        factor = 1,
+                                                                        factorStdDev = 1
                                                                     }
                                                    | otherwise = Nothing
                 lineToSpeedup _ = Nothing
@@ -76,7 +81,9 @@ main = do
                             nCores = nCores x,
                             speedup = (speedup x) - (speedup y),
                             stdDev = max (stdDev x) (stdDev y),
-                            factor = (time y) / (time x)
+                            -- care: different order than time. cause reasons
+                            factor = (time y) / (time x),
+                            factorStdDev = (max (stdDev x) (stdDev y)) / (time x)
                         }
                     | otherwise = Nothing
 
@@ -135,12 +142,26 @@ main = do
                                                     nCores = nCores x,
                                                     speedup = speedup x,
                                                     stdDev = stdDev x,
-                                                    factor = (fromIntegral $ round ((factor x) * 100000)) / 100000
+                                                    factor = rndVal (factor x),
+                                                    factorStdDev = factorStdDev x
                                                 }
+
+                                rndVal x = (fromIntegral $ round (x * 100000)) / 100000
+
+                                roundedGeometricMean = rndVal . S.geometricMean . fromList
+
+                                roundedMean = rndVal . S.mean . fromList
                             in
                                 do appendFile output $ (toString $ rnd $ calcOutput True)
                                     ++ ","
-                                    ++ (toStringLn $ rnd $ calcOutput False)
+                                    ++ (toString $ rnd $ calcOutput False)
+                                    ++ ","
+                                    -- geometric mean of factor
+                                    ++ (show $ roundedMean $ map (factor) diffs)
+                                    ++ ","
+                                    --
+                                    ++ (show $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs)
+                                    ++ "\n"
 
                         else
                             do writeFile output $ legend ++ (concat $ map toStringLn diffs)
