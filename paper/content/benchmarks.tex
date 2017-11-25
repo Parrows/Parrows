@@ -120,13 +120,15 @@ In the following we describe the benchmarks of our parallel DSL and algorithmic 
 memory setting. All benchmarks were done on \enquote{the Glasgow GPG Beowulf cluster}, consisting of
 16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the cases.
 
-Apart from Eden, all benchmarks and libaries were compiled with Stack's \footnote{see https://www.haskellstack.org/} lts-7.1 GHC compiler which is equivalent to a standard GHC 8.0.1 with the base package in version 4.9.0.0. Stack itself was used in version 1.3.2. For GpH in its Multicore variant we used the the parallel cabal package in version 3.2.1.0, while for the |Par| monad we used monad-par in version 0.3.4.8. For all Eden tests we used its GHC-Eden compiler in version 7.8.2 together with OpenMPI 1.6.5.
+Apart from Eden, all benchmarks and libaries were compiled with Stack's \footnote{see \url{https://www.haskellstack.org/}} lts-7.1 GHC compiler which is equivalent to a standard GHC 8.0.1 with the base package in version 4.9.0.0. Stack itself was used in version 1.3.2. For GpH in its Multicore variant we used the the parallel cabal package in version 3.2.1.0, while for the |Par| monad we used monad-par in version 0.3.4.8. For all Eden tests, we used its GHC-Eden compiler in version 7.8.2 together with OpenMPI 1.6.5.
+
+Furtermore, all benchmarks were done with help of the bench \footnote{see \url{https://hackage.haskell.org/package/bench}} tool in version 1.0.2 which uses criterion (>=1.1.1.0 \&\& < 1.2) internally. All runtime data (mean runtime, max stddev, etc.) was collected with this tool if not mentioned otherwise.
 
 We used a single node with 16 real cores as a shared memory testbed
 and the whole grid with 256 real cores as a device to test our
 distributed memory software.
 
-\subsection{Test programs}
+\subsection{Benchmarks}
 
 We used multiple tests that originated from different
 sources. Most of them are parallel mathematical computations, initially
@@ -138,7 +140,7 @@ implemented in Eden. Table~\ref{tab:benches} summarises.
 \renewcommand{\tabcolsep}{0.5em}
 \begin{tabular}{lccll}
 \toprule
-Name & Area & Type & Origin & Citation \\
+Name & Area & Type & Origin & Source \\
 \midrule
 \rmtest & Mathematics & \ensuremath{\Varid{parMap}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
 \jacobitest & Mathematics & \ensuremath{\Varid{workpool}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
@@ -164,17 +166,17 @@ discusses some optimisations of parallel APRCL. Generic parallel
 implementations of \rmtest and APRCL were presented in \citet{Lobachev2012}.
 
 \enquote{Gentleman} is a standard Eden test program, developed
-for their \ensuremath{\Varid{torus}} skeleton. It implements a parallel matrix
+for their \ensuremath{\Varid{torus}} skeleton. It implements a Gentleman's algorithm for parallel matrix
 multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Eden:SkeletonBookChapter02} to PArrows.
 
 A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
-to GpH Haskell. We ported it to PArrows.
+to GpH, and we ported it to PArrows.
 
 \input{bestAndWorstBenchmarks}
 
 \subsection{What parallel Haskells run where}
 
-The \ensuremath{\Conid{Par}} monad and GpH Haskell -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
+The \ensuremath{\Conid{Par}} monad and GpH -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
 memory machines only. Although GpH is available on distributed memory
 clusters, and newer distributed memory Haskells such as HdpH exist,
 current support of distributed memory in PArrows is limited to
@@ -189,23 +191,24 @@ in the plots as ``Eden~CP''.
 
 \subsection{Effect of hyper-threading}
 
-The PArrows version of \rmtest on a single node of the Glasgow cluster
-showed almost linear speedup (Fig.~\ref{fig:bench-rm-sm}). The speedup
-of 64-task PArrows/Eden at 16 real cores version was 13.65, the
-efficiency was 85.3\%. However, if we increase the number of
-requested cores to be 32 -- \ie if we use hyper-threading on 16 real
-cores -- the speedup does not increase that well. It is merely 15.99
-for 32 tasks with PArrows/Eden. It is worse for other backends.  As
-for 64 tasks, we obtain the speedup of 16.12 with PArrows/Eden at 32
-hyper-threaded cores and only 13.55 with PArrows/GpH. Efficiency is 50.4\% and 42.3\%, respectively. The Eden
+In preliminary tests, the PArrows version of \rmtest on a single node of the Glasgow cluster
+showed almost linear speedup on up to 16 shared-memory cores (Fig.~\ref{fig:bench-rm-sm}). The speedup
+of 64-task PArrows/Eden at 16 real cores version was 13.65 giving a parallel
+efficiency of 85.3\%. However, if we increased the number of
+requested cores to 32 -- \ie if we use hyper-threading on 16 real
+cores -- the speedup did not increase that well. It was merely 15.99
+for 32 tasks with PArrows/Eden. This was worse for other backends.  As
+for 64 tasks, we obtained a speedup of 16.12 with PArrows/Eden at 32
+hyper-threaded cores and only 13.55 with PArrows/GpH. The parallel eficiencies were 50.4\% and 42.3\%, respectively. The Eden
 version used here was Eden~CP, the \enquote{share nothing} SMP build.
 
 In the distributed memory setting the same effect ensues. We obtain
 plummeting speedup of 124.31 at 512 hyper-threaded cores, whereas it was
 213.172 for 256 real cores. Apparently, hyper-threading in the Glasgow
 cluster fails to execute two parallel Haskell processes with full-fledged
-parallelism. For this reason, we did not regard hyper-threaded cores in
-our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
+parallelism.
+
+Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark} and table~\ref{tab:bestAndWorstResults} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in use.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
