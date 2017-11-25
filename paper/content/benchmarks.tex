@@ -114,12 +114,13 @@ xmax=#6]
 \end{tikzpicture}
 }
 
-\subsection{Hardware}
+\subsection{Hardware and Software used}
 
 In the following we describe the benchmarks of our parallel DSL and algorithmic skeletons we conducted. They were run both in a shared and in a distributed
-memory setting. All benchmarks were done on the \enquote{Glasgow grid}, consisting of
-16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the
-cases.
+memory setting. All benchmarks were done on \enquote{the Glasgow GPG Beowulf cluster}, consisting of
+16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the cases.
+
+Apart from Eden, all benchmarks and libaries were compiled with Stack's \footnote{see https://www.haskellstack.org/} lts-7.1 GHC compiler which is equivalent to a standard GHC 8.0.1 with the base package in version 4.9.0.0. Stack itself was used in version 1.3.2. For GpH in its Multicore variant we used the the parallel cabal package in version 3.2.1.0, while for the |Par| monad we used monad-par in version 0.3.4.8. For all Eden tests we used its GHC-Eden compiler in version 7.8.2 together with OpenMPI 1.6.5.
 
 We used a single node with 16 real cores as a shared memory testbed
 and the whole grid with 256 real cores as a device to test our
@@ -132,8 +133,6 @@ sources. Most of them are parallel mathematical computations, initially
 implemented in Eden. Table~\ref{tab:benches} summarises.
 
 \begin{table}
-\caption{The benchmarks we use in this paper.}
-\label{tab:benches}
 \centering
 %% something was wrong with separators in table
 \renewcommand{\tabcolsep}{0.5em}
@@ -145,12 +144,14 @@ Name & Area & Type & Origin & Citation \\
 \jacobitest & Mathematics & \ensuremath{\Varid{workpool}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
 \torustest & Mathematics & \ensuremath{\Varid{torus}} & Eden & \citet{Eden:SkeletonBookChapter02}\\
 \sudokutest & Puzzle & \ensuremath{\Varid{parMap}} & \ensuremath{\Conid{Par}} Monad & \citet{par-monad} 
-\tablefootnote{actual code from: http://community.haskell.org/~simonmar/par-tutorial.pdf and https://github.com/simonmar/parconc-examples}\\
+\tablefootnote{actual code from: http://community.haskell.org/\~simonmar/par-tutorial.pdf and https://github.com/simonmar/parconc-examples}\\
 \bottomrule
 \end{tabular}
+\label{tab:benches}
+\caption{The benchmarks we use in this paper.}
 \end{table}
 
-\rmtest is a probabilistic primality test that iterates multiple (32--256 here)
+\rmtest is a probabilistic primality test that iterates multiple (here: 32--256)
 \enquote{subtests}. Should a subtest fail, the input is definitely not a
 prime. If all $n$ subtest pass, the input is composite with the
 probability of $1/4^{n}$. 
@@ -169,9 +170,7 @@ multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Ede
 A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
 to GpH Haskell. We ported it to PArrows.
 
-\input{worstBenchmarks}
-
-\input{bestBenchmarks}
+\input{bestAndWorstBenchmarks}
 
 \subsection{What parallel Haskells run where}
 
@@ -190,7 +189,7 @@ in the plots as ``Eden~CP''.
 
 \subsection{Effect of hyper-threading}
 
-The PArrows version of \rmtest on a single node of the Glasgow grid
+The PArrows version of \rmtest on a single node of the Glasgow cluster
 showed almost linear speedup (Fig.~\ref{fig:bench-rm-sm}). The speedup
 of 64-task PArrows/Eden at 16 real cores version was 13.65, the
 efficiency was 85.3\%. However, if we increase the number of
@@ -204,7 +203,7 @@ version used here was Eden~CP, the \enquote{share nothing} SMP build.
 In the distributed memory setting the same effect ensues. We obtain
 plummeting speedup of 124.31 at 512 hyper-threaded cores, whereas it was
 213.172 for 256 real cores. Apparently, hyper-threading in the Glasgow
-grid fails to execute two parallel Haskell processes with full-fledged
+cluster fails to execute two parallel Haskell processes with full-fledged
 parallelism. For this reason, we did not regard hyper-threaded cores in
 our speedup plots in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark}.
 
@@ -291,7 +290,7 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 {\speedupSkelRMSM{11213}{64}}
 \caption{Relative speedup of \rmtest on a multicore machine. We used the same PArrows-based implementation with
   different backends on the same hardware. Measurements were performed on a single node of the Glasgow
-  grid; it has 16 real cores. Input was $2^{11213}-1$, we used 32 (left) or 64 (right)
+  cluster; it has 16 real cores. Input was $2^{11213}-1$, we used 32 (left) or 64 (right)
   tasks. The
   closer to linear speedup the better.}
 \label{fig:bench-rm-sm}
@@ -304,7 +303,7 @@ smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 {\speedupSkelRMDist{44497}{256}{32}{272}\label{subfig:rm-dist-a}}%
 %\hfill%
 {\performanceSkelRMDistDiff{44497}{256}{32}{0.5}{272}\label{subfig:rm-dist-b}}
-\caption{Parallel performance of the \rmtest on the Glasgow grid
+\caption{Parallel performance of the \rmtest on the Glasgow cluster
   consisting of 256 cores. Input was $2^{44497}-1$, we used 256
   tasks. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
@@ -369,7 +368,7 @@ smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 {\speedupJacobiDist{3}{3217}{32}{272}{4253}\label{subfig:jacobi-dist-a}}%
 %\hfill%
 {\performanceJacobiDistDiff{3}{3217}{32}{5}{272}\label{subfig:jacobi-dist-b}}
-\caption{Parallel performance of the \jacobitest on the Glasgow grid
+\caption{Parallel performance of the \jacobitest on the Glasgow cluster
   consisting of 256 cores. Input was $2^{3217}-1$, we used 256
   tasks. The top plot shows relative speedup in a distributed memory setting compared to a simulated speedup for input $2^{4253}-1$. The
   closer to linear speedup the better. Time
@@ -407,7 +406,7 @@ smooth]{benchmarks/distributed-torus/#1-diff.csv};
 {\speedupTorusDist{4096}{32}{272}\label{subfig:speedupTorusDist}}%
 %\hfill%
 {\performanceTorusDistDiff{4096}{32}{0.5}{272}\label{subfig:performancetorusDistDiff}}
-\caption{Parallel performance of \torustest on the Glasgow grid
+\caption{Parallel performance of \torustest on the Glasgow cluster
   consisting of 256 cores. Input was a matrix size of $4096$. The top plot shows absolute speedup in a distributed memory setting. The
   closer to linear speedup the better. Time
   (and hence speedup) measurements for PArrows with Eden backend and
@@ -460,7 +459,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 {\performanceSudokuSM{1000}\label{subfig:performanceSudokuSM}}
 \caption{Absolute speedup of \sudokutest on a multicore machine. We used the same PArrows-based implementation with
   different backends on the same hardware and the \ensuremath{\Varid{parMap}} version from the \ensuremath{\Conid{Par}} Monad examples. Measurements were performed on a single node of the Glasgow
-  grid; it has 16 real cores and 32 threads. Input was a file of $1000$ Sudokus. The
+  cluster; it has 16 real cores and 32 threads. Input was a file of $1000$ Sudokus. The
   closer to linear speedup the better.}
 \label{fig:sudokuSMBenchmark}
 \end{figure}
@@ -474,7 +473,7 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 {\performanceSudokuSM{16000}\label{subfig:performanceSudokuSM16000}}
 \caption{Absolute speedup of \sudokutest on a multicore machine. We used the same PArrows-based implementation with
   different backends on the same hardware and the \ensuremath{\Varid{parMap}} version from the \ensuremath{\Conid{Par}} Monad examples. Measurements were performed on a single node of the Glasgow
-  grid; it has 16 real cores and 32 threads. Input was a file of $16000$ Sudokus. The
+  cluster; it has 16 real cores and 32 threads. Input was a file of $16000$ Sudokus. The
   closer to linear speedup the better. The GpH version shows signs of choking with too many sparks being created.}
 \label{fig:sudokuSMBenchmark16000}
 \end{figure}
