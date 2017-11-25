@@ -32,7 +32,9 @@ data Speedup = Speedup {
     speedup :: Double,
     stdDev :: Double,
     factor :: Double,
-    factorStdDev :: Double
+    factorStdDev :: Double,
+    overhead :: Double,
+    stdDevForOverhead :: Double
 } deriving (Show)
 
 
@@ -67,7 +69,9 @@ main = do
                                                                         speedup = speedup,
                                                                         stdDev = stdDev,
                                                                         factor = 1,
-                                                                        factorStdDev = 1
+                                                                        factorStdDev = 0,
+                                                                        overhead = 0,
+                                                                        stdDevForOverhead = 0
                                                                     }
                                                    | otherwise = Nothing
                 lineToSpeedup _ = Nothing
@@ -83,12 +87,14 @@ main = do
                             stdDev = max (stdDev x) (stdDev y),
                             -- care: different order than time. cause reasons
                             factor = (time y) / (time x),
-                            factorStdDev = (max (stdDev x) (stdDev y)) / (time x)
+                            factorStdDev = (max (stdDev x) (stdDev y)) / (time x),
+                            overhead = (time y - time x) / (time y),
+                            stdDevForOverhead = (max (stdDev x) (stdDev y)) / (time y)
                         }
                     | otherwise = Nothing
 
                 legend :: String
-                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\",\"factor\"" ++ "\n"
+                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\",\"factor\",\"factorStdDev\",\"overhead\",\"stdDevForOverhead\"" ++ "\n"
 
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
@@ -99,7 +105,8 @@ main = do
                 toString :: Speedup -> String
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
                                     (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "," ++
-                                    (show $ factor x)
+                                    (show $ factor x) ++ "," ++ (show $ factorStdDev x) ++ "," ++ (show $ overhead x) ++
+                                    "," ++ (show $ stdDevForOverhead x)
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
                 handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines
@@ -143,7 +150,9 @@ main = do
                                                     speedup = speedup x,
                                                     stdDev = stdDev x,
                                                     factor = rndVal (factor x),
-                                                    factorStdDev = factorStdDev x
+                                                    factorStdDev = factorStdDev x,
+                                                    overhead = rndVal $ overhead x,
+                                                    stdDevForOverhead = stdDevForOverhead x
                                                 }
 
                                 rndVal x = (fromIntegral $ round (x * 100000)) / 100000
@@ -161,6 +170,10 @@ main = do
                                     ++ ","
                                     --
                                     ++ (show $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs)
+                                    ++ ","
+                                    ++ (show $ roundedMean $ map (overhead) diffs)
+                                    ++ ","
+                                    ++ (show $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs)
                                     ++ "\n"
 
                         else
