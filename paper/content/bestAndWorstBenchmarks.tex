@@ -7,24 +7,22 @@
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
 						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
 	\endgroup
-    \caption{\sudokutest \\ 1000}\label{sudokuBest-1000}
+    \caption{\sudokutest 1000}\label{sudokuBest-1000}
 \end{subtable}
 \begin{subtable}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
-						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\	
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-16000.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
 	\endgroup
-    \caption{\sudokutest \\ 16000}\label{sudokuBest-16000}
+    \caption{\sudokutest 16000}\label{sudokuBest-16000}
 \end{subtable}
 \newline
 \vspace*{0.5 cm}
@@ -34,7 +32,6 @@
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
 						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
@@ -45,8 +42,7 @@
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
-						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\	
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
@@ -60,8 +56,7 @@
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
-						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\	
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\ \hline
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
@@ -72,8 +67,7 @@
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
-						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\	
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
@@ -87,8 +81,7 @@
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{l C{0.8cm} C{1.3cm} |@{\hspace{0.5em}} C{0.8cm} C{1.3cm}}
-						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\	
-		% \multicolumn{3}{c}{worst Sudoku Benchmarks} \\ \hline
+						& \multicolumn{2}{c}{best} & \multicolumn{2}{c}{worst} \\
 		vs.             & cores & factor & cores & factor \\ \hline
 		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-4253.csv}{}{\vs & \bestNCores & \bestFactor & \worstNCores & \worstFactor \\}
 	\end{tabular}
