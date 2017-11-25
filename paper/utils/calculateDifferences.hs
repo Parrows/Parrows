@@ -16,6 +16,8 @@ import Data.Ord
 import Statistics.Sample as S hiding(stdDev)
 import Data.Vector(fromList)
 
+import Numeric
+
 import Data.Maybe
 import Data.Either
 import qualified Data.Map.Strict as M
@@ -166,14 +168,14 @@ main = do
                                     ++ (toString $ rnd $ calcOutput False)
                                     ++ ","
                                     -- geometric mean of factor
-                                    ++ (show $ roundedMean $ map (factor) diffs)
+                                    ++ (showFFloat Nothing $ roundedMean $ map (factor) diffs) ""
                                     ++ ","
                                     --
-                                    ++ (show $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs)
+                                    ++ (showFFloat Nothing $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs) ""
                                     ++ ","
-                                    ++ (show $ roundedMean $ map (overhead) diffs)
+                                    ++ (showFFloat Nothing $ roundedMean $ map (overhead) diffs) ""
                                     ++ ","
-                                    ++ (show $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs)
+                                    ++ (showFFloat Nothing $  rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
                                     ++ "\n"
 
                         else
