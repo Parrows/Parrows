@@ -148,7 +148,7 @@ arr (uncurry3 zipWith3 lazyzip3)
 \end{code}
 from |([[c]], ([[fut a]], [[fut b]]))| to |[[(c, fut a, fut b)]]|, which we then feed into our parallel execution.
 
-This action is, however,  more complicated than in the ring case as we have one more dimension of inputs to be transformed. We first have to |shuffle| all the inputs to then pass it into |evalN conf (repeat (ptorus f))| which yields |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| type class. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
+This action is, however,  more complicated than in the ring case as we have one more dimension of inputs that needs to be transformed. In order to achieve that, we first have to |shuffle| all the inputs to then pass it into |evalN conf (repeat (ptorus f))| which yields |[(d, fut a, fut b)]|. We can then unpack this shuffled list back to its original ordering by feeding it into the specific unshuffle arrow we created one step earlier with |arr length >>> arr unshuffle| with the use of |app :: arr (arr a b, a) c| from the |ArrowApply| type class. Finally, we unpack this matrix |[[[(d, fut a, fut b)]]| with |arr (map unzip3) >>> arr unzip3 >>> threetotwo| to get  |([[d]], ([[fut a]], [[fut b]]))|.
 
 \begin{figure}[tb]
 \begin{code}
@@ -168,7 +168,7 @@ ptorus f = arr (\ ~(c, a, b) -> (c, get a, get b)) >>> f >>> arr (\ ~(d, a, b) -
 \caption{Definition of the |torus| skeleton. The definitions of |lazyzip3|, |uncurry3| and |threetotwo| have been omitted and can be found in Fig.~\ref{fig:lazyzip3etc}}.
 \label{fig:torus}
 \end{figure}
-As an example of using this skeleton \citep{Eden:SkeletonBookChapter02} showed the matrix multiplication using the Gentleman algorithm (\citeyear{Gentleman1978}). An adapted version can be found in Fig.~\ref{fig:torusMatMult}.
+As an example of using this skeleton \citet{Eden:SkeletonBookChapter02} showed the matrix multiplication using the Gentleman algorithm (\citeyear{Gentleman1978}). An adapted version can be found in Fig.~\ref{fig:torusMatMult}.
 \begin{figure}[tb]
 \begin{code}
 type Matrix = [[Int]]
