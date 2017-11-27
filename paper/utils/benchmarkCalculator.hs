@@ -30,6 +30,8 @@ import Debug.Trace
 
 import System.Environment
 
+import Data.Ord
+
 type SpeedupsPerProgram = (String, [Speedup])
 type NCores = Int
 type SpeedupVal = Double
@@ -91,6 +93,9 @@ findSeqRun results = go $ filter (\res -> nCores res == 1) results
 
 data Speedup = Speedup (Maybe SpeedupVal) BenchResult deriving (Show)
 
+benchResult :: Speedup -> BenchResult
+benchResult (Speedup _ x) = x
+
 calculateSpeedUps :: [BenchResult] -> Maybe [Double]
 calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
     in
@@ -105,12 +110,12 @@ calculateSpeedUps benchResults = let maybeSeqRun = findSeqRun benchResults
 calculateSpeedUpsForMap :: M.Map String [BenchResult] -> [SpeedupsPerProgram]
 calculateSpeedUpsForMap = foldr (:) [] . (M.mapWithKey (\key benchResults ->
                                                 let
-                                                    maybeSpeedUps = calculateSpeedUps benchResults
+                                                    maybeSpeedUps = calculateSpeedUps (benchResults)
 
                                                     zipToSpeedUp (Just speedUps) = zipWith (Speedup) (map Just speedUps) benchResults
                                                     zipToSpeedUp Nothing = zipWith Speedup (repeat Nothing) benchResults
                                                 in
-                                                    (key, zipToSpeedUp maybeSpeedUps)))
+                                                    (key, sortBy (comparing (nCores . benchResult)) $ zipToSpeedUp maybeSpeedUps)))
 
 toPlottableValues :: [SpeedupsPerProgram] -> [(String, [(NCores, SpeedupVal)])]
 toPlottableValues speedUpsPerPrograms =
@@ -215,9 +220,6 @@ main = do
                        benchResultsPerProgram = toMap $ convToBenchResults lines
                        speedUpsPerPrograms = calculateSpeedUpsForMap benchResultsPerProgram
                        plottableValues = toPlottableValues speedUpsPerPrograms
-
-                       speedups :: [Speedup]
-                       speedups = concat $ map snd speedUpsPerPrograms
 
                        -- "","name","time","nCores","speedup"
                        legend :: String
