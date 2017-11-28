@@ -1,62 +1,37 @@
-\renewcommand{\multirow}[3]{#3}
-\newcommand{\meanOverhead}{
-\begin{table}
-\caption{Best and worst benchmark results on shared memory multiprocessors.}
-\begin{tabular}{l c S S}
-\toprule
-	\multirow{4}{c}{\sudokutest 1000}    &	 
-    {backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \midrule
-    \multirow{4}{c}{\sudokutest 16000}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-16000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \midrule
-    \multirow{4}{c}{\rmtest 11213 32}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \midrule
-    \multirow{4}{c}{\rmtest 11213 64}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \bottomrule
-    \end{tabular}
-    \label{tab:overhead-smp}
-\end{table}
-\begin{table}
-\caption{Best and worst benchmark results on a distributed memory grid.}
-\begin{tabular}{l c S S}
-\toprule
-	\multirow{2}{c}{\torustest 4096}    &	 
-    {backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-		\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \midrule
-    \multirow{2}{c}{\rmtest 44497 256}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-        \midrule
-    \multirow{2}{c}{\jacobitest 3217}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \midrule
-    \multirow{2}{c}{\jacobitest 4253}    &	 
-	{backend}             & {mean overhead} & {max.\ normalised stdDev} \\ \midrule
-    \csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-4253.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-    \bottomrule
-    \end{tabular}
-    \label{tab:overhead-grid}
+%\bestAndWorstBenchmarks
+
+\newcommand{\meanOverheadTEST}{
+\begin{table}[]
+\centering
+\caption{Overhead in the benchmarks}
+\label{tab:meanOverhead}
+\captionsetup[subtable]{justification=centering}
+\subfloat[\sudokutest 1000]{
+	\begin{minipage}[t]{\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{C{2cm} C{3cm} C{1.7cm} C{2.3cm}}
+		\thead{vs.}             & \thead{Benchmark} & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \toprule
+		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \benchmark \params & \meanOverhead & \maxStdDevForOverhead \\}
+		\midrule
+	\end{tabular}
+	\endgroup
+	\label{sudokuMeanFactor-1000}
+	\end{minipage}
+}
+\caption{Overhead in the benchmarks}
 \end{table}
 }
 
 
-%\bestAndWorstBenchmarks
-
-\newcommand{\meanOverheadOLD}{
+\newcommand{\meanOverhead}{
 \begin{table}[]
 \centering
+\caption{Overhead in the benchmarks}
 \label{tab:meanOverhead}
 \captionsetup[subtable]{justification=centering}
-\begin{subtable}[t]{.49\linewidth}%
+\subfloat[\sudokutest 1000]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -64,9 +39,11 @@
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-    \caption{\sudokutest 1000}\label{sudokuMeanFactor-1000}
-\end{subtable}
-\begin{subtable}[t]{.49\linewidth}%
+	\label{sudokuMeanFactor-1000}
+	\end{minipage}
+}
+\subfloat[\sudokutest 16000]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -74,12 +51,14 @@
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-16000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-    \caption{\sudokutest 16000}\label{sudokuMeanFactor-16000}
-\end{subtable}
+    \label{sudokuMeanFactor-16000}
+	\end{minipage}
+}
 \newline
 \vspace*{0.5 cm}
 \newline
-\begin{subtable}[t]{.49\linewidth}%
+\subfloat[\rmtest 11213 32]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -87,9 +66,11 @@
 		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-	\caption{\rmtest 11213 32}\label{sm-rmMeanFactor-11213-32}
-\end{subtable}
-\begin{subtable}[t]{.49\linewidth}%
+	\label{sm-rmMeanFactor-11213-32}
+	\end{minipage}
+}
+\subfloat[\rmtest 11213 64]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -97,12 +78,14 @@
 		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-    \caption{\rmtest 11213 64}\label{sm-rmMeanFactor-11213-64}
-\end{subtable}
+    \label{sm-rmMeanFactor-11213-64}
+	\end{minipage}
+}
 \newline
 \vspace*{0.5 cm}
 \newline
-\begin{subtable}[t]{.49\linewidth}%
+\subfloat[\torustest (dist) 4096]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -110,9 +93,11 @@
 		\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-	\caption{\torustest (dist) 4096}\label{torusMeanFactor-4096}
-\end{subtable}
-\begin{subtable}[t]{.49\linewidth}%
+	\label{torusMeanFactor-4096}
+	\end{minipage}
+}
+\subfloat[\rmtest (dist) 44497 256]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -120,12 +105,26 @@
 		\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-    \caption{\rmtest (dist) 44497 256}\label{dist-rmMeanFactor-44497}
-\end{subtable}
+    \label{dist-rmMeanFactor-44497}
+	\end{minipage}
+}
 \newline
 \vspace*{0.5 cm}
 \newline
-\begin{subtable}[t]{.49\linewidth}%
+\subfloat[\jacobitest (dist) 3217]{
+	\begin{minipage}[t]{.49\linewidth}%
+    \centering%
+    \begingroup\catcode`"=9
+	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
+		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
+		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
+	\end{tabular}
+	\endgroup
+    \label{jacobiMeanFactor-3217}
+	\end{minipage}
+}
+\subfloat[\jacobitest (dist) 4253]{
+	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
 	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
@@ -133,9 +132,9 @@
 		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-4253.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
-    \caption{\jacobitest (dist) 4253}\label{jacobiMeanFactor-4253}
-\end{subtable}
-\caption{Overhead in the benchmarks}
+    \label{jacobiMeanFactor-4253}
+	\end{minipage}
+}
 \end{table}
 }
 
