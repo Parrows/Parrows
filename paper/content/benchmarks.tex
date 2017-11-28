@@ -3,6 +3,13 @@
 \section{Performance results}
 \label{sec:benchmarks}
 
+In the following section, we describe the benchmarks of our parallel DSL and algorithmic skeletons conducted.
+We start by explaining the Hardware \& Software stack and also elaborate on which Benchmarks programs were used
+and also which parallel Haskell were used in which setting. Before we go into detail on the benchmarks we
+also address the issue of poor performance gains when using hyper-threading and our reasoning behind not including
+hyper-threaded cores in our benchmarks. Finally, we show that PArrows hold up in terms of performance when compared to the original parallel Haskells used as backends in this paper, starting with the shared-memory variants (GpH, |Par| Monad and Eden CP) and concluding with Eden as a distributed backend.
+
+
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
 \newcommand{\sudokutest}{Sudoku\xspace}
 \newcommand{\jacobitest}{Jacobi sum test\xspace}
@@ -116,7 +123,7 @@ xmax=#6]
 
 \subsection{Hardware and Software used}
 
-In the following we describe the benchmarks of our parallel DSL and algorithmic skeletons we conducted. They were run both in a shared and in a distributed
+Benchmarks were run both in a shared and in a distributed
 memory setting. All benchmarks were done on \enquote{the Glasgow GPG Beowulf cluster}, consisting of
 16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the cases.
 
