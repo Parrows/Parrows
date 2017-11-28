@@ -5,15 +5,12 @@
 \caption{Overhead in the benchmarks}
 \label{tab:meanOverhead}
 \captionsetup[subtable]{justification=centering}
-\sisetup{
-	table-number-alignment = center
-}
 \subfloat[\sudokutest 1000]{
 	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
-	\begin{tabular}{S S[table-text-alignment = center] S[table-text-alignment = center]}
-		vs.             & mean overhead & maximum normalized stdDev \\ \hline
+	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
+		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup

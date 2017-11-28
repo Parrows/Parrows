@@ -144,6 +144,7 @@ implemented in Eden. Table~\ref{tab:benches} summarises.
 \begin{table}
 \centering
 \caption{The benchmarks we use in this paper.}
+\label{tab:benches}
 %% something was wrong with separators in table
 \renewcommand{\tabcolsep}{0.5em}
 \begin{tabular}{lccll}
@@ -156,7 +157,6 @@ Name & Area & Type & Origin & Source \\
 \sudokutest & Puzzle & \ensuremath{\Varid{parMap}} & \ensuremath{\Conid{Par}} Monad & \citet{par-monad}\tablefootnote{actual code from: \url{http://community.haskell.org/\~simonmar/par-tutorial.pdf and https://github.com/simonmar/parconc-examples}}\\
 \bottomrule
 \end{tabular}
-\label{tab:benches}
 \end{table}
 
 \rmtest is a probabilistic primality test that iterates multiple (here: 32--256)
