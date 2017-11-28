@@ -1,5 +1,5 @@
 %\FloatBarrier
-\section{Topological Skeletons}
+\subsection{Topological Skeletons}
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
 
@@ -20,7 +20,7 @@ instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
     evalN _ = listApp
 \end{code}
 
-\subsection{Parallel pipe}\label{sec:pipe}
+\subsubsection{Parallel pipe}\label{sec:pipe}
 
 The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| type class which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \begin{code}
@@ -88,7 +88,7 @@ f parcomp g = (f . put) >>> (get . g)
 \end{code}
 It does not launch both arrows |f| and |g| in parallel, but allows for more smooth data communication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
 
-\subsection{Ring skeleton} \label{sec:ring}
+\subsubsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
 	\includegraphics[scale=0.75]{images/ring}
 	\caption{Schematic depiction of the ring skeleton.}
@@ -129,7 +129,7 @@ ring conf f =
 % \end{code}
 %% we have shown this already.
 
-\subsection{Torus skeleton}\label{sec:torus}
+\subsubsection{Torus skeleton}\label{sec:torus}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
 	\caption{Schematic depiction of the |torus| skeleton.}
