@@ -4,9 +4,9 @@ In this manner we are able to bridge across various parallel Haskells.
 
 Additionally, using these parallel Arrows (PArrows) has the benefit of being portable across multiple parallel Haskell implementations.
 Furthermore, as each parallel computation is an Arrow, PArrows can be readily composed and transformed as such.
-In order to allow for more sophisticated communication schemes between computation nodes in distributed systems we introduce the concept of Futures to wrap existing direct communication concepts in backends.
+In order to allow for more sophisticated communication schemes between computation nodes in distributed systems we utilise the concept of Futures to wrap existing direct communication concepts in backends.
 
-To show that PArrows have similar expressiveness to existing parallel languages, we also implement several parallel skeletons. 
+To show that PArrows have similar expressive power as existing parallel languages, we also implement several parallel skeletons. 
 Benchmarks show that our framework does not induce any notable overhead
 performance-wise. We finally conclude that Arrows turn out to be a useful tool for composing parallel programs and that our particular approach results in programs that are portable accross multiple backends.
 \olcomment{Summarize conclusions}

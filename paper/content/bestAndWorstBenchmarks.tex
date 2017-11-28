@@ -1,41 +1,19 @@
 %\bestAndWorstBenchmarks
 
-\newcommand{\meanOverheadTEST}{
 \begin{table}[]
 \centering
 \caption{Overhead in the benchmarks}
 \label{tab:meanOverhead}
 \captionsetup[subtable]{justification=centering}
-\subfloat[\sudokutest 1000]{
-	\begin{minipage}[t]{\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{3cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{Benchmark} & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \toprule
-		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \benchmark \params & \meanOverhead & \maxStdDevForOverhead \\}
-		\midrule
-	\end{tabular}
-	\endgroup
-	\label{sudokuMeanFactor-1000}
-	\end{minipage}
+\sisetup{
+	table-number-alignment = center
 }
-\caption{Overhead in the benchmarks}
-\end{table}
-}
-
-
-\newcommand{\meanOverhead}{
-\begin{table}[]
-\centering
-\caption{Overhead in the benchmarks}
-\label{tab:meanOverhead}
-\captionsetup[subtable]{justification=centering}
 \subfloat[\sudokutest 1000]{
 	\begin{minipage}[t]{.49\linewidth}%
     \centering%
     \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
+	\begin{tabular}{S S[table-text-alignment = center] S[table-text-alignment = center]}
+		vs.             & mean overhead & maximum normalized stdDev \\ \hline
 		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
 	\end{tabular}
 	\endgroup
@@ -136,6 +114,3 @@
 	\end{minipage}
 }
 \end{table}
-}
-
-\meanOverhead

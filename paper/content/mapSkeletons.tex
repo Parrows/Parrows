@@ -1,9 +1,10 @@
 \section{Skeletons}
 \label{sec:skeletons}
+Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations. While there are many possible skeletons to implement, we regard in detail here only some |map|-based and topological skeletons to demonstrate the power of PArrows.
 %%% \FloatBarrier
-\subsection{Map-based Skeletons}
+\subsection{|map|-based Skeletons}
 \label{sec:map-skeletons}
-Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations.
+We start with |map|-based skeletons. The essential differences between the skeletons presented here are in terms of order of evaluation and work distribution but still provide the same output of a standard |map|. 
 
 \paragraph{Parallel |map| and laziness.}
 The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to obtain an arrow |arr [a] [b]|.
