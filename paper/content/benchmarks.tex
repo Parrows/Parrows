@@ -121,7 +121,9 @@ xmax=#6]
 \end{tikzpicture}
 }
 
-\subsection{Hardware and Software used}
+\subsection{Preliminaries}
+
+\subsubsection{Hardware and Software used}
 
 Benchmarks were run both in a shared and in a distributed
 memory setting. All benchmarks were done on the Glasgow GPG Beowulf cluster, consisting of
@@ -135,7 +137,7 @@ We used a single node with 16 real cores as a shared memory testbed
 and the whole grid with 256 real cores as a device to test our
 distributed memory software.
 
-\subsection{Benchmarks}
+\subsubsection{Benchmarks}
 
 We used multiple tests that originated from different
 sources. Most of them are parallel mathematical computations, initially
@@ -180,7 +182,7 @@ to GpH, and we ported it to PArrows.
 
 \input{bestAndWorstBenchmarks}
 
-\subsection{What parallel Haskells run where}
+\subsubsection{What parallel Haskells run where}
 
 The \ensuremath{\Conid{Par}} monad and GpH -- in its multicore version \cite{Marlow2009} --  can be executed on a shared
 memory machines only. Although GpH is available on distributed memory
@@ -195,7 +197,7 @@ in the plots as ``Eden~CP''.
 
 
 
-\subsection{Effect of hyper-threading}
+\subsubsection{Effect of hyper-threading}
 
 In preliminary tests, the PArrows version of \rmtest on a single node of the Glasgow cluster
 showed almost linear speedup on up to 16 shared-memory cores (Fig.~\ref{fig:bench-rm-sm}). The speedup
@@ -214,7 +216,7 @@ plummeting speedup of 124.31 at 512 hyper-threaded cores, whereas it was
 cluster fails to execute two parallel Haskell processes with full-fledged
 parallelism.
 
-Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark} and table~\ref{tab:bestAndWorstResults} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in use.
+Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark} and Table~\ref{tab:meanOverhead} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in use.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
@@ -487,6 +489,6 @@ smooth]{benchmarks/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sud
 \label{fig:sudokuSMBenchmark16000}
 \end{figure}
 
-\subsection{Byline}
+\subsection{Discussion}
 
 In the shared memory setting we naturally find that the backends perform differently. Furthermore, in our distributed memory tests on the full grid the difference between PArrows and Eden was almost always below the error margin if PArrows performed worse. Even the biggest difference of 12.27\% in the \jacobitest for input $2^{4253}-1$ and 128 cores remained in line with these findings. The only exception to this was the \torustest  with only a $1.7\%$ difference in favour of Eden which is only a marginal slowdown in our opinion.
