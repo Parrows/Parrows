@@ -93,13 +93,55 @@ smooth]{#5};
 \newcommand{\jacobitest}{Jacobi sum test\xspace}
 \newcommand{\torustest}{Gentleman\xspace}
 
-\meanOverheadPlot{Mean Overhead for distributed \rmtest 44497 256}{0.02}{32}{272}{../content/benchmarks/distributed-rm/44497-256-diff.csv}
-\\
-\meanOverheadPlot{Mean Overhead for distributed \jacobitest 4253}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
-\\
-\meanOverheadPlot{Mean Overhead for distributed \jacobitest 3217}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
-\\
-\meanOverheadPlot{Mean Overhead for distributed \torustest 4096}{0.5}{32}{272}{../content/benchmarks/distributed-torus/4096-diff.csv}
+\subsection{Distributed}
 
+\subsubsection{\rmtest}
+
+\meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.02}{32}{272}{../content/benchmarks/distributed-rm/44497-256-diff.csv}
+
+
+
+
+\subsubsection{\jacobitest}
+
+\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 4253}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
+
+
+
+
+\subsubsection{\torustest}
+
+\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.5}{32}{272}{../content/benchmarks/distributed-torus/4096-diff.csv}
+
+
+
+
+\subsection{Shared-Memory}
+
+\subsubsection{\rmtest}
+
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Eden CP}{0.5}{4}{18}{../content/benchmarks/sm-rm/eden-cp-11213-32-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Eden CP}{0.5}{4}{18}{../content/benchmarks/sm-rm/eden-cp-11213-64-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs GpH}{0.5}{4}{18}{../content/benchmarks/sm-rm/mult-11213-32-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs GpH}{0.5}{4}{18}{../content/benchmarks/sm-rm/mult-11213-32-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Par Monad}{0.5}{4}{18}{../content/benchmarks/sm-rm/par-11213-32-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Par Monad}{0.5}{4}{18}{../content/benchmarks/sm-rm/par-11213-32-diff.csv}
+
+
+    
+    %benchmarks/sudoku-sm
+    %    "eden-cp-1000-diff.csv"
+    %"eden-cp-16000-diff.csv"
+    %"mult-1000-diff.csv"
+    %"mult-16000-diff.csv"
+    %"par-1000-diff.csv"
+    %"par-16000-diff.csv"
 
 \end{document}
