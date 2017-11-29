@@ -228,14 +228,6 @@ Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sud
 % -"- par: 15.155709987503396
 
 \subsection{Benchmark results}
-
-The difference between, say, PArrows with \ensuremath{\Conid{Par}} Monad backend and a
-genuine \ensuremath{\Conid{Par}}
-Monad benchmark is very small. To give an example, it is $0.4\seconds$ in favour of PArrows for 16 cores ($10.8\seconds$ vs. $11.2\seconds$) and $-0.8\seconds$ in favour of the \ensuremath{\Conid{Par}} monad for 8 cores ($16.1\seconds$ vs. $16.9\seconds$) for
-the Sudoku benchmark in the shared memory setting. It is almost invisible in speedup and
-(non shown) run time plots. We thus show only the results for the
-PArrows-enabled versions in the backend-comparison.
-
 To show that PArrows induce very small overhead even in a distributed context (and in general as well), we compare the original Eden
 versions of the benchmark to its PArrows-enabled counterpart in the \rmtest, \torustest and \jacobitest benchmarks. We plot execution time differences between measurements for
 PArrows and the corresponding backend in a separate plot
@@ -246,7 +238,7 @@ time differences that are not relative \wrt the total execution time.
 Furthermore, the error bars ends were computed from point-wise maximum of both standard
 deviations from both measurements for PArrows and non-PArrows
 versions. These are the values provided by the \ensuremath{\Varid{bench}} package that we
-used for bench-marking. We call a difference between two versions
+used for benchmarking. We call a difference between two versions
 significant when the border of the error bar of absolute time
 difference is above or below zero. In other words: the time
 difference is significant if it is outside of the measurement error.
@@ -287,9 +279,9 @@ smooth]{benchmarks/distributed-rm/bench-distributed.bench.skelrm-parrows-#1-#2.c
 }
 
 \newcommand{\performanceSkelRMDistDiff}[5]{
-\performancediffplot{Run time differences\\for \rmtest \enquote{#1 #2}}{(Eden $-$ PArrows)}{256}{#3}{
+\performancediffplot{Overhead\\for \rmtest \enquote{#1 #2}}{(Eden $-$ PArrows)}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
-    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+    y dir=both,y explicit] table [x="nCores", y="overhead", y error="stdDevForOverhead", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-rm/#1-#2-diff.csv};
 }{#4}{#5}{\plotwidthDist}
 }
@@ -365,9 +357,9 @@ smooth]{benchmarks/distributed-jacobi/bench-jacobi.bench.jacobi-parr-#1-#5.csv};
 }
 
 \newcommand{\performanceJacobiDistDiff}[5]{
-\performancediffplot{Run time differences\\for \jacobitest \enquote{#2}}{(Eden $-$ PArrows) #2}{256}{#3}{
+\performancediffplot{Overhead\\for \jacobitest \enquote{#2}}{(Eden $-$ PArrows) #2}{256}{#3}{
 \addplot+[mark=*,very thick,error bars/.cd,
-    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+    y dir=both,y explicit] table [x="nCores", y="overhead", y error="stdDevForOverhead", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-jacobi/#1-#2-diff.csv};
 }{#4}{#5}{\plotwidthDist}
 }
@@ -403,9 +395,9 @@ smooth]{benchmarks/distributed-torus/bench-torus-distributed.bench.torus-matrix-
 
 
 \newcommand{\performanceTorusDistDiff}[4]{
-\performancediffplot{Run time differences\\for \torustest \enquote{#1}}{(Eden $-$ PArrows)}{256}{#2}{
+\performancediffplot{Overhead\\for \torustest \enquote{#1}}{(Eden $-$ PArrows)}{256}{#2}{
 \addplot+[mark=*,very thick,error bars/.cd,
-    y dir=both,y explicit] table [x="nCores", y="time", y error="max stddev", col sep=comma, mark=dots,
+    y dir=both,y explicit] table [x="nCores", y="overhead", y error="stdDevForOverhead", col sep=comma, mark=dots,
 smooth]{benchmarks/distributed-torus/#1-diff.csv};
 }{#3}{#4}{\plotwidthDist}
 }
