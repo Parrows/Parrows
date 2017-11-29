@@ -1,0 +1,105 @@
+% This is our submission, modified from:
+% the file JFP2egui.lhs
+% release v1.02, 27th September 2001
+%   (based on JFPguide.lhs v1.11 for LaLhs 2.09)
+% Copyright (C) 2001 Cambridge University Press
+
+\NeedsTeXFormat{LaTeX2e}
+
+\documentclass{jfp1}
+
+%%% Macros for the guide only %%%
+%\providecommand\AMSLaTeX{AMS\,\LaTeX}
+%\newcommand\eg{\emph{e.g.}\ }
+%\newcommand\etc{\emph{etc.}}
+%\newcommand\bcmdtab{\noindent\bgroup\tabcolsep=0pt%
+%  \begin{tabular}{@{}p{10pc}@{}p{20pc}@{}}}
+%\newcommand\ecmdtab{\end{tabular}\egroup}
+%\newcommand\rch[1]{$\longrightarrow\rlap{$#1$}$\hspace{1em}}
+%\newcommand\lra{\ensuremath{\quad\longrightarrow\quad}}
+
+\jdate{August 2017}
+\pubyear{2017}
+\pagerange{\pageref{firstpage}--\pageref{lastpage}}
+\doi{...}
+
+%\newtheorem{lemma}{Lemma}[section]
+
+\input{prelude}
+
+\title{Plots for \enquote{Arrows for Parallel Computations}}
+\ifthenelse{\boolean{anonymous}}{%
+\author{Submission ID xxxxxx}
+}{%
+%\author{Martin Braun, Phil Trinder, and Oleg Lobachev}
+%\affiliation{University Bayreuth, Germany and Glasgow University, UK}
+ \author[M. Braun, O. Lobachev and P. Trinder]%
+        {MARTIN BRAUN\\
+         University Bayreuth, 95440 Bayreuth, Germany\\
+		 OLEG LOBACHEV\\
+		 University Bayreuth, 95440 Bayreuth, Germany\\
+		 \and\ PHIL TRINDER\\
+		 Glasgow University, Glasgow, G12 8QQ, Scotland}
+}% end ifthenelse
+
+
+
+\begin{document}
+
+\label{firstpage}
+
+\def\SymbReg{\textsuperscript{\textregistered}}
+
+\maketitle
+
+\tableofcontents
+
+\section{Plots}
+
+\newlength{\plotwidthDist}
+\setlength{\plotwidthDist}{0.6\textwidth}
+
+\newcommand{\meanOverheadPlot}[5]{
+\begin{tikzpicture}
+\begin{axis}[title={#1},
+title style={align=center},
+scale only axis, width=\plotwidthDist,
+xlabel=Threads,
+%xtick=data,
+ytick distance=#2 / 4,
+xtick distance=#3,
+minor tick num=9,
+ylabel=Overhead (\%),
+ylabel near ticks,
+grid=both,
+legend entries={Mean Overhead},
+legend style={at={(0.99,0.99)},anchor=north east},
+max space between ticks=50pt,
+grid style={line width=.1pt, draw=gray!10},
+major grid style={line width=.2pt,draw=gray!50},
+ymin=-#2,
+ymax=#2,
+xmin=-1,
+xmax=#4]
+\addplot+[mark=*,very thick,error bars/.cd,
+    y dir=both,y explicit] table [x="nCores", y="overhead", y error="stdDevForOverhead", col sep=comma, mark=dots,
+smooth]{#5};
+\end{axis}
+\end{tikzpicture}
+}
+
+\newcommand{\rmtest}{Rabin--Miller test\xspace}
+\newcommand{\sudokutest}{Sudoku\xspace}
+\newcommand{\jacobitest}{Jacobi sum test\xspace}
+\newcommand{\torustest}{Gentleman\xspace}
+
+\meanOverheadPlot{Mean Overhead for distributed \rmtest 44497 256}{0.02}{32}{272}{../content/benchmarks/distributed-rm/44497-256-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for distributed \jacobitest 4253}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for distributed \jacobitest 3217}{0.5}{32}{272}{../content/benchmarks/distributed-jacobi/3-4253-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for distributed \torustest 4096}{0.5}{32}{272}{../content/benchmarks/distributed-torus/4096-diff.csv}
+
+
+\end{document}

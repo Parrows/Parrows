@@ -1,0 +1,137 @@
+\usepackage{tikz}
+
+\usepackage{filecontents}
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{statistics}
+
+\usepackage{makecell}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{csvsimple}
+
+\usepackage{tablefootnote}
+
+%\usepackage{color}
+\usepackage{hyperref}
+
+%\usepackage{subcaption}
+
+\usepackage[round,sectionbib]{natbib}
+%% https://tex.stackexchange.com/questions/148992/changing-the-heading-style-of-references-section
+%% and jfp1.cls
+\renewcommand\refname{References}
+\makeatletter
+\renewcommand\bibsection{%
+  \section*{\refname}%
+}%
+\makeatother
+
+\usepackage{csquotes}
+
+% \usepackage{placeins} %% unneeded
+
+\usepackage{microtype}
+\DisableLigatures[>,<]{encoding = T1,family=tt*} 
+
+% für Listings
+%\usepackage{listings}
+
+
+\renewcommand{\cite}[1]{\citep{#1}}
+
+\newcommand{\citHughes}{\citep{HughesArrows}}
+
+%\newcommand{\inlinecode}[1]{\texttt{#1}}
+\newcommand{\inlinecode}[1]{\emph{#1}} %%% booo
+%%% |code| is inline code in lhs2tex
+
+%\newcommand{\fixme}[1]{\colorbox{red}{#1}}
+
+%%%%%% more fun and typography
+
+\usepackage{xifthen}
+
+\newboolean{anonymous}
+\setboolean{anonymous}{False}
+
+\usepackage[british]{babel}
+
+\usepackage{siunitx}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+%%\usepackage{tipa} %% causes problems with lhs2tex?!
+
+\usepackage{xspace}
+\usepackage{xcolor}
+\newcommand{\hl}[1]{\textcolor{red}{#1}}
+\newcommand{\comm}[2]{\textcolor{red}{\bfseries #1: #2}}
+%\newcommand{\comm}[2]{}
+\newcommand{\olcomment}[1]{\comm{OL}{#1}}
+\newcommand{\mbcomment}[1]{\comm{MB}{#1}}
+\newcommand{\ptcomment}[1]{\comm{Phil}{#1}}
+%\newcommand{\done}{\xspace\hl{done!}\xspace}
+\newcommand{\fixme}{\mbcomment}
+
+%\renewcommand{\olcomment}[1]{}
+%\renewcommand{\mbcomment}[1]{}
+
+\DeclareRobustCommand{\xth}{\textsuperscript{th}\xspace}
+\DeclareRobustCommand{\st}{\textsuperscript{st}\xspace}
+\DeclareRobustCommand{\nd}{\textsuperscript{nd}\xspace}
+\DeclareRobustCommand{\xrd}{\textsuperscript{rd}\xspace}
+
+%% kuerzel
+%\newcommand{\todo}{\textcolor{red}{\bfseries TODO!}\xspace}
+\newcommand{\done}{\textcolor{green}{\bfseries done!}\xspace}
+\DeclareRobustCommand{\hairspn}{\hspace{1pt}\nolinebreak}% hair space with no break
+
+\newcommand{\seconds}{\ensuremath{s}}
+
+% \DeclareRobustCommand{\ie}{{i.\hairspn{}e.\nopagebreak[4] }}
+% \DeclareRobustCommand{\eg}{{e.\hairspn{}g.\nopagebreak[4] }}
+% \DeclareRobustCommand{\fe}{{f.\hairspn{}e.,}\nopagebreak[4] }
+\DeclareRobustCommand{\ie}{{i.\hairspn{}e.~}}
+\DeclareRobustCommand{\eg}{{e.\hairspn{}g.~}}
+\DeclareRobustCommand{\fe}{{f.\hairspn{}e.,~}}
+\DeclareRobustCommand{\ad}{{A.\hairspn{}D.\xspace}}
+\DeclareRobustCommand{\bcc}{{A.\hairspn{}C.\xspace}}
+\DeclareRobustCommand{\wrt}{w.\hairspn{}r.\hairspn{}t.~}
+\DeclareRobustCommand{\etc}{etc.\ }
+\DeclareRobustCommand{\cf}{\textit{cf.~}}
+\DeclareRobustCommand{\viz}{\textit{viz.~}}
+%\DeclareRobustCommand{\hof}{higher-or\-der function\xspace}
+
+% %% the numberings
+\DeclareRobustCommand{\xth}{\textsuperscript{th}\xspace}
+\DeclareRobustCommand{\st}{\textsuperscript{st}\xspace}
+\DeclareRobustCommand{\nd}{\textsuperscript{nd}\xspace}
+\DeclareRobustCommand{\xrd}{\textsuperscript{rd}\xspace}
+
+\newcommand{\tabsepbakup}{\tabcolsep}
+%% for narrower tables
+
+%% nice tables
+\usepackage{booktabs}
+\usepackage{multirow}
+
+%% more microtype
+\microtypecontext{spacing=nonfrench} %% log said so
+
+\usepackage{subfig}
+
+
+%% fight for pipepipepipe
+\newcommand{\pipepipepipe}{\ensuremath{\mathbin{\mid\!\mid\!\mid}}\xspace}
+%%% ^^^^ keep consistent with definition at the top of main.lhs
+%%%\newcommand{\pipepipepipe}{\inlinecode{|||}\xspace}
+
+%%% JFP requirements:
+%%% Harvard citing style, "(Curry 1933)".
+%%% code: identifies italic, keywords bold
+%%% figures: eps(!) or ps (can convert pdf), eventually provide a greyscale version, color NOT in cmyk
