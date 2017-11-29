@@ -36,10 +36,22 @@ data Speedup = Speedup {
     factor :: Double,
     factorStdDev :: Double,
     overhead :: Double,
-    stdDevForOverhead :: Double
+    stdDevForOverhead :: Double,
+    runtimeX :: Double,
+    runtimeY :: Double
 } deriving (Show)
 
 
+textBFLaTeX :: String -> String
+textBFLaTeX str = "\"\\textbf{" ++ str ++ "}\""
+
+textITLaTeX :: String -> String
+textITLaTeX str = "\"\\textit{" ++ str ++ "}\""
+
+formatOverheadForLaTeX :: Double -> String
+formatOverheadForLaTeX overhead
+   | overhead < 0 = textBFLaTeX (showFFloat Nothing overhead "")
+   | overhead > 0 = textITLaTeX (showFFloat Nothing overhead "")
 
 main :: IO ()
 main = do
@@ -73,7 +85,9 @@ main = do
                                                                         factor = 1,
                                                                         factorStdDev = 0,
                                                                         overhead = 0,
-                                                                        stdDevForOverhead = 0
+                                                                        stdDevForOverhead = 0,
+                                                                        runtimeX = 0,
+                                                                        runtimeY = 0
                                                                     }
                                                    | otherwise = Nothing
                 lineToSpeedup _ = Nothing
@@ -91,12 +105,14 @@ main = do
                             factor = (time y) / (time x),
                             factorStdDev = (max (stdDev x) (stdDev y)) / (time x),
                             overhead = (time y - time x) / (time y),
-                            stdDevForOverhead = (max (stdDev x) (stdDev y)) / (time y)
+                            stdDevForOverhead = (max (stdDev x) (stdDev y)) / (time y),
+                            runtimeX = time x,
+                            runtimeY = time y
                         }
                     | otherwise = Nothing
 
                 legend :: String
-                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\",\"factor\",\"factorStdDev\",\"overhead\",\"stdDevForOverhead\"" ++ "\n"
+                legend = "\"\",\"name\",\"time\",\"nCores\",\"speedup\",\"max stddev\",\"factor\",\"factorStdDev\",\"overhead\",\"stdDevForOverhead\",\"runtimeX\",\"runtimeY\"" ++ "\n"
 
                 str :: String -> String
                 str st = "\"" ++ st ++ "\""
@@ -108,10 +124,10 @@ main = do
                 toString x = (str (num x)) ++ "," ++ (str $ name x) ++ "," ++  (show $ time x) ++ "," ++
                                     (nCores x) ++ "," ++ (show $ speedup x) ++ "," ++ (show $ stdDev x) ++ "," ++
                                     (show $ factor x) ++ "," ++ (show $ factorStdDev x) ++ "," ++ (show $ overhead x) ++
-                                    "," ++ (show $ stdDevForOverhead x)
+                                    "," ++ (show $ stdDevForOverhead x) ++ "," ++ (show $ runtimeX x) ++  "," ++ (show $ runtimeY x)
 
                 handleParse :: Either ParseError [[String]] -> [Speedup]
-                handleParse (Right lines) = catMaybes $ traceShowId $ map lineToSpeedup lines
+                handleParse (Right lines) = catMaybes $ map lineToSpeedup lines
                 handleParse _  = []
 
             linesOrError1 <- parseFromFile csvFile file1
@@ -125,7 +141,7 @@ main = do
             else
                 do
                     let maybeDiffs = zipWith diff speedups1 speedups2
-                        diffs = catMaybes maybeDiffs
+                        diffs = traceShowId $ catMaybes maybeDiffs
                     if (length diffs /= length maybeDiffs)
                     then
                         putStrLn $ "parse Error!"
@@ -154,7 +170,9 @@ main = do
                                                     factor = rndVal (factor x),
                                                     factorStdDev = factorStdDev x,
                                                     overhead = rndVal $ overhead x,
-                                                    stdDevForOverhead = stdDevForOverhead x
+                                                    stdDevForOverhead = stdDevForOverhead x,
+                                                    runtimeX = runtimeX x,
+                                                    runtimeY = runtimeY x
                                                 }
 
                                 rndVal x = (fromIntegral $ round (x * 100000)) / 100000
@@ -173,9 +191,9 @@ main = do
                                     --
                                     ++ (showFFloat Nothing $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs) ""
                                     ++ ","
-                                    ++ (showFFloat Nothing $ roundedMean $ map (overhead) diffs) ""
+                                    ++ (formatOverheadForLaTeX $ roundedMean $ map (overhead) diffs)
                                     ++ ","
-                                    ++ (showFFloat Nothing $  rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
+                                    ++ (showFFloat Nothing $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
                                     ++ "\n"
 
                         else
