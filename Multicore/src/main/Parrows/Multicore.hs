@@ -22,17 +22,19 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Parrows.Multicore where
 
-import Parrows.Definition
-import Parrows.Future
-import Parrows.Util
+import           Parrows.Definition
+import           Parrows.Future
+import           Parrows.Util
 
-import Control.Parallel
-import Control.Parallel.Strategies
-import Control.Arrow
-import Control.DeepSeq
+import           Control.Arrow
+import           Control.DeepSeq
+import           Control.Parallel
+import           Control.Parallel.Strategies
 
 data Conf a = Conf (Strategy a)
 
@@ -58,4 +60,4 @@ instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
 
 instance Future BasicFuture a where
     put = arr BF
-    get = arr $ (\(BF a) -> a)
+    get = arr (\(BF a) -> a)

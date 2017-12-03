@@ -22,17 +22,19 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE CPP, MultiParamTypeClasses, FlexibleContexts #-}
+{-# LANGUAGE CPP                   #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Parrows.Definition where
 
-import Parrows.Util
+import           Parrows.Util
 
-import Control.Arrow
+import           Control.Arrow
 
-import Control.Monad
+import           Control.Monad
 
-import Data.Either
-import Data.List.Split
+import           Data.Either
+import           Data.List.Split
 
 --infixr 3 `|***|`
 --infixr 3 `|&&&|`
@@ -50,7 +52,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 (|***|) = parEval2 ()
 
 (|&&&|) :: (ArrowChoice arr, ArrowParallel arr (Either a a) (Either b c) ()) => arr a b -> arr a c -> arr a (b, c)
-(|&&&|) f g = (arr $ \a -> (a, a)) >>> f |***| g
+(|&&&|) f g = arr (\a -> (a, a)) >>> f |***| g
 
 -- some really basic sugar
 
@@ -67,7 +69,7 @@ toPar = return
 (<||||>) = (++)
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
-parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf  -> ChunkSize -> [arr a b] -> (arr [a] [b])
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf  -> ChunkSize -> [arr a b] -> arr [a] [b]
 parEvalNLazy conf chunkSize fs =
                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                -- evaluate the function chunks in parallel and concat the input to a single list again

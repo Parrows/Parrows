@@ -24,30 +24,30 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
 module Parrows.Util where
 
-import Control.Arrow
+import           Control.Arrow
 
-import Data.List
+import           Data.List
 
 --import Control.DeepSeq
 
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
-zipWithArr zipFn = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr zipFn
+zipWithArr zipFn = arr (uncurry zip) >>> mapArr zipFn
 
 listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
-listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
+listApp fs = arr (\as -> (fs, as)) >>> zipWithArr app
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr f = arr listcase >>>
          arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
-         where listcase [] = Left ()
+         where listcase []     = Left ()
                listcase (x:xs) = Right (x,xs)
 
 -- fold on Arrows inspired by mapArr
 foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
 foldlArr f b = arr listcase >>>
              arr (const b) ||| (first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
-             where listcase [] = Left []
+             where listcase []     = Left []
                    listcase (x:xs) = Right (x,xs)
 
 -- From Eden:
@@ -57,7 +57,7 @@ unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
 unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
 
 takeEach :: Int -> [a] -> [a]
-takeEach n [] = []
+takeEach n []     = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 
 -- | Simple shuffling - inverse to round robin distribution

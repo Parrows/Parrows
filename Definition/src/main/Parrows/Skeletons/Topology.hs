@@ -22,16 +22,18 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Parrows.Skeletons.Topology where
 
-import Control.Arrow
+import           Control.Arrow
 
-import Parrows.Definition
-import Parrows.Future
-import Parrows.Util
+import           Parrows.Definition
+import           Parrows.Future
+import           Parrows.Util
 
-import Parrows.Skeletons.Map
+import           Parrows.Skeletons.Map
 
 -- Ports of Control.Parallel.Eden.Topology to Parrows:
 -- edenskel-2.0.0.2 and the paper:

@@ -22,19 +22,21 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Parrows.Skeletons.Map where
 
-import Control.Arrow
+import           Control.Arrow
 
-import Parrows.Definition
-import Parrows.Util
+import           Parrows.Definition
+import           Parrows.Util
 
-import Data.List.Split
+import           Data.List.Split
 
 -- some map skeletons
 
-parMap :: (ArrowParallel arr a b conf) => conf -> (arr a b) -> (arr [a] [b])
+parMap :: (ArrowParallel arr a b conf) => conf -> arr a b -> arr [a] [b]
 parMap conf f = parEvalN conf (repeat f)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
