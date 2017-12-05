@@ -22,59 +22,35 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Parrows.ParMonad where
 
-import Parrows.Definition
-import Parrows.Future
-import Parrows.Util
+import           Parrows.Definition
+import           Parrows.Future
+import           Parrows.Util
 
-import Control.Monad.Par
-import Control.Monad.IO.Class
-import Control.Arrow
-import Control.DeepSeq
+import           Control.Arrow
+import           Control.DeepSeq
+import           Control.Monad.Par
 
 instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
+    parEvalN _ fs = arr (\as -> (fs, as)) >>>
                     zipWithArr (app >>> arr spawnP) >>>
                     arr sequenceA >>>
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
-
-{-
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
-                    zipWithArr (app >>> arr spawnP &&& arr id) >>> arr unzip >>>
-                    first (arr sequenceA >>>
-                           arr (>>= mapM Control.Monad.Par.get) >>>
-                           arr (>> return (unsafePerformIO (print "test"))) >>>
-                           arr (>>= (return . rnf)) >>>
-                           arr runParIO >>> arr forkIO)
-                    >>> arr (uncurry pseq)
--}
-
-{-
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = (arr $ \as -> (fs, as)) >>>
-                    zipWithArr (app >>> arr spawnP &&& arr id) >>> arr unzip >>>
-                    first (arr sequenceA >>>
-                           arr (>>= mapM Control.Monad.Par.get) >>>
-                           arr runPar)
-                    >>> arr snd
--}
-
---instance (NFData a) => NFData (Lazy a) where
---    rnf _ = ()
 
 data BasicFuture a = BF a
 
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
+instance (ArrowChoice arr, ArrowApply arr,
     ArrowParallel arr a b conf) => FutureEval arr a b conf where
     evalN _ = listApp
 
 instance Future BasicFuture a where
     put = arr BF
-    get = arr $ (\(BF a) -> a)
+    get = arr (\(BF a) -> a)

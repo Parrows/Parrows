@@ -22,16 +22,21 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses, AllowAmbiguousTypes, FunctionalDependencies #-}
+{-# LANGUAGE AllowAmbiguousTypes    #-}
+{-# LANGUAGE FlexibleContexts       #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE UndecidableInstances   #-}
 module Parrows.Eden where
 
-import Parrows.Definition
-import Parrows.Future
-import Parrows.Util
+import           Parrows.Definition
+import           Parrows.Future
+import           Parrows.Util
 
-import Control.Arrow
+import           Control.Arrow
 
-import Control.Parallel.Eden
+import           Control.Parallel.Eden
 
 data RemoteData a = RD { rd :: RD a }
 instance NFData (RemoteData a) where
