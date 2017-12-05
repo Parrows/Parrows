@@ -56,7 +56,7 @@ pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 \end{figure}
 
 
-Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a common type we obtain |pipe2| (Fig.~\ref{fig:pipe2}).
+Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a bigger arrow |arr (([a], [b]), [c]) (([a], [b]), [c])| suitable for |pipe|, we can define |pipe2| as in Fig.~\ref{fig:pipe2}.
 \begin{figure}[tb]
 \begin{code}
 pipe2 :: (ArrowLoop arr, ArrowChoice arr, Future fut (([a], [b]), [c]),
