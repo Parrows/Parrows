@@ -194,6 +194,8 @@ main = do
                                     ++ (formatOverheadForLaTeX $ roundedMean $ map (overhead) diffs)
                                     ++ ","
                                     ++ (showFFloat Nothing $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
+                                    ++ ","
+                                    ++ (showFFloat Nothing $ rndVal $ runtimeX $ maximumBy (comparing nCores) diffs) ""
                                     ++ "\n"
 
                         else
