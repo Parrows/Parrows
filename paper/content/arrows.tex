@@ -1,3 +1,15 @@
+\subsection{Arrows}
+\label{sec:arrows}
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation and a less restrictive generalisation of Monads. \citeauthor{HughesArrows} motivates the broader interface of Arrows with the example of a parser with added static meta-information that can not satisfy the monadic bind operator |(>>=) :: m a -> (a -> m b) -> m b| (with |m| being a Monad).
+
+An Arrow |arr a b| represents a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
+%
+To lift an ordinary function to an Arrow, |arr| is used, analogous to the monadic |return|. Similarly, the composition operator |>>>| is analogous to the monadic composition |>>=| and combines two arrows |arr a b| and |arr b c| by \enquote{wiring} the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator takes the input Arrow |arr a b| and converts it into an arrow on pairs |arr (a, c) (b, c)| that leaves the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of these basic Arrow combinators.
+The most prominent instances of this interface are regular functions |(->)|
+and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic functions, e.g.  |a -> m b|.
+
+Note that with the Kleisli type we can define an alternative to |(>>=)| with the signature |m a -> Kleisli m a b -> m b|. The difference between the definitions of Arrows and Monads becomes more clear when we compare this definition with the Arrow compose operator |(>>>)|: Monads are types that allow composition of computations, while Arrows \emph{are} computations. 
+
 \begin{figure}[t]
 \centering
 \begin{code}
@@ -48,14 +60,6 @@ instance Monad m => Arrow (Kleisli m) where
 \label{fig:arrow-sch}
 \label{fig:arrows-viz}
 \end{figure}
-
-\subsection{Arrows}
-\label{sec:arrows}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation. An Arrow |arr a b| represents  a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
-%
-To lift an ordinary function to an Arrow, |arr| is used, analogous to the monadic |return|. Similarly, the composition operator |>>>| is analogous to the monadic composition |>>=| and combines two arrows |arr a b| and |arr b c| by \enquote{wiring} the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator takes the input Arrow |arr a b| and converts it into an arrow on pairs |arr (a, c) (b, c)| that leaves the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of these basic Arrow combinators.
-The most prominent instances of this interface are regular functions |(->)|
-and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic functions, e.g.  |a -> m b| (with |m| being a Monad).
 
 \begin{figure}[h]
 	\centering
@@ -109,9 +113,6 @@ add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 % \\\\
 % \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
 %
-
-The more restrictive interface of Arrows allows for more elaborate composition and transformation combinators---a Monad can be \emph{anything}, an Arrow is a process of doing something, a \emph{computation}. This is exactly one of the key challenges in parallel computing.
-
 
 %%% Local Variables:
 %%% mode: latex
