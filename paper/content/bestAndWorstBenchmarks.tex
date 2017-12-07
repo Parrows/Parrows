@@ -2,112 +2,40 @@
 
 \begin{table}[]
 \centering
-\caption{Overhead in the benchmarks}
-\label{tab:meanOverhead}
-\captionsetup[subtable]{justification=centering}
-\subfloat[\sudokutest 1000]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-	\label{sudokuMeanFactor-1000}
-	\end{minipage}
-}
-\subfloat[\sudokutest 16000]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-16000.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-    \label{sudokuMeanFactor-16000}
-	\end{minipage}
-}
-\newline
-\vspace*{0.5 cm}
-\newline
-\subfloat[\rmtest 11213 32]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-	\label{sm-rmMeanFactor-11213-32}
-	\end{minipage}
-}
-\subfloat[\rmtest 11213 64]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-    \label{sm-rmMeanFactor-11213-64}
-	\end{minipage}
-}
-\newline
-\vspace*{0.5 cm}
-\newline
-\subfloat[\torustest (dist) 4096]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-	\label{torusMeanFactor-4096}
-	\end{minipage}
-}
-\subfloat[\rmtest (dist) 44497 256]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-    \label{dist-rmMeanFactor-44497}
-	\end{minipage}
-}
-\newline
-\vspace*{0.5 cm}
-\newline
-\subfloat[\jacobitest (dist) 3217]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-    \label{jacobiMeanFactor-3217}
-	\end{minipage}
-}
-\subfloat[\jacobitest (dist) 4253]{
-	\begin{minipage}[t]{.49\linewidth}%
-    \centering%
-    \begingroup\catcode`"=9
-	\begin{tabular}{C{2cm} C{1.7cm} C{2.3cm}}
-		\thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} \\ \hline
-		\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-4253.csv}{}{\vs & \meanOverhead & \maxStdDevForOverhead \\}
-	\end{tabular}
-	\endgroup
-    \label{jacobiMeanFactor-4253}
-	\end{minipage}
-}
+\caption{Overhead in the shared memory benchmarks}
+\label{tab:meanOverheadSharedMemory}
+\centering
+\begingroup\catcode`"=9
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 16 cores} \\ \hline \\
+	\multirow{3}{*}{\sudokutest 1000}
+	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 32}
+	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 64}
+	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Overhead in the distributed memory benchmarks}
+\label{tab:meanOverHeadDistributedMemory}
+\centering
+\begingroup\catcode`"=9
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 256 cores} \\ \hline \\
+	\multirow{1}{*}{\torustest 4096}
+	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\rmtest 44497 256}
+	\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\jacobitest 3217}
+	\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
 \end{table}
