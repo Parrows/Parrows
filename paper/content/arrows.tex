@@ -8,7 +8,7 @@ To lift an ordinary function to an Arrow, |arr| is used, analogous to the monadi
 The most prominent instances of this interface are regular functions |(->)|
 and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic functions, e.g.  |a -> m b|.
 
-Note that with the Kleisli type we can define an alternative to |(>>=)| with the signature |m a -> Kleisli m a b -> m b|. The difference between the definitions of Arrows and Monads becomes more clear when we compare this definition with the Arrow compose operator |(>>>)|: Monads are types that allow composition of computations, while Arrows \emph{are} computations. 
+Note that with the Kleisli type we can define an alternative to |(>>=)| with the signature |m a -> Kleisli m a b -> m b|. The difference between the definitions of Arrows and Monads becomes more clear if we compare this with the signature of the Arrow compose operator |(>>>) :: arr a b -> arr b c -> arr a c|: Monads are types that allow composition of computations, while Arrows \emph{are} composable computations. 
 
 \begin{figure}[t]
 \centering
