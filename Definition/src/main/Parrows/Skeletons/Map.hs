@@ -41,7 +41,7 @@ parMap conf f = parEvalN conf (repeat f)
 
 -- contrary to parMap this schedules chunks of a given size (parMap has "chunks" of length = 1) to be
 -- evaluated on the same thread
-parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
+parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr [a] [b]
 parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 
 -- similar to parMapStream, but divides the input list by the given number
@@ -51,7 +51,7 @@ farm conf numCores f = unshuffle numCores >>>
                        shuffle
 
 -- farm and parMapStream combined. divide the input list and inside work in chunks
-farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr, ArrowApply arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
+farmChunk :: (ArrowParallel arr a b conf, ArrowParallel arr [a] [b] conf, ArrowChoice arr) => conf -> ChunkSize -> NumCores -> arr a b -> arr [a] [b]
 farmChunk conf chunkSize numCores f = unshuffle numCores >>>
                                       parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
                                       shuffle

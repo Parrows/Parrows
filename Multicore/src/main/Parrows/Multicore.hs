@@ -38,12 +38,12 @@ import           Control.Parallel.Strategies
 
 data Conf a = Conf (Strategy a)
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         listApp fs >>>
         arr (withStrategy (parList strat))
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
+instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b () where
     parEvalN _ fs = parEvalN (hack fs) fs
                     where
                         hack :: (NFData b) => [arr a b] -> Conf b
@@ -54,8 +54,8 @@ data BasicFuture a = BF a
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (Arrow arr, ArrowChoice arr, ArrowApply arr,
-    ArrowParallel arr a b conf) => FutureEval arr a b conf where
+instance (Arrow arr, ArrowChoice arr, ArrowParallel arr a b conf) 
+    => FutureEval arr a b conf where
     evalN _ = listApp
 
 instance Future BasicFuture a where

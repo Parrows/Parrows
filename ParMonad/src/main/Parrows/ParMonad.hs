@@ -35,9 +35,8 @@ import           Control.Arrow
 import           Control.DeepSeq
 import           Control.Monad.Par
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = arr (\as -> (fs, as)) >>>
-                    zipWithArr (app >>> arr spawnP) >>>
+instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b conf where
+    parEvalN _ fs = listApp (map (>>> arr spawnP) fs) >>>
                     arr sequenceA >>>
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
@@ -47,8 +46,7 @@ data BasicFuture a = BF a
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (ArrowChoice arr, ArrowApply arr,
-    ArrowParallel arr a b conf) => FutureEval arr a b conf where
+instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
     evalN _ = listApp
 
 instance Future BasicFuture a where

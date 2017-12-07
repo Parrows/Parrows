@@ -77,16 +77,15 @@ ring conf f =
         arr unzip)
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
-torus :: (ArrowLoop arr, ArrowChoice arr, ArrowApply arr,
+torus :: (ArrowLoop arr, ArrowChoice arr,
             FutureEval arr (c, fut a, fut b) (d, fut a, fut b) conf,
             Future fut a, Future fut b) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
     loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
         arr (uncurry3 (zipWith3 lazyzip3)) >>>
-        (arr length >>> arr unshuffle) &&&
-            (shuffle >>> evalN conf (repeat $ ptorus f)) >>>
-        app >>>
+        arr length &&& (shuffle >>> evalN conf (repeat (ptorus f))) >>>
+        arr (uncurry unshuffle) >>>
         arr (map unzip3) >>> arr unzip3 >>> threetotwo)
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
