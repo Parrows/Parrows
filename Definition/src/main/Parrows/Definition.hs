@@ -31,8 +31,6 @@ import           Parrows.Util
 
 import           Control.Arrow
 
-import           Control.Monad
-
 import           Data.Either
 import           Data.List.Split
 
@@ -57,16 +55,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 -- some really basic sugar
 
 (...) :: (Arrow arr) => [arr a b] -> arr b c -> [arr a c]
-(...) parr arr = map (>>> arr) parr
-
--- minor stuff, remove this? these are basically just operations on lists
-
-toPar :: (Arrow arr) => arr a b -> [arr a b]
-toPar = return
-(<|||>) :: (Arrow arr) => [arr a b] -> arr a b -> [arr a b]
-(<|||>) fs g = fs ++ [g]
-(<||||>) :: (Arrow arr) => [arr a b] -> [arr a b] -> [arr a b]
-(<||||>) = (++)
+(...) parr f = map (>>> f) parr
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr) => conf  -> ChunkSize -> [arr a b] -> arr [a] [b]

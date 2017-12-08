@@ -29,11 +29,9 @@ module Parrows.Skeletons.Topology where
 
 import           Control.Arrow
 
-import           Parrows.Definition
+import           Parrows.Definition()
 import           Parrows.Future
 import           Parrows.Util
-
-import           Parrows.Skeletons.Map
 
 -- Ports of Control.Parallel.Eden.Topology to Parrows:
 -- edenskel-2.0.0.2 and the paper:
@@ -56,7 +54,7 @@ pipe2 conf f g =
     arr head
     where
         unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
-        unify f g = (mapArr f *** mapArr g) *** arr (const []) >>> arr (\((b, c), a) -> ((a, b), c))
+        unify f' g' = (mapArr f' *** mapArr g') *** arr (const []) >>> arr (\((b, c), a) -> ((a, b), c))
 
 pipe :: (ArrowLoop arr, FutureEval arr (fut a) (fut a) conf, Future fut a) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))

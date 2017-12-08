@@ -45,11 +45,18 @@ mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr = listApp . repeat
 
 -- fold on Arrows inspired by mapArr
-foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
-foldlArr f b = arr listcase >>>
-             arr (const b) ||| (first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
-             where listcase []     = Left []
-                   listcase (x:xs) = Right (x,xs)
+foldlArr :: (ArrowChoice arr) => arr (b, a) b -> arr (b, [a]) b
+foldlArr f = arr listcase >>>
+             arr fst ||| (arr unassoc >>> first f >>> foldlArr f)
+             where listcase (b, [])     = Left (b, [])
+                   listcase (b, x:xs) = Right (b, (x,xs))
+
+
+assoc :: ((a, b), c) -> (a,(b,c))
+assoc ((a,b),c) = (a,(b,c))
+
+unassoc :: (a,(b,c)) -> ((a, b), c)
+unassoc (a,(b,c)) = ((a,b),c)
 
 -- From Eden:
 
@@ -58,7 +65,7 @@ unshuffle :: (Arrow arr) => Int -> arr [a] [[a]]
 unshuffle n = arr (\xs -> [takeEach n (drop i xs) | i <- [0..n-1]])
 
 takeEach :: Int -> [a] -> [a]
-takeEach n []     = []
+takeEach _ []     = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 
 -- | Simple shuffling - inverse to round robin distribution

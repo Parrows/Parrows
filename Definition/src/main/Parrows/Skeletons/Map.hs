@@ -59,8 +59,10 @@ farmChunk conf chunkSize numCores f = unshuffle numCores >>>
 -- this does not completely adhere to Google's definition of Map Reduce as it
 -- the mapping function does not allow for "reordering" of the output
 -- The original Google version can be found at https://de.wikipedia.org/wiki/MapReduce
-parMapReduceDirect :: (ArrowParallel arr [a] b conf, ArrowApply arr, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (b, b) b -> b -> arr [a] b
-parMapReduceDirect conf chunkSize mapfn foldfn neutral =
-                                   arr (chunksOf chunkSize) >>>
-                                   parMap conf (mapArr mapfn >>> foldlArr foldfn neutral) >>>
-                                   foldlArr foldfn neutral
+parMapReduceDirect :: (ArrowParallel arr (b, [a]) b conf, ArrowChoice arr) => conf -> ChunkSize -> arr a b -> arr (b, b) b -> arr (b, [a]) b
+parMapReduceDirect conf chunkSize mapfn foldfn =
+                                   arr fst &&& nodeMapReduce >>> foldlArr foldfn
+                                   where
+                                     nodeMapReduce = arr repeat *** arr (chunksOf chunkSize) >>>
+                                        arr (uncurry zip) >>>
+                                        parMap conf (second (mapArr mapfn) >>> foldlArr foldfn)
