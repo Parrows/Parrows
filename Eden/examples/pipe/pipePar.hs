@@ -22,28 +22,27 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
-{-# LANGUAGE UndecidableInstances   #-}
-module Parrows.Future where
+{-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances, MultiParamTypeClasses #-}
 
-import           Control.Arrow
-import           Parrows.Definition
+module Main where
 
-class Future fut a | a -> fut where
-    put :: (Arrow arr) => arr a (fut a)
-    get :: (Arrow arr) => arr (fut a) a
+import Parrows.Definition
+import Parrows.ParMonad
+import Parrows.Skeletons.Topology
+import Parrows.Future
 
-class ArrowParallel arr a b conf => FutureEval arr a b conf where
-    distributedEvalN :: conf -> [arr a b] -> arr [a] [b]
-    sharedEvalN :: conf -> [arr a b] -> arr [a] [b]
+import Control.Arrow
 
-liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
-liftFut f = get >>> f >>> put
+replicated :: [Int -> Int]
+replicated = map (+) [1..4]
 
-unliftFut :: (Arrow arr, Future fut a, Future fut b) => arr (fut a) (fut b) -> arr a b
-unliftFut f = put >>> f >>> get
+expectedValue :: Int -> Int
+expectedValue x = foldl (flip ($)) x replicated
 
-parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
-parEvalNFut conf fs = parEvalN conf $ map liftFut fs
+pipeTest :: Int -> Int 
+pipeTest x = pipe () replicated x
+
+main = print $ pipeTest 1 
+
+
+

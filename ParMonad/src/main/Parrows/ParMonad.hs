@@ -47,8 +47,9 @@ instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
 instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
-    evalN _ = listApp
+    distributedEvalN _ = listApp
+    sharedEvalN = parEvalN
 
 instance Future BasicFuture a where
     put = arr BF
-    get = arr (\(BF a) -> a)
+    get = arr (\(~(BF a)) -> a)

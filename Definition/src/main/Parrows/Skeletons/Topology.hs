@@ -29,7 +29,7 @@ module Parrows.Skeletons.Topology where
 
 import           Control.Arrow
 
-import           Parrows.Definition()
+import           Parrows.Definition
 import           Parrows.Future
 import           Parrows.Util
 
@@ -62,29 +62,33 @@ pipe conf fs = unliftFut (pipeSimple conf (map liftFut fs))
 pipeSimple :: (ArrowLoop arr, FutureEval arr a a conf) => conf -> [arr a a] -> arr a a
 pipeSimple conf fs =
     loop (arr snd &&&
-        (arr (uncurry (:) >>> lazy) >>> evalN conf fs)) >>>
+        (arr (uncurry (:) >>> lazy) >>> distributedEvalN conf fs)) >>>
     arr last
 
 ring :: (ArrowLoop arr, FutureEval arr (i, fut r) (o, fut r) conf,
-    Future fut r) =>
+    Future fut r,
+    FutureEval arr o o conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
         arr (uncurry zip) >>>
-        evalN conf (repeat (second get >>> f >>> second put)) >>>
-        arr unzip)
+        distributedEvalN conf (repeat (second get >>> f >>> second put)) >>>
+        arr unzip) >>>
+    sharedEvalN conf (repeat (arr id))
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr,
             FutureEval arr (c, fut a, fut b) (d, fut a, fut b) conf,
-            Future fut a, Future fut b) =>
+            Future fut a, Future fut b,
+            FutureEval arr [d] [d] conf) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
     loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
         arr (uncurry3 (zipWith3 lazyzip3)) >>>
-        arr length &&& (shuffle >>> evalN conf (repeat (ptorus f))) >>>
+        arr length &&& (shuffle >>> distributedEvalN conf (repeat (ptorus f))) >>>
         arr (uncurry unshuffle) >>>
-        arr (map unzip3) >>> arr unzip3 >>> threetotwo)
+        arr (map unzip3) >>> arr unzip3 >>> threetotwo) >>>
+    sharedEvalN conf (repeat (arr id))
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c

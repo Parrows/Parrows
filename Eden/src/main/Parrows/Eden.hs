@@ -25,7 +25,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE AllowAmbiguousTypes    #-}
 {-# LANGUAGE FlexibleContexts       #-}
 {-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances   #-}
 module Parrows.Eden where
@@ -47,21 +46,9 @@ instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 
-instance ArrowParallel arr a b conf => FutureEval arr a b conf where
-    evalN = parEvalN
-
--- ArrowParallel Instances
-
--- FIXME: will this work with (spawnF id bs) with already "computed" bs
--- so that we can write a uniform instance that doesn't require
--- the weird unwrapping of the Kleisli type?
--- Probably not, because we would end up computing the values while
--- sending them over the network, right?
-
---instance (Trans a) => Trans (Lazy a)
---instance (NFData a) => NFData (Lazy a) where
---    rnf x = rnf $ unLazy x
-
+instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
+    distributedEvalN = parEvalN
+    sharedEvalN _ = listApp
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
     parEvalN _ fs as = spawnF fs as
