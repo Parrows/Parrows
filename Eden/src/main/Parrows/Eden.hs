@@ -51,7 +51,8 @@ instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b con
     sharedEvalN _ = listApp
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-    parEvalN _ fs as = spawnF fs as
+    parEvalN _ = spawnF
 
 instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
-    parEvalN conf fs = (arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>> (Kleisli $ sequence)
+    parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
+                       Kleisli sequence
