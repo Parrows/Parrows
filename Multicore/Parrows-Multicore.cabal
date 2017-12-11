@@ -1,6 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.17.0.
+-- This file has been generated from package.yaml by hpack version 0.20.0.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 971ecf661df68ece958714286c42a869c5347d27917db46aa1083d26de998c50
 
 name:           Parrows-Multicore
 version:        0.1.0.1
@@ -27,11 +29,13 @@ library
       src/main
   ghc-options: -Wall
   build-depends:
-      base
+      Parrows
+    , base
     , deepseq
     , parallel
     , split
-    , Parrows
   exposed-modules:
       Parrows.Multicore
+  other-modules:
+      Paths_Parrows_Multicore
   default-language: Haskell2010
