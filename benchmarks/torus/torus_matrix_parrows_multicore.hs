@@ -4,7 +4,6 @@ module Main where
 
 --import Parrows.Eden
 import Parrows.Multicore.Simple
-import Parrows.ParMonad
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
