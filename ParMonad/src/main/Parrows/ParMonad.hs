@@ -71,11 +71,6 @@ instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b
     headStrictEvalN _ fs = parEvalN (stratToConf fs headStrict) fs
     postHeadStrictEvalN = parEvalN
 
-data BasicFuture a = BF a
-
-instance NFData a => NFData (BasicFuture a) where
-    rnf (BF a) = rnf a
-
-instance Future BasicFuture a where
-    put = arr BF
-    get = arr (\(~(BF a)) -> a)
+instance Future BasicFuture a (Conf a) where
+    put _ = put'
+    get _ = get'

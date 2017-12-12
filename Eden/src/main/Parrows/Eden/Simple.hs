@@ -14,3 +14,7 @@ instance (Trans b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowPara
 instance (Trans b, ArrowChoice arr, ArrowParallel arr a b (), FutureEval arr a b (Conf b)) => FutureEval arr a b () where
     headStrictEvalN _ fs = headStrictEvalN (defaultConf fs) fs
     postHeadStrictEvalN _  fs = postHeadStrictEvalN (defaultConf fs) fs
+
+instance Future BasicFuture b () where
+    put _ = put'
+    get _ = get'

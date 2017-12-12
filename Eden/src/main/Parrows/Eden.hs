@@ -52,9 +52,9 @@ data Conf a = Nil
 defaultConf :: [arr a b] -> Conf b
 defaultConf _ = Nil
 
-instance (Trans a) => Future RemoteData a where
-    put = arr (\a -> RD { rd = release a })
-    get = arr rd >>> arr fetch
+instance (Trans a) => Future RemoteData a (Conf a) where
+    put _ = arr (\a -> RD { rd = release a })
+    get _ = arr rd >>> arr fetch
 
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
     headStrictEvalN = parEvalN
