@@ -40,7 +40,7 @@ evalN (f:fs) = arr listcase >>>
                listcase (x:xs) = Right (x,xs)
 evalN [] = arr (const [])
 
--- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
+-- inspiration from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr = evalN . repeat
 
