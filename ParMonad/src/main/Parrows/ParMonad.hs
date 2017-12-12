@@ -45,7 +45,7 @@ import           Control.Arrow
 import           Control.DeepSeq
 import           Control.Monad.Par
 
-type Strategy a = (a -> Par (IVar a))
+type Strategy a = a -> Par (IVar a)
 
 strict :: (NFData a) => Strategy a
 strict = spawn . return
