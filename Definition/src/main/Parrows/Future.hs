@@ -51,14 +51,6 @@ get' = arr (\(~(BF a)) -> a)
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-{-
-get :: (Arrow arr, Future fut a conf) => conf -> arr a (fut a)
-get conf = get' (typeToken [([]::a, [conf])])
-
-put :: (Arrow arr, Future fut a conf) => conf -> arr (fut a) a
-put conf = put' (typeToken _)
--}
-
 liftFut :: (Arrow arr, Future fut a conf, Future fut b conf) => conf -> arr a b -> arr (fut a) (fut b)
 liftFut conf f = get conf >>> f >>> put conf
 
