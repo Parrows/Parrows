@@ -27,13 +27,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE UndecidableInstances  #-}
 module Parrows.Multicore(
   Strategy,
-  Conf,
+  Conf(..),
   defaultConf,
   stratToConf,
   module Parrows.Definition,
   module Parrows.Future,
-  module Control.DeepSeq,
-  module Control.Parallel.Strategies
+  module Control.DeepSeq
 ) where
 
 import           Parrows.Definition

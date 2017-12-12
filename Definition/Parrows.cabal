@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2eb1df268bc33cfa0ddc8d6cccc76deb519c72768dd826d04f3a87649f725682
+-- hash: 80d96165454268cc1c30c1b2fb5c9f6804d4892bf10d77d2813e8edbeeb39fdc
 
 name:           Parrows
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       Multithreaded evaluation using Arrows
 description:    Multithreaded evaluation using Arrows
 category:       Other

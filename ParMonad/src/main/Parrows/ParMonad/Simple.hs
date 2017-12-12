@@ -12,4 +12,4 @@ instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowPar
 
 instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (), FutureEval arr a b (Conf b)) => FutureEval arr a b () where
     headStrictEvalN _ fs = headStrictEvalN (defaultConf fs) fs
-    postHeadStrictEvalN _  fs= postHeadStrictEvalN (defaultConf fs) fs
+    postHeadStrictEvalN _  fs = postHeadStrictEvalN (defaultConf fs) fs

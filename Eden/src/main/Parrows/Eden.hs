@@ -28,7 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances   #-}
 module Parrows.Eden(
-  Conf,
+  Conf(..),
   defaultConf,
   module Parrows.Definition,
   module Parrows.Future

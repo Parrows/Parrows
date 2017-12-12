@@ -22,4 +22,4 @@ license: MIT
 maintainer: Martin Braun
 name: Parrows-HdpH
 synopsis: Multithreaded evaluation using Arrows
-version: '0.1.0.1'
+version: '0.1.0.2'

@@ -27,7 +27,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE UndecidableInstances  #-}
 module Parrows.ParMonad(
   Strategy,
-  Conf,
+  Conf(..),
   defaultConf,
   stratToConf,
   strict,
