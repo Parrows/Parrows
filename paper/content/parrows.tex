@@ -58,7 +58,7 @@ Just like for GpH we can easily lift the definition of |parEvalN| to Arrows. To 
 type Strategy a = a -> Par (IVar a)
 data Conf a = Conf (Strategy a)
 \end{code}
-Now we can once again define our |ArrowParallel| instance as follows: First, we convert our arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad, where |evalN| is once again of the type |evalN :: [arr a b] -> arr [a] [b]|. By combining the result of this arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final arrow |arr [a] [b]|.
+Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad, where |evalN| is once again of the type |evalN :: [arr a b] -> arr [a] [b]|. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
