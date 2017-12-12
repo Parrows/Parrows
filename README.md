@@ -1,3 +1,4 @@
+
 Parrows
 =======
 
@@ -6,7 +7,8 @@ using arrows.
 
 For more information take a look at the paper:
 
-https://github.com/s4ke/Parrows/blob/master/paper/main.pdf
+https://github.com/s4ke/Parrows/blob/master/paper/content/main.pdf
+
 
 Currently supported modes:
 -------------------------
