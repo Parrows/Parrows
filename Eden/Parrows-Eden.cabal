@@ -5,7 +5,7 @@
 -- modified file from ../Parrows.cabal
 
 name:           Parrows-Eden
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       Multithreaded evaluation using Arrows
 description:    Multithreaded evaluation using Arrows
 category:       Other
