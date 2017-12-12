@@ -55,7 +55,7 @@ stratToConf _ strat = Conf strat
 
 instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
-        listApp fs >>>
+        evalN fs >>>
         arr (withStrategy (parList strat))
 
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where

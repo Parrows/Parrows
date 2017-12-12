@@ -63,7 +63,7 @@ parEvalNLazy conf chunkSize fs =
                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                -- evaluate the function chunks in parallel and concat the input to a single list again
                arr (chunksOf chunkSize) >>>
-               listApp fchunks >>>
+               evalN fchunks >>>
                arr concat
                where
                 fchunks = map (parEvalN conf) $ chunksOf chunkSize fs

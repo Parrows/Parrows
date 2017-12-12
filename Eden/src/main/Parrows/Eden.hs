@@ -58,7 +58,7 @@ instance (Trans a) => Future RemoteData a where
 
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
     headStrictEvalN = parEvalN
-    postHeadStrictEvalN _ = listApp
+    postHeadStrictEvalN _ = evalN
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
     parEvalN _ = spawnF

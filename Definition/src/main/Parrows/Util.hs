@@ -33,16 +33,16 @@ import           Data.List
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
 zipWithArr zipFn = arr (uncurry zip) >>> mapArr zipFn
 
-listApp :: (ArrowChoice arr) => [arr a b] -> arr [a] [b]
-listApp (f:fs) = arr listcase >>>
-         arr (const []) ||| (f *** listApp fs >>> arr (uncurry (:)))
+evalN :: (ArrowChoice arr) => [arr a b] -> arr [a] [b]
+evalN (f:fs) = arr listcase >>>
+         arr (const []) ||| (f *** evalN fs >>> arr (uncurry (:)))
          where listcase []     = Left ()
                listcase (x:xs) = Right (x,xs)
-listApp [] = arr (const [])
+evalN [] = arr (const [])
 
 -- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
-mapArr = listApp . repeat
+mapArr = evalN . repeat
 
 -- fold on Arrows inspired by mapArr
 foldlArr :: (ArrowChoice arr) => arr (b, a) b -> arr (b, [a]) b
