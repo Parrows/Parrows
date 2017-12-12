@@ -4,7 +4,7 @@ Arrows are a general interface to computation. Here we introduce special Arrows 
 \subsection{The ArrowParallel type class}
 A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Sec.~\ref{sec:parEvalNIntro}).
 Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
-This combinator is similar to our utility function |listApp| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
+This combinator is similar to our utility function |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
 % \begin{figure}[h]
 \begin{code}
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
@@ -31,66 +31,48 @@ class Arrow arr => ArrowParallel arr a b conf where
 % \caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
 % \label{fig:parEvalNArrowTypeClassFinal}
 % \end{figure}
-We do not require the |conf| parameter in every implementation. If it is not needed, we usually just default the |conf| type parameter to |()| and even blank it out in the parameter list of the implemented |parEvalN|.
 % , as we will see in the implementation of the GpH Haskell and the |Par| Monad backends.
 
 \subsection{ArrowParallel instances}
 
 \subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
-The GpH implementation of |ArrowParallel| is implemented in a straightforward manner by using |listApp| (Appendix~\ref{utilfns}) combined with the |withStrategy :: Strategy a -> a -> a| combinators from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters.
+The GpH implementation of |ArrowParallel| is implemented in a straightforward manner, but a bit different to the variant from Section \ref{sec:GpHIntro} by using |evalN :: [arr a b] -> arr [a] [b]| (think |zipWith ($) fs as| on Arrows, definition in Appendix~\ref{utilfns}) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
 \begin{figure}[t]
 \begin{code}
 data Conf a = Conf (Strategy a)
 
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
-    	parEvalN _ fs =
-       		listApp fs >>>
-        	arr (withStrategy (parList rdeepseq))
+instance (NFData b, ArrowChoice arr) =>
+  ArrowParallel arr a b (Conf b) where
+    parEvalN (Conf strat) fs =
+        evalN fs >>>
+        arr (withStrategy (parList strat))
 \end{code}% $ %% formatting
-\caption{Fully evaluating |ArrowParallel| instance for the GpH Haskell backend.}
-\label{fig:ArrowParallelMulticoreRdeepseq}
-\end{figure}
-For most cases a fully evaluating version like in Fig.~\ref{fig:ArrowParallelMulticoreRdeepseq} would probably suffice, but as the GpH interface allows the user to specify the level of evaluation to be done via the |Strategy| interface, our DSL should allow for this. We therefore introduce the |Conf a| data-type that simply wraps a |Strategy a|. With this definition in place, we can provide a delegating version of the non-configurable instance. We show this in Fig.~\ref{fig:actualNonConfigMulticore}.
-% \begin{figure}[h]
-% \caption{Definition of Conf a}
-% \label{fig:confa}
-% \end{figure}
-% We can't directly use the |Strategy a| type here as GHC (at least currently) does not allow type synonyms in type class instances. To get our configurable |ArrowParallel| instance, we simply unwrap the strategy and pass it to |parList| like in the fully evaluating version (Fig.~\ref{fig:ArrowParallelMulticoreConfigurable}).
-\begin{figure}[t]
-\begin{code}
-instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
-	ArrowParallel arr a b (Conf b) where
-    	parEvalN (Conf strat) fs =
-        	listApp fs >>>
-        	arr (withStrategy (parList strat)) &&& arr id >>>
-        	arr (uncurry pseq)
-\end{code}
-\caption{Configurable |ArrowParallel| instance for the GpH Haskell backend.}
+\caption{The |ArrowParallel| instance for the GpH Haskell backend.}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
+
 \subsubsection{|Par| Monad}
 \olcomment{introduce a newcommand for par-monad, "arrows", "parrows" and replace all mentions to them to ensure uniform typesetting \done, we write Arrows. also "Monad"? \done}
-The |Par| Monad implementation (Fig.~\ref{fig:ArrowParallelParMonad}) makes use of Haskells laziness and |Par| Monad's |spawnP :: NFData a => a -> Par (IVar a)| function. The latter forks away the computation of a value and returns an |IVar| containing the result in the |Par| Monad.
-
-
-We therefore apply each function to its corresponding input value with and then fork the computation away with |arr spawnP| inside a |zipWithArr| (Fig.~\ref{fig:zipWithArr}) call. This yields a list |[Par (IVar b)]|, which we then convert into |Par [IVar b]| with |arr sequenceA|. In order to wait for the computation to finish, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)|. The result of this operation is a |Par [b]| from which we can finally remove the Monad again by running |arr runPar| to get our output of |[b]|.
+Just like for GpH we can easily lift the definition of |parEvalN| to Arrows. To start off, we define the |Strategy a| and |Conf a| type so we can have a configurable instance of ArrowParallel:
+\begin{code}
+type Strategy a = a -> Par (IVar a)
+data Conf a = Conf (Strategy a)
+\end{code}
+Now we can once again define our |ArrowParallel| instance as follows: First, we convert our arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad, where |evalN| is once again of the type |evalN :: [arr a b] -> arr [a] [b]|. By combining the result of this arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final arrow |arr [a] [b]|.
 \begin{figure}[h]
 \begin{code}
-instance (NFData b, ArrowApply arr, ArrowChoice arr) =>
-	ArrowParallel arr a b conf where
-		parEvalN _ fs = 
-			(arr $ \as -> (fs, as)) >>>
-			zipWithArr (app >>> arr spawnP) >>>
-			arr sequenceA >>>
-			arr (>>= mapM get) >>>
-			arr runPar
+instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+    parEvalN (Conf strat) fs = evalN (map (>>> arr strat) fs) >>>
+                    arr sequenceA >>>
+                    arr (>>= mapM Control.Monad.Par.get) >>>
+                    arr runPar
 \end{code} %$ %% formatting
 \caption{ArrowParallel instance for the Par Monad backend.}
 \label{fig:ArrowParallelParMonad}
 \end{figure}
 
 \subsubsection{Eden}
-For both the GpH Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowApply| and |ArrowChoice| type classes. With Eden this is not the case as we can only spawn a list of functions and we cannot extract simple functions out of arrows. While we could still manage to have only one class in the module by introducing a type class: % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
+For both the GpH Haskell and |Par| Monad implementations we could use general instances of |ArrowParallel| that just require the |ArrowChoice| type class. With Eden this is not the case as we can only spawn a list of functions, which we cannot extract from general arrows. While we could still manage to have only one instance in the module by introducing a type class % |ArrowUnwrap| (Fig.~\ref{fig:ArrowUnwrap}).
 % \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
@@ -100,11 +82,11 @@ class (Arrow arr) => ArrowUnwrap arr where
 % \label{fig:ArrowUnwrap}
 % \end{figure}
 % We don't do it here
-However, we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
+, we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
 % \begin{figure}[h]
 \begin{code}
-instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
-parEvalN _ fs as = spawnF fs as
+instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
+    parEvalN _ fs as = spawnF fs as
 \end{code}
 % \caption{ArrowParallel instance for functions in the Eden backend}
 % \label{fig:ArrowParallelEdenFns}
@@ -112,15 +94,35 @@ parEvalN _ fs as = spawnF fs as
 and the Kleisli type: % (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
 % \begin{figure}[h]
 \begin{code}
-instance (Monad m, Trans a, Trans b, Trans (m b)) =>
-	ArrowParallel (Kleisli m) a b conf where
-parEvalN conf fs =
-	(arr $ parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
-	(Kleisli $ sequence)
+instance (ArrowParallel (->) a (m b) (Conf b),
+  Monad m, Trans a, Trans b, Trans (m b)) =>
+  ArrowParallel (Kleisli m) a b conf where
+    parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
+                       Kleisli sequence
 \end{code}
+where |Conf a| is simply defined as |data Conf a = Nil| since Eden does not have a configurable |spawnF| variant.
 % \caption{ArrowParallel instance for the Kleisli type in the Eden backend}
 % \label{fig:ArrowParallelEdenKleisli}
 % \end{figure}
+
+\subsubsection{Default configuration instances}
+While the configurability in the instances of the |ArrowParallel| instances above might be nice to have, users probably would prefer a proper default configuration for many parallel programs. These can easily be defined as well as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
+
+\begin{code}
+instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowParallel arr a b () where
+    parEvalN _ fs = parEvalN (defaultConf fs) fs
+
+defaultConf :: (NFData b) => [arr a b] -> Conf b
+defaultConf fs = stratToConf fs rdeepseq
+
+stratToConf :: [arr a b] -> Strategy b -> Conf b
+stratToConf _ strat = Conf strat
+\end{code}
+
+The other backends have similarly structured implementations. Note that by restricting the original implementations of our backends to their specific |Conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one. We can however only have one instance of |ArrowParallel arr a b ()| present at a time.
+
+\mbcomment{For convenience purposes, ArrowParallel arr a b () is defined as...}
+\mbcomment{Until now we described the arrow operations more literally, but in the following sectioins we only talk about the dataflow in general as the idea should be clear now.}
 
 %\FloatBarrier
 

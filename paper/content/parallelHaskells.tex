@@ -25,6 +25,7 @@ We will now go into some detail on GpH, the |Par| Monad and Eden, and also give 
 %parallel Haskells.
 
 \subsubsection{Glasgow parallel Haskell -- GpH}
+\label{sec:GpHIntro}
 GpH \cite{Marlow2009,Trinder1998a} is one of the simplest ways to do parallel processing found in standard GHC.\footnote{The Multicore implementation of GpH is available on Hackage under \url{https://hackage.haskell.org/package/parallel-3.2.1.0}, compiler support is integrated in the stock GHC.} Besides some basic primitives (|par| \& |pseq| hints), it ships with parallel evaluation strategies for several types which can be applied with |using :: a -> Strategy a -> a|, which is exactly what is required for an implementation of |parEvalN|.
 
 
@@ -61,11 +62,11 @@ The |Par| Monad\footnote{The |Par| monad can be found in the \texttt{monad-par} 
 \begin{code}
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
-	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+	(sequenceA (map (return . spawn) (zipWith ($) fs as))) >>= mapM get
 \end{code}
 
 The |Par| Monad version of our parallel evaluation function |parEvalN| is defined by zipping the list of |[a -> b]| with the list of inputs |[a]| with the application operator |$| just like with GpH. % $
-Then, we map over this not yet evaluated lazy list of results |[b]| with |spawnP :: NFData a => a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| Monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get |[b]|.
+Then, we map over this not yet evaluated lazy list of results |[b]| with |spawn :: NFData a => Par a -> Par (IVar a)| to transform them to a list of not yet evaluated forked away computations |[Par (IVar b)]|, which we convert to |Par [IVar b]| with |sequenceA|. We wait for the computations to finish by mapping over the |IVar b| values inside the |Par| Monad with |get|. This results in |Par [b]|. We execute this process with |runPar| to finally get |[b]|. While we used |spawn| in the definition above, a head-strict variant can easily be defined by replacing |spawn| with |spawn_ :: Par a -> Par (IVar a)|.
 Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 
 % \begin{figure}[h]
