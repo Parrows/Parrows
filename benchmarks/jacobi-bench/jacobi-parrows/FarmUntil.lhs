@@ -5,7 +5,7 @@ module FarmUntil where
 
 import Data.Maybe
 import Control.Parallel.Eden
-import Parrows.Eden
+import Parrows.Eden.Simple
 import Parrows.Skeletons.Map
 -- (noPe, Trans, process)
 -- import MapHacks -- old hack
@@ -29,7 +29,7 @@ farmUntilBool f xs = and $ map_farm f xs
 \begin{code}
 farmUntilMaybe :: (Trans a, Trans b) => (a -> Maybe b) -> [a] -> [b]
 farmUntilMaybe f xs = let rs = map_farm f xs -- :: [Maybe b]
-                          magic = takeWhile (\x -> case x of 
+                          magic = takeWhile (\x -> case x of
                                                      (Just a) -> True
                                                      _ -> False
                                             )
@@ -38,9 +38,9 @@ farmUntilMaybe f xs = let rs = map_farm f xs -- :: [Maybe b]
 \end{code}
 \begin{code}
 farmUntilMaybePass :: (Trans a, Trans b) => (a -> Maybe b) -> [a] -> [Maybe b]
-farmUntilMaybePass f xs 
+farmUntilMaybePass f xs
     = let rs = map_farm f xs -- :: [Maybe b]
-          magic' = takeWhile (\x -> case x of 
+          magic' = takeWhile (\x -> case x of
                                       (Just a) -> True
                                       _ -> False
                              )
@@ -75,7 +75,7 @@ unify :: (Eq a, Ord a, Show a) => [[a]] -> [a]
 unify = foldl1 intersect . nub -- nub gives better performance
 
 unifyMaybe :: (Eq a, Ord a, Show a) => [Maybe [a]] -> Maybe [a]
-unifyMaybe xss | hasNothing xss = trace "unifyMaybe: bailing out!" $ 
+unifyMaybe xss | hasNothing xss = trace "unifyMaybe: bailing out!" $
                                   Nothing
                | otherwise = Just $ unify $ catMaybes xss
     where hasNothing = not . all maybeBool

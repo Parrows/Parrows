@@ -27,7 +27,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE UndecidableInstances   #-}
-module Parrows.Eden where
+module Parrows.Eden(
+  Conf,
+  defaultConf,
+  module Parrows.Definition,
+  module Parrows.Future
+) where
 
 import           Parrows.Definition
 import           Parrows.Future
@@ -42,17 +47,22 @@ instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
 
+data Conf a = Nil
+
+defaultConf :: [arr a b] -> Conf b
+defaultConf _ = Nil
+
 instance (Trans a) => Future RemoteData a where
     put = arr (\a -> RD { rd = release a })
     get = arr rd >>> arr fetch
 
-instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
-    distributedEvalN = parEvalN
-    sharedEvalN _ = listApp
+instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
+    headStrictEvalN = parEvalN
+    postHeadStrictEvalN _ = listApp
 
-instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
+instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
     parEvalN _ = spawnF
 
-instance (Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b conf where
+instance (ArrowParallel (->) a (m b) (Conf b), Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b (Conf b) where
     parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
                        Kleisli sequence

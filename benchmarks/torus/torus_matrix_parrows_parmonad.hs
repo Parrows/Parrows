@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances,
-MultiParamTypeClasses #-} 
+MultiParamTypeClasses #-}
 module Main where
 
 --import Parrows.Eden
-import Parrows.ParMonad
+import Parrows.ParMonad.Simple
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
@@ -73,7 +73,7 @@ numCoreCalc num
         | num <= 256 = 256
         | num <= 512 = 512
         | otherwise = error "too many cores!"
- 
+
 prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
 prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith (zipWith (,)) (split m1) (split m2)
     where   torusSize = (floor . sqrt) $ fromIntegral $ numCoreCalc numCores

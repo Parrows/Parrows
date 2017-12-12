@@ -61,4 +61,5 @@ library
       Parrows.Skeletons.Topology
       Parrows.Util
       Parrows.Eden
+      Parrows.Eden.Simple
   default-language: Haskell2010

@@ -16,7 +16,7 @@ import Text.Printf (printf)
 \end{code}
 \begin{code}
 import Parrows.Definition
-import Parrows.Eden
+import Parrows.Eden.Simple
 import Parrows.Skeletons.Map
 import Control.Parallel.Eden(noPe)
 
@@ -34,10 +34,10 @@ mapUntil amap areduce f xs = areduce $ amap f xs -- meh.
 listRabinMillerP :: Int             -- ^ k ist die Anzahl der Tests k
                  -> Integer         -- ^ n ist der Primzahlkandidat
                  -> [Integer]       -- ^ die Liste mit den Basen fuer RabinMiller
-                 ->  Maybe Integer  -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl) 
+                 ->  Maybe Integer  -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl)
 listRabinMillerP k n as
       | (n<3)            = error "N must be greater than 3."
-      | (n `mod` 2 == 0) = error "N must be odd."  
+      | (n `mod` 2 == 0) = error "N must be odd."
       | otherwise        = listRabinMillerP2 n as k
 \end{code}
 -- new skeletal code
@@ -45,7 +45,7 @@ listRabinMillerP k n as
 listRabinMillerP2 :: Integer        -- ^ n ist der Primzahlkandidat
                   -> [Integer]      -- ^ die Liste mit den Basen fuer RabinMiller
                   -> Int        -- ^ Restliche Durchlaeufe
-                  -> Maybe Integer  -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl) 
+                  -> Maybe Integer  -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl)
 listRabinMillerP2 n as k = let f :: (Integer, Integer) -> Bool
                                f (n, a) = singleRabinMillerBool n t 0 b
                                    where ((q,t),b) = (zerlege(n-1,0) , powermod a q n)
@@ -57,19 +57,19 @@ listRabinMillerP2 n as k = let f :: (Integer, Integer) -> Bool
 \end{code}
 Sequentielles Code.
 \begin{code}
--- | Pruefe ob n Primzahl        
+-- | Pruefe ob n Primzahl
 rabinMillerPIO         :: Integer            -- ^ n ist der Primzahlkandidat
-                   -> Int 
-                   -> IO (Maybe Integer) -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl) 
+                   -> Int
+                   -> IO (Maybe Integer) -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: Moegliche Primzahl)
 rabinMillerPIO n nTests = do
   ls <- randomBaseList n
-  let s = listRabinMillerP nTests n ls 
+  let s = listRabinMillerP nTests n ls
   return s
 
 -- | Pruefe ob n Primzahl
 -- | HAAAACK!
 rabinMillerP     :: Integer -- ^ n ist der Primzahlkandidat
-                -> Int 
+                -> Int
 		-> Maybe Integer -- ^ Die Ausgabe (Nothing: keine Primzahl, Just n: moeglicherweise Prim)
 rabinMillerP n nTests = unsafePerformIO $ rabinMillerPIO n nTests
 \end{code}

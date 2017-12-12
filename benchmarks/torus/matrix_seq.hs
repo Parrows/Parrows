@@ -3,7 +3,7 @@ MultiParamTypeClasses #-}
 
 module Main where
 
-import Parrows.Eden
+import Parrows.Eden.Simple
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Util

@@ -36,8 +36,8 @@ class Future fut a | a -> fut where
     get :: (Arrow arr) => arr (fut a) a
 
 class ArrowParallel arr a b conf => FutureEval arr a b conf where
-    distributedEvalN :: conf -> [arr a b] -> arr [a] [b]
-    sharedEvalN :: conf -> [arr a b] -> arr [a] [b]
+    headStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
+    postHeadStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
 
 liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
 liftFut f = get >>> f >>> put

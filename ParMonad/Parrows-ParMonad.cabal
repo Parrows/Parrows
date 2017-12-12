@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 26f1b750c8332439046322928f36f93a503d2d2b4f4603142a54b1fee228b51a
+-- hash: 09187ff00cbf597e17f5163334a738cafaff5f631c4eb375768c8a63d0d36822
 
 name:           Parrows-ParMonad
 version:        0.1.0.1
@@ -36,6 +36,7 @@ library
     , split
   exposed-modules:
       Parrows.ParMonad
+      Parrows.ParMonad.Simple
   other-modules:
       Paths_Parrows_ParMonad
   default-language: Haskell2010

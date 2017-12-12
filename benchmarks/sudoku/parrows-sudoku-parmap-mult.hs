@@ -5,7 +5,7 @@ import System.Environment
 import Data.Maybe
 import Parrows.Definition
 import Parrows.Skeletons.Map
-import Parrows.Multicore
+import Parrows.Multicore.Simple
 import Control.DeepSeq
 
 main :: IO ()

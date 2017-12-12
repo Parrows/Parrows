@@ -5,7 +5,7 @@ import System.Environment
 import Data.Maybe
 import Parrows.Definition
 import Parrows.Skeletons.Map
-import Parrows.Eden
+import Parrows.Eden.Simple
 import Control.Parallel.Eden
 import Control.DeepSeq
 

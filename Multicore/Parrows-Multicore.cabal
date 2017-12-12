@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 971ecf661df68ece958714286c42a869c5347d27917db46aa1083d26de998c50
+-- hash: a969f35c55f878cec80d370e47978649ec0f47763303176d6262755b217e2b09
 
 name:           Parrows-Multicore
 version:        0.1.0.1
@@ -36,6 +36,7 @@ library
     , split
   exposed-modules:
       Parrows.Multicore
+      Parrows.Multicore.Simple
   other-modules:
       Paths_Parrows_Multicore
   default-language: Haskell2010

@@ -25,7 +25,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances  #-}
-module Parrows.Multicore where
+module Parrows.Multicore(
+  Strategy,
+  Conf,
+  defaultConf,
+  stratToConf,
+  module Parrows.Definition,
+  module Parrows.Future,
+  module Control.DeepSeq,
+  module Control.Parallel.Strategies
+) where
 
 import           Parrows.Definition
 import           Parrows.Future
@@ -38,25 +47,26 @@ import           Control.Parallel.Strategies
 
 data Conf a = Conf (Strategy a)
 
+defaultConf :: (NFData b) => [arr a b] -> Conf b
+defaultConf fs = stratToConf fs rdeepseq
+
+stratToConf :: [arr a b] -> Strategy b -> Conf b
+stratToConf _ strat = Conf strat
+
 instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         listApp fs >>>
         arr (withStrategy (parList strat))
 
-instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b () where
-    parEvalN _ fs = parEvalN (hack fs) fs
-                    where
-                        hack :: (NFData b) => [arr a b] -> Conf b
-                        hack _ = Conf rdeepseq
+instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
+    headStrictEvalN _ fs = parEvalN (stratToConf fs rseq) fs
+    postHeadStrictEvalN = parEvalN
 
 data BasicFuture a = BF a
 
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
 
-instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
-    distributedEvalN _ = listApp
-    sharedEvalN = parEvalN
 
 instance Future BasicFuture a where
     put = arr BF

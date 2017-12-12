@@ -25,7 +25,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances  #-}
-module Parrows.ParMonad where
+module Parrows.ParMonad(
+  Strategy,
+  Conf,
+  defaultConf,
+  stratToConf,
+  strict,
+  headStrict,
+  module Parrows.Definition,
+  module Parrows.Future,
+  module Control.DeepSeq
+) where
 
 import           Parrows.Definition
 import           Parrows.Future
@@ -35,20 +45,36 @@ import           Control.Arrow
 import           Control.DeepSeq
 import           Control.Monad.Par
 
-instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b conf where
-    parEvalN _ fs = listApp (map (>>> arr spawnP) fs) >>>
+type Strategy a = (a -> Par (IVar a))
+
+strict :: (NFData a) => Strategy a
+strict = spawn . return
+
+headStrict :: Strategy a
+headStrict = spawn_ . return
+
+data Conf a = Conf (Strategy a)
+
+defaultConf :: (NFData b) => [arr a b] -> Conf b
+defaultConf fs = stratToConf fs strict
+
+stratToConf :: [arr a b] -> Strategy b -> Conf b
+stratToConf _ strat = Conf strat
+
+instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+    parEvalN (Conf strat) fs = listApp (map (>>> arr strat) fs) >>>
                     arr sequenceA >>>
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
+
+instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
+    headStrictEvalN _ fs = parEvalN (stratToConf fs headStrict) fs
+    postHeadStrictEvalN = parEvalN
 
 data BasicFuture a = BF a
 
 instance NFData a => NFData (BasicFuture a) where
     rnf (BF a) = rnf a
-
-instance (ArrowChoice arr, ArrowParallel arr a b conf) => FutureEval arr a b conf where
-    distributedEvalN _ = listApp
-    sharedEvalN = parEvalN
 
 instance Future BasicFuture a where
     put = arr BF

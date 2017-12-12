@@ -41,7 +41,7 @@ import           Data.List.Split
 type NumCores = Int
 type ChunkSize = Int
 
-class Arrow arr => ArrowParallel arr a b conf where
+class (Arrow arr) => ArrowParallel arr a b conf where
     parEvalN :: conf -> [arr a b] -> arr [a] [b]
 
 -- parallel versions of (***) and (&&&)
