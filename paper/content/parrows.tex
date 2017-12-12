@@ -36,7 +36,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 \subsection{ArrowParallel instances}
 
 \subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
-The GpH implementation of |ArrowParallel| is implemented in a straightforward manner, but a bit different compared to the variant from Section \ref{sec:GpHIntro}, by using |evalN :: [arr a b] -> arr [a] [b]| (think |zipWith ($) fs as| on Arrows, definition in Appendix~\ref{utilfns}) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
+The GpH implementation of |ArrowParallel| is implemented in a straightforward manner, but a bit different compared to the variant from Section \ref{sec:GpHIntro}, by using |evalN :: [arr a b] -> arr [a] [b]| (definition in Appendix~\ref{utilfns}, think |zipWith ($)| on Arrows) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
 \begin{figure}[t]
 \begin{code}
 data Conf a = Conf (Strategy a)
@@ -47,7 +47,7 @@ instance (NFData b, ArrowChoice arr) =>
         evalN fs >>>
         arr (withStrategy (parList strat))
 \end{code}% $ %% formatting
-\caption{The |ArrowParallel| instance for the GpH Haskell backend.}
+\caption{The |ArrowParallel| instance for the GpH backend.}
 \label{fig:ArrowParallelMulticoreConfigurable}
 \end{figure}
 
@@ -109,7 +109,8 @@ where |Conf a| is simply defined as |data Conf a = Nil| since Eden does not have
 While the configurability in the instances of the |ArrowParallel| instances above might be nice to have, users probably would prefer a proper default configuration for many parallel programs. These can easily be defined as well as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
 
 \begin{code}
-instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowParallel arr a b () where
+instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
+  ArrowParallel arr a b () where
     parEvalN _ fs = parEvalN (defaultConf fs) fs
 
 defaultConf :: (NFData b) => [arr a b] -> Conf b
