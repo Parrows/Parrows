@@ -15,9 +15,10 @@ parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> [arr a b] -> (arr [a] [b])
 parEvalNLazy conf chunkSize fs =
 	arr (chunksOf chunkSize) >>>
-	listApp fchunks >>>
-	arr concat
-	where fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
+    evalN fchunks >>>
+    arr concat
+    where
+      fchunks = map (parEvalN conf) (chunksOf chunkSize fs)
 \end{code} %$ %% formatting
 \caption{Definition of |parEvalNLazy|.}
 \label{fig:parEvalNLazy}
@@ -29,8 +30,7 @@ parEvalNLazy conf chunkSize fs =
 	\caption{Schematic depiction of |parEval2|.}
 	\label{fig:parEval2Img}
 \end{figure}
-We have only talked about the parallelization arrows of the same type until now. But sometimes we want to parallelize heterogeneous types as well. However, we can implement such a |parEval2| combinator (Figs.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows |arr a b| and |arr c d| into a new parallel arrow |arr (a, c) (b, d)| quite easily with the help of the |ArrowChoice| type class. The idea is to use the |+++| combinator which combines two arrows |arr a b| and |arr c d| and transforms them into |arr (Either a c) (Either b d)| to get a common arrow type that we can then feed into |parEvalN|.
-
+We have only talked about the parallelisation of arrows of the same type until now. But sometimes we want to parallelize heterogeneous types as well. We can implement such a |parEval2| combinator (Figs.~\ref{fig:parEval2Img},~\ref{fig:parEval2}) which combines two arrows |arr a b| and |arr c d| into a new parallel arrow |arr (a, c) (b, d)| quite easily with the help of the |ArrowChoice| type class. The idea is to use the |+++| combinator which combines two arrows |arr a b| and |arr c d| and transforms them into |arr (Either a c) (Either b d)| to get a common arrow type that we can then feed into |parEvalN|.
 
 %%% Local Variables:
 %%% mode: latex
