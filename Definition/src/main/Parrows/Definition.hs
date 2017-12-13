@@ -66,7 +66,7 @@ parEvalNLazy conf chunkSize fs =
                evalN fchunks >>>
                arr concat
                where
-                fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
+                fchunks = map (parEvalN conf) (chunksOf chunkSize fs)
 
 -- evaluate two functions with different types in parallel
 parEval2 :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) conf) => conf -> arr a b -> arr c d -> arr (a, c) (b, d)

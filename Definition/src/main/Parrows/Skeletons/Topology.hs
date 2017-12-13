@@ -107,8 +107,3 @@ threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 
 twotothree :: (Arrow arr) => arr (a, (b, c)) (a, b, c)
 twotothree = arr $ \ ~(a, (b, c)) -> (a, b, c)
-
--- from Eden, ported to Arrows:
-rightRotate :: (Arrow arr) => arr [a] [a]
-rightRotate = arr $ \list -> case list of [] -> []
-                                          xs -> last xs : init xs

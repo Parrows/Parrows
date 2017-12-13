@@ -29,13 +29,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {-# LANGUAGE UndecidableInstances   #-}
 module Parrows.Eden(
   Conf(..),
+  RemoteData(..),
   defaultConf,
+  put',
+  get',
   module Parrows.Definition,
   module Parrows.Future
 ) where
 
 import           Parrows.Definition
-import           Parrows.Future
+import           Parrows.Future hiding (put', get')
 import           Parrows.Util
 
 import           Control.Arrow
@@ -52,9 +55,15 @@ data Conf a = Nil
 defaultConf :: [arr a b] -> Conf b
 defaultConf _ = Nil
 
+put' :: (Arrow arr, Trans a) => arr a (RemoteData a)
+put' = arr (\a -> RD { rd = release a })
+
+get' :: (Arrow arr, Trans a) => arr (RemoteData a) a
+get' = arr rd >>> arr fetch
+
 instance (Trans a) => Future RemoteData a (Conf a) where
-    put _ = arr (\a -> RD { rd = release a })
-    get _ = arr rd >>> arr fetch
+    put _ = put'
+    get _ = get'
 
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
     headStrictEvalN = parEvalN

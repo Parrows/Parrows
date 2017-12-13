@@ -52,6 +52,11 @@ foldlArr f = arr listcase >>>
                    listcase (b, x:xs) = Right (b, (x,xs))
 
 
+-- from Eden, ported to Arrows:
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case list of [] -> []
+                                          xs -> last xs : init xs
+
 assoc :: ((a, b), c) -> (a,(b,c))
 assoc ((a,b),c) = (a,(b,c))
 
