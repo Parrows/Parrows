@@ -106,7 +106,7 @@ where |Conf a| is simply defined as |data Conf a = Nil| since Eden does not have
 % \end{figure}
 
 \subsubsection{Default configuration instances}
-While the configurability in the instances of the |ArrowParallel| instances above might be nice to have, users probably would prefer a proper default configuration for many parallel programs. These can easily be defined as well as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
+While the configurability in the instances of the |ArrowParallel| instances above is nice, users probably would like to have a proper default configuration for many parallel programs as well. These can also easily be defined as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
 
 \begin{code}
 instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
@@ -120,16 +120,6 @@ stratToConf :: [arr a b] -> Strategy b -> Conf b
 stratToConf _ strat = Conf strat
 \end{code}
 
-The other backends have similarly structured implementations. Note that by restricting the original implementations of our backends to their specific |Conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one. We can however only have one instance of |ArrowParallel arr a b ()| present at a time.
+The other backends have similarly structured implementations which we do not discuss here for brevity reasons. Note that by restricting the original implementations of our backends to their specific |Conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one. We can however only have one instance of |ArrowParallel arr a b ()| present at a time.
 
-\mbcomment{For convenience purposes, ArrowParallel arr a b () is defined as...}
-\mbcomment{Until now we described the arrow operations more literally, but in the following sectioins we only talk about the dataflow in general as the idea should be clear now.}
-
-%\FloatBarrier
-
-
-
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "main"
-%%% End:
+Up until now we discussed Arrow operations more in detail, but in the following sections we focus on the dataflow instead of how the Arrows are obtained so we can focus on the important parts now that we have seen that Arrows are capable of expressing parallelism.

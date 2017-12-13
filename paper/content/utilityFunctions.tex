@@ -53,6 +53,28 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 (pipepipepipe) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{code}
 
+\section{Profunctor Arrows}
+\label{app:profunctorArrows}
+
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows.
+
+\begin{figure}[h]
+\begin{code}
+instance (Category p, Strong p) => Arrow p where
+  arr f = dimap id f id
+  first = first'
+
+instance (Category p, Strong p, Costrong p) => ArrowLoop p where
+  loop = loop'
+
+instance (Category p, Strong p, Choice p) => ArrowChoice p where
+  left = left'
+\end{code}
+\caption{Profunctors as Arrows}
+\footnote{for additional information on the typeclasses see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html}}}
+\label{fig:profunctorArrow}
+\end{figure}
+
 \section{Omitted Function Definitions}
 \label{app:omitted}
 We have omitted some function definitions in the main text for
