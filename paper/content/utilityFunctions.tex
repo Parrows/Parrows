@@ -80,16 +80,64 @@ instance (Category p, Strong p, Choice p) => ArrowChoice p where
 We have omitted some function definitions in the main text for
 brevity, and redeem this here.
 
-%
-We begin with warping Eden's build-in Futures in PArrows as in
-Figure~\ref{fig:RDFuture}, where |rd| is the accessor function for the |RD| wrapped inside |RemoteData|. Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. The |Trans| instance does not have any functions declared as the default implementation suffices here. Furthermore, because |MVar| already ships with a |NFData| instance, we only have to supply a simple delegating |NFData| instance for our |RemoteData| type, where |rd| simply unwraps |RD|. The |Trans| instance does not have any functions declared as the default implementation suffices:
 
-% \begin{figure}[h]
+%
+We begin with warping Eden's build-in |RemoteData| to |Future| in
+Figure~\ref{fig:RDFuture}
+
+\begin{figure}[h]
 \begin{code}
+data RemoteData a = RD { rd :: RD a }
+
+put' :: (Arrow arr) => arr a (BasicFuture a)
+put' = arr BF
+
+get' :: (Arrow arr) => arr (BasicFuture a) a
+get' = arr (\(~(BF a)) -> a)
+
 instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
+
+instance (Trans a) => Future RemoteData a (Conf a) where
+    put _ = put'
+    get _ = get'
+
+instance (Trans a) => Future RemoteData a () where
+    put _ = put'
+    get _ = get'
 \end{code}
+\caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
+\label{fig:RDFuture}
+\end{figure}
+
+Next, we have the definition of |BasicFuture| in Fig.~\ref{fig:BasicFuture} and the corresponding |Future| instances.
+
+\begin{figure}[h]
+\begin{code}
+data BasicFuture a = BF a
+
+put' :: (Arrow arr) => arr a (BasicFuture a)
+put' = arr BF
+
+get' :: (Arrow arr) => arr (BasicFuture a) a
+get' = arr (\(~(BF a)) -> a)
+
+instance NFData a => NFData (BasicFuture a) where
+    rnf (BF a) = rnf a
+
+instance Future BasicFuture a (Conf a) where
+    put _ = put'
+    get _ = get'
+
+instance Future BasicFuture a () where
+    put _ = put'
+    get _ = get'
+\end{code}
+\caption{The |BasicFuture| type and its |Future| instance for the |Par| Monad and GpH Haskell backends.}
+\label{fig:BasicFuture}
+\end{figure}
+
 % \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
 % \end{figure}
 
@@ -126,19 +174,6 @@ Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach|
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton is in Figure~\ref{fig:ringEden}. It
 follows \citet{Loogen2012}.
-
-
-\begin{figure}[h]
-\begin{code}
-data RemoteData a = RD { rd :: RD a }
-
-instance (Trans a) => Future RemoteData a where
-    put = arr (\a -> RD { rd = release a })
-    get = arr rd >>> arr fetch
-\end{code}
-\caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
-\label{fig:RDFuture}
-\end{figure}
 
 \begin{figure}[h]
 \begin{code}
