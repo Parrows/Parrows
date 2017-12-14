@@ -70,10 +70,11 @@ instance (Category p, Strong p, Costrong p) => ArrowLoop p where
 instance (Category p, Strong p, Choice p) => ArrowChoice p where
   left = left'
 \end{code}
-\caption{Profunctors as Arrows}
-\footnote{for additional information on the typeclasses see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}}
+\caption{Profunctors as Arrows\protect\footnotemark}
 \label{fig:profunctorArrow}
 \end{figure}
+
+\footnotetext{for additional information on the typeclasses used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}}
 
 \section{Omitted Function Definitions}
 \label{app:omitted}
