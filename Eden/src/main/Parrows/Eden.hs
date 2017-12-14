@@ -50,10 +50,10 @@ instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
 
-data Conf a = Nil
+data Conf = Nil
 
-defaultConf :: [arr a b] -> Conf b
-defaultConf _ = Nil
+defaultConf :: Conf
+defaultConf = Nil
 
 put' :: (Arrow arr, Trans a) => arr a (RemoteData a)
 put' = arr (\a -> RD { rd = release a })
@@ -61,17 +61,17 @@ put' = arr (\a -> RD { rd = release a })
 get' :: (Arrow arr, Trans a) => arr (RemoteData a) a
 get' = arr rd >>> arr fetch
 
-instance (Trans a) => Future RemoteData a (Conf a) where
+instance (Trans a) => Future RemoteData a Conf where
     put _ = put'
     get _ = get'
 
-instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
+instance (ArrowChoice arr, ArrowParallel arr a b Conf) => FutureEval arr a b Conf where
     headStrictEvalN = parEvalN
     postHeadStrictEvalN _ = evalN
 
-instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
+instance (Trans a, Trans b) => ArrowParallel (->) a b Conf where
     parEvalN _ = spawnF
 
-instance (ArrowParallel (->) a (m b) (Conf b), Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b (Conf b) where
+instance (ArrowParallel (->) a (m b) Conf, Monad m, Trans a, Trans b, Trans (m b)) => ArrowParallel (Kleisli m) a b Conf where
     parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
                        Kleisli sequence
