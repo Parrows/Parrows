@@ -99,7 +99,7 @@ instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
 
-instance (Trans a) => Future RemoteData a (Conf a) where
+instance (Trans a) => Future RemoteData a Conf where
     put _ = put'
     get _ = get'
 
