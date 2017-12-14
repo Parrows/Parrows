@@ -9,7 +9,7 @@ We start with |map|-based skeletons. The essential differences between the skele
 \paragraph{Parallel |map| and laziness.}
 The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to obtain an arrow |arr [a] [b]|.
 Just like |parEvalN|, |parMap| is 100\% strict.
-As |parMap|  is 100\% strict it has the same restrictions as |parEvalN| compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code is quite straightforward, we show it in Appendix.
+Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code of these two skeletons is quite straightforward, we show it in Appendix.
 
 \begin{figure}[thb]
 %farm

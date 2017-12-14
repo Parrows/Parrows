@@ -85,8 +85,8 @@ class (Arrow arr) => ArrowUnwrap arr where
 , we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
 % \begin{figure}[h]
 \begin{code}
-instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
-    parEvalN _ fs as = spawnF fs as
+instance (Trans a, Trans b) => ArrowParallel (->) a b Conf where
+    parEvalN _ = spawnF
 \end{code}
 % \caption{ArrowParallel instance for functions in the Eden backend}
 % \label{fig:ArrowParallelEdenFns}
@@ -94,13 +94,13 @@ instance (Trans a, Trans b) => ArrowParallel (->) a b (Conf b) where
 and the Kleisli type: % (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
 % \begin{figure}[h]
 \begin{code}
-instance (ArrowParallel (->) a (m b) (Conf b),
+instance (ArrowParallel (->) a (m b) Conf,
   Monad m, Trans a, Trans b, Trans (m b)) =>
   ArrowParallel (Kleisli m) a b conf where
     parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
                        Kleisli sequence
 \end{code}
-where |Conf a| is simply defined as |data Conf a = Nil| since Eden does not have a configurable |spawnF| variant.
+where |Conf| is simply defined as |data Conf = Nil| since Eden does not have a configurable |spawnF| variant.
 % \caption{ArrowParallel instance for the Kleisli type in the Eden backend}
 % \label{fig:ArrowParallelEdenKleisli}
 % \end{figure}

@@ -1,14 +1,20 @@
 \section{Futures} \label{sec:futures}
-Consider a mock-up parallel arrow combinator:
+Consider a mock-up parallel Arrow combinator:
 \begin{code}
-someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
-someCombinator fs1 fs2 = parEvalN () fs1 >>> rightRotate >>> parEvalN () fs2
+someCombinator:: (ArrowChoice arr,
+	ArrowParallel arr a b (),
+	ArrowParallel arr b c ()) =>
+	[arr a b] -> [arr b c] -> arr [a] [c]
+someCombinator fs1 fs2 =
+	parEvalN () fs1 >>>
+	rightRotate >>>
+	parEvalN () fs2
 \end{code}
 
-In a distributed environment, a resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
+In a distributed environment, a resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once (in the example we require |ArrowChoice| for this) and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
-While the above example could be rewritten into only one |parEvalN| call by directly wiring the arrows together before spawning, it illustrates an important problem. When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck %in heavy threaded applications.
+While the above example could be rewritten into only one |parEvalN| call by directly wiring the arrows together before spawning, it illustrates an important problem. When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck
 for larger amount of data and number of processes \citep[as e.g.][showcases]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
@@ -23,13 +29,13 @@ for larger amount of data and number of processes \citep[as e.g.][showcases]{Ber
 \olcomment{use the fft example (when it works)?}
 \end{figure}
 
-This is in fact only a problem in distributed memory (in the scope of this paper) and we should  allow nodes to communicate directly with each other. Eden already ships with \enquote{remote data} that enable this \cite{AlGo03a,Dieterle2010}.
-But as we want code with our DSL to be implementation agnostic, we have to wrap this context. We do this with the |Future| type class (Fig.~\ref{fig:future}).
+This is in fact only a problem in distributed memory (in the scope of this paper) and we should allow nodes to communicate directly with each other. Eden already ships with \enquote{remote data} that enable this \cite{AlGo03a,Dieterle2010}.
+But as we want code with our DSL to be implementation agnostic, we have to wrap this concept. We do this with the |Future| type class (Fig.~\ref{fig:future}). Note that we require a conf parameter here as well, but only so that Haskells type system allows us to have multiple Future implementations imported at once without breaking any dependencies similar to what we did with the |ArrowParallel| typeclass earlier.
 \begin{figure}[h]
 \begin{code}
-class Future fut a | a -> fut where
-    put :: (Arrow arr) => arr a (fut a)
-    get :: (Arrow arr) => arr (fut a) a
+class Future fut a conf | a conf -> fut where
+    put :: (Arrow arr) => conf -> arr a (fut a)
+    get :: (Arrow arr) => conf -> arr (fut a) a
 \end{code}
 \caption{Definition of the |Future| type class.}
 \label{fig:future}
@@ -37,36 +43,25 @@ class Future fut a | a -> fut where
 Since |RD| is only a type synonym for a communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as Fig.~\ref{fig:RDFuture} shows. %This is due to the same reason we had to introduce a wrapper for |Strategy a| in the GpH Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
 Technical details are in Appendix, in Section~\ref{app:omitted}.
 
-For the |Par| Monad and GpH Haskell backends, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}), which are just simple wrappers around the actual data with boiler-plate logic so that the type class is satisfied. This is because the concept of a |Future| does not change anything for shared-memory execution as there are no communication problems to fix. Nevertheless, we require a common interface so the parallel Arrows are portable across backends.
-\begin{figure}[tb]
-\begin{code}
-data BasicFuture a = BF a
+For the |Par| Monad and GpH Haskell backends, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}), which are just simple wrappers around the actual data with boiler-plate logic so that the type class is satisfied. This is because the concept of a |Future| does not change anything for shared-memory execution as there are no communication problems to fix. Nevertheless, we require a common interface so the parallel Arrows are portable across backends. The implementation can also be found in Section ~\ref{app:omitted}.
 
-instance (NFData a) => NFData (BasicFuture a) where
-    rnf (BF a) = rnf a
-
-instance (NFData a) => Future BasicFuture a where
-    put = arr BF
-    get = arr (\(BF a) -> a)
-\end{code}
-\caption{The |BasicFuture| type and its |Future| instance for the |Par| Monad and GpH Haskell backends.}
-\label{fig:BasicFuture}
-\end{figure} % $
-
-
-In our communication example we can use this |Future| concept for direct communication between nodes as shown in Fig.~\ref{fig:someCombinatorParallel}.
+In our communication example we can use this |Future| concept for direct communication between nodes as shown in Fig.~\ref{fig:someCombinatorParallel}. Note that with our PArrows DSL we can also define default instances |Future fut a ()| for each backend similar to how |ArrowParallel arr a b ()| was defined in Section~\ref{sec:parallel-arrows}. Details can be found in Section~\ref{app:omitted}.
 \begin{figure}[tbh]
 \begin{code}
-someCombinator :: (Arrow arr) => [arr a b] -> [arr b c] -> arr [a] [c]
+someCombinator :: (ArrowChoice arr, NFData b, NFData c,
+	ArrowParallel arr a (fut b) (), 
+	ArrowParallel arr (fut b) c (),
+	Future fut b ()) =>
+	[arr a b] -> [arr b c] -> arr [a] [c]
 someCombinator fs1 fs2 =
-	parEvalN () (map (>>> put) fs1) >>>
+	parEvalN () (map (>>> put ()) fs1) >>>
 	rightRotate >>>
-	parEvalN () (map (get >>>) fs2)
+	parEvalN () (map (get () >>>) fs2)
 \end{code}
 \caption{The mock-up combinator in parallel.}
 \label{fig:someCombinatorParallel}
 \end{figure}
-In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualization in Fig.~\ref{fig:withFutures}. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
+In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualization in Fig.~\ref{fig:withFutures}. One especially elegant aspect of this solution is that we can specify the type of |Future| to be used per backend with full interoperability between code using different backends, without even requring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withFutures}
