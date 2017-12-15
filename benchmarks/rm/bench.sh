@@ -1,6 +1,6 @@
 #!/bin/bash
 
-procCount=512
+procCount=256
 
 programs=(
     "skelrm-parrows"

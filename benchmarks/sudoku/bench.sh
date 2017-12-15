@@ -3,13 +3,13 @@
 procCount=16
 
 programs=(
-#    "parmonad-sudoku"
-#    "parrows-sudoku-parmap-eden"
-#    "parrows-sudoku-parmap-mult"
-#    "parrows-sudoku-parmap-par"
-#    "sudoku-seq"
-     "multicore-sudoku"
-     "eden-sudoku"
+    "parmonad-sudoku"
+    "parrows-sudoku-parmap-eden"
+    "parrows-sudoku-parmap-mult"
+    "parrows-sudoku-parmap-par"
+    "sudoku-seq"
+    "multicore-sudoku"
+    "eden-sudoku"
 )
 
 parameters=(
