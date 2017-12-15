@@ -65,9 +65,9 @@ instance (Trans a) => Future RemoteData a Conf where
     put _ = put'
     get _ = get'
 
-instance (ArrowChoice arr, ArrowParallel arr a b Conf) => FutureEval arr a b Conf where
-    headStrictEvalN = parEvalN
-    postHeadStrictEvalN _ = evalN
+instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
+    loopParEvalN = parEvalN
+    postLoopParEvalN _ = evalN
 
 instance (Trans a, Trans b) => ArrowParallel (->) a b Conf where
     parEvalN _ = spawnF

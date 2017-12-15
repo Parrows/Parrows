@@ -67,9 +67,9 @@ instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
 
-instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b (Conf b) where
-    headStrictEvalN _ fs = parEvalN (stratToConf fs headStrict) fs
-    postHeadStrictEvalN = parEvalN
+instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowLoopParallel arr a b (Conf b) where
+    loopParEvalN _ fs = parEvalN (stratToConf fs headStrict) fs
+    postLoopParEvalN = parEvalN
 
 instance Future BasicFuture a (Conf a) where
     put _ = put'

@@ -36,10 +36,6 @@ class Future fut a conf | a conf -> fut where
     put :: (Arrow arr) => conf -> arr a (fut a)
     get :: (Arrow arr) => conf -> arr (fut a) a
 
-class ArrowParallel arr a b conf => FutureEval arr a b conf where
-    headStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
-    postHeadStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
-
 data BasicFuture a = BF a
 
 put' :: (Arrow arr) => arr a (BasicFuture a)

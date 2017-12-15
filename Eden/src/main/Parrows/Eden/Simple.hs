@@ -35,9 +35,9 @@ import Control.Parallel.Eden (Trans)
 instance (Trans b, ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowParallel arr a b () where
     parEvalN _ fs = parEvalN defaultConf fs
 
-instance (Trans b, ArrowChoice arr, ArrowParallel arr a b (), FutureEval arr a b Conf) => FutureEval arr a b () where
-    headStrictEvalN _ fs = headStrictEvalN defaultConf fs
-    postHeadStrictEvalN _  fs = postHeadStrictEvalN defaultConf fs
+instance (Trans b, ArrowChoice arr, ArrowParallel arr a b (), ArrowLoopParallel arr a b Conf) => ArrowLoopParallel arr a b () where
+    loopParEvalN _ fs = loopParEvalN defaultConf fs
+    postLoopParEvalN _  fs = postLoopParEvalN defaultConf fs
 
 instance (Trans a) => Future RemoteData a () where
     put _ = put'

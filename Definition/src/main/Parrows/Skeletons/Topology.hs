@@ -38,13 +38,13 @@ import           Parrows.Util
 -- http://www.mathematik.uni-marburg.de/~eden/paper/edenCEFP.pdf
 
 (|>>>|) :: (ArrowLoop arr, ArrowChoice arr,
-            FutureEval arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
+            ArrowLoopParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) (),
             Future fut (([a], [b]), [c]) ()) =>
             arr a b -> arr b c -> arr a c
 (|>>>|) = pipe2 ()
 
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
-            FutureEval arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
+            ArrowLoopParallel arr (fut (([a], [b]), [c])) (fut (([a], [b]), [c])) conf,
             Future fut (([a], [b]), [c]) conf) =>
             conf -> arr a b -> arr b c -> arr a c
 pipe2 conf f g =
@@ -56,39 +56,39 @@ pipe2 conf f g =
         unify :: (ArrowChoice arr) => arr a b -> arr b c -> arr (([a], [b]), [c]) (([a], [b]), [c])
         unify f' g' = (mapArr f' *** mapArr g') *** arr (const []) >>> arr (\((b, c), a) -> ((a, b), c))
 
-pipe :: (ArrowLoop arr, FutureEval arr (fut a) (fut a) conf, Future fut a conf) => conf -> [arr a a] -> arr a a
+pipe :: (ArrowLoop arr, ArrowLoopParallel arr (fut a) (fut a) conf, Future fut a conf) => conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut conf (pipeSimple conf (map (liftFut conf) fs))
 
-pipeSimple :: (ArrowLoop arr, FutureEval arr a a conf) => conf -> [arr a a] -> arr a a
+pipeSimple :: (ArrowLoop arr, ArrowLoopParallel arr a a conf) => conf -> [arr a a] -> arr a a
 pipeSimple conf fs =
     loop (arr snd &&&
-        (arr (uncurry (:) >>> lazy) >>> headStrictEvalN conf fs)) >>>
+        (arr (uncurry (:) >>> lazy) >>> loopParEvalN conf fs)) >>>
     arr last
 
-ring :: (ArrowLoop arr, FutureEval arr (i, fut r) (o, fut r) conf,
+ring :: (ArrowLoop arr, ArrowLoopParallel arr (i, fut r) (o, fut r) conf,
     Future fut r conf,
-    FutureEval arr o o conf) =>
+    ArrowLoopParallel arr o o conf) =>
     conf -> arr (i, r) (o, r) -> arr [i] [o]
 ring conf f =
     loop (second (rightRotate >>> lazy) >>>
         arr (uncurry zip) >>>
-        headStrictEvalN conf (repeat (second (get conf) >>> f >>> second (put conf))) >>>
+        loopParEvalN conf (repeat (second (get conf) >>> f >>> second (put conf))) >>>
         arr unzip) >>>
-    postHeadStrictEvalN conf (repeat (arr id))
+    postLoopParEvalN conf (repeat (arr id))
 
 --TODO: check whether this exchanges the futures the same way as Eden does it
 torus :: (ArrowLoop arr, ArrowChoice arr,
-            FutureEval arr (c, fut a, fut b) (d, fut a, fut b) conf,
+            ArrowLoopParallel arr (c, fut a, fut b) (d, fut a, fut b) conf,
             Future fut a conf, Future fut b conf,
-            FutureEval arr [d] [d] conf) =>
+            ArrowLoopParallel arr [d] [d] conf) =>
          conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
 torus conf f =
     loop (second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy)) >>>
         arr (uncurry3 (zipWith3 lazyzip3)) >>>
-        arr length &&& (shuffle >>> headStrictEvalN conf (repeat (ptorus conf f))) >>>
+        arr length &&& (shuffle >>> loopParEvalN conf (repeat (ptorus conf f))) >>>
         arr (uncurry unshuffle) >>>
         arr (map unzip3) >>> arr unzip3 >>> threetotwo) >>>
-    postHeadStrictEvalN conf (repeat (arr id))
+    postLoopParEvalN conf (repeat (arr id))
 
 uncurry3 :: (a -> b -> c -> d) -> (a, (b, c)) -> d
 uncurry3 f (a, (b, c)) = f a b c

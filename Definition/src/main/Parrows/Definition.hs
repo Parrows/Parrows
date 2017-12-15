@@ -44,6 +44,10 @@ type ChunkSize = Int
 class (Arrow arr) => ArrowParallel arr a b conf where
     parEvalN :: conf -> [arr a b] -> arr [a] [b]
 
+class ArrowParallel arr a b conf => ArrowLoopParallel arr a b conf where
+    loopParEvalN :: conf -> [arr a b] -> arr [a] [b]
+    postLoopParEvalN :: conf -> [arr a b] -> arr [a] [b]
+
 -- parallel versions of (***) and (&&&)
 
 (|***|) :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) ()) => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -58,7 +62,7 @@ class (Arrow arr) => ArrowParallel arr a b conf where
 (...) parr f = map (>>> f) parr
 
 -- spawns the first n arrows to be evaluated in parallel. this works for infinite lists of arrows as well
-parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr) => conf  -> ChunkSize -> [arr a b] -> arr [a] [b]
+parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr) => conf -> ChunkSize -> [arr a b] -> arr [a] [b]
 parEvalNLazy conf chunkSize fs =
                -- chunk the functions, feed the function chunks into parEvalN, chunk the input accordingly
                -- evaluate the function chunks in parallel and concat the input to a single list again
