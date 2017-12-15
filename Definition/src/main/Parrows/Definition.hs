@@ -1,7 +1,7 @@
 {-
 The MIT License (MIT)
 
-Copyright (c) 2016 Martin Braun
+Copyright (c) 2016-2017 Martin Braun
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -66,7 +66,7 @@ parEvalNLazy conf chunkSize fs =
                evalN fchunks >>>
                arr concat
                where
-                fchunks = map (parEvalN conf) $ chunksOf chunkSize fs
+                fchunks = map (parEvalN conf) (chunksOf chunkSize fs)
 
 -- evaluate two functions with different types in parallel
 parEval2 :: (ArrowChoice arr, ArrowParallel arr (Either a c) (Either b d) conf) => conf -> arr a b -> arr c d -> arr (a, c) (b, d)

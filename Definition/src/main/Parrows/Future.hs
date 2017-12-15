@@ -1,7 +1,7 @@
 {-
 The MIT License (MIT)
 
-Copyright (c) 2016 Martin Braun
+Copyright (c) 2016-2017 Martin Braun
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -29,21 +29,33 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 module Parrows.Future where
 
 import           Control.Arrow
+import           Control.DeepSeq
 import           Parrows.Definition
 
-class Future fut a | a -> fut where
-    put :: (Arrow arr) => arr a (fut a)
-    get :: (Arrow arr) => arr (fut a) a
+class Future fut a conf | a conf -> fut where
+    put :: (Arrow arr) => conf -> arr a (fut a)
+    get :: (Arrow arr) => conf -> arr (fut a) a
 
 class ArrowParallel arr a b conf => FutureEval arr a b conf where
     headStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
     postHeadStrictEvalN :: conf -> [arr a b] -> arr [a] [b]
 
-liftFut :: (Arrow arr, Future fut a, Future fut b) => arr a b -> arr (fut a) (fut b)
-liftFut f = get >>> f >>> put
+data BasicFuture a = BF a
 
-unliftFut :: (Arrow arr, Future fut a, Future fut b) => arr (fut a) (fut b) -> arr a b
-unliftFut f = put >>> f >>> get
+put' :: (Arrow arr) => arr a (BasicFuture a)
+put' = arr BF
 
-parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a, Future fut b) => conf -> [arr a b] -> arr [fut a] [fut b]
-parEvalNFut conf fs = parEvalN conf $ map liftFut fs
+get' :: (Arrow arr) => arr (BasicFuture a) a
+get' = arr (\(~(BF a)) -> a)
+
+instance NFData a => NFData (BasicFuture a) where
+    rnf (BF a) = rnf a
+
+liftFut :: (Arrow arr, Future fut a conf, Future fut b conf) => conf -> arr a b -> arr (fut a) (fut b)
+liftFut conf f = get conf >>> f >>> put conf
+
+unliftFut :: (Arrow arr, Future fut a conf, Future fut b conf) => conf -> arr (fut a) (fut b) -> arr a b
+unliftFut conf f = put conf >>> f >>> get conf
+
+parEvalNFut :: (ArrowParallel arr (fut a) (fut b) conf, Future fut a conf, Future fut b conf) => conf -> [arr a b] -> arr [fut a] [fut b]
+parEvalNFut conf fs = parEvalN conf $ map (liftFut conf) fs

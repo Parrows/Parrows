@@ -1,7 +1,7 @@
 {-
 The MIT License (MIT)
 
-Copyright (c) 2016 Martin Braun
+Copyright (c) 2016-2017 Martin Braun
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -40,7 +40,7 @@ evalN (f:fs) = arr listcase >>>
                listcase (x:xs) = Right (x,xs)
 evalN [] = arr (const [])
 
--- from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
+-- inspiration from http://www.cse.chalmers.se/~rjmh/afp-arrows.pdf
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapArr = evalN . repeat
 
@@ -51,6 +51,11 @@ foldlArr f = arr listcase >>>
              where listcase (b, [])     = Left (b, [])
                    listcase (b, x:xs) = Right (b, (x,xs))
 
+
+-- from Eden, ported to Arrows:
+rightRotate :: (Arrow arr) => arr [a] [a]
+rightRotate = arr $ \list -> case list of [] -> []
+                                          xs -> last xs : init xs
 
 assoc :: ((a, b), c) -> (a,(b,c))
 assoc ((a,b),c) = (a,(b,c))

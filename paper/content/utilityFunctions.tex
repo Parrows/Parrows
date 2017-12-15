@@ -7,36 +7,33 @@ second f = arr swap >>> first f >>> arr swap
 	where swap (x, y) = (y, x)
 \end{code}
 
-Next, we also define |map|, |foldl| and |zipWith| on Arrows.
+Next, we give the definition of |evalN| which also helps us to define |map|, and |zipWith| on Arrows.
+The |evalN| combinator in Fig.~\ref{fig:evalN} converts a list of arrows |[arr a b]| into an arrow |arr [a] [b]|.
+
+\begin{figure}[h]
+\begin{code}
+evalN :: (ArrowChoice arr) => [arr a b] -> arr [a] [b]
+evalN (f:fs) = arr listcase >>>
+         arr (const []) ||| (f *** evalN fs >>> arr (uncurry (:)))
+         where listcase []     = Left ()
+               listcase (x:xs) = Right (x,xs)
+evalN [] = arr (const [])
+\end{code}
+\caption{The definition of |evalN|}
+\label{fig:evalN}
+\end{figure}
+
 The |mapArr| combinator (Fig.~\ref{fig:mapArr}) lifts any arrow |arr a
-b| to an arrow |arr [a] [b]| \cite{programming_with_arrows}. 
-Similarly, we can also define |foldlArr| (Fig.~\ref{fig:foldlArr}) that lifts any arrow |arr (b, a) b| with a neutral element |b| to |arr [a] b|.
+b| to an arrow |arr [a] [b]|. The original inspiration was from \cite{programming_with_arrows},
+but the definition as then unified with |evalN|. 
 
 \begin{figure}[h]
 \begin{code}
 mapArr :: ArrowChoice arr => arr a b -> arr [a] [b]
-mapArr f =
-	arr listcase >>>
-	arr (const []) ||| (f *** mapArr f >>> arr (uncurry (:)))
-
-listcase [] = Left ()
-listcase (x:xs) = Right (x,xs)
+mapArr = evalN . repeat
 \end{code}
-\caption{The definition of |map| over Arrows and the |listcase| helper
-function.}
+\caption{The definition of |map| over Arrows.}
 \label{fig:mapArr}
-\end{figure}
-
-\begin{figure}[h]
-\begin{code}
-foldlArr :: (ArrowChoice arr, ArrowApply arr) => arr (b, a) b -> b -> arr [a] b
-foldlArr f b =
-	arr listcase >>>
-	arr (const b) |||
-		(first (arr (\a -> (b, a)) >>> f >>> arr (foldlArr f)) >>> app)
-\end{code}
-\caption{The definition of |foldl| over Arrows.}
-\label{fig:foldlArr}
 \end{figure}
 
 Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWithArr|  (Fig.~\ref{fig:zipWithArr}) that lifts any arrow |arr (a, b) c| to an arrow |arr ([a], [b]) [c]|.
@@ -55,55 +52,97 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 \begin{code}
 (pipepipepipe) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
 \end{code}
-% \caption{Type signature of \pipepipepipe}
-% \label{fig:codeSigPipePipePipe}
-% \end{figure}
 
-With the zipWithArr combinator we can also write a combinator |listApp|, that lifts a list of arrows |[arr a b]| to an arrow |arr [a] [b]|.
-% \begin{figure}[htb]
+\section{Profunctor Arrows}
+\label{app:profunctorArrows}
+
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| typeclass.
+
+\begin{figure}[h]
 \begin{code}
-listApp :: (ArrowChoice arr, ArrowApply arr) => [arr a b] -> arr [a] [b]
-listApp fs = (arr $ \as -> (fs, as)) >>> zipWithArr app
-\end{code}
-% \caption{Definition of |listApp|}
-% \label{fig:listApp}
-% \end{figure}
-% $ %% formatting
-Note that  this additionally makes use of the |ArrowApply| type class that allows us to evaluate arrows with |app :: arr (arr a b, a) c|.
+instance (Category p, Strong p) => Arrow p where
+  arr f = dimap id f id
+  first = first'
 
-% $ %% formatting
+instance (Category p, Strong p, Costrong p) => ArrowLoop p where
+  loop = loop'
+
+instance (Category p, Strong p, Choice p) => ArrowChoice p where
+  left = left'
+\end{code}
+\caption{Profunctors as Arrows\protect\footnotemark}
+\label{fig:profunctorArrow}
+\end{figure}
+
+\footnotetext{for additional information on the typeclasses used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}}
 
 \section{Omitted Function Definitions}
 \label{app:omitted}
 We have omitted some function definitions in the main text for
 brevity, and redeem this here.
 
-To begin with, we give the actual implementation of the non-configurable instance of the |ArrowParallel| instance:
-
-\begin{figure}
-\begin{code}
-instance (NFData b, ArrowApply arr, ArrowChoice arr) => ArrowParallel arr a b () where
-    parEvalN _ fs = parEvalN (hack fs) fs
-                    where
-                        hack :: (NFData b) => [arr a b] -> Conf b
-                        hack _ = Conf rdeepseq
-\end{code}
-\caption{The actual default implementation of GpH's |ArrowParallel|.}
-\label{fig:actualNonConfigMulticore}
-\end{figure}
 
 %
-Next, we warp Eden's build-in Futures in PArrows as in
-Figure~\ref{fig:RDFuture}, where |rd| is the accessor function for the |RD| wrapped inside |RemoteData|. Furthermore, in order for these |Future| types to fit with the |ArrowParallel| instances we gave earlier, we have to give the necessary |NFData| and |Trans| instances, the latter are only needed in Eden. The |Trans| instance does not have any functions declared as the default implementation suffices here. Furthermore, because |MVar| already ships with a |NFData| instance, we only have to supply a simple delegating |NFData| instance for our |RemoteData| type, where |rd| simply unwraps |RD|. The |Trans| instance does not have any functions declared as the default implementation suffices:
+We begin with warping Eden's build-in |RemoteData| to |Future| in
+Figure~\ref{fig:RDFuture}
 
-% \begin{figure}[h]
+\begin{figure}[h]
 \begin{code}
+data RemoteData a = RD { rd :: RD a }
+
+put' :: (Arrow arr) => arr a (BasicFuture a)
+put' = arr BF
+
+get' :: (Arrow arr) => arr (BasicFuture a) a
+get' = arr (\(~(BF a)) -> a)
+
 instance NFData (RemoteData a) where
     rnf = rnf . rd
 instance Trans (RemoteData a)
+
+instance (Trans a) => Future RemoteData a Conf where
+    put _ = put'
+    get _ = get'
+
+instance (Trans a) => Future RemoteData a () where
+    put _ = put'
+    get _ = get'
 \end{code}
+\caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
+\label{fig:RDFuture}
+\end{figure}
+
+Next, we have the definition of |BasicFuture| in Fig.~\ref{fig:BasicFuture} and the corresponding |Future| instances.
+
+\begin{figure}[h]
+\begin{code}
+data BasicFuture a = BF a
+
+put' :: (Arrow arr) => arr a (BasicFuture a)
+put' = arr BF
+
+get' :: (Arrow arr) => arr (BasicFuture a) a
+get' = arr (\(~(BF a)) -> a)
+
+instance NFData a => NFData (BasicFuture a) where
+    rnf (BF a) = rnf a
+
+instance Future BasicFuture a (Conf a) where
+    put _ = put'
+    get _ = get'
+
+instance Future BasicFuture a () where
+    put _ = put'
+    get _ = get'
+\end{code}
+\caption{The |BasicFuture| type and its |Future| instance for the |Par| Monad and GpH Haskell backends.}
+\label{fig:BasicFuture}
+\end{figure}
+
 % \caption{NFData and Trans instances for the RemoteData type. The Trans instance does not have any functions declared as the default implementation suffices here. See \url{https://hackage.haskell.org/package/edenmodules-1.2.0.0/docs/Control-Parallel-Eden.html\#g:5} for more information.}
 % \end{figure}
+
+Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a visualizations of two parallel |map| variants, defined using |parEvalN| and its lazy counterpart.
 
 \begin{figure}[thb]
 %parMap
@@ -132,25 +171,10 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \label{fig:parMapStream}
 \end{figure}
 
-Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a visualizations of two parallel |map| variants, defined using |parEvalN| and its lazy counterpart.
-
 Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}. Similarly, Figure~\ref{fig:edenlazyrightrotate} contains the definition of arrow versions of Eden's |lazy| and |rightRotate| utility functions. Fig.~\ref{fig:lazyzip3etc} contains Eden's definition of |lazyzip3| together with the utility functions |uncurry3| and |threetotwo|.
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton is in Figure~\ref{fig:ringEden}. It
 follows \citet{Loogen2012}.
-
-
-\begin{figure}[h]
-\begin{code}
-data RemoteData a = RD { rd :: RD a }
-
-instance (Trans a) => Future RemoteData a where
-    put = arr (\a -> RD { rd = release a })
-    get = arr rd >>> arr fetch
-\end{code}
-\caption{|RD|-based |RemoteData| version of |Future| for the Eden backend.}
-\label{fig:RDFuture}
-\end{figure}
 
 \begin{figure}[h]
 \begin{code}

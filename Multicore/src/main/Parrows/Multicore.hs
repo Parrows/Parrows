@@ -1,7 +1,7 @@
 {-
 The MIT License (MIT)
 
-Copyright (c) 2016 Martin Braun
+Copyright (c) 2016-2017 Martin Braun
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -61,12 +61,6 @@ instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => FutureEval arr a b
     headStrictEvalN _ fs = parEvalN (stratToConf fs rseq) fs
     postHeadStrictEvalN = parEvalN
 
-data BasicFuture a = BF a
-
-instance NFData a => NFData (BasicFuture a) where
-    rnf (BF a) = rnf a
-
-
-instance Future BasicFuture a where
-    put = arr BF
-    get = arr (\(~(BF a)) -> a)
+instance Future BasicFuture a (Conf a) where
+    put _ = put'
+    get _ = get'

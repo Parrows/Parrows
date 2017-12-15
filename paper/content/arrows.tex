@@ -1,14 +1,12 @@
 \subsection{Arrows}
 \label{sec:arrows}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation and a less restrictive generalisation of Monads. \citeauthor{HughesArrows} motivates the broader interface of Arrows with the example of a parser with added static meta-information that can not satisfy the monadic bind operator |(>>=) :: m a -> (a -> m b) -> m b| (with |m| being a Monad).
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation and a less restrictive generalisation of Monads. \citeauthor{HughesArrows} motivates the broader interface of Arrows with the example of a parser with added static meta-information that can not satisfy the monadic bind operator |(>>=) :: m a -> (a -> m b) -> m b| (with |m| being a Monad). In the example a parser of the type |Parser s a| with static meta information |s| and result |a| is shown to not be able to use the static information |s| without applying the monadic function |a -> m b|. With Arrows this is possible.
 
 An Arrow |arr a b| represents a computation that converts an input |a| to an output |b|. This is defined in the |Arrow| type class shown in Fig.~\ref{fig:ArrowDefinition}.
 %
 To lift an ordinary function to an Arrow, |arr| is used, analogous to the monadic |return|. Similarly, the composition operator |>>>| is analogous to the monadic composition |>>=| and combines two arrows |arr a b| and |arr b c| by \enquote{wiring} the outputs of the first to the inputs to the second to get a new arrow |arr a c|. Lastly, the |first| operator takes the input Arrow |arr a b| and converts it into an arrow on pairs |arr (a, c) (b, c)| that leaves the second argument untouched. It allows us to to save input across arrows. Figure~\ref{fig:arrows-viz} shows a graphical representation of these basic Arrow combinators.
 The most prominent instances of this interface are regular functions |(->)|
 and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic functions, e.g.  |a -> m b|.
-
-Note that with the Kleisli type we can define an alternative to |(>>=)| with the signature |m a -> Kleisli m a b -> m b|. The difference between the definitions of Arrows and Monads becomes more clear if we compare this with the signature of the Arrow compose operator |(>>>) :: arr a b -> arr b c -> arr a c|: Monads are types that allow composition of computations, while Arrows \emph{are} composable computations. 
 
 \begin{figure}[t]
 \centering
@@ -106,15 +104,9 @@ A~first short example given by Hughes on how to use arrows is addition with arro
 add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
 add f g = (f &&& g) >>> arr (\(u, v) -> u + v)
 \end{code}
-% \caption{Add over arrows}
-% \label{fig:addArrows}
-% \end{figure}
-% The benefit of using the |Arrow| typeclass is that any type which is shown to be an arrow can be used in conjunction with this newly created |add| combinator. Even though this example is quite simple, the power of the arrow interface immediately is clear: If a type is an arrow, it can automatically used together with every library that works on arrows. Compared to simple Monads, this enables us to write code that is more extensible, without touching the internals of the specific arrows.
-% \\\\
-% \textit{Note: In the definitions Hughes gave in his paper, the notation |a b c| for an arrow from |b| to |c| is used. We use the equivalent definition |arr a b| for an arrow from |a| to |b| instead, to make it easier to find the arrow type in type signatures.}
-%
 
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: "main"
-%%% End:
+As we can rewrite the monadic bind operation |(>>=)| with only the Kleisli type into |m a -> Kleisli m a b -> m b|, but not with a general Arrow |arr a b|, we can intuitively get an idea of why Arrows must be a generalisation of Monads. While this also means that a general Arrow can not express everything a Monad can, the Parser example shows that this trade-off is worth it in some cases.
+
+In this paper we will show that we can express parallel computations with Arrows and do not require Monads to do so. We also do not restrict the compatible Arrows to ones which have |ArrowApply| instances but instead only require instances for |ArrowChoice| and |ArrowLoop|. Because of this, we have a truly more general interface as compared to a monadic one.
+
+Also note that, while we could have based our DSL on Profunctors as well, we chose Arrows. for this paper since they they allow for a more direct way of thinking about parallelism than general Profunctors because of their composability. However, they are a promising candidate for future improvements of our DSL. Note that some Profunctors, especially ones supporting a composition operation among other things, can already be adapted to our interface as shown in Appendix~\ref{app:profunctorArrows}.
