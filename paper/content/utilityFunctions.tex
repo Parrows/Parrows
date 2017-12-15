@@ -56,7 +56,7 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 \section{Profunctor Arrows}
 \label{app:profunctorArrows}
 
-In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows.
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| typeclass.
 
 \begin{figure}[h]
 \begin{code}
@@ -70,10 +70,11 @@ instance (Category p, Strong p, Costrong p) => ArrowLoop p where
 instance (Category p, Strong p, Choice p) => ArrowChoice p where
   left = left'
 \end{code}
-\caption{Profunctors as Arrows}
-\footnote{for additional information on the typeclasses see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html}}}
+\caption{Profunctors as Arrows\protect\footnotemark}
 \label{fig:profunctorArrow}
 \end{figure}
+
+\footnotetext{for additional information on the typeclasses used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}}
 
 \section{Omitted Function Definitions}
 \label{app:omitted}

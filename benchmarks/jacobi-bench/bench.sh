@@ -2,18 +2,18 @@
 
 ./recompile.sh
 
-procCount=256
+procCount=1
 
 programs=(
-#    "jacobi-eden"
+    "jacobi-eden"
     "jacobi-parr"
 )
 
 parameters=(
 #    "3 1279"
 #    "3 2203"
-    "3 4253" 
-#    "3 3217"
+#    "3 4253" 
+    "3 3217"
 )
 
 # get length of an array

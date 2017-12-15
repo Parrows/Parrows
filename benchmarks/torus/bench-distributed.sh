@@ -40,7 +40,7 @@ problemSizes=(
 #    "1024"
 #     "2048"
      "4096"
-     "8192"
+#     "8192"
 )
 
 # get length of an array
