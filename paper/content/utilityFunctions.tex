@@ -47,7 +47,7 @@ zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
 \end{figure}
  %$ %% formatting
 
-These combinators make use of the |ArrowChoice| type class which provides the |pipepipepipe| combinator. It takes two arrows |arr a c| and |arr b c| and combines them into a new arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow:
+These combinators make use of the |ArrowChoice| type class which provides the |pipepipepipe| combinator. It takes two Arrows |arr a c| and |arr b c| and combines them into a new Arrow |arr (Either a b) c| which pipes all |Left a|'s to the first arrow and all |Right b|'s to the second arrow:
 % \begin{figure}[htb]
 \begin{code}
 (pipepipepipe) :: ArrowChoice arr a c -> arr b c -> arr (Either a b) c
@@ -56,7 +56,7 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 \section{Profunctor Arrows}
 \label{app:profunctorArrows}
 
-In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| typeclass.
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. This works because Arrows are strong Monads in the bicategory Prof of Profunctors as shown by \citet{Asada:2010:ASM:1863597.1863607}. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| typeclass like presented in this paper.
 
 \begin{figure}[h]
 \begin{code}
