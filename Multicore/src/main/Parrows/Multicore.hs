@@ -58,7 +58,7 @@ instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
         arr (withStrategy (parList strat))
 
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowLoopParallel arr a b (Conf b) where
-    loopParEvalN _ fs = parEvalN (stratToConf fs rseq) fs
+    loopParEvalN _ = evalN
     postLoopParEvalN = parEvalN
 
 instance Future BasicFuture a (Conf a) where
