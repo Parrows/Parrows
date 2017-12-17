@@ -3,7 +3,8 @@ module EdenSpec (spec) where
 import Parrows.Definition
 import Parrows.Skeletons.Topology
 import Parrows.Skeletons.Map
-import Parrows.Eden()
+import Parrows.Eden
+import Parrows.Eden.Simple
 import Parrows.Future
 
 import Control.Arrow
@@ -33,7 +34,7 @@ parEvalSpec = describe "Basic Parrow Functionality Eden" $ do
         parEvalNLazyInt xs = parEvalNLazy () 4 (repeat (+1)) xs == map (+1) xs
 
         parEvalNFutInt :: [Int] -> Bool
-        parEvalNFutInt xs = (map (get) $ parEvalNFut () (repeat (+1)) (map put xs)) == map (+1) xs
+        parEvalNFutInt xs = (map (get ()) (parEvalNFut () (repeat (+1)) (map (put ()) xs))) == map (+1) xs
 
         parEval2Int :: (Int, Int) -> Bool
         parEval2Int (x, y) = (parEval2 () (+1) (*2) (x, y)) == (x+1,y*2)
@@ -87,4 +88,4 @@ mapReduceSpec = describe "parMapReduceDirect Test" $
     prop "Basic parMapReduceDirect Test" $ parMapReduceDirectTest
       where
         parMapReduceDirectTest :: [Int] -> Bool
-        parMapReduceDirectTest xs = (parMapReduceDirect () 4 (+1) (uncurry (*)) 0 xs) == (foldl (*) 0 $ map (+1) xs)
+        parMapReduceDirectTest xs = (parMapReduceDirect () 4 (+1) (uncurry (*)) (0, xs)) == (foldl (*) 0 $ map (+1) xs)
