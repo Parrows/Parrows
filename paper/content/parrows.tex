@@ -122,4 +122,4 @@ stratToConf _ strat = Conf strat
 
 The other backends have similarly structured implementations which we do not discuss here for brevity reasons. Note that by restricting the original implementations of our backends to their specific |Conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one. We can however only have one instance of |ArrowParallel arr a b ()| present at a time.
 
-Up until now we discussed Arrow operations more in detail, but in the following sections we focus on the dataflow instead of how the Arrows are obtained so we can focus on the important parts now that we have seen that Arrows are capable of expressing parallelism.
+Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the dataflow between the arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for easier understanding.
