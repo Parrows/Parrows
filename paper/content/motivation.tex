@@ -34,7 +34,7 @@ We propose an Arrow-based encoding for parallelism based on a new Arrow combinat
 We structure this paper as follows:
 
 \begin{itemize}
-\item We introduce a parallel evaluation formalism using Arrows. One big advantage is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}) in contrast to Monad solutions such as the |Par| Monad. This behaviour encourages better composability.
+\item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}). This behaviour encourages better composability.
 \item We utilitze multiple backends -- currently a GpH, a |Par| Monad, and Eden. We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
 
 So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant. (Sec.~\ref{sec:parallel-arrows})
