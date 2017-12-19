@@ -3,18 +3,6 @@
 
 \section{Introduction}
 \label{sec:introduction}
-% \olcomment{todo, reuse 5.5, and more}
-%
-% \mbcomment{
-% Haskell is Spielwiese für Parallelität; verschiedene Ansätze (Par, Multicore, Eden); Orthogonale Ansätze; Verwenden höchstens eine Monade - manchmal auch nur intern; Wir wollen Parallelität mit Arrows abbilden, was noch niemand gemacht hat;
-% Statt einer eigenen Implementierung definieren wir ein "shallow embedded DSL" (ACHTUNG, ist das der richtige Name? effektiv API);
-% Umsetzung mit verschiedenen parallelen Haskells; We tame the zoo of parallel Haskells und vergewissern uns dass es nicht viel Overhead bringt
-% }
-%
-% blablabla arrows, parallel, haskell.
-%
-% \olcomment{An attempt ---->}
-%%%%%
 
 Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
 Glasgow parallel Haskell or short GpH (its Multicore SMP implementation, in particular), the
@@ -23,11 +11,8 @@ languages represent orthogonal approaches. Some use a monad, even if
 only for the internal representation. Some introduce additional
 language constructs. Section \ref{sec:parallelHaskells} gives a short overview over these languages.
 
-%In this paper we introduce a notion of parallel
-%computations using Arrows.
-A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they are a generalization of the function arrow (|->|) and serve as general interface to computations. Section \ref{sec:arrows} gives a short introduction to Arrows.
+A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they can be thought of as a more general function arrow (|->|) and serve as general interface to computations while not being as restrictive as Monads \citep{HughesArrows}. Section \ref{sec:arrows} gives a short introduction to Arrows.
 
-%Our Arrows-based interface is a high-level one.
 We provide an Arrows-based type class and implementations for the three above mentioned parallel Haskells.
 Instead of 
 introducing a new low-level parallel backend in order to implement our
@@ -44,12 +29,12 @@ the parallel backends at will. The induced penalty was max. 8.3 \% in our measur
 %
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
-We propose an Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]| in Section \ref{sec:parallel-arrows}, which converts a list of Arrows into a new parallel Arrow. A parallel Arrow is still an Arrow, hence the resulting parallel Arrow can still be used in the same way as a potential sequential version.
+We propose an Arrow-based encoding for parallelism based on a new Arrow combinator |parEvalN :: [arr a b] -> arr [a] [b]|. A parallel Arrow is still an Arrow, hence the resulting parallel Arrow can still be used in the same way as a potential sequential version. In this paper we evaluate the expressive power of such a formalism in the context of parallel programming.
 
-In this paper evaluate the expressive power of our Arrow formalism in the context of parallel programming.
+We structure this paper as follows:
 
 \begin{itemize}
-\item We introduce a parallel evaluation formalism using Arrows. One big advantage is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}) in contrast to Monad solutions such as the |Par| Monad. This behaviour encourages better composability.
+\item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}). This behaviour encourages better composability.
 \item We utilitze multiple backends -- currently a GpH, a |Par| Monad, and Eden. We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
 
 So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant. (Sec.~\ref{sec:parallel-arrows})
@@ -59,14 +44,6 @@ So as an example, during development, we can run the program in a simple GHC-com
 \end{itemize}
 
 PArrows are open source and available from \url{https://github.com/s4ke/Parrows}.
-
-\mbcomment{Überleitung auf Related Work hier machen}
-
-
-
-\mbcomment{Mention Future work here?}
-
-\mbcomment{Conclusion?}
 
 %\ptcomment{* We evaluate the expressive power of  arrow parallelism. Showing that 
 %  + there is no need to introduce additional types

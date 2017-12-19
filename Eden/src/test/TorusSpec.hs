@@ -9,6 +9,7 @@ import Parrows.Future
 import Control.Parallel.Eden.Topology as E
 import Parrows.Skeletons.Topology as P
 import Parrows.Eden
+import Parrows.Eden.Simple
 import Data.List
 
 import Control.Applicative
