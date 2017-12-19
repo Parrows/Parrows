@@ -2,7 +2,7 @@
 
 ./recompile.sh
 
-procCount=1
+procCount=256
 
 programs=(
     "jacobi-eden"
