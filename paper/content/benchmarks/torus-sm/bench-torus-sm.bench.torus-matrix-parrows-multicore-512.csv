@@ -1,0 +1,5 @@
+"","name","time","nCores","speedup","stddev"
+"2","bench/./torus_matrix_parrows_multicore 512",5.068996547307132,2,1.6317892587345508,5.475702758995083e-2
+"3","bench/./torus_matrix_parrows_multicore 512",2.809445073045259,4,2.944187874615569,1.3748950809871768e-2
+"4","bench/./torus_matrix_parrows_multicore 512",3.1127444749772923,8,2.657312280192432,1.5103205615488304e-2
+"5","bench/./torus_matrix_parrows_multicore 512",3.6234923751840955,16,2.2827519039661452,8.236559140583365e-2
