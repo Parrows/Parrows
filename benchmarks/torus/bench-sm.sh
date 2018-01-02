@@ -7,6 +7,7 @@ programs=(
      "torus_matrix_parrows_eden_sm"
      "torus_matrix_parrows_multicore"
      "torus_matrix_parrows_parmonad"
+     "matrix_seq"
 )
 
 parameters=(
@@ -25,7 +26,7 @@ do
     for (( i=0; i < ${programCount}; i++ ));
     do
         progName=${programs[$i]}
-        if [ "${progName}" == "sudoku-seq" ]
+        if [ "${progName}" == "matrix_seq" ]
         then
             cmd="\"./"${progName}" "${parameter}"\""
             benchCmds=${benchCmds}" "${cmd}
