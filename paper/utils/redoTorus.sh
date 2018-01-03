@@ -10,7 +10,7 @@ originalBenchmarks=(
 )
 
 parrowsBenchmarks=(
-    "bench-torus-distributed.bench.torus-matrix-parrows-4096.csv"
+    "bench-torus-distributed.bench.torus-matrix-parrows-eden-4096.csv"
 )
 
 outFileNames=(
