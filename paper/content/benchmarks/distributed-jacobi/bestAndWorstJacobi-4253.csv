@@ -1,2 +1,0 @@
-"benchmark","vs","params","displayName","","worstName","worstTime","worstNCores","worstSpeedup","worstMaxstddev","worstFactor","worstFactorStdDev","worstOverhead","worstStdDevForOverhead","worstRuntimeX","worstRuntimeY","","bestName","bestTime","bestNCores","bestSpeedup","bestMaxstddev","bestFactor","bestFactorStdDev","bestOverhead","bestStdDevForOverhead","bestRuntimeX","bestRuntimeY","meanFactor","maxStdDevFactor","meanOverhead","maxStdDevForOverhead","runtimeMaxCores"
-"Jacobi (Distributed)","Eden","4253","Eden vs. PArrows 4253",

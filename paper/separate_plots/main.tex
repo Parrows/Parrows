@@ -133,7 +133,7 @@ xmax=#6]
 
 \paragraph{Overhead}~\\
 
-\meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.02}{32}{272}{\benchmarkDir/distributed-rm/44497-256-diff.csv}
+\meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.04}{32}{272}{\benchmarkDir/distributed-rm/44497-256-diff.csv}
 
 \paragraph{Speedup}~\\
 
@@ -147,26 +147,19 @@ smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-4449
 
 \paragraph{Overhead}~\\
 
-\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.5}{32}{272}{\benchmarkDir/distributed-jacobi/3-4253-diff.csv}
-\\
-\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 4253}{0.5}{32}{272}{\benchmarkDir/distributed-jacobi/3-4253-diff.csv}
+\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.04}{32}{272}{\benchmarkDir/distributed-jacobi/3-3217-diff.csv}
 
 \paragraph{Speedup}~\\
 
 \speedupplot{Speedup of distributed \jacobitest \enquote{3217}}{PArrows Eden}{256}{32}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-4253.csv};
-}{272}{\plotwidthDist}{272}
-
-\speedupplot{Speedup of distributed \jacobitest \enquote{4253}}{PArrows Eden}{256}{32}{
-\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-4253.csv};
-}{272}{\plotwidthDist}{272}
+smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-3217.csv};
+}{272}{\plotwidthDist}{32}
 
 
 \subsubsection{\torustest}
 
-\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.5}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
+\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.04}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
 
 \paragraph{Speedup}~\\
 
@@ -203,17 +196,17 @@ smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-par-11213-64.csv};
 
 \paragraph{Overhead}~\\
 
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Eden CP}{0.5}{4}{18}{\benchmarkDir/sm-rm/eden-cp-11213-32-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Eden CP}{0.04}{4}{18}{\benchmarkDir/sm-rm/eden-cp-11213-32-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Eden CP}{0.5}{4}{18}{\benchmarkDir/sm-rm/eden-cp-11213-64-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Eden CP}{0.03}{4}{18}{\benchmarkDir/sm-rm/eden-cp-11213-64-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs GpH}{0.5}{4}{18}{\benchmarkDir/sm-rm/mult-11213-32-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs GpH}{0.2}{4}{18}{\benchmarkDir/sm-rm/mult-11213-32-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs GpH}{0.5}{4}{18}{\benchmarkDir/sm-rm/mult-11213-32-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs GpH}{0.05}{4}{18}{\benchmarkDir/sm-rm/mult-11213-64-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Par Monad}{0.5}{4}{18}{\benchmarkDir/sm-rm/par-11213-32-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 32 vs Par Monad}{0.2}{4}{18}{\benchmarkDir/sm-rm/par-11213-32-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Par Monad}{0.5}{4}{18}{\benchmarkDir/sm-rm/par-11213-32-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \rmtest 11213 64 vs Par Monad}{0.2}{4}{18}{\benchmarkDir/sm-rm/par-11213-64-diff.csv}
 
 
 \subsubsection{\sudokutest}
@@ -231,11 +224,11 @@ smooth]{\benchmarkDir/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-
 
 \paragraph{Overhead}~\\
 
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs Eden CP}{0.5}{4}{18}{\benchmarkDir/sudoku-sm/eden-cp-1000-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs Eden CP}{0.05}{4}{18}{\benchmarkDir/sudoku-sm/eden-cp-1000-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs GpH}{0.5}{4}{18}{\benchmarkDir/sudoku-sm/mult-1000-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs GpH}{0.05}{4}{18}{\benchmarkDir/sudoku-sm/mult-1000-diff.csv}
 \\
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs Par Monad}{0.5}{4}{18}{\benchmarkDir/sudoku-sm/par-1000-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \sudokutest 1000 vs Par Monad}{0.05}{4}{18}{\benchmarkDir/sudoku-sm/par-1000-diff.csv}
 
 \subsubsection{\torustest}
 
@@ -252,6 +245,6 @@ smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-parmona
 
 \paragraph{Overhead}~\\
 
-\meanOverheadPlot{Mean Overhead for shared-memory \\ \torustest 512 vs Eden CP}{0.5}{4}{18}{\benchmarkDir/torus-sm/eden-cp-512-diff.csv}
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \torustest 512 vs Eden CP}{0.05}{4}{18}{\benchmarkDir/torus-sm/eden-cp-512-diff.csv}
 
 \end{document}
