@@ -92,7 +92,7 @@ smooth]{#5};
 \end{tikzpicture}
 }
 
-\newcommand{\speedupplot}[7]{
+\newcommand{\speedupplot}[8]{
 \begin{tikzpicture}
 \begin{axis}[title={#1},
 title style={align=center},
@@ -112,7 +112,7 @@ grid style={line width=.1pt, draw=gray!10},
 major grid style={line width=.2pt,draw=gray!50},
 ymin=-1,
 xmin=-1,
-ymax=#6,
+ymax=#8,
 xmax=#6]
 \addplot [domain=0:#3, no markers,dotted,thick]{x};
 #5
@@ -131,25 +131,49 @@ xmax=#6]
 
 \subsubsection{\rmtest}
 
+\paragraph{Overhead}~\\
+
 \meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.02}{32}{272}{\benchmarkDir/distributed-rm/44497-256-diff.csv}
 
+\paragraph{Speedup}~\\
 
+\speedupplot{Speedup of distributed \rmtest \enquote{44497 256}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-44497-256.csv};
+}{272}{\plotwidthDist}{272}
 
 
 \subsubsection{\jacobitest}
 
-\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 4253}{0.5}{32}{272}{\benchmarkDir/distributed-jacobi/3-4253-diff.csv}
-\\
+\paragraph{Overhead}~\\
+
 \meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.5}{32}{272}{\benchmarkDir/distributed-jacobi/3-4253-diff.csv}
+\\
+\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 4253}{0.5}{32}{272}{\benchmarkDir/distributed-jacobi/3-4253-diff.csv}
 
+\paragraph{Speedup}~\\
 
+\speedupplot{Speedup of distributed \jacobitest \enquote{3217}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-4253.csv};
+}{272}{\plotwidthDist}{272}
+
+\speedupplot{Speedup of distributed \jacobitest \enquote{4253}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-4253.csv};
+}{272}{\plotwidthDist}{272}
 
 
 \subsubsection{\torustest}
 
 \meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.5}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
 
+\paragraph{Speedup}~\\
 
+\speedupplot{Speedup of distributed \torustest \enquote{4096}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-eden-4096.csv};
+}{272}{\plotwidthDist}{160}
 
 
 \subsection{Shared-Memory}
@@ -158,23 +182,23 @@ xmax=#6]
 
 \paragraph{Speedup}~\\
 
-\speedupplot{Speedup of \rmtest \enquote{32}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
+\speedupplot{Speedup of \rmtest \enquote{11213 32}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-11213-32.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-11213-32.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-par-11213-32.csv};
-}{17}{\plotwidthSMP}
+}{17}{\plotwidthSMP}{17}
 
-\speedupplot{Speedup of \rmtest \enquote{64}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
+\speedupplot{Speedup of \rmtest \enquote{11213 64}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-eden-cp-11213-64.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-mult-11213-64.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sm-rm/bench-sm-rm.bench.skelrm-parr-par-11213-64.csv};
-}{17}{\plotwidthSMP}
+}{17}{\plotwidthSMP}{17}
 
 
 \paragraph{Overhead}~\\
@@ -203,7 +227,7 @@ smooth]{\benchmarkDir/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-eden
 smooth]{\benchmarkDir/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-mult-sudoku17.1000.txt.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-sudoku17.1000.txt.csv};
-}{17}{\plotwidthSMP}
+}{17}{\plotwidthSMP}{17}
 
 \paragraph{Overhead}~\\
 
@@ -224,8 +248,10 @@ smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-eden-sm
 smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-multicore-512.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-parmonad-512.csv};
-}{17}{\plotwidthSMP}
+}{17}{\plotwidthSMP}{17}
 
 \paragraph{Overhead}~\\
+
+\meanOverheadPlot{Mean Overhead for shared-memory \\ \torustest 512 vs Eden CP}{0.5}{4}{18}{\benchmarkDir/torus-sm/eden-cp-512-diff.csv}
 
 \end{document}
