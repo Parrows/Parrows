@@ -5,3 +5,4 @@
 ./redoRMSM.sh
 ./redoSudokuSM.sh
 ./redoTorus.sh
+./redoTorusSM.sh
