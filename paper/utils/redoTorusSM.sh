@@ -22,7 +22,7 @@ displayNames=(
 )
 
 vs=(
-    "\"Eden\""
+    "\"Eden CP\""
 )
 
 params=(
