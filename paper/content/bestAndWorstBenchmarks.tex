@@ -7,7 +7,7 @@
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 16 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{vs.}             & \thead{mean of \\ mean \\overheads} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 16 cores} \\ \hline \\
 	\multirow{3}{*}{\sudokutest 1000}
 	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
@@ -30,7 +30,7 @@
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{vs.}             & \thead{mean \\ overhead} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 256 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{vs.}             & \thead{mean of \\ mean \\overheads} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 256 cores} \\ \hline \\
 	\multirow{1}{*}{\torustest 4096}
 	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\

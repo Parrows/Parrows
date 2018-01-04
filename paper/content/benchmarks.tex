@@ -19,57 +19,9 @@ hyper-threaded cores in our benchmarks. Finally, we show that PArrows hold up in
 \newlength{\plotwidthDist}
 \setlength{\plotwidthDist}{0.6\textwidth}
 
+\newcommand{\benchmarkDir}{benchmarks}
 
-\newcommand{\performanceplot}[7]{
-\begin{tikzpicture}
-\begin{axis}[title={#1},
-title style={align=center},
-scale only axis, width=#7,
-xlabel=Threads,
-%xtick=data,
-xtick distance=#4,
-ylabel=Time (s),
-ylabel near ticks,
-minor tick num=2,
-grid=major,
-legend entries={#2},
-legend style={at={(0.99,0.99)},anchor=north east},
-max space between ticks=50pt,
-grid style={line width=.1pt, draw=gray!10},
-major grid style={line width=.2pt,draw=gray!50},
-xmin=-1,
-xmax=#6]
-#5
-\end{axis}
-\end{tikzpicture}
-}
-
-\newcommand{\performancediffplot}[8]{
-\begin{tikzpicture}
-\begin{axis}[title={#1},
-title style={align=center},
-scale only axis, width=#8,
-xlabel=Threads,
-%xtick=data,
-ytick distance=#6,
-xtick distance=#4,
-minor tick num=9,
-ylabel=Absolute time difference (s),
-ylabel near ticks,
-grid=both,
-legend entries={#2},
-legend style={at={(0.99,0.99)},anchor=north east},
-max space between ticks=50pt,
-grid style={line width=.1pt, draw=gray!10},
-major grid style={line width=.2pt,draw=gray!50},
-xmin=-1,
-xmax=#7]
-#5
-\end{axis}
-\end{tikzpicture}
-}
-
-\newcommand{\speedupplot}[7]{
+\newcommand{\speedupplot}[8]{
 \begin{tikzpicture}
 \begin{axis}[title={#1},
 title style={align=center},
@@ -89,33 +41,9 @@ grid style={line width=.1pt, draw=gray!10},
 major grid style={line width=.2pt,draw=gray!50},
 ymin=-1,
 xmin=-1,
-ymax=#6,
+ymax=#8,
 xmax=#6]
 \addplot [domain=0:#3, no markers,dotted,thick]{x};
-#5
-\end{axis}
-\end{tikzpicture}
-}
-
-\newcommand{\speedupdiffplot}[7]{
-\begin{tikzpicture}
-\begin{axis}[title={#1},
-title style={align=center},
-scale only axis, width=#7,
-xlabel=Threads,
-%xtick=data,
-xtick distance=#4,
-ytick distance=0.5,
-ylabel=Absolute speedup difference,
-ylabel near ticks,
-grid=major,
-legend entries={#2},
-legend style={at={(0.99,0.99)},anchor=north east},
-max space between ticks=50pt,
-grid style={line width=.1pt, draw=gray!10},
-major grid style={line width=.2pt,draw=gray!50},
-xmin=-1,
-xmax=#6]
 #5
 \end{axis}
 \end{tikzpicture}
@@ -180,8 +108,6 @@ multiplication \citep{Gentleman1978}. We ported an Eden based version \citep{Ede
 A~parallel Sudoku solver was used by \citet{par-monad} to compare \ensuremath{\Conid{Par}} Monad
 to GpH, and we ported it to PArrows.
 
-\input{bestAndWorstBenchmarks}
-
 \subsubsection{What parallel Haskells run where}
 
 The \ensuremath{\Conid{Par}} monad and GpH -- in its multicore version \cite{Marlow2009} --  can be executed on shared memory machines only.
@@ -217,7 +143,7 @@ cluster fails to execute two parallel Haskell processes with full-fledged
 parallelism.
 
 \mbcomment{fix this when benchmarks are redone}
-Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sudokuSMBenchmark} and Table~\ref{tab:meanOverhead} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in use.
+With this in mind, the performance measurements in the Section~\ref{sec:benchmarkResults} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in more detail.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
@@ -228,23 +154,52 @@ Hence, the performance measurements in Figs.~\ref{fig:bench-rm-sm}--\ref{fig:sud
 % -"- multi: 13.545304115702333
 % -"- par: 15.155709987503396
 
-\subsection{Benchmark results}
+\subsection{Benchmark results}\label{sec:benchmarkResults}
 
 In the following paragraphs we will go into detail on how well PArrows perform when compared to versions of the benchmark programs implemented with the original parallel Haskells that were used in the backends. We start by comparing Speedups and Overheads of for the shared memory backends and conclude with OpenMPI variants of the Eden-enabled backend as a representative of a distributed memory backend.
+
 
 \subsubsection{Shared memory}
 
 \paragraph{Speedup}
+The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (Par Monad), 8.14 (Eden CP) for 16 cores and 1000 Sudokus. In contrast to Rabin–Miller, here the |GpH| Monad backend seems to be the best of all, while Rabin–Miller profited most from Eden CP (i.e., Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
+
+\mbcomment{Ich hab ein bisschen mehr Daten hinzugefügt für Sudoku}
 
 \paragraph{Overhead}
+We compared the overhead of our PArrows implementations to the original parallel Haskells. We basically implemented the test programs both in PArrows and in traditional style, benchmarked both and compare the mean overhead, i.e. the \textit{relative} difference between both benchmarks with same settings. The error margin of the benchmarks, supplied by criterion package, goes into the mean overhead computation. 
+
+For the shared memory \rmtest benchmark, implemented with PArrows both with Eden CP and with |Par| Monad backends, \mbcomment{stimmt das so noch? Ich bin die Daten da nicht zu 100\% durch gegangen, aber die Aussage always finde ich etwas viel, almost always?} the zero \mbcomment{almost} always lay in the error margin of the mean overhead. This means that though we have measured some difference (against or even in favour of PArrows), it could be merely the error margin of the benchmarks and the difference might not be existent. In the following, we call the contrary case “significant”. In other words, we notice no significant slow-down through PArrows here. For GpH backend there was only a small significant overhead of $8\%$ at 16 cores with 32 tasks and input value $2^{11213}-1$.
+For Sudoku the situation is slightly different. There is a minimal ($1.4\%$) significant speed improvement with PArrows Eden CP version when compared with the base Eden CP benchmark. However, with increasing number of cores the error margin reaches zero again. The |Par| Monad shows a similar development. The GpH version shows a small significant speed \textit{improvement} from PArrows of $4.2\%$.
+The Gentleman multiplication with Eden CP shows a minor significant overhead of $2.6\%$ at 8 cores and an insignificant improvement at 16 cores.
+
+We observe a low (if significant at all) overhead, induced by PArrows in the shared memory setting.
 
 \subsubsection{Distributed Memory}
 
 \paragraph{Speedup}
+The speedup of distributed memory Rabin–Miller benchmark with PArrows and distributed Eden backend showed an almost linear speedup sans some issues in the middle because of unfortunate task distribution. As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 with PArrrows at 256 cores (vs. 207.7 with pure Eden). We managed to measure the speedup of Jacobi sum test for sufficient large inputs only in a massively distributed setting, because of memory limitations. We improved there from 9193 seconds (128 cores) to 1649 seconds (256 cores) in our PArrows version, so we only include a graph for a run $2^{3217}-1$ in the supplementary material. This speedup at about 11 for both PArrows and Eden for more than 64 cores. There is apparently not enough work for that many cores. The Gentleman test with input 4096 had an almost linear speedup first, then plummeted between 128 and 224 cores, and recovered at 256 cores with speedup of 129.
+
+\begin{figure}[ht]
+	\centering
+	\speedupplot{Speedup of distributed \rmtest \enquote{44497 256}}{PArrows Eden}{256}{32}{
+	\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+	smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-44497-256.csv};
+	}{272}{\plotwidthDist}{272}
+	\caption[Speedup distributed Rabin Miller]{Speedup of the distributed \rmtest benchmark with the Eden backend}
+	\label{fig:rabinMillerDistSpeedup}
+\end{figure}
 
 \paragraph{Overhead}
+We use our above mean overhead quality measure and the notion of significance also for distributed memory benchmarks. The mean overhead of Rabin–Miller test in the distributed memory setting ranges from $0.29\%$ to $-2.8\%$ (last value in favor of PArrows), but these values are not significant. A sole significant (by a very low margin) overhead is $0.35\%$ at 64 cores.
+We measured the mean overhead for Jacobi benchmark for an input of $2^{3217}-1$ for up to 256 cores. We reached a maximum overhead of $0.32\%$ at 256 cores. In all cases it was not significant, the zero was inside the error margin.
+Mean overhead for distributed Gentleman multiplication was also low. Significant values include $1.23\%$ at 64 cores, $6.4\%$ at 128 cores, and $2.4\%$ at 256 cores. It took PArrows 64.2 seconds at 256 cores to complete the benchmark.
 
+Similar to the shared memory setting, PArrows only imply a very low penalty with distributed memory that is outweighed by their convenience and usefulness to the user.
 
 \subsection{Discussion}
 
-In the shared memory setting we naturally find that the backends perform differently. Furthermore, in our distributed memory tests on the full grid the difference between PArrows and Eden was almost always below the error margin if PArrows performed worse. Even the biggest difference of 12.27\% in the \jacobitest for input $2^{4253}-1$ and 128 cores remained in line with these findings. The only exception to this was the \torustest  with only a $1.7\%$ difference in favour of Eden which is only a marginal slowdown in our opinion.
+\input{bestAndWorstBenchmarks}
+
+\mbcomment{Schau hier vll nochmal drüber, das ist etwas unsauber formuliert evtl.?}
+Summing up, PArrows performed with little to no overhead. Tables \ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrow enabled versions trade blows with the vanilla counterparts when comparing the mean of the mean overheads. If we combine these findings with the convenience of our DSL, PArrows seem like a great improvement over the respective backends with. 
