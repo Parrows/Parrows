@@ -59,7 +59,7 @@ Just like for GpH we can easily lift the definition of |parEvalN| for the |Par| 
 type Strategy a = a -> Par (IVar a)
 data Conf a = Conf (Strategy a)
 \end{code}
-Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
+Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the computation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
@@ -123,4 +123,4 @@ stratToConf _ strat = Conf strat
 
 The other backends have similarly structured implementations which we do not discuss here for the sake of brevity. Also note that we can only have one instance of |ArrowParallel arr a b ()| present at a time, which should not be a problem, though.
 
-Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the dataflow between the arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for better understanding.
+Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the data-flow between the arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for better understanding.

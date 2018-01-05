@@ -34,7 +34,7 @@ We propose an Arrow-based encoding for parallelism based on a new Arrow combinat
 We structure this paper as follows:
 \begin{itemize}
 \item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}). This behaviour encourages better composability.
-\item We utilise multiple backends -- currently a GpH, a |Par| Monad, and Eden. We do not reimplement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
+\item We utilise multiple backends -- currently a GpH, a |Par| Monad, and Eden. We do not re-implement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
 
 So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant. (Sec.~\ref{sec:parallel-arrows})
 \item We extend our PArrows formalism with |Future|s. Our goal here is to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because it allows for inter-node communication without blocking the master-node. (Sec.~\ref{sec:futures})
