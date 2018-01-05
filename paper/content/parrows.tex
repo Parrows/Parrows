@@ -1,10 +1,10 @@
 \section{Parallel Arrows}
 \label{sec:parallel-arrows}
-Arrows are a general interface to computation. Here we introduce special Arrows as general interface to \textit{parallel computations}. First, we present the interface and explain the reasoning behind it. Then, we discuss some implementations using existing parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
+Arrows are a general interface to computation. Here we introduce special Arrows as a general interface to \textit{parallel computations}. First, we present the |ArrowParallel| type class and explain the reasoning behind it. Then, we discuss some implementations using existing parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel type class}
 A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Sec.~\ref{sec:parEvalNIntro}).
 Translating this into arrow terms gives us a new operator |parEvalN| that lifts a list of arrows |[arr a b]| to a parallel arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
-This combinator is similar to our utility function |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
+This combinator is similar to |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
 % \begin{figure}[h]
 \begin{code}
 parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
@@ -12,7 +12,7 @@ parEvalN :: (Arrow arr) => [arr a b] -> arr [a] [b]
 % \caption{parEvalN Arrow combinator as a function}
 % \label{fig:parEvalNArrowFn}
 % \end{figure}
-With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| and we want this to be an interface for different backends, we introduce a new type class |ArrowParallel arr a b|: %(Fig.~\ref{fig:parEvalNArrowTypeClass1}).
+With this definition of |parEvalN|, parallel execution is yet another arrow combinator. But as the implementation may differ depending on the actual type of the arrow |arr| - or even the input |a| and output |b| - and we want this to be an interface for different backends, we introduce a new type class |ArrowParallel arr a b|: %(Fig.~\ref{fig:parEvalNArrowTypeClass1}).
 % \begin{figure}[h]
 \begin{code}
 class Arrow arr => ArrowParallel arr a b where
@@ -21,13 +21,14 @@ class Arrow arr => ArrowParallel arr a b where
 % \caption{parEvalN Arrow combinator in a first version of the ArrowParallel typeclass}
 % \label{fig:parEvalNArrowTypeClass1}
 % \end{figure}
-Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak head normal form vs. normal form). For this reason we also introduce an additional |conf| parameter to the function. We also do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. % So we add it to the type signature of the typeclass as well: %(Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
+Sometimes parallel Haskells require or allow for additional configuration parameters, \eg an information about the execution environment or the level of evaluation (weak head normal form vs. normal form). For this reason we introduce an additional |conf| parameter as we do not want |conf| to be a fixed type, as the configuration parameters can differ for different instances of |ArrowParallel|. % So we add it to the type signature of the typeclass as well: %(Fig.~\ref{fig:parEvalNArrowTypeClassFinal}).
 % % \begin{figure}[h]
 % \olcomment{|ArrowParallel arr a b conf| or |ArrowParallel conf arr a b|?} \mbcomment{does it really matter?}
 \begin{code}
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{code}
+Note that by restricting the implementations of our backends to a specific |conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one.
 % \caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
 % \label{fig:parEvalNArrowTypeClassFinal}
 % \end{figure}
@@ -36,7 +37,7 @@ class Arrow arr => ArrowParallel arr a b conf where
 \subsection{ArrowParallel instances}
 
 \subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
-The GpH implementation of |ArrowParallel| is implemented in a straightforward manner in Fig.~\ref{fig:ArrowParallelMulticore}, but a bit different compared to the variant from Section \ref{sec:GpHIntro}, by using |evalN :: [arr a b] -> arr [a] [b]| (definition in Appendix~\ref{utilfns}, think |zipWith ($)| on Arrows) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
+The GpH implementation of |ArrowParallel| is implemented in a straightforward manner in Fig.~\ref{fig:ArrowParallelMulticore}, but a bit different compared to the variant from Section \ref{sec:GpHIntro}. We use |evalN :: [arr a b] -> arr [a] [b]| (definition in Appendix~\ref{utilfns}, think |zipWith ($)| on Arrows) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
 \begin{figure}[t]
 \begin{code}
 data Conf a = Conf (Strategy a)
@@ -58,7 +59,7 @@ Just like for GpH we can easily lift the definition of |parEvalN| for the |Par| 
 type Strategy a = a -> Par (IVar a)
 data Conf a = Conf (Strategy a)
 \end{code}
-Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad, where |evalN| is once again of the type |evalN :: [arr a b] -> arr [a] [b]|. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
+Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the comptuation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
 \begin{figure}[h]
 \begin{code}
 instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
@@ -106,7 +107,7 @@ where |Conf| is simply defined as |data Conf = Nil| since Eden does not have a c
 % \end{figure}
 
 \subsubsection{Default configuration instances}
-While the configurability in the instances of the |ArrowParallel| instances above is nice, users probably would like to have a proper default configuration for many parallel programs as well. These can also easily be defined as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
+While the configurability in the instances of the |ArrowParallel| instances above is nice, users probably would like to have proper default configurations for many parallel programs as well. These can also easily be defined as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
 
 \begin{code}
 instance (NFData b, ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
@@ -120,6 +121,6 @@ stratToConf :: [arr a b] -> Strategy b -> Conf b
 stratToConf _ strat = Conf strat
 \end{code}
 
-The other backends have similarly structured implementations which we do not discuss here for brevity reasons. Note that by restricting the original implementations of our backends to their specific |Conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one. We can however only have one instance of |ArrowParallel arr a b ()| present at a time.
+The other backends have similarly structured implementations which we do not discuss here for the sake of brevity. Also note that we can only have one instance of |ArrowParallel arr a b ()| present at a time, which should not be a problem, though.
 
-Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the dataflow between the arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for easier understanding.
+Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the dataflow between the arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for better understanding.

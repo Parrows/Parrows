@@ -4,7 +4,7 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms including the expression of parallelism. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
+Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
 Glasgow parallel Haskell or short GpH (its Multicore SMP implementation, in particular), the
 |Par| Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a monad, even if
@@ -15,7 +15,7 @@ A key novelty in this paper is to use Arrows to represent parallel computations.
 
 We provide an Arrows-based type class and implementations for the three above mentioned parallel Haskells.
 Instead of 
-introducing a new low-level parallel backend in order to implement our
+introducing a new low-level parallel backend to implement our
 Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
 is defined as a common interface with varying implementations in
 the existing parallel Haskells. Thus, we not only define a parallel programming interface in a

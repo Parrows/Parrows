@@ -1,6 +1,6 @@
 \section{Skeletons}
 \label{sec:skeletons}
-Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations. While there are many possible skeletons to implement, we regard in detail here only some |map|-based and topological skeletons to demonstrate the power of PArrows.
+Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations. While there are many possible skeletons to implement, here we only regard in detail some |map|-based and topological skeletons to demonstrate the power of PArrows.
 %%% \FloatBarrier
 \subsection{|map|-based Skeletons}
 \label{sec:map-skeletons}
@@ -8,8 +8,8 @@ We start with |map|-based skeletons. The essential differences between the skele
 
 \paragraph{Parallel |map| and laziness.}
 The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to obtain an arrow |arr [a] [b]|.
-Just like |parEvalN|, |parMap| is 100\% strict.
-Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code of these two skeletons is quite straightforward, we show it in Appendix.
+Just like |parEvalN|, |parMap| traverses all input Arrows as well as the inputs.
+Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code of these two skeletons is quite straightforward, we show it in Appendix \ref{app:omitted} in Figs.\ref{fig:parMap} and \ref{fig:parMapStream}.
 
 \begin{figure}[thb]
 %farm
@@ -37,11 +37,11 @@ farm conf numCores f =
 \end{figure}
 
 \paragraph{Statically load-balancing parallel |map|.}
-Our |parMap| spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we gave in this paper). This can be quite wasteful and a statically load-balancing |farm| (Figs.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers seems useful.
+Our |parMap| spawns every single computation in a new thread (at least for the instances of |ArrowParallel| we presented in this paper). This can be quite wasteful and a statically load-balancing |farm| (Figs.~\ref{fig:farmImg},~\ref{fig:farm}) that equally distributes the workload over |numCores| workers seems useful.
 The definitions of the helper functions |unshuffle|, |takeEach|, |shuffle| (Fig.~\ref{fig:edenshuffleetc}) originate from an Eden skeleton\footnote{Available on Hackage under \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/src/Control-Parallel-Eden-Map.html}.}.
 
 %\paragraph{Lazy statically load-balancing parallel map}
-Since a |farm|  is basically just |parMap| with a different work distribution, it is, again, 100\% strict. So we can define |farmChunk| (Figs.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|. It is basically the same definition as for |farm|, with |parEvalN| replaced with |parEvalNLazy|.
+Since a |farm|  is basically just |parMap| with a different work distribution, it has the same restrictions as |parEvalN| and |parMap|. We can, however, define |farmChunk| (Figs.~\ref{fig:farmChunkImg},~\ref{fig:farmChunk}) which uses |parEvalNLazy| instead of |parEvalN|. It is basically the same definition as for |farm|, but with |parEvalNLazy| instead of |parEvalN|.
 
 %%% Local Variables:
 %%% mode: latex
