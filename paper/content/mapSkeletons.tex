@@ -7,7 +7,7 @@ Now we have developed Parallel Arrows far enough to define some useful algorithm
 We start with |map|-based skeletons. The essential differences between the skeletons presented here are in terms of order of evaluation and work distribution but still provide the same output of a standard |map|. 
 
 \paragraph{Parallel |map| and laziness.}
-The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an arrow |arr a b| and then passing it into |parEvalN| to obtain an arrow |arr [a] [b]|.
+The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an Arrow |arr a b| and then passing it into |parEvalN| to obtain an Arrow |arr [a] [b]|.
 Just like |parEvalN|, |parMap| traverses all input Arrows as well as the inputs.
 Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code of these two skeletons is quite straightforward, we show it in Appendix \ref{app:omitted} in Figs.\ref{fig:parMap} and \ref{fig:parMapStream}.
 

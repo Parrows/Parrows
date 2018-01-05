@@ -170,7 +170,7 @@ parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \label{fig:parMapStream}
 \end{figure}
 
-Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}. Similarly, Figure~\ref{fig:edenlazyrightrotate} contains the definition of arrow versions of Eden's |lazy| and |rightRotate| utility functions. Fig.~\ref{fig:lazyzip3etc} contains Eden's definition of |lazyzip3| together with the utility functions |uncurry3| and |threetotwo|.
+Arrow versions of Eden's |shuffle|, |unshuffle| and the definition of |takeEach| are in Figure~\ref{fig:edenshuffleetc}. Similarly, Figure~\ref{fig:edenlazyrightrotate} contains the definition of Arrow versions of Eden's |lazy| and |rightRotate| utility functions. Fig.~\ref{fig:lazyzip3etc} contains Eden's definition of |lazyzip3| together with the utility functions |uncurry3| and |threetotwo|.
 The full definition of |farmChunk| is in Figure~\ref{fig:farmChunk}.
 Eden definition of |ring| skeleton is in Figure~\ref{fig:ringEden}. It
 follows \citet{Loogen2012}.
@@ -257,7 +257,7 @@ lazy ~(x:xs) = x : lazy xs
 \end{figure}
 
 The |parEval2| skeleton is defined in Figure~\ref{fig:parEval2}. 
-We start by transforming the |(a, c)| input into a two-element list |[Either a c]| by first tagging the two inputs with |Left| and |Right| and wrapping the right element in a singleton list with |return| so that we can combine them with |arr (uncurry (:))|. Next, we feed this list into a parallel arrow running on two instances of |f +++ g| as described in the paper. After the calculation is finished, we convert the resulting |[Either b d]| into |([b], [d])| with |arr partitionEithers|. The two lists in this tuple contain only one element each by construction, so we can finally just convert the tuple to |(b, d)| in the last step.
+We start by transforming the |(a, c)| input into a two-element list |[Either a c]| by first tagging the two inputs with |Left| and |Right| and wrapping the right element in a singleton list with |return| so that we can combine them with |arr (uncurry (:))|. Next, we feed this list into a parallel Arrow running on two instances of |f +++ g| as described in the paper. After the calculation is finished, we convert the resulting |[Either b d]| into |([b], [d])| with |arr partitionEithers|. The two lists in this tuple contain only one element each by construction, so we can finally just convert the tuple to |(b, d)| in the last step.
 \begin{figure}[h]
 \begin{code}
 parEval2 :: (ArrowChoice arr,
@@ -289,7 +289,7 @@ matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 
 \section{Syntactic Sugar} \label{syntacticSugar}
 Finally, we also give the definitions for some syntactic sugar for PArrows, namely |parstar| and |parand|.
-For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
+For basic Arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two Arrows |arr a b| and |arr c d| into an Arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
 ):
 % \begin{figure}[h]
 \begin{code}

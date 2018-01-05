@@ -11,10 +11,10 @@ someCombinator fs1 fs2 =
 	parEvalN () fs2
 \end{code}
 
-In a distributed environment, a resulting arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once (in the example we require |ArrowChoice| for this) and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
+In a distributed environment, a resulting Arrow of this combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once (in the example we require |ArrowChoice| for this) and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
-While the above example could be rewritten into only one |parEvalN| call by directly wiring the arrows together before spawning, it illustrates an important problem. When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck
+While the above example could be rewritten into only one |parEvalN| call by directly wiring the Arrows together before spawning, it illustrates an important problem. When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck
 for a larger amount of data and number of processes \citep[as e.g.][showcases]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering

@@ -28,7 +28,7 @@ instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
 
 \subsubsection{Parallel pipe}\label{sec:pipe}
 
-The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of arrows with |>>>|, but does this in parallel, meaning that the arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| type class which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
+The parallel |pipe| skeleton is semantically equivalent to folding over a list |[arr a a]| of Arrows with |>>>|, but does this in parallel, meaning that the Arrows do not have to reside on the same thread/machine. We implement this skeleton using the |ArrowLoop| type class which gives us the |loop :: arr (a, b) (c, b) -> arr a c| combinator which allows us to express recursive fix-point computations in which output values are fed back as input. For example %this
 \begin{code}
 loop (arr (\(a, b) -> (b, a:b)))
 \end{code}
@@ -36,7 +36,7 @@ which is the same as
 \begin{code}
 loop (arr snd &&& arr (uncurry (:)))
 \end{code}
-defines an arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using |loop| to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |evalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
+defines an Arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using |loop| to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |evalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
 
 \begin{figure}[t]
 \begin{code}
@@ -73,7 +73,7 @@ unliftFut conf f = put conf >>> f >>> get conf
 \end{figure}
 
 
-Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two arrows inside a bigger arrow |arr (([a], [b]), [c]) (([a], [b]), [c])| suitable for |pipe|, we can define |pipe2| as in Fig.~\ref{fig:pipe2}.
+Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe Arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two Arrows inside a bigger Arrow |arr (([a], [b]), [c]) (([a], [b]), [c])| suitable for |pipe|, we can define |pipe2| as in Fig.~\ref{fig:pipe2}.
 \begin{figure}[tb]
 \begin{code}
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
@@ -109,7 +109,7 @@ Note that extensive use of |pipe2| over |pipe| with a hand-written combination d
 %\begin{code}
 %f parcomp g = (f . put) >>> (get . g)
 %\end{code}
-%It does not launch both arrows |f| and |g| in parallel, but allows for more smooth data communication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
+%It does not launch both Arrows |f| and |g| in parallel, but allows for more smooth data communication between them. Basically, it is a |Future|-lifted \emph{sequential} |>>>|, a way to compose parallel Arrows efficiently.
 
 \subsubsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
@@ -126,11 +126,11 @@ Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hack
 %\begin{code}
 
 
-We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into |loop|'s signature: |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)| (Fig.~\ref{fig:edenlazyrightrotate}). Similarly to the |pipe| from Section~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) arrow here, or the evaluation would fail to terminate. The reasoning is explained by \citet{Loogen2012} as a demand problem.
+We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an Arrow, already fits quite neatly into |loop|'s signature: |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)| (Fig.~\ref{fig:edenlazyrightrotate}). Similarly to the |pipe| from Section~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) Arrow here, or the evaluation would fail to terminate. The reasoning is explained by \citet{Loogen2012} as a demand problem.
 
-Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)|. We then feed this into our parallel Arrow |arr [(i, fut r)] [(o, fut r)]| obtained by transforming our input arrow |f :: arr (i, r) (o, r)| into |arr (i, fut r) (o, fut r)| before |repeat|ing and lifting it with |loopParEvalN|. Finally we unzip the output list |[(o, fut r)]| list into |([o], [fut r])|.
+Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)|. We then feed this into our parallel Arrow |arr [(i, fut r)] [(o, fut r)]| obtained by transforming our input Arrow |f :: arr (i, r) (o, r)| into |arr (i, fut r) (o, fut r)| before |repeat|ing and lifting it with |loopParEvalN|. Finally we unzip the output list |[(o, fut r)]| list into |([o], [fut r])|.
 
-Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}). To make sure this algorithm has speedup on shared-memory machines as well, we pass the result of this arrow to |postLoopParEvalN conf (repeat (arr id))|.
+Plugging this Arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring Arrow (Fig.~\ref{fig:ringFinal}). To make sure this algorithm has speedup on shared-memory machines as well, we pass the result of this Arrow to |postLoopParEvalN conf (repeat (arr id))|.
 This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
 %Further details on this can be found in \cite{eden_cefp}.
 
@@ -161,11 +161,11 @@ ring conf f =
 If we take the concept of a |ring| from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends and receives data from horizontal and vertical neighbours in each communication round.
 With our Parallel Arrows we re-implement the |torus| combinator\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.} from Eden---yet again with the help of the |ArrowLoop| type class.
 
-Similar to the |ring|, we start by rotating the input (Fig.~\ref{fig:edenlazyrightrotate}), but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation arrow becomes 
+Similar to the |ring|, we start by rotating the input (Fig.~\ref{fig:edenlazyrightrotate}), but this time not only in one direction, but in two. This means that the intermediary input from the neighbour nodes has to be stored in a tuple |([[fut a]], [[fut b]])| in the second argument (loop only allows for two arguments) of our looped Arrow |arr ([[c]], ([[fut a]], [[fut b]])) ([[d]], ([[fut a]], [[fut b]]))| and our rotation Arrow becomes 
 \begin{code}
 second ((mapArr rightRotate >>> lazy) *** (arr rightRotate >>> lazy))
 \end{code}
-instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we zip the inputs for the input arrow with 
+instead of the singular rotation in the ring as we rotate |[[fut a]]| horizontally and |[[fut b]]| vertically. Then, we zip the inputs for the input Arrow with 
 \begin{code}
 arr (uncurry3 zipWith3 lazyzip3)
 \end{code}
@@ -226,12 +226,12 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
 \caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMMTr| calculates $AB^T$ and is used for the (sequential) calculation in the chunks. |splitMatrix| splits the Matrix into chunks. |matAdd| calculates $A + B$. Omitted definitions can be found in \ref{fig:torus_example_rest}. }
 \label{fig:torusMatMult}
 \end{figure}
-If we compare the trace from a call using our arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the arrow version and execution times are comparable. We discuss further benchmarks on larger clusters and in a more detail in the next section.
+If we compare the trace from a call using our Arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the Arrow version and execution times are comparable. We discuss further benchmarks on larger clusters and in a more detail in the next section.
 \begin{figure}[tb]
 \olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[Matrix Multiplication with |torus| (Parrows)]{Matrix Multiplication with |torus| (PArrows).}
+	\caption[Matrix Multiplication with |torus| (PArrows)]{Matrix Multiplication with |torus| (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
