@@ -6,7 +6,7 @@ combinators. To our knowledge we are first to represent
 \emph{parallel} computation with Arrows.
 % \olcomment{that strange arrows-based robot interaction paper from 1993 or so! clearly discuss in related work} \done
 %
-Arrows turn out to be a useful tool for composing parallel
+Arrows are a useful tool for composing parallel
 programs. We have shown, that, in order to have a generic and extensible parallel Haskell, we do not have to restrict ourselves to a monadic interface. Instead, we use Arrows which are a more general concept than Monads, but still allow for powerful composition. Furthermore, we think Arrows are a better fit to parallelize pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs) while still having a generic and composable interface.
 %
 The DSL natively allows for parallelization of monadic code via the Kleisli type and additionally allows to parallelize any Arrow type that has an instance for |ArrowChoice| (note that some skeletons require an additional |ArrowLoop| instance).

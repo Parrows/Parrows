@@ -40,7 +40,7 @@ Finally, with the help of |mapArr| (Fig.~\ref{fig:mapArr}), we can define |zipWi
 \begin{figure}[h]
 \begin{code}
 zipWithArr :: ArrowChoice arr => arr (a, b) c -> arr ([a], [b]) [c]
-zipWithArr f = (arr $ \(as, bs) -> zipWith (,) as bs) >>> mapArr f
+zipWithArr f = (arr (\(as, bs) -> zipWith (,) as bs)) >>> mapArr f
 \end{code}
 \caption{|zipWith| over Arrows.} %$
 \label{fig:zipWithArr}
@@ -288,8 +288,8 @@ matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 \end{figure}
 
 \section{Syntactic Sugar} \label{syntacticSugar}
-Finally, we also give the definitions for some syntactic sugar for PArrows, namely |***| and |&&&|.
-For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |***| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
+Finally, we also give the definitions for some syntactic sugar for PArrows, namely |parstar| and |parand|.
+For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two arrows |arr a b| and |arr c d| into an arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
 ):
 % \begin{figure}[h]
 \begin{code}
@@ -301,7 +301,7 @@ For basic arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArro
 % \label{fig:par***}
 % \end{figure}
 % With this we can analogously to the serial |&&&|
-We define the parallel |&&&| % (Fig.~\ref{fig:par&&&}) 
+We define the parallel |parand| % (Fig.~\ref{fig:par&&&}) 
 in a similar manner to its sequential pendant |&&&| (Fig.~\ref{fig:syntacticSugarArrows}):
 % \begin{figure}[h]
 \begin{code}

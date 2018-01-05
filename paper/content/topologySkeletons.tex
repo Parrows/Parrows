@@ -1,24 +1,27 @@
 %\FloatBarrier
 \subsection{Topological Skeletons}
 \label{sec:topology-skeletons}
-Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with Parallel Arrows as well.
+Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with parallel Arrows as well.
 
-If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materialises with the usage of |loop| of the |ArrowLoop| type class and we think that this is due to difference of how evaluation is done in these backends when compared to Eden. An investigation of where this difference comes from is beyond the scope of this work, we only provide a workaround for these types of skeletons as such skeletons probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting even though other skeletons would be better suited to be run with them.
+If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materialises with the usage of |loop| of the |ArrowLoop| type class and we think that this is due to difference of how evaluation is done in these backends when compared to Eden. An investigation of why this difference exists is beyond the scope of this work, we only provide a workaround for these types of skeletons as such they probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting even though other skeletons would be better suited to be run with them.
 The idea of the fix is to provide a |ArrowLoopParallel| typeclass that has two functions - |loopParEvalN| and |postLoopParEvalN| where the first is to be used inside an |loop| construct while the latter will be used right outside of the |loop|. This way we can delegate to the actual |parEvalN| in the spot where the backend supports it.
 \begin{code}
-class ArrowParallel arr a b conf => ArrowLoopParallel arr a b conf where
+class ArrowParallel arr a b conf =>
+	ArrowLoopParallel arr a b conf where
     loopParEvalN :: conf -> [arr a b] -> arr [a] [b]
     postLoopParEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{code}
 As Eden has no problems with the looping skeletons, we use this instance:
 \begin{code}
-instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
+instance (ArrowChoice arr, ArrowParallel arr a b Conf) =>
+	ArrowLoopParallel arr a b Conf where
     loopParEvalN = parEvalN
     postLoopParEvalN _ = evalN
 \end{code}
 As the backends for the |Par| Monad and GpH have problems with |parEvalN| inside of |loop| their respective instances for |ArrowLoopParallel| look like this:
 \begin{code}
-instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) => ArrowLoopParallel arr a b (Conf b) where
+instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
+	ArrowLoopParallel arr a b (Conf b) where
     loopParEvalN _ = evalN
     postLoopParEvalN = parEvalN
 \end{code}
@@ -33,7 +36,7 @@ which is the same as
 \begin{code}
 loop (arr snd &&& arr (uncurry (:)))
 \end{code}
-defines an arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using this to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |evalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
+defines an arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using |loop| to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |evalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
 
 \begin{figure}[t]
 \begin{code}
@@ -44,11 +47,13 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> loopParEvalN conf fs)) >>>
     arr last
 \end{code}
-\caption{A~first implementation of the |pipe| skeleton expressed with Parallel Arrows. Note that the use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |evalN|.}
+\caption{A~first implementation of the |pipe| skeleton expressed with parallel Arrows. Note that the use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |evalN|.}
 \label{fig:pipeSimple}
+\end{figure}
 
 However, using this definition directly will make the master node a potential bottleneck in distributed environments as described in Section~\ref{futures}. Therefore, we introduce a more sophisticated version that internally uses Futures and obtain the final definition of |pipe| in Fig.~\ref{fig:pipe}.
 
+\begin{figure}[t]
 \begin{code}
 pipe :: (ArrowLoop arr, ArrowLoopParallel arr (fut a) (fut a) conf,
 	Future fut a conf) =>
@@ -97,7 +102,7 @@ pipe2 conf f g =
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to |parEvalN| inside of |evalN|. Nonetheless, we can define a version of parallel piping operator |parcomp|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
+Note that extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to |parEvalN| inside of |evalN|. Nonetheless, we can define a parallel piping operator |parcomp|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
 
 
 %Another version of |>>>| is:
@@ -121,9 +126,11 @@ Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hack
 %\begin{code}
 
 
-We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into the |loop|'s |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)| (Fig.~\ref{fig:edenlazyrightrotate}). Similarly to the |pipe| from Section~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) arrow here, or the evaluation would fail to terminate. The reasoning is explained by \citet{Loogen2012} as a demand problem.
+We can rewrite this functionality easily with the use of |loop| as the definition of the node function, |arr (i, r) (o, r)|, after being transformed into an arrow, already fits quite neatly into |loop|'s signature: |arr (a, b) (c, b) -> arr a c|. In each iteration we start by rotating the intermediary input from the nodes |[fut r]| with |second (rightRotate >>> lazy)| (Fig.~\ref{fig:edenlazyrightrotate}). Similarly to the |pipe| from Section~\ref{sec:pipe} (Fig.~\ref{fig:pipeSimple}), we have to feed the intermediary input into our |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) arrow here, or the evaluation would fail to terminate. The reasoning is explained by \citet{Loogen2012} as a demand problem.
 
-Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)| so we can feed that into our input arrow |arr (i, r) (o, r)|, which we transform into |arr (i, fut r) (o, fut r)| with |second get >>> f >>> second put| before converting it into a parallel arrow |arr [(i, fut r)] [(o, fut r)]| with the help of |repeat| and |loopParEvalN| to get an output list |[(o, fut r)]|. Finally we unzip this list into |([o], [fut r])|. Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}). To make sure this algorithm has speedup on shared-memory machines as well, we pass the result of this arrow to |postLoopParEvalN conf (repeat (arr id))|.
+Next, we zip the resulting |([i], [fut r])| to |[(i, fut r)]| with |arr (uncurry zip)|. We then feed this into our parallel Arrow |arr [(i, fut r)] [(o, fut r)]| obtained by transforming our ipnut arrow |f :: arr (i, r) (o, r)| into |arr (i, fut r) (o, fut r)| before |repeat|ing and lifting it with |loopParEvalN|. Finally we unzip the output list |[(o, fut r)]| list into |([o], [fut r])|.
+
+Plugging this arrow |arr ([i], [fut r]) ([o], fut r)| into the definition of |loop| from earlier gives us |arr [i] [o]|, our ring arrow (Fig.~\ref{fig:ringFinal}). To make sure this algorithm has speedup on shared-memory machines as well, we pass the result of this arrow to |postLoopParEvalN conf (repeat (arr id))|.
 This combinator can, for example, be used to calculate the shortest paths in a graph using Warshall's algorithm.
 %Further details on this can be found in \cite{eden_cefp}.
 

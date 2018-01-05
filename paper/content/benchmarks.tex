@@ -3,11 +3,9 @@
 \section{Performance results and discussion}
 \label{sec:benchmarks}
 
-In the following section, we describe the benchmarks of our parallel DSL and algorithmic skeletons conducted.
-We start by explaining the hardware and software stack and also elaborate on which benchmarks programs were used
-and also which parallel Haskell were used in which setting and why. Before we go into detail on the benchmarks we
-also address the issue of poor performance gains when using hyper-threading and our reasoning behind not including
-hyper-threaded cores in our benchmarks. Finally, we show that PArrows hold up in terms of performance when compared to the original parallel Haskells used as backends in this paper, starting with the shared-memory variants (GpH, |Par| Monad and Eden CP) and concluding with Eden as a distributed backend.
+In the following section, we describe the benchmarks we conducted of our parallel DSL and algorithmic skeletons.
+We start by explaining the hardware and software stack and also elaborate on which benchmarks programs and parallel Haskells were used in which setting and why. Before we go into detail on the benchmarks we
+also shortly address hyper-threading and why we do not use it in our benchmarks. Finally, we show that PArrows hold up in terms of performance when compared to the original parallel Haskells used as backends in this paper, starting with the shared-memory variants (GpH, |Par| Monad and Eden CP) and concluding with Eden as a distributed backend.
 
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
@@ -115,11 +113,11 @@ Although GpH is available on distributed memory
 clusters, and newer distributed memory Haskells such as HdpH exist,
 current support of distributed memory in PArrows is limited to
 Eden. We used the MPI backend of Eden in a distributed memory
-setting. However, for shared memory Eden features a ``CP'' backend
+setting. However, for shared memory Eden features a \enquote{CP} backend
 that merely copies the memory blocks between distributed heaps. In
-this mode, Eden still operates in the ``nothing shared'' setting, but
-is adapted better to multicore machines. We label this version of Eden
-in the plots as ``Eden~CP''.
+this mode, Eden still operates in the \enquote{nothing shared} setting, but
+is adapted better to multicore machines. We call this version of Eden
+\enquote{Eden~CP}.
 
 
 
@@ -133,17 +131,9 @@ requested cores to 32 -- \ie if we use hyper-threading on 16 real
 cores -- the speedup did not increase that well. It was merely 15.99
 for 32 tasks with PArrows/Eden. This was worse for other backends.  As
 for 64 tasks, we obtained a speedup of 16.12 with PArrows/Eden at 32
-hyper-threaded cores and only 13.55 with PArrows/GpH. The parallel efficiencies were 50.4\% and 42.3\%, respectively. The Eden
-version used here was Eden~CP, the \enquote{share nothing} SMP build.
+hyper-threaded cores and only 13.55 with PArrows/GpH. 
 
-In the distributed memory setting the same effect ensues. We obtain
-plummeting speedup of 124.31 at 512 hyper-threaded cores, whereas it was
-213.172 for 256 real cores. Apparently, hyper-threading in the Glasgow
-cluster fails to execute two parallel Haskell processes with full-fledged
-parallelism.
-
-\mbcomment{fix this when benchmarks are redone}
-With this in mind, the performance measurements in the Section~\ref{sec:benchmarkResults} use only real cores as the purpose of this paper is to show the performance of PArrows and not to investigate parallel performance with hyper-threading in more detail.
+While this shows that hyper-threading can be of benefit in scenarios similar to the ones presented in the benchmarks, we only use real cores for the performance measurements in Section~\ref{sec:benchmarkResults} as the purpose of this paper is to show the performance of PArrows and not to investigate parallel behaviour with hyper-threading.
 
 
 % rm 11213 32 32-sm speedup eden: 15.993037587283924
@@ -160,20 +150,20 @@ In the following paragraphs we will go into detail on how well PArrows perform w
 
 \subsubsection{Defining overhead}
 
-We compared the overhead of our PArrows implementations to the original parallel Haskells. We basically implemented the test programs both in PArrows and in traditional style, benchmarked both and compare the mean overhead, i.e. the \textit{relative} difference between both benchmarks with same settings. The error margin of the time measurements, supplied by criterion package, is computed together with the mean overhead computation. 
+We compared the overhead of our PArrows implementations to the original parallel Haskells. We basically implemented the test programs both in PArrows and in traditional style, benchmarked both and will now compare the mean overhead, i.e. the \textit{relative} difference between both benchmarks with same settings. The error margin of the time measurements, supplied by criterion package, is computed together with the mean overhead computation. 
 
-Quite often the zero value lies in the error margin of the mean overhead. This means that though we have measured some difference (against or even in favour of PArrows), it could be merely the error margin of the benchmarks and the difference might not be existent. We are mostly interested in the cases where above issue does not persist, we call them \emph{significant}. We often denote the error margin with $\pm$ after the mean overhead value.
+Quite often the zero value lies in the error margin of the mean overhead. This means that even though we have measured some difference (against or even in favour of PArrows), it could be merely the error margin of the benchmarks and the difference might not be existent. We are mostly interested in the cases where above issue does not persist, we call them \emph{significant}. We often denote the error margin with $\pm$ after the mean overhead value.
 
 \subsubsection{Shared memory}
 
 \paragraph{Speedup}
-The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (Par Monad), 8.14 (Eden CP) for 16 cores and 1000 Sudokus. In contrast to Rabin–Miller, here the |GpH| Monad backend seems to be the best of all, while Rabin–Miller profited most from Eden CP (i.e., Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
+The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (Par Monad), 8.14 (Eden CP) for 16 cores and 1000 Sudokus. In contrast to Rabin–Miller, here the |GpH| backend seems to be the best of all, while Rabin–Miller profited most from Eden CP (i.e., Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for the Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
 
 \paragraph{Overhead}
 
 For the shared memory \rmtest benchmark, implemented with PArrows using Eden CP, GpH, and |Par| Monad backends, the overhead values are within single percents range, but also negative overhead (\ie PArrows are better) and larger error margins happen. To give a few examples, the overhead for Eden~CP with input value $2^{11213}-1$, 32 tasks, and 16 cores is $1.5\%$, but the error margin is around $5.2\%$! Same backend in the same setting with 64 tasks reaches $-0.2\%$ overhead, PArrows apparently fare better than Eden -- but the error margin of $1.9\%$ disallows this interpretation. We focus now on significant overhead values. To name a few: $0.41\%\; \pm 7\cdot 10^{-2}\%$ for Eden~CP and 64 tasks at 4 cores, $4.7\% \; \pm 0.72\%$ for GpH, 32 tasks, 8 cores, $0.34\% \; \pm 0.31\%$ for |Par| Monad at 4 cores with 64 tasks. The worst significant overhead was  GpH backend with $8\% \; \pm 6.9\%$ at 16 cores with 32 tasks and input value $2^{11213}-1$. In other words, we notice no major slow-down through PArrows here.
 
-For Sudoku the situation is slightly different. There is a minimal significant ($-1.4\% \; \pm 1.2\%$ at 8 cores) speed improvement with PArrows Eden~CP version when compared with the base Eden CP benchmark. However, with increasing number of cores the error margin reaches zero again: $-1.6\% \; \pm 5.0\%$ at 16 cores. The |Par| Monad shows a similar development, \eg with $-1.95\% \; \pm 0.64\%$ at 8 cores. The GpH version shows both a significant speed \textit{improvement} from PArrows of $-4.2\% \; \pm 0.26\%$ and a minor overhead of $0.87\% \; \pm 0.70\%$.
+For Sudoku the situation is slightly different. There is a minimal significant ($-1.4\% \; \pm 1.2\%$ at 8 cores) speed improvement with PArrows Eden~CP version when compared with the base Eden CP benchmark. However, with increasing number of cores the error margin reaches zero again: $-1.6\% \; \pm 5.0\%$ at 16 cores. The |Par| Monad shows a similar development, \eg with $-1.95\% \; \pm 0.64\%$ at 8 cores. The GpH version shows both a significant speed \textit{improvement} from PArrows of $-4.2\% \; \pm 0.26\%$ and a minor overhead of $0.87\% \; \pm 0.70\%$. \mbcomment{Widerspricht sich das nicht?}
 
 The Gentleman multiplication with Eden CP shows a minor significant overhead of $2.6\% \; \pm 1.0\%$ at 8 cores and an insignificant improvement at 16 cores. Summarising, we observe a low (if significant at all) overhead, induced by PArrows in the shared memory setting.
 
