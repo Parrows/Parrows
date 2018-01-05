@@ -20,6 +20,8 @@ main.pdf : *.tex *.bib Makefile
 	latexmk -pdflatex="pdflatex -file-line-error -synctex=1" -pdf main || true
 	cd ${BACKUP_FOLDER} && cp -r `ls . ` ..
 
+ms.tex : main.pdf ms.lhs Makefile
+	lhs2TeX ms.lhs -o ms.tex --poly
 clean :
 	latexmk -C
 	cd ${BACKUP_FOLDER} && cp -r `ls . ` ..
