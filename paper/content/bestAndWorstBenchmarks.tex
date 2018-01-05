@@ -2,12 +2,14 @@
 
 \begin{table}[]
 \centering
-\caption{Overhead in the shared memory benchmarks}
+\caption{Overhead in the shared memory benchmarks. Bold marks values
+  in favour of PArrows. Overhead is unitless, multiply by 100 to
+  obtain percent. Runtime is in seconds.}
 \label{tab:meanOverheadSharedMemory}
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{vs.}             & \thead{mean of \\ mean \\overheads} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 16 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalized \\ stdDev} & \thead{Runtime for \\ 16 cores} \\ \hline \\
 	\multirow{3}{*}{\sudokutest 1000}
 	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
@@ -25,16 +27,20 @@
 
 \begin{table}[]
 \centering
-\caption{Overhead in the distributed memory benchmarks}
+\caption{Overhead in the distributed memory benchmarks. Bold marks values
+  in favour of PArrows. Overhead is unitless, multiply by 100 to
+  obtain percent. Runtime is in seconds.}
+\olcomment{Vielleicht gleich durchmultiplizieren und \% angeben? Nicht
+zu viele leere Zeilen in der Tabelle?}
 \label{tab:meanOverHeadDistributedMemory}
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{vs.}             & \thead{mean of \\ mean \\overheads} & \thead{maximum \\ normalized \\ stdDev} & \thead{runtime for \\ 256 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalized \\ stdDev} & \thead{Runtime for \\ 256 cores} \\ \hline \\
 	\multirow{1}{*}{\torustest 4096}
 	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
-	\multirow{1}{*}{\rmtest 44497 256}
+  	\multirow{1}{*}{\rmtest 44497 256}
 	\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
 	\multirow{1}{*}{\jacobitest 3217}

@@ -1,4 +1,4 @@
-\section{Futures} \label{sec:futures}
+\section{Futures} \label{sec:futures}\label{futures}
 Consider a mock-up parallel Arrow combinator:
 \begin{code}
 someCombinator:: (ArrowChoice arr,
@@ -19,18 +19,18 @@ for larger amount of data and number of processes \citep[as e.g.][showcases]{Ber
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
-	\caption[without Futures]{Communication between 4 Eden processes without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colors: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
+	\caption[without Futures]{Communication between 4 Eden processes without Futures. All communication goes through the master node. Each bar represents one process. Black lines between processes represent communication. Colours: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
-\olcomment{more practical and heavy-weight example! fft (I have the code)?}\\
-\mbcomment{Depends... Are the communications easy to read in such an example?}\\
-\mbcomment{Keep the description for the different colours, or link to
-  the EdenTV description in \ref{sec:edentv}}
-\olcomment{ok as is}
-\olcomment{use the fft example (when it works)?}
+% \olcomment{more practical and heavy-weight example! fft (I have the code)?}
+% \mbcomment{Depends... Are the communications easy to read in such an example?}
+% \mbcomment{Keep the description for the different colours, or link to
+%   the EdenTV description in \ref{sec:edentv}}
+% \olcomment{ok as is}
+% \olcomment{use the fft example (when it works)?}
 \end{figure}
 
 This is in fact only a problem in distributed memory (in the scope of this paper) and we should allow nodes to communicate directly with each other. Eden already ships with \enquote{remote data} that enable this \cite{AlGo03a,Dieterle2010}.
-But as we want code with our DSL to be implementation agnostic, we have to wrap this concept. We do this with the |Future| type class (Fig.~\ref{fig:future}). Note that we require a conf parameter here as well, but only so that Haskells type system allows us to have multiple Future implementations imported at once without breaking any dependencies similar to what we did with the |ArrowParallel| typeclass earlier.
+But as we want code with our DSL to be implementation agnostic, we have to wrap this concept. We do this with the |Future| type class (Fig.~\ref{fig:future}). Note that we require a |conf| parameter here as well, but only so that Haskells type system allows us to have multiple Future implementations imported at once without breaking any dependencies similar to what we did with the |ArrowParallel| typeclass earlier.
 \begin{figure}[h]
 \begin{code}
 class Future fut a conf | a conf -> fut where
@@ -61,7 +61,7 @@ someCombinator fs1 fs2 =
 \caption{The mock-up combinator in parallel.}
 \label{fig:someCombinatorParallel}
 \end{figure}
-In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualization in Fig.~\ref{fig:withFutures}. One especially elegant aspect of this solution is that we can specify the type of |Future| to be used per backend with full interoperability between code using different backends, without even requring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
+In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualisation in Fig.~\ref{fig:withFutures}. One especially elegant aspect of this solution is that we can specify the type of |Future| to be used per backend with full interoperability between code using different backends, without even requiring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/withFutures}
