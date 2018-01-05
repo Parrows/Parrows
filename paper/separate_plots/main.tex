@@ -6,7 +6,7 @@
 
 \NeedsTeXFormat{LaTeX2e}
 
-\documentclass{jfp1}
+\documentclass[final]{jfp1}
 
 %%% Macros for the guide only %%%
 %\providecommand\AMSLaTeX{AMS\,\LaTeX}
@@ -18,8 +18,8 @@
 %\newcommand\rch[1]{$\longrightarrow\rlap{$#1$}$\hspace{1em}}
 %\newcommand\lra{\ensuremath{\quad\longrightarrow\quad}}
 
-\jdate{August 2017}
-\pubyear{2017}
+\jdate{January 2018}
+\pubyear{2018}
 \pagerange{\pageref{firstpage}--\pageref{lastpage}}
 \doi{...}
 
@@ -27,7 +27,7 @@
 
 \input{prelude}
 
-\title{Plots for \enquote{Arrows for Parallel Computations}}
+\title{Arrows for Parallel Computations: Supplementary Material}
 \ifthenelse{\boolean{anonymous}}{%
 \author{Submission ID xxxxxx}
 }{%
@@ -54,14 +54,21 @@
 
 \maketitle
 
-\tableofcontents
+\begin{abstract}
+  This is supplementary material to our paper \enquote{Arrows for
+    parallel computations}. It shows the speedup and mean overhead
+  plots for all benchmarks.
+\end{abstract}
 
-\newpage
+\tableofcontents
+%
+% \newpage
 
 \newlength{\plotwidthDist}
 \setlength{\plotwidthDist}{0.6\textwidth}
 \newlength{\plotwidthSMP}
-\setlength{\plotwidthSMP}{0.39\textwidth}
+% \setlength{\plotwidthSMP}{0.39\textwidth}
+\setlength{\plotwidthSMP}{\plotwidthDist}
 
 \newcommand{\meanOverheadPlot}[5]{
 \begin{tikzpicture}
@@ -127,39 +134,9 @@ xmax=#6]
 
 \newcommand{\benchmarkDir}{../content/benchmarks}
 
-\section{Distributed Plots}
-\subsection{\rmtest}
-\subsubsection{Overhead}
 
-\meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.04}{32}{272}{\benchmarkDir/distributed-rm/44497-256-diff.csv}
-
-\subsubsection{Speedup}
-\speedupplot{Speedup of distributed \rmtest \enquote{44497 256}}{PArrows Eden}{256}{32}{
-\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-44497-256.csv};
-}{272}{\plotwidthDist}{272}
-
-
-\subsection{\jacobitest}
-\subsubsection{Overhead}
-\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.04}{32}{272}{\benchmarkDir/distributed-jacobi/3-3217-diff.csv}
-
-\subsubsection{Speedup}
-\speedupplot{Speedup of distributed \jacobitest \enquote{3217}}{PArrows Eden}{256}{32}{
-\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-3217.csv};
-}{272}{\plotwidthDist}{32}
-
-
-\subsection{\torustest}
-\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.04}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
-
-\subsubsection{Speedup}
-\speedupplot{Speedup of distributed \torustest \enquote{4096}}{PArrows Eden}{256}{32}{
-\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-smooth]{\benchmarkDir/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-eden-4096.csv};
-}{272}{\plotwidthDist}{160}
-
+%%%%% hack: center all!
+\centering
 
 \section{Shared-Memory Plots}
 \subsection{\rmtest}
@@ -228,5 +205,42 @@ smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-parmona
 
 \subsubsection{Overhead}
 \meanOverheadPlot{Mean Overhead for shared-memory \\ \torustest 512 vs Eden CP}{0.08}{4}{18}{\benchmarkDir/torus-sm/eden-cp-512-diff.csv}
+
+\section{Distributed Plots}
+\subsection{\rmtest}
+
+\subsubsection{Speedup}
+\speedupplot{Speedup of distributed \rmtest \enquote{44497 256}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-44497-256.csv};
+}{272}{\plotwidthDist}{272}
+
+\subsubsection{Overhead}
+
+\meanOverheadPlot{Mean Overhead for distributed \\ \rmtest 44497 256}{0.04}{32}{272}{\benchmarkDir/distributed-rm/44497-256-diff.csv}
+
+
+\subsection{\jacobitest}
+
+\subsubsection{Speedup}
+\speedupplot{Speedup of distributed \jacobitest \enquote{3217}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-3217.csv};
+}{272}{\plotwidthDist}{32}
+
+
+\subsubsection{Overhead}
+\meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.04}{32}{272}{\benchmarkDir/distributed-jacobi/3-3217-diff.csv}
+
+\subsection{\torustest}
+\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.04}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
+
+\subsubsection{Speedup}
+\speedupplot{Speedup of distributed \torustest \enquote{4096}}{PArrows Eden}{256}{32}{
+\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
+smooth]{\benchmarkDir/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-eden-4096.csv};
+}{272}{\plotwidthDist}{160}
+
+
 
 \end{document}
