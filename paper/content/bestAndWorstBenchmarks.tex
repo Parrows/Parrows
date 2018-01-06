@@ -3,10 +3,17 @@
 \begin{table}[]
 \centering
 \caption{Overhead in the shared memory benchmarks. Bold marks values
+<<<<<<< HEAD
   in favour of PArrows. Overhead is unit-less. Runtime is in seconds.}
+=======
+  in favour of PArrows. Overhead is unit-less, multiply by 100 to
+  obtain percent.}
+
+>>>>>>> 5455ef4... OL: futile fiddling with tables.  Should work with csvsimple and siunitx, but it does not.
 \label{tab:meanOverheadSharedMemory}
 \centering
 \begingroup\catcode`"=9
+\sisetup{round-mode=places, round-precision=3}
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
 	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores (s)} \\ \hline \\
 	\multirow{3}{*}{\sudokutest 1000}
