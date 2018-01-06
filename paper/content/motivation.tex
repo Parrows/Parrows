@@ -33,13 +33,13 @@ We propose an Arrow-based encoding for parallelism based on a new Arrow combinat
 
 We structure this paper as follows:
 \begin{itemize}
-\item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types (Sec.~\ref{sec:parallel-arrows}). This behaviour encourages better composability.
+\item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types (Section~\ref{sec:parallel-arrows}). This behaviour encourages better composability.
 \item We utilise multiple backends -- currently a GpH, a |Par| Monad, and Eden. We do not re-implement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
 
-So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant. (Sec.~\ref{sec:parallel-arrows})
-\item We extend our PArrows formalism with |Future|s. Our goal here is to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because it allows for inter-node communication without blocking the master-node. (Sec.~\ref{sec:futures})
-\item It is possible to define algorithmic skeletons with PArrows (Sec.~\ref{sec:skeletons}). All our benchmarks were skeleton-based.
-\item Finally, we practically demonstrate that Arrow parallelism is a viable alternative to existing approaches. It introduces only low performance overhead (Sec.~\ref{sec:benchmarks}).
+So as an example, during development, we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant. (Section~\ref{sec:parallel-arrows})
+\item We extend our PArrows formalism with |Future|s. Our goal here is to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data (|RD|). Direct communication is useful in a distributed memory setting because it allows for inter-node communication without blocking the master-node. (Section~\ref{sec:futures})
+\item It is possible to define algorithmic skeletons with PArrows (Section~\ref{sec:skeletons}). All our benchmarks were skeleton-based.
+\item Finally, we practically demonstrate that Arrow parallelism is a viable alternative to existing approaches. It introduces only low performance overhead (Section~\ref{sec:benchmarks}).
 \end{itemize}
 
 PArrows are open source and available from \url{https://github.com/s4ke/Parrows}.
@@ -66,7 +66,7 @@ PArrows are open source and available from \url{https://github.com/s4ke/Parrows}
 
 
 %\paragraph{Structure}
-%The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Sec.~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Sec.~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
+%The remaining text is structures as follows. Section~\ref{sec:background} briefly introduces known parallel Haskell flavours (Section~\ref{sec:parEvalNIntro}) and gives an overview of Arrows to the reader (Section~\ref{sec:arrows}). Section~\ref{sec:related-work} discusses related work. Section~\ref{sec:parallel-arrows} defines Parallel Arrows and presents a basic interface. Section~\ref{futures} defines Futures for Parallel Arrows, this concept enables better communication. Section~\ref{sec:map-skeletons} presents some basic algorithmic skeletons  in our newly defined dialect: parallel |map| with and without load balancing. More advanced skeletons are showcased in Section~\ref{sec:topology-skeletons} (|pipe|, |ring|, |torus|). Section~\ref{sec:benchmarks} shows the benchmark results. Section~\ref{sec:conclusion} discusses future work and concludes.
 
 %%% Local Variables:
 %%% mode: latex

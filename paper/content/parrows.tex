@@ -2,7 +2,7 @@
 \label{sec:parallel-arrows}
 Arrows are a general interface to computation. Here we introduce special Arrows as a general interface to \textit{parallel computations}. First, we present the |ArrowParallel| type class and explain the reasoning behind it. Then, we discuss some implementations using existing parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
 \subsection{The ArrowParallel type class}
-A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Sec.~\ref{sec:parEvalNIntro}).
+A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Section~\ref{sec:parEvalNIntro}).
 Translating this into Arrow terms gives us a new operator |parEvalN| that lifts a list of Arrows |[arr a b]| to a parallel Arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
 This combinator is similar to |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
 % \begin{figure}[h]
