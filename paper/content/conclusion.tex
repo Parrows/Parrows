@@ -3,20 +3,33 @@
 \label{sec:conclusion}
 Arrows are a generic concept that allows for powerful composition
 combinators. To our knowledge we are first to represent
-\emph{parallel} computation with Arrows.
-% \olcomment{that strange arrows-based robot interaction paper from 1993 or so! clearly discuss in related work} \done
+\emph{parallel} computation with
+Arrows, and hence to show their usefulness for
+% Arrows are a useful tool for
+composing parallel
+programs. We have shown that for a generic and extensible parallel Haskell, we do not have to restrict ourselves to a monadic interface. % Instead, we use Arrows which are a more general concept than Monads, but still allow for powerful composition. Furthermore, we think
+We argue that Arrows are better suited to  parallelise
+pure functions than monads,  as the functions are already Arrows and can be used
+directly in our DSL.
+Arrows are a better fit to parallelise pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. % We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs)
+% while still having a generic and composable interface.
+We use a non-monadic interface (similar to Eden or GpH) and retain composibility.
 %
-Arrows are a useful tool for composing parallel
-programs. We have shown, that, in order to have a generic and extensible parallel Haskell, we do not have to restrict ourselves to a monadic interface. Instead, we use Arrows which are a more general concept than Monads, but still allow for powerful composition. Furthermore, we think Arrows are a better fit to parallelize pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs) while still having a generic and composable interface.
+The DSL allows for a direct parallelisation of monadic code via the Kleisli type and additionally allows to parallelise any Arrow type that has an instance for |ArrowChoice| (but some skeletons require an additional |ArrowLoop| instance).
+
+
+We have demonstrated the generality of the approach by exhibiting PArrow implementations for Eden, GpH, and the |Par| Monad. Hence, paralle programs can be ported between task parallel Haskell implementations with little or no effort. We are confident that it will be straightforward to add other task-parallel backends.
+% Parallel Arrows, as presented here, feature an implementation of the |ArrowParallel| type class for GpH Haskell, |Par| Monad, and Eden. With our approach parallel programs can be ported across these flavours with little to no effort. It is quite straightforward to add further backends.
+% %
+% %
+% Performance-wise,
+%Parallel Arrows are on par with existing parallel Haskells, as they only introduce minor overhead in some of our benchmarks.
 %
-The DSL natively allows for parallelization of monadic code via the Kleisli type and additionally allows to parallelize any Arrow type that has an instance for |ArrowChoice| (note that some skeletons require an additional |ArrowLoop| instance).
+%The benefit is, however, the
+In other words, PArrows greatly increase portability of parallel Haskell programs.
 %
-Parallel Arrows, as presented here, feature an implementation of the |ArrowParallel| type class for GpH Haskell, |Par| Monad, and Eden. With our approach parallel programs can be ported across these flavours with little to no effort. It is quite straightforward to add further backends.
 %
-%
-Performance-wise, Parallel Arrows are on par with existing parallel Haskells, as they only introduce minor overhead in some of our benchmarks.
-%
-The benefit is, however, the greatly increased portability of parallel programs.
+Our measurements of four benchmarks on both shared and distributed memory platforms shows that the generality and portability of PArrows has very low performance overheads, \ie never more than $8\% \; \pm 6.9\%$ and typically under $2\%$.
 
 %\mbcomment{mention ArrowLoop in Torus and Ring chapters}
 %\olcomment{Parrows + accelerate = love?} \olcomment{Metion port to Frege.}
@@ -25,10 +38,15 @@ The benefit is, however, the greatly increased portability of parallel programs.
 \subsection{Future Work}
 \label{sec:future-work}
 
-Our PArrows DSL can be expanded to further parallel Haskells. More specifically we target HdpH \cite{Maier:2014:HDS:2775050.2633363} for this future extension. HdpH is a modern distributed Haskell that would benefit from our Arrow notation. Further Future-aware versions of Arrow combinators can be defined. Existing combinators could also be improved.
-Arrow-based notation might enable further compiler optimisations.
+Our PArrows DSL can be expanded % to further parallel Haskells.  More specifically we target HdpH \cite{Maier:2014:HDS:2775050.2633363} for this future extension. HdpH is a modern distributed Haskell that would benefit from our Arrow notation.
+to other task parallel Haskells, and a specific target is HdpH \cite{Maier:2014:HDS:2775050.2633363}.
+Further Future-aware versions of Arrow combinators can be defined. Existing combinators could also be improved, for example a more special versions of |>>>| and |***| combinators are viable.
+%Arrow-based notation might enable further compiler optimisations, such as 
 
-More experiences with seamless porting of parallel PArrows-based programs across the backends are welcome.
-Of course, we are ourselves working on expanding both our skeleton library and the number of skeleton-based parallel programs that use our DSL to be portable across flavours of parallel Haskells.
+% More experiences with seamless porting of parallel PArrows-based programs across the backends are welcome.
+% Of course, we are ourselves working on expanding
+In ongoing work we are expanding 
+both our skeleton library and the number of skeleton-based parallel programs that use our DSL.
+% to be portable across flavours of parallel Haskells.
 It would also be interesting to see a hybrid of PArrows and Accelerate \cite{McDonell:2015:TRC:2887747.2804313}.
-Ports of our approach to other languages such as Frege, Eta, or Java directly are in an early development stage.
+Ports of our approach to other languages such as Frege, Eta, or Java directly are at an early development stage.
