@@ -63,8 +63,14 @@ rndSignificant cnt val
 
 formatOverheadForLaTeX :: Double -> String
 formatOverheadForLaTeX overhead
-   | overhead < 0 = textBFLaTeX ((showFFloat Nothing (rndSignificant 2 (overhead * 100)) "") ++ "\\%")
-   | overhead > 0 = textITLaTeX ((showFFloat Nothing (rndSignificant 2 (overhead * 100)) "") ++ "\\%")
+   | overhead < 0 = textBFLaTeX (formatPercent overhead)
+   | overhead > 0 = textITLaTeX (formatPercent overhead)
+
+formatPercent :: Double -> String
+formatPercent x = ((showFFloat Nothing (rndPercent x) "") ++ "\\%")
+
+rndPercent :: Double -> Double
+rndPercent x = (rndSignificant 2 (x * 100))
 
 main :: IO ()
 main = do
@@ -208,7 +214,7 @@ main = do
                                     ++ ","
                                     ++ (formatOverheadForLaTeX $ meanMeanOverhead $ map (overhead) diffs)
                                     ++ ","
-                                    ++ (showFFloat Nothing $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
+                                    ++ (formatPercent $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs)
                                     ++ ","
                                     ++ (showFFloat Nothing $ rndVal $ runtimeX $ maximumBy (comparing nCores) diffs) ""
                                     ++ "\n"
