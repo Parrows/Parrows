@@ -29,7 +29,7 @@ instance Monad m => Arrow (Kleisli m) where
 	first f = Kleisli (\(a,c) -> f a >>= \b -> return (b,c))
 \end{code}
 \vfill
-\caption{The definition of the |Arrow| type class and its two most typical instances.}
+\caption{The |Arrow| type class and its two most typical instances.}
 \label{fig:ArrowDefinition}
 \end{figure}
 

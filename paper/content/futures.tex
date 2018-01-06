@@ -37,7 +37,7 @@ class Future fut a conf | a conf -> fut where
     put :: (Arrow arr) => conf -> arr a (fut a)
     get :: (Arrow arr) => conf -> arr (fut a) a
 \end{code}
-\caption{Definition of the |Future| type class.}
+\caption{The |Future| type class.}
 \label{fig:future}
 \end{figure}
 Since |RD| is only a type synonym for a communication type that Eden uses internally, we have to use some wrapper classes to fit that definition, though, as Fig.~\ref{fig:RDFuture} shows. %This is due to the same reason we had to introduce a wrapper for |Strategy a| in the GpH Haskell implementation of |ArrowParallel| in Section~\ref{sec:parrows:multicore}.
@@ -58,7 +58,7 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get () >>>) fs2)
 \end{code}
-\caption{The mock-up combinator in parallel.}
+\caption{The outline parallel combinator.}
 \label{fig:someCombinatorParallel}
 \end{figure}
 In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualisation in Fig.~\ref{fig:withFutures}. One especially elegant aspect of the definition in Fig.~\ref{fig:future} is that we can specify the type of |Future| to be used per backend with full interoperability between code using different backends, without even requiring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics as can be seen in Fig.~\ref{fig:someCombinatorParallel}. Note that with our PArrows DSL we can also define default instances |Future fut a ()| for each backend similar to how |ArrowParallel arr a b ()| was defined in Section~\ref{sec:parallel-arrows}. Details can be found in Section~\ref{app:omitted}. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
