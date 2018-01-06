@@ -60,6 +60,14 @@ approach. \citeauthor{marlow2013parallel} authored a recent book in
 \paragraph{Algorithmic skeletons.}
 Algorithmic skeletons were introduced by \citet{Cole1989}.
 Early publications on this topic include \cite{darlington1993parallel,botorog1996efficient,p3l97,Gorlatch1998,Lengauer1997}. \citet{SkeletonBook} consolidated early reports on high-level programming approaches.
+Typical types of algorithmic skeletons include |map|-, |fold|-, and |scan|-based parallel programming patterns, special applications such as divide-and-conquer or topological skeletons.
+
+The |farm| skeleton \citep{Hey1990185,Eden:PPDP01,Kuchen05} is statically task-balanced parallel |map|. When tasks' durations cannot be foreseen, a dynamic load balancing (|workpool|) brings a lot of improvement \citep{Rudolph:1991:SLB:113379.113401,Eden:PPL03,Hippold2006,PADL08HMWS,Marlow2009}. For special tasks |workpool| skeletons can be extended with dynamic task creation \cite{WPEuropar06,Dinan:2009:SWS:1654059.1654113,brown2010ever}.
+%
+The |fold| (or |reduce|) skeleton was implemented in various skeleton libraries \cite{Kuchen2002,BUONO20102095,Dastgeer:2011:ASM:1984693.1984697,5361825}, as also its inverse, |scan|, \cite{Bischof2002,harris2007parallel}.
+%
+Google |map|--|reduce| is more special than just a composition of the two skeletons \cite{LAMMEL20081,Berthold2009-mr}.
+
 The effort is ongoing, including topological skeletons \cite{Eden:PARCO05}, special-purpose skeletons for computer algebra \cite{Berthold2009-fft,lobachev-phd,Lobachev2012,janjic2013space}, iteration skeletons \cite{Dieterle2013}. The idea of \citet{scscp} is to use a parallel Haskell to orchestrate further software systems to run in parallel. \citet{dieterle_horstmeyer_loogen_berthold_2016} compare the composition of skeletons to stable process networks.
 
 \paragraph{Arrows.}
