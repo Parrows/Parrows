@@ -11,11 +11,11 @@ In its purest form, parallel computation (on functions) can be looked at as the 
 
 In this section, we will implement this non-Arrow version which will later be adapted for usage in our Arrow-based parallel Haskell.
 
-There exist several parallel Haskells already. Among the most important are probably GpH  (based on |par| and |pseq| \enquote{hints}) \cite{Trinder1996,Trinder1998a}, the |Par| Monad (a monad for deterministic parallelism) \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, Eden (a parallel Haskell for distributed memory) \cite{eden,Loogen2012}, HdpH (a Template Haskell based parallel Haskell for distributed memory) \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} and LVish (a |Par| extension with focus on communication) \cite{Kuper:2014:TPE:2666356.2594312}.
+There exist several parallel Haskells already. Among the most important are probably GpH \citep[based on |par| and |pseq| \enquote{hints},][]{Trinder1996,Trinder1998a}, the |Par| Monad \citep[a monad for deterministic parallelism,][]{par-monad,Foltzer:2012:MPC:2398856.2364562}, Eden \citep[a parallel Haskell for distributed memory,][]{eden,Loogen2012}, HdpH \citep[a Template Haskell-based parallel Haskell for distributed memory,][]{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} and LVish \citep[a |Par| extension with focus on communication,][]{Kuper:2014:TPE:2666356.2594312}.
 
 As the goal of this paper is not to re-implement yet another parallel runtime, but to represent parallelism with Arrows, we base our efforts on existing work which we wrap as backends behind a common interface. For this paper we chose GpH for its simplicity, the |Par| Monad to represent a monadic DSL, and Eden as a distributed parallel Haskell.
 
-LVish and HdpH were not chosen as the former does not differ from the original |Par| Monad with regard to how we would have used it in this paper, while the latter (at least in its current form) does not comply with our representation of parallelism due to its heavy reliance on TemplateHaskell.
+LVish and HdpH were not chosen as the former does not differ from the original |Par| Monad with regard to how we would have used it in this paper, while the latter (at least in its current form) does not comply with our representation of parallelism due to its heavy reliance on Template Haskell.
 
 We will now go into some detail on GpH, the |Par| Monad and Eden, and also give their respective implementations of the non-Arrow version of |parEvalN|.
 
