@@ -1,6 +1,46 @@
 \section{Related Work}
 \label{sec:related-work}
 
+\ptcomment{The non-strict semantics of Haskell, and the fact that reduction encapsulates computations as closures, makes it relatively easy to define alternate parallelisations. A range of approaches have been explored, including data parallelism (Chakravarty et al., 2007; Keller et al.,
+2010), GPU-based approaches (Mainland & Morrisett, 2010; Svensson, 2011), software
+transactional memory (Harris et al., 2005; Perfumo et al., 2008). The Haskell–GPU bridge
+Accelerate (Chakravarty et al., 2011; Clifton-Everest et al., 2014; McDonell et al., 2015)
+deserves a special mention. <<Why does it deserve special mention?>>  Accelerate is completely orthogonal to our approach. A good survey of parallel Haskells can be found in ~\cite{Marlow2013}. 
+
+
+Our PArrow implementation uses three task parallel languages as backends: the
+GpH (Trinder et al., 1996, 1998) parallel Haskell dialect and its multicore version (Marlow
+et al., 2009), the Par Monad (Marlow et al., 2011; Foltzer et al., 2012), and Eden (Loogen
+et al., 2005; Loogen, 2012). These languages are under active development, for example a combined shared and distributed memory implementation of GpH is available (Aljabri et al., 2014,
+2015). Research on Eden includes a low-level  implementation (Berthold, 2008; Berthold et al., 2016), work on skeleton
+composition (Dieterle et al., 2016), communication (Dieterle et al., 2010a), and generation
+of process networks (Horstmeyer & Loogen, 2013). The definitions of new Eden skeletons is a specific focus (Hammond et al., 2003; Berthold
+& Loogen, 2006; Berthold et al., 2009b,c; Dieterle et al., 2010b; de la Encina et al., 2011;
+Dieterle et al., 2013; Janjic et al., 2013).
+
+Other task parallel Haskells related to Eden, GpH, and the Par Monad include the following.  
+HdpH (Maier et al., 2014; Stewart et al., 2016) is an extension of Par Monad to
+heterogeneous clusters. LVish (Kuper et al., 2014) is a communication-centred extension
+of Par Monad.}
+
+
+\paragraph{Parallel Haskells.}
+The non-strict semantics of Haskell, and the fact that reduction encapsulates computations as closures, makes it relatively easy to define alternate parallelisations. A range of approaches have been explored, including data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
+The Haskell--GPU bridge Accelerate
+\cite{Chakravarty:2011:AHA:1926354.1926358,CMCK14,McDonell:2015:TRC:2887747.2804313}
+is completely orthogonal to our approach.
+A good survey of parallel Haskells can be found in ~\cite{Marlow2013}.
+
+Our PArrow implementation uses three task parallel languages as backends: the GpH \cite{Trinder1996,Trinder1998a} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the |Par| Monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012}. These languages are under active development, for example a combined shared and distributed memory implementation of GpH is available \cite{Aljabri:2013:DIG:2620678.2620682,Aljabri2015}.
+Research on Eden includes low-level  implementation \cite{JostThesis,berthold_loidl_hammond_2016}. Skeleton composition \cite{dieterle_horstmeyer_loogen_berthold_2016},
+work on skeleton composition \cite{dieterle_horstmeyer_loogen_berthold_2016}, communication \cite{Dieterle2010}, and generation of process networks \cite{Horstmeyer2013}. The definitions of new Eden skeletons is a specific focus \cite{doi:10.1142/S0129626403001380,Eden:PARCO05,Berthold2009-mr,Berthold2009-fft,dieterle2010skeleton,delaEncina2011,Dieterle2013,janjic2013space}.
+
+Other task parallel Haskells related to Eden, GpH, and the |Par| Monad include the following.  
+HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an extension of |Par| Monad to
+heterogeneous clusters. LVish \cite{Kuper:2014:TPE:2666356.2594312} is a communication-centred extension
+of |Par| Monad.
+
+\olcomment{OLD:
 \paragraph{Parallel Haskells.}
 Of course, the three parallel Haskell flavours we use as backends: the GpH \cite{Trinder1996,Trinder1998a} parallel Haskell dialect and its multicore version \cite{Marlow2009}, the |Par| Monad \cite{par-monad,Foltzer:2012:MPC:2398856.2364562}, and Eden \cite{eden,Loogen2012} are related to this work. We use these languages as backends: our DSL can switch from one to another at user's command.
 
@@ -8,9 +48,14 @@ HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an exte
 %
 Further parallel Haskell approaches include pH \cite{ph-book}, research work done on distributed variants of GpH \cite{Trinder1996,Aljabri:2013:DIG:2620678.2620682,Aljabri2015}, and low-level Eden implementation \cite{JostThesis,berthold_loidl_hammond_2016}. Skeleton composition \cite{dieterle_horstmeyer_loogen_berthold_2016}, communication \cite{Dieterle2010}, and generation of process networks \cite{Horstmeyer2013} are recent in-focus research topics in Eden. This also includes the definitions of new skeletons \cite{doi:10.1142/S0129626403001380,Eden:PARCO05,Berthold2009-mr,Berthold2009-fft,dieterle2010skeleton,delaEncina2011,Dieterle2013,janjic2013space}.
 
-More different approaches include data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
+Alternative approaches include data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
 %
-The Haskell--GPU bridge Accelerate \cite{Chakravarty:2011:AHA:1926354.1926358,CMCK14,McDonell:2015:TRC:2887747.2804313} deserves a special mention. Accelerate is completely orthogonal to our approach. \citeauthor{marlow2013parallel} authored a recent book in \citeyear{marlow2013parallel} on parallel Haskells.
+The Haskell--GPU bridge Accelerate
+\cite{Chakravarty:2011:AHA:1926354.1926358,CMCK14,McDonell:2015:TRC:2887747.2804313}
+deserves a special mention. Accelerate is completely orthogonal to our
+approach. \citeauthor{marlow2013parallel} authored a recent book in
+\citeyear{marlow2013parallel} on parallel Haskells.
+}
 
 \paragraph{Algorithmic skeletons.}
 Algorithmic skeletons were introduced by \citet{Cole1989}.
