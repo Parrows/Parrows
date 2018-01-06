@@ -158,10 +158,10 @@ Quite often the zero value lies in the error margin of the mean overhead. This m
 
 \subsubsection{Shared memory}
 
-\paragraph{Speedup}
+\paragraph{Speedup.}
 The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (Par Monad), 8.14 (Eden CP) for 16 cores and 1000 Sudokus. In contrast to Rabin--Miller, here the |GpH| backend seems to be the best of all, while Rabin--Miller profited most from Eden CP (i.e., Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for the Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
 
-\paragraph{Overhead}
+\paragraph{Overhead.}
 
 For the shared memory \rmtest benchmark, implemented with PArrows using Eden CP, GpH, and |Par| Monad backends, the overhead values are within single percents range, but also negative overhead (\ie PArrows are better) and larger error margins happen. To give a few examples, the overhead for Eden~CP with input value $2^{11213}-1$, 32 tasks, and 16 cores is $1.5\%$, but the error margin is around $5.2\%$! Same backend in the same setting with 64 tasks reaches $-0.2\%$ overhead, PArrows apparently fare better than Eden -- but the error margin of $1.9\%$ disallows this interpretation. We focus now on significant overhead values. To name a few: $0.41\%\; \pm 7\cdot 10^{-2}\%$ for Eden~CP and 64 tasks at 4 cores, $4.7\% \; \pm 0.72\%$ for GpH, 32 tasks, 8 cores, $0.34\% \; \pm 0.31\%$ for |Par| Monad at 4 cores with 64 tasks. The worst significant overhead was  GpH backend with $8\% \; \pm 6.9\%$ at 16 cores with 32 tasks and input value $2^{11213}-1$. In other words, we notice no major slow-down through PArrows here.
 
@@ -171,7 +171,7 @@ The Gentleman multiplication with Eden CP shows a minor significant overhead of 
 
 \subsubsection{Distributed Memory}
 
-\paragraph{Speedup}
+\paragraph{Speedup.}
 The speedup of distributed memory Rabin--Miller benchmark with PArrows and distributed Eden backend showed an almost 
 linear speedup excepting around 192 cores where an unfortunate task distribution reduces performance.
 As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 with PArrrows at 256 cores (vs. 207.7 with pure Eden). Because of memory limitations, the speedup of Jacobi sum test for large inputs (such as $2^{4253}-1$) could be measured only in a massively distributed setting. PArrows improved there from \SI{9193}{\second} (at 128 cores) to \SI{1649}{\second} (at 256 cores). A~scaled-down version with input $2^{3217}-1$ stagnates the speedup at about 11 for both PArrows and Eden for more than 64 cores. There is apparently not enough work for that many cores. The Gentleman test with input 4096 had an almost linear speedup first, then plummeted between 128 and 224 cores, and recovered at 256 cores with speedup of~129.
@@ -186,7 +186,7 @@ As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 
 	\label{fig:rabinMillerDistSpeedup}
 \end{figure}
 
-\paragraph{Overhead}
+\paragraph{Overhead.}
 We use our mean overhead quality measure and the notion of significance also for distributed memory benchmarks. The mean overhead of Rabin-Miller test in the distributed memory setting ranges from $0.29\%$ to $-2.8\%$ (last value in favour of PArrows), but these values are not significant with error margins $\pm 0.8\%$ and $\pm 2.9\%$ correspondingly. A sole significant (by a very low margin) overhead is $0.35\% \; \pm 0.33\%$ at 64 cores.
 We measured the mean overhead for Jacobi benchmark for an input of $2^{3217}-1$ for up to 256 cores.
 We reach the flattering value $-3.8\% \; \pm 0.93\%$ at 16 cores in favour of PArrows, it was the sole significant overhead value. The  value for 256 cores was $0.31\% \; \pm 0.39\%$.
