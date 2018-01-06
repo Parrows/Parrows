@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import Util
@@ -12,6 +13,8 @@ import Data.CSV
 import Data.List
 
 import Data.Ord
+
+import Data.Int
 
 import Statistics.Sample as S hiding(stdDev)
 import Data.Vector(fromList)
@@ -48,10 +51,20 @@ textBFLaTeX str = "\"\\textbf{" ++ str ++ "}\""
 textITLaTeX :: String -> String
 textITLaTeX str = "\"\\textit{" ++ str ++ "}\""
 
+rndSignificant :: Int -> Double -> Double
+rndSignificant cnt val
+      | val == 0.0 = 0.0
+      | otherwise = (fromIntegral shifted) / magnitude
+        where d::Double = fromIntegral (ceiling (logBase 10 (if val < 0 then -val else val)))
+              power::Int64 = (fromIntegral cnt) - (floor d)
+
+              magnitude::Double = fromIntegral (10 ^ power)
+              shifted::Int64 = (round (val * magnitude))
+
 formatOverheadForLaTeX :: Double -> String
 formatOverheadForLaTeX overhead
-   | overhead < 0 = textBFLaTeX (showFFloat Nothing overhead "")
-   | overhead > 0 = textITLaTeX (showFFloat Nothing overhead "")
+   | overhead < 0 = textBFLaTeX ((showFFloat Nothing (rndSignificant 2 (overhead * 100)) "") ++ "\\%")
+   | overhead > 0 = textITLaTeX ((showFFloat Nothing (rndSignificant 2 (overhead * 100)) "") ++ "\\%")
 
 main :: IO ()
 main = do
@@ -141,7 +154,7 @@ main = do
             else
                 do
                     let maybeDiffs = zipWith diff speedups1 speedups2
-                        diffs = traceShowId $ catMaybes maybeDiffs
+                        diffs = {-traceShowId $-} catMaybes maybeDiffs
                     if (length diffs /= length maybeDiffs)
                     then
                         putStrLn $ "parse Error!"
@@ -175,7 +188,9 @@ main = do
                                                     runtimeY = runtimeY x
                                                 }
 
-                                rndVal x = (fromIntegral $ round (x * 1000)) / 1000
+                                rndVal = rndSignificant 3
+
+                                meanMeanOverhead = S.mean . fromList
 
                                 roundedGeometricMean = rndVal . S.geometricMean . fromList
 
@@ -191,7 +206,7 @@ main = do
                                     --
                                     ++ (showFFloat Nothing $ rndVal $ factorStdDev $ maximumBy (comparing factorStdDev) diffs) ""
                                     ++ ","
-                                    ++ (formatOverheadForLaTeX $ roundedMean $ map (overhead) diffs)
+                                    ++ (formatOverheadForLaTeX $ meanMeanOverhead $ map (overhead) diffs)
                                     ++ ","
                                     ++ (showFFloat Nothing $ rndVal $ stdDevForOverhead $ maximumBy (comparing stdDevForOverhead) diffs) ""
                                     ++ ","
