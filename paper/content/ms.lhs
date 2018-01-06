@@ -20,8 +20,8 @@
 %\newcommand\rch[1]{$\longrightarrow\rlap{$#1$}$\hspace{1em}}
 %\newcommand\lra{\ensuremath{\quad\longrightarrow\quad}}
 
-\jdate{August 2017}
-\pubyear{2017}
+\jdate{January 2018}
+\pubyear{2018}
 \pagerange{\pageref{firstpage}--\pageref{lastpage}}
 \doi{...}
 
@@ -31,18 +31,18 @@
 %include prelude.tex
 
 
-\title{Arrows for Parallel Computations}
+\title{Arrows for Parallel Computation}
 \ifthenelse{\boolean{anonymous}}{%
 \author{Submission ID xxxxxx}
 }{%
 %\author{Martin Braun, Phil Trinder, and Oleg Lobachev}
 %\affiliation{University Bayreuth, Germany and Glasgow University, UK}
- \author[M. Braun, O. Lobachev and P. Trinder]%
-        {MARTIN BRAUN\\
+ \author[M. Braun, O. Lobachev, and P. Trinder]%
+        {\textls*{MARTIN BRAUN}\\
          University Bayreuth, 95440 Bayreuth, Germany\\
-		 OLEG LOBACHEV\\
+		 \textls*{OLEG LOBACHEV}\\
 		 University Bayreuth, 95440 Bayreuth, Germany\\
-		 \and\ PHIL TRINDER\\
+		 \and\ \textls*{PHIL TRINDER}\\
 		 Glasgow University, Glasgow, G12 8QQ, Scotland}
 }% end ifthenelse
 
