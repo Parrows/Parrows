@@ -222,7 +222,7 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
           sm2' = transpose sm2
           sms = zipWith prMMTr (sm1:sm1s) (sm2':sm2s)
           result = foldl1' matAdd sms
-\end{code}
+\end{code} %$
 \caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMMTr| calculates $AB^T$ and is used for the (sequential) calculation in the chunks. |splitMatrix| splits the Matrix into chunks. |matAdd| calculates $A + B$. Omitted definitions can be found in \ref{fig:torus_example_rest}. }
 \label{fig:torusMatMult}
 \end{figure}
@@ -231,14 +231,14 @@ If we compare the trace from a call using our Arrow definition of the torus (Fig
 \olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[Matrix Multiplication with |torus| (PArrows)]{Matrix Multiplication with |torus| (PArrows).}
+	\caption[Matrix multiplication with |torus| (PArrows)]{Matrix Multiplication with |torus| (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[tb]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
-	\caption[Matrix Multiplication with |torus| (Eden)]{Matrix Multiplication with |torus| (Eden).}
+	\caption[Matrix multiplication with |torus| (Eden)]{Matrix Multiplication with |torus| (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
 

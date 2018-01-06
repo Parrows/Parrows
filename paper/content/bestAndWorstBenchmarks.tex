@@ -8,7 +8,7 @@
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores (s)} \\ \hline \\
 	\multirow{3}{*}{\sudokutest 1000}
 	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
@@ -34,7 +34,7 @@ zu viele leere Zeilen in der Tabelle?}
 \centering
 \begingroup\catcode`"=9
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
-	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 256 cores} \\ \hline \\
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 256 cores (s)} \\ \hline \\
 	\multirow{1}{*}{\torustest 4096}
 	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\

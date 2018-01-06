@@ -3,9 +3,10 @@
 \section{Performance results and discussion}
 \label{sec:benchmarks}
 
-In the following section, we describe the benchmarks we conducted of our parallel DSL and algorithmic skeletons.
-We start by explaining the hardware and software stack and also elaborate on which benchmarks programs and parallel Haskells were used in which setting and why. Before we go into detail on the benchmarks we
-also shortly address hyper-threading and why we do not use it in our benchmarks. Finally, we show that PArrows hold up in terms of performance when compared to the original parallel Haskells used as backends in this paper, starting with the shared-memory variants (GpH, |Par| Monad and Eden CP) and concluding with Eden as a distributed backend.
+The preceding section has shown that PArrows are expressive. This section evaluates the performance overhead of this compositional abstraction in comparison to  GpH and the |Par| Monad on shared memory architectures and Eden on  a distributed memory cluster.
+We start by explaining the hardware and software stack and outline the benchmark programs, and motivations for choosing them. Before we go into detail on the benchmarks we
+also shortly address hyper-threading and why we do not use it in our
+benchmarks. Our results show that PArrows hold up in terms of performance when compared to the original parallel Haskells, starting with the shared-memory variants (GpH, |Par| Monad and Eden~CP) and concluding with Eden in a distributed memory setting.
 
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
@@ -47,12 +48,11 @@ xmax=#6]
 \end{tikzpicture}
 }
 
-\subsection{Preliminaries}
+\subsection{Measurement Platform}
 
-\subsubsection{Hardware and Software used}
+\subsubsection{Hardware and Software}
 
-Benchmarks were run both in a shared and in a distributed
-memory setting. All benchmarks were done on the Glasgow GPG Beowulf cluster, consisting of
+The benchmarks are executed  both in a shared and in a distributed memory setting using the Glasgow GPG Beowulf cluster, consisting of
 16 machines with 2 Intel\SymbReg~Xeon\SymbReg~E5-2640 v2 and 64 GB of DDR3 RAM each. Each processor has 8 cores and 16 (hyper-threaded) threads with a base frequency of 2 GHz and a turbo frequency of 2.50 GHz. This results in a total of 256 cores and 512 threads for the whole cluster. The operating system was Ubuntu 14.04 LTS with Kernel 3.19.0-33. Non-surprisingly, we found that hyper-threaded 32 cores do not behave in the same manner as real 16 cores (numbers here for a single machine). We disregarded the hyper-threading ability in most of the cases.
 
 Apart from Eden, all benchmarks and libraries were compiled with Stack's\footnote{see \url{https://www.haskellstack.org/}} lts-7.1 GHC compiler which is equivalent to a standard GHC 8.0.1 with the base package in version 4.9.0.0. Stack itself was used in version 1.3.2. For GpH in its Multicore variant we used the the parallel package in version 3.2.1.0\footnote{see \url{https://hackage.haskell.org/package/parallel-3.2.1.0}}, while for the |Par| Monad we used monad-par in version 0.3.4.8\footnote{see \url{https://hackage.haskell.org/package/monad-par-0.3.4.8}}. For all Eden tests, we used its GHC-Eden compiler in version 7.8.2\footnote{see \url{http://www.mathematik.uni-marburg.de/~eden/?content=build_eden_7_&navi=build}} together with OpenMPI 1.6.5\footnote{see \url{https://www.open-mpi.org/software/ompi/v1.6/}}.
@@ -65,7 +65,7 @@ distributed memory software.
 
 \subsubsection{Benchmarks}
 
-We used multiple tests that originated from different
+We measure four benchmarks from different
 sources. Most of them are parallel mathematical computations, initially
 implemented in Eden. Table~\ref{tab:benches} summarises.
 
@@ -82,7 +82,7 @@ Name & Area & Type & Origin & Source \\
 \rmtest & Mathematics & \ensuremath{\Varid{parMap}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
 \jacobitest & Mathematics & \ensuremath{\Varid{workpool}\mathbin{+}\Varid{reduce}} & Eden & \citet{Lobachev2012}\\
 \torustest & Mathematics & \ensuremath{\Varid{torus}} & Eden & \citet{Eden:SkeletonBookChapter02}\\
-\sudokutest & Puzzle & \ensuremath{\Varid{parMap}} & \ensuremath{\Conid{Par}} Monad & \citet{par-monad}\tablefootnote{actual code from: \url{http://community.haskell.org/\~simonmar/par-tutorial.pdf and https://github.com/simonmar/parconc-examples}}\\
+\sudokutest & Puzzle & \ensuremath{\Varid{parMap}} & \ensuremath{\Conid{Par}} Monad & \citet{par-monad}\tablefootnote{actual code from: \url{http://community.haskell.org/\~simonmar/par-tutorial.pdf} and \url{https://github.com/simonmar/parconc-examples}}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -146,11 +146,13 @@ While this shows that hyper-threading can be of benefit in scenarios similar to 
 
 \subsection{Benchmark results}\label{sec:benchmarkResults}
 
-In the following paragraphs we will go into detail on how well PArrows perform when compared to versions of the benchmark programs implemented with the original parallel Haskells that were used in the backends. We start with the definition of an Overhead to compare both PArrows-enabled and standard benchmark implementations. We continue comparing speedups and overheads for the shared memory backends and then study OpenMPI variants of the Eden-enabled backend as a representative of a distributed memory backend. We plot all speedup curves and all overhead values in the supplementary materials.
+We compare the PArrow performance with direct implementations of the benchmarks in Eden, GpH and the |Par| Monad.
+We start with the definition of mean overhead to compare both PArrows-enabled and standard benchmark implementations. We continue comparing speedups and overheads for the shared memory backends and then study OpenMPI variants of the Eden-enabled backend as a representative of a distributed memory backend. We plot all speedup curves and all overhead values in the supplementary materials.
 
 \subsubsection{Defining overhead}
 
-We compared the overhead of our PArrows implementations to the original parallel Haskells. We basically implemented the test programs both in PArrows and in traditional style, benchmarked both and will now compare the mean overhead, i.e. the \textit{relative} difference between both benchmarks with same settings. The error margin of the time measurements, supplied by criterion package, is computed together with the mean overhead computation. 
+We compare the mean overhead, \ie the mean of relative differences between the PArrow and direct benchmark implementations executed multiple times with the same settings.
+The error margins of the time measurements, supplied by criterion package\footnote{\url{https://hackage.haskell.org/package/criterion-1.1.1.0}}, yield the error margin of the mean overhead. 
 
 Quite often the zero value lies in the error margin of the mean overhead. This means that even though we have measured some difference (against or even in favour of PArrows), it could be merely the error margin of the benchmarks and the difference might not be existent. We are mostly interested in the cases where above issue does not persist, we call them \emph{significant}. We often denote the error margin with $\pm$ after the mean overhead value.
 
@@ -170,7 +172,9 @@ The Gentleman multiplication with Eden CP shows a minor significant overhead of 
 \subsubsection{Distributed Memory}
 
 \paragraph{Speedup}
-The speedup of distributed memory Rabin--Miller benchmark with PArrows and distributed Eden backend showed an almost linear speedup sans some issues in the middle because of unfortunate task distribution. As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 with PArrrows at 256 cores (vs. 207.7 with pure Eden). We managed to measure the speedup of Jacobi sum test for sufficient large inputs like $2^{4253}-1$ only in a massively distributed setting, because of memory limitations. We improved there from 9193 seconds (128 cores) to 1649 seconds (256 cores) in our PArrows version. A~scaled-down version with input $2^{3217}-1$ stagnates the speedup at about 11 for both PArrows and Eden for more than 64 cores. There is apparently not enough work for that many cores. The Gentleman test with input 4096 had an almost linear speedup first, then plummeted between 128 and 224 cores, and recovered at 256 cores with speedup of 129.
+The speedup of distributed memory Rabin--Miller benchmark with PArrows and distributed Eden backend showed an almost 
+linear speedup excepting around 192 cores where an unfortunate task distribution reduces performance.
+As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 with PArrrows at 256 cores (vs. 207.7 with pure Eden). Because of memory limitations, the speedup of Jacobi sum test for large inputs (such as $2^{4253}-1$) could be measured only in a massively distributed setting. PArrows improved there from \SI{9193}{\second} (at 128 cores) to \SI{1649}{\second} (at 256 cores). A~scaled-down version with input $2^{3217}-1$ stagnates the speedup at about 11 for both PArrows and Eden for more than 64 cores. There is apparently not enough work for that many cores. The Gentleman test with input 4096 had an almost linear speedup first, then plummeted between 128 and 224 cores, and recovered at 256 cores with speedup of~129.
 
 \begin{figure}[ht]
 	\centering
