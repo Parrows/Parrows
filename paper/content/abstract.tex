@@ -1,14 +1,12 @@
 \begin{abstract}
-Arrows are a general interface for computation and therefore form an alternative to Monads for API design. We express parallelism using this concept in a novel way: We define an Arrow-based language for parallelism and implement it using multiple parallel Haskells.
-In this manner we are able to bridge across various parallel Haskells.
+Arrows are a general interface for computation and an alternative to Monads for API design. In contrast to Monad based parallelism, we explore the use of Arrows for specifying generalised parallelism. Specifically, we define an Arrow-based language and implement it using multiple parallel Haskells.
 
-Additionally, using these parallel Arrows (PArrows) has the benefit of being portable across multiple parallel Haskell implementations.
-Furthermore, as each parallel computation is an Arrow, PArrows can be readily composed and transformed as such.
-In order to allow for more sophisticated communication schemes between computation nodes in distributed systems we utilise the concept of Futures to wrap existing direct communication concepts in backends.
+As each parallel computation is an Arrow, such parallel Arrows (PArrows) can be readily composed and transformed as such.
+To allow for more sophisticated communication schemes between computation nodes in distributed systems we utilise the concept of Futures to wrap direct communication.
 
-To show that PArrows have similar expressive power as existing parallel languages, we also implement several parallel skeletons. 
-Benchmarks show that our framework does not induce any notable overhead
-performance-wise. We finally conclude that Arrows turn out to be a useful tool for composing parallel programs and that our particular approach results in programs that are portable across multiple backends.
+To show that PArrows have similar expressive power as existing parallel languages, we implement several skeletons and 4 benchmarks. 
+Benchmarks show that our framework does not induce any notable performance overhead. We conclude that Arrows have considerable potential for composing parallel programs, and for producing programs that can execute on multiple parallel language implementations. 
+
 \olcomment{Summarise conclusions}
 
 \mbcomment{Jedes Kapitel soll einmal ins Abstract. Conclusions sollen mit ins Abstract}
