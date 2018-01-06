@@ -175,7 +175,7 @@ main = do
                                                     runtimeY = runtimeY x
                                                 }
 
-                                rndVal x = (fromIntegral $ round (x * 100000)) / 100000
+                                rndVal x = (fromIntegral $ round (x * 1000)) / 1000
 
                                 roundedGeometricMean = rndVal . S.geometricMean . fromList
 
