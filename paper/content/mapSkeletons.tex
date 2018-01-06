@@ -1,21 +1,20 @@
 \section{Skeletons}
 \label{sec:skeletons}
-Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations. While there are many possible skeletons to implement, here we only regard in detail some |map|-based and topological skeletons to demonstrate the power of PArrows.
+Now we have developed Parallel Arrows far enough to define some useful algorithmic skeletons that abstract typical parallel computations. While there are many possible skeletons to implement, we demonstrate the expressive power of PArrows here using four |map|-based and three toplogical skeletons.
 %%% \FloatBarrier
 \subsection{|map|-based Skeletons}
 \label{sec:map-skeletons}
-We start with |map|-based skeletons. The essential differences between the skeletons presented here are in terms of order of evaluation and work distribution but still provide the same output of a standard |map|. 
+The essential differences between the mapping skeletons presented here are in terms of order of evaluation and work distribution but still provide the same semantics as a sequential |map|.
 
 \paragraph{Parallel |map| and laziness.}
 The |parMap| skeleton (Figs.~\ref{fig:parMapImg},~\ref{fig:parMap}) is probably the most common skeleton for parallel programs. We can implement it with |ArrowParallel| by repeating an Arrow |arr a b| and then passing it into |parEvalN| to obtain an Arrow |arr [a] [b]|.
 Just like |parEvalN|, |parMap| traverses all input Arrows as well as the inputs.
-Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. The code of these two skeletons is quite straightforward, we show it in Appendix \ref{app:omitted} in Figs.\ref{fig:parMap} and \ref{fig:parMapStream}.
+Because of this, it has the same restrictions as |parEvalN| as compared to |parEvalNLazy|. So it makes sense to also have a |parMapStream| (Figs.~\ref{fig:parMapStreamImg},~\ref{fig:parMapStream}) which behaves like |parMap|, but uses |parEvalNLazy| instead of |parEvalN|. Implementing these skeletons is straightforward as in Appendix \ref{app:omitted} in Figs.\ref{fig:parMap} and \ref{fig:parMapStream}.
 
 \begin{figure}[thb]
 %farm
 \includegraphics[scale=0.7]{images/farm}
-\caption{Schematic depiction of a |farm|, a statically
-      load-balanced |parMap|.}
+\caption{|farm| depiction.}
 \label{fig:farmImg}
 
 \begin{code}
@@ -27,12 +26,12 @@ farm conf numCores f =
 	parEvalN conf (repeat (mapArr f)) >>>
 	shuffle
 \end{code}
-\caption{The definition of |farm|.}
+\caption{|farm| definition.}
 \label{fig:farm}
 
 %farmChunk
 \includegraphics[scale=0.7]{images/farmChunk}
-\caption{Schematic depiction of |farmChunk|.}
+\caption{|farmChunk| depiction.}
 \label{fig:farmChunkImg}
 \end{figure}
 

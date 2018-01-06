@@ -47,7 +47,7 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> loopParEvalN conf fs)) >>>
     arr last
 \end{code}
-\caption{A~first implementation of the |pipe| skeleton expressed with parallel Arrows. Note that the use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |evalN|.}
+\caption{Simple |pipe| skeleton. The use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |evalN|.}
 \label{fig:pipeSimple}
 \end{figure}
 
@@ -68,7 +68,7 @@ unliftFut :: (Arrow arr, Future fut a conf, Future fut b conf) =>
 	conf -> arr (fut a) (fut b) -> arr a b
 unliftFut conf f = put conf >>> f >>> get conf
 \end{code}
-\caption{Final definition of the |pipe| skeleton with Futures.}
+\caption{|pipe| skeleton definition with Futures.}
 \label{fig:pipe}
 \end{figure}
 
@@ -114,7 +114,7 @@ Note that extensive use of |pipe2| over |pipe| with a hand-written combination d
 \subsubsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
 	\includegraphics[scale=0.75]{images/ring}
-	\caption{Schematic depiction of the ring skeleton.}
+	\caption{|ring| skeleton depiction.}
 	\label{fig:ringImg}
 \end{figure}
 Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}} (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function |[i] -> [o]| with a ring of nodes that communicate with each other. Its input is a node function |i -> r -> (o, r)| in which |r| serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels, the so called \enquote{remote data}. We depict it in Appendix, Fig.~\ref{fig:ringEden}.
@@ -148,14 +148,14 @@ ring conf f =
         arr unzip) >>>
     postLoopParEvalN conf (repeat (arr id))
 \end{code}
-\caption{Definition of the |ring| skeleton.}
+\caption{|ring| skeleton definition.}
 \label{fig:ringFinal}
 \end{figure}
 
 \subsubsection{Torus skeleton}\label{sec:torus}
 \begin{figure}
 	\includegraphics[scale=0.75]{images/torus}
-	\caption{Schematic depiction of the |torus| skeleton.}
+	\caption{|torus| skeleton depiction.}
 	\label{fig:ringTorusImg}
 \end{figure}
 If we take the concept of a |ring| from Section~\ref{sec:ring} one dimension further, we obtain a |torus| skeleton (Fig.~\ref{fig:ringTorusImg},~\ref{fig:torus}). Every node sends and receives data from horizontal and vertical neighbours in each communication round.
@@ -199,7 +199,7 @@ ptorus conf f =
 	f >>>
 	arr (\ ~(d, a, b) -> (d, put conf a, put conf b))
 \end{code} % $
-\caption{Definition of the |torus| skeleton. The definitions of |lazyzip3|, |uncurry3| and |threetotwo| have been omitted and can be found in Fig.~\ref{fig:lazyzip3etc}}.
+\caption{|torus| skeleton definition. |lazyzip3|, |uncurry3| and |threetotwo| definitions are in Fig.~\ref{fig:lazyzip3etc}}.
 \label{fig:torus}
 \end{figure}
 As an example of using this skeleton, \citet{Eden:SkeletonBookChapter02} showed the matrix multiplication using the Gentleman algorithm (\citeyear{Gentleman1978}). An adapted version can be found in Fig.~\ref{fig:torusMatMult}.

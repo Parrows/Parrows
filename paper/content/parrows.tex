@@ -1,8 +1,8 @@
 \section{Parallel Arrows}
 \label{sec:parallel-arrows}
-Arrows are a general interface to computation. Here we introduce special Arrows as a general interface to \textit{parallel computations}. First, we present the |ArrowParallel| type class and explain the reasoning behind it. Then, we discuss some implementations using existing parallel Haskells. Finally, we explain why using Arrows for expressing parallelism is beneficial.
+While Arrows are a general interface to computation, we introduce here specialised Arrows as a general interface to \textit{parallel computations}. We present the |ArrowParallel| type class and explain the reasoning behind it before discussing some parallel Haskell implementations and basic extensions.
 \subsection{The ArrowParallel type class}
-A~parallel computation (on functions) in its purest form can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Section~\ref{sec:parEvalNIntro}).
+A~parallel computation (on functions) can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Section~\ref{sec:parEvalNIntro}).
 Translating this into Arrow terms gives us a new operator |parEvalN| that lifts a list of Arrows |[arr a b]| to a parallel Arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
 This combinator is similar to |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
 % \begin{figure}[h]
@@ -28,7 +28,7 @@ Sometimes parallel Haskells require or allow for additional configuration parame
 class Arrow arr => ArrowParallel arr a b conf where
 	parEvalN :: conf -> [arr a b] -> arr [a] [b]
 \end{code}
-Note that by restricting the implementations of our backends to a specific |conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one.
+By restricting the implementations of our backends to a specific |conf| type, we also get interoperability between backends for free. We can parallelize one part of a program using one backend, and parallelize the next with another one.
 % \caption{parEvalN Arrow combinator in the final version of the ArrowParallel typeclass}
 % \label{fig:parEvalNArrowTypeClassFinal}
 % \end{figure}
@@ -48,13 +48,13 @@ instance (NFData b, ArrowChoice arr) =>
         evalN fs >>>
         arr (withStrategy (parList strat))
 \end{code}% $ %% formatting
-\caption{The |ArrowParallel| instance for the GpH backend.}
+\caption{GpH |ArrowParallel| instance.}
 \label{fig:ArrowParallelMulticore}
 \end{figure}
 
 \subsubsection{|Par| Monad}
 \olcomment{introduce a newcommand for par-monad, "Arrows", "parrows" and replace all mentions to them to ensure uniform typesetting \done, we write Arrows. also "Monad"? \done}
-Just like for GpH we can easily lift the definition of |parEvalN| for the |Par| Monad to Arrows in Fig.~\ref{fig:ArrowParallelParMonad}. To start off, we define the |Strategy a| and |Conf a| type so we can have a configurable instance of ArrowParallel:
+As for GpH we can easily lift the definition of |parEvalN| for the |Par| Monad to Arrows in Fig.~\ref{fig:ArrowParallelParMonad}. To start off, we define the |Strategy a| and |Conf a| type so we can have a configurable instance of ArrowParallel:
 \begin{code}
 type Strategy a = a -> Par (IVar a)
 data Conf a = Conf (Strategy a)
@@ -68,7 +68,7 @@ instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
 \end{code} %$ %% formatting
-\caption{ArrowParallel instance for the Par Monad backend.}
+\caption{|Par| Monad |ArrowParallel| instance.}
 \label{fig:ArrowParallelParMonad}
 \end{figure}
 
@@ -83,28 +83,21 @@ class (Arrow arr) => ArrowUnwrap arr where
 % \label{fig:ArrowUnwrap}
 % \end{figure}
 % We don't do it here
-, we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions: % (Fig.~\ref{fig:ArrowParallelEdenFns})
-% \begin{figure}[h]
+we avoid doing so for aesthetic reasons. For now, we just implement |ArrowParallel| for normal functions and the Kleisli type in Fig.~\ref{fig:ArrowParallelEden}, where |Conf| is simply defined as |data Conf = Nil| since Eden does not have a configurable |spawnF| variant. % (Fig.~\ref{fig:ArrowParallelEdenFns})
+\begin{figure}[t]
 \begin{code}
 instance (Trans a, Trans b) => ArrowParallel (->) a b Conf where
     parEvalN _ = spawnF
-\end{code}
-% \caption{ArrowParallel instance for functions in the Eden backend}
-% \label{fig:ArrowParallelEdenFns}
-% \end{figure}
-and the Kleisli type: % (Fig.~\ref{fig:ArrowParallelEdenKleisli}).
-% \begin{figure}[h]
-\begin{code}
+
 instance (ArrowParallel (->) a (m b) Conf,
   Monad m, Trans a, Trans b, Trans (m b)) =>
   ArrowParallel (Kleisli m) a b conf where
     parEvalN conf fs = arr (parEvalN conf (map (\(Kleisli f) -> f) fs)) >>>
                        Kleisli sequence
-\end{code}
-where |Conf| is simply defined as |data Conf = Nil| since Eden does not have a configurable |spawnF| variant.
-% \caption{ArrowParallel instance for the Kleisli type in the Eden backend}
-% \label{fig:ArrowParallelEdenKleisli}
-% \end{figure}
+\end{code} %$ %% formatting
+\caption{Eden |ArrowParallel| instance.}
+\label{fig:ArrowParallelEden}
+\end{figure}
 
 \subsubsection{Default configuration instances}
 While the configurability in the instances of the |ArrowParallel| instances above is nice, users probably would like to have proper default configurations for many parallel programs as well. These can also easily be defined as we can see by the example of the default implementation of |ArrowParallel| for the GpH backend:
@@ -121,6 +114,6 @@ stratToConf :: [arr a b] -> Strategy b -> Conf b
 stratToConf _ strat = Conf strat
 \end{code}
 
-The other backends have similarly structured implementations which we do not discuss here for the sake of brevity. Also note that we can only have one instance of |ArrowParallel arr a b ()| present at a time, which should not be a problem, though.
+The other backends have similarly structured implementations which we do not discuss here for the sake of brevity. We can, however, only have one instance of |ArrowParallel arr a b ()| present at a time, which should not be a problem, though.
 
-Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the data-flow between the Arrows, now that we have seen that Arrows are capable of expressing parallelism. We do however explain new concepts with more details if required for better understanding.
+Up until now we discussed Arrow operations more in detail, but in the following sections we focus more on the data-flow between the Arrows, now that we have seen that Arrows are capable of expressing parallelism. We do explain new concepts with more details if required for better understanding, though.
