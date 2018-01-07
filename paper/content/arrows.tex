@@ -79,7 +79,7 @@ instance Monad m => Arrow (Kleisli m) where
 \end{figure}
 Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): |second|, |***| and |&&&|. 
 |second| is the mirrored version of |first| (Appendix~\ref{utilfns}).
-|***| combines |first| and |second| to handle two inputs in one arrow, and is defined as follows:
+The |***| function combines |first| and |second| to handle two inputs in one arrow, and is defined as follows:
 % \begin{figure}[h]
 \begin{code}
 (***) :: Arrow arr => arr a b -> arr c d -> arr (a, c) (b, d)
@@ -105,8 +105,8 @@ add :: Arrow arr => arr a Int -> arr a Int -> arr a Int
 add f g = f &&& g >>> arr (\(u, v) -> u + v)
 \end{code}
 
-As we can rewrite the monadic bind operation |(>>=)| with only the Kleisli type into |m a -> Kleisli m a b -> m b|, but not with a general Arrow |arr a b|, we can intuitively get an idea of why Arrows must be a generalisation of Monads. While this also means that a general Arrow can not express everything a Monad can, the Parser example shows that this trade-off is worth it in some cases.
+As we can rewrite the monadic bind operation |(>>=)| with only the Kleisli type into |m a -> Kleisli m a b -> m b|, but not with a general Arrow |arr a b|, we can intuitively get an idea of why Arrows must be a generalisation of Monads. While this also means that a general Arrow can not express everything a Monad can, \citet{HughesArrows} shows in his parser example that this trade-off is worth it in some cases.
 
 In this paper we will show that parallel computations can be expressed with this more general interface of Arrows without requiring Monads. We also do not restrict the compatible Arrows to ones which have |ArrowApply| instances but instead only require instances for |ArrowChoice| (for if-then-else constructs) and |ArrowLoop| (for looping). Because of this, we have a truly more general interface as compared to a monadic one.
 
-While we could have based our DSL on Profunctors as well, we chose Arrows \mbcomment{cite missing?}. for this paper since they they allow for a more direct way of thinking about parallelism than general Profunctors because of their composability. However, they are a promising candidate for future improvements of our DSL. Some Profunctors, especially ones supporting a composition operation, choice, and looping, can already be adapted to our interface as shown in Appendix~\ref{app:profunctorArrows}.
+While we could have based our DSL on Profunctors as well, we chose Arrows\mbcomment{cite missing?} for this paper since they they allow for a more direct way of thinking about parallelism than general Profunctors because of their composability. However, they are a promising candidate for future improvements of our DSL. Some Profunctors, especially ones supporting a composition operation, choice, and looping, can already be adapted to our interface as shown in Appendix~\ref{app:profunctorArrows}.
