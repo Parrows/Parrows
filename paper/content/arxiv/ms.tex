@@ -888,7 +888,7 @@ allows us to define \ensuremath{\Varid{parEvalN}} directly:
 \ColumnHook
 \end{hscode}\resethooks
 % \begin{figure}[h]
-% 	\includegraphics[scale=0.5]{images/parEvalNEden}
+% 	\includegraphics[scale=0.5]{parEvalNEden}
 % 	\caption{Dataflow of the Eden |parEvalN| version.}
 % 	\label{fig:parEvalNEden}
 % \end{figure}
@@ -2016,7 +2016,54 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 
 \subsection{Discussion}
 
-\input{bestAndWorstBenchmarks}
+%\bestAndWorstBenchmarks
+
+\begin{table}[]
+\centering
+\caption{Overhead in the shared memory benchmarks. Bold marks values in favour of PArrows.}
+\label{tab:meanOverheadSharedMemory}
+\centering
+\begingroup\catcode`"=9
+\sisetup{round-mode=places, round-precision=3}
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores (s)} \\ \hline \\
+	\multirow{3}{*}{\sudokutest 1000}
+	\csvreader[head to column names]{bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\torustest 512}
+	\csvreader[head to column names]{bestAndWorstTorusSM-512.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 32}
+	\csvreader[head to column names]{bestAndWorstRMSM-11213-32.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 64}
+	\csvreader[head to column names]{bestAndWorstRMSM-11213-64.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Overhead in the distributed memory benchmarks. Bold marks values
+  in favour of PArrows.}
+% \olcomment{Vielleicht gleich durchmultiplizieren und \% angeben? Nicht
+% zu viele leere Zeilen in der Tabelle?}
+\label{tab:meanOverHeadDistributedMemory}
+\centering
+\begingroup\catcode`"=9
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 256 cores (s)} \\ \hline \\
+	\multirow{1}{*}{\torustest 4096}
+	\csvreader[head to column names]{bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+  	\multirow{1}{*}{\rmtest 44497 256}
+	\csvreader[head to column names]{bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\jacobitest 3217}
+	\csvreader[head to column names]{bestAndWorstJacobi-3217.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
+\end{table}
 
 PArrows performed in our benchmarks with little to no overhead. Tables~\ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrows-enabled versions trade blows with their vanilla counterparts when comparing the means over all cores of the mean overheads. If we combine these findings with the usability of our DSL,
 the minor overhead induced by PArrows is outweighed by their convenience and usefulness to the user.
@@ -2119,7 +2166,7 @@ Alimarine, Artem, Smetsers, Sjaak, van Weelden, Arjen, van Eekelen, Marko, \&
   }2014]{Aljabri:2013:DIG:2620678.2620682}
 Aljabri, Malak, Loidl, Hans-Wolfgang, \& Trinder, Phil~W. (2014).
 \newblock The design and implementation of {GUMSMP}: A multilevel parallel
-  Haskell implementation.
+  haskell implementation.
 \newblock {\em Pages  37:37--37:48 of:} {\em Proceedings of the 25\xth
   Symposium on Implementation and Application of Functional Languages}.
 \newblock IFL '13.
@@ -2143,7 +2190,7 @@ Alt, Martin, \& Gorlatch, Sergei. (2003).
 \bibitem[\protect\citename{Asada, }2010]{Asada:2010:ASM:1863597.1863607}
 Asada, Kazuyuki. (2010).
 \newblock Arrows are strong monads.
-\newblock {\em Pages  33--42 of:} {\em Proceedings of the Third ACM SIGPLAN
+\newblock {\em Pages  33--42 of:} {\em Proceedings of the Third {ACM SIGPLAN}
   Workshop on Mathematically Structured Functional Programming}.
 \newblock MSFP '10.
 \newblock New York, NY, USA: ACM.
@@ -2306,7 +2353,7 @@ Clifton-Everest, Robert, McDonell, Trevor~L, Chakravarty, Manuel M~T, \&
   }2013]{Czaplicki:2013:AFR:2499370.2462161}
 Czaplicki, Evan, \& Chong, Stephen. (2013).
 \newblock Asynchronous functional reactive programming for guis.
-\newblock {\em Sigplan not.}, {\bf 48}(6), 411--422.
+\newblock {\em {SIGPLAN} not.}, {\bf 48}(6), 411--422.
 
 \bibitem[\protect\citename{Dagand {\em et~al.}\relax,
   }2009]{Dagand:2009:ORD:1481861.1481870}
@@ -2410,7 +2457,7 @@ Foltzer, Adam, Kulkarni, Abhishek, Swords, Rebecca, Sasidharan, Sajith, Jiang,
   Eric, \& Newton, Ryan. (2012).
 \newblock A meta-scheduler for the {Par}-monad: Composable scheduling for the
   heterogeneous cloud.
-\newblock {\em Sigplan not.}, {\bf 47}(9), 235--246.
+\newblock {\em {SIGPLAN} not.}, {\bf 47}(9), 235--246.
 
 \bibitem[\protect\citename{Geimer {\em et~al.}\relax, }2010]{Geimer2010}
 Geimer, M., Wolf, F., Wylie, B. J.~N., {\'A}brah{\'a}m, E., Becker, D., \&
@@ -2452,7 +2499,7 @@ Harris, Mark, Sengupta, Shubhabrata, \& Owens, John~D. (2007).
   }2005]{Harris:2005:CMT:1065944.1065952}
 Harris, Tim, Marlow, Simon, {Peyton Jones}, Simon, \& Herlihy, Maurice. (2005).
 \newblock Composable memory transactions.
-\newblock {\em Pages  48--60 of:} {\em Proceedings of the 10\xth ACM SIGPLAN
+\newblock {\em Pages  48--60 of:} {\em Proceedings of the 10\xth {ACM SIGPLAN}
   Symposium on Principles and Practice of Parallel Programming}.
 \newblock PPoPP '05.
 \newblock ACM.
@@ -2521,8 +2568,8 @@ Karasawa, Y., \& Iwasaki, H. (2009).
   }2010]{Keller:2010:RSP:1932681.1863582}
 Keller, Gabriele, Chakravarty, Manuel~M.T., Leshchinskiy, Roman, {Peyton
   Jones}, Simon, \& Lippmeier, Ben. (2010).
-\newblock Regular, shape-polymorphic, parallel arrays in Haskell.
-\newblock {\em Sigplan not.}, {\bf 45}(9), 261--272.
+\newblock Regular, shape-polymorphic, parallel arrays in haskell.
+\newblock {\em {SIGPLAN} not.}, {\bf 45}(9), 261--272.
 
 \bibitem[\protect\citename{Kuchen, }2002]{Kuchen2002}
 Kuchen, Herbert. (2002).
@@ -2537,7 +2584,7 @@ Kuchen, Herbert. (2002).
 Kuper, Lindsey, Todd, Aaron, Tobin-Hochstadt, Sam, \& Newton, Ryan~R. (2014).
 \newblock Taming the parallel effect zoo: Extensible deterministic parallelism
   with {LVish}.
-\newblock {\em Sigplan not.}, {\bf 49}(6), 2--14.
+\newblock {\em {SIGPLAN} not.}, {\bf 49}(6), 2--14.
 
 \bibitem[\protect\citename{Lengauer {\em et~al.}\relax, }1997]{Lengauer1997}
 Lengauer, Christian, Gorlatch, Sergei, \& Herrmann, Christoph. (1997).
@@ -2576,7 +2623,7 @@ Linton, S., Hammond, K., Konovalov, A., Al~Zain, A.~D., Trinder, P., Horn, P.,
   }2009]{Liu:2009:CCA:1631687.1596559}
 Liu, Hai, Cheng, Eric, \& Hudak, Paul. (2009).
 \newblock Causal commutative arrows and their optimization.
-\newblock {\em Sigplan not.}, {\bf 44}(9), 35--46.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(9), 35--46.
 
 \bibitem[\protect\citename{Lobachev, }2011]{lobachev-phd}
 Lobachev, Oleg. (2011).
@@ -2624,18 +2671,18 @@ Lämmel, Ralf. (2008).
   }2014]{Maier:2014:HDS:2775050.2633363}
 Maier, Patrick, Stewart, Robert, \& Trinder, Phil. (2014).
 \newblock The {HdpH} {DSLs} for scalable reliable computation.
-\newblock {\em Sigplan not.}, {\bf 49}(12), 65--76.
+\newblock {\em {SIGPLAN} not.}, {\bf 49}(12), 65--76.
 
 \bibitem[\protect\citename{Mainland \& Morrisett,
   }2010]{Mainland:2010:NEC:2088456.1863533}
 Mainland, Geoffrey, \& Morrisett, Greg. (2010).
 \newblock Nikola: Embedding compiled {GPU} functions in {Haskell}.
-\newblock {\em Sigplan not.}, {\bf 45}(11), 67--78.
+\newblock {\em {SIGPLAN} not.}, {\bf 45}(11), 67--78.
 
 \bibitem[\protect\citename{Marlow {\em et~al.}\relax, }2009]{Marlow2009}
 Marlow, S., {Peyton Jones}, S., \& Singh, S. (2009).
 \newblock Runtime support for multicore {Haskell}.
-\newblock {\em Acm sigplan notices}, {\bf 44}(9), 65--78.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(9), 65--78.
 
 \bibitem[\protect\citename{Marlow, }2013]{marlow2013parallel}
 Marlow, Simon. (2013).
@@ -2646,20 +2693,20 @@ Marlow, Simon. (2013).
 \bibitem[\protect\citename{Marlow {\em et~al.}\relax, }2011]{par-monad}
 Marlow, Simon, Newton, Ryan, \& {Peyton Jones}, Simon. (2011).
 \newblock A monad for deterministic parallelism.
-\newblock {\em Sigplan not.}, {\bf 46}(12), 71--82.
+\newblock {\em {SIGPLAN} not.}, {\bf 46}(12), 71--82.
 
 \bibitem[\protect\citename{McDonell {\em et~al.}\relax,
   }2015]{McDonell:2015:TRC:2887747.2804313}
 McDonell, Trevor~L., Chakravarty, Manuel M.~T., Grover, Vinod, \& Newton,
   Ryan~R. (2015).
 \newblock Type-safe runtime code generation: Accelerate to {LLVM}.
-\newblock {\em Sigplan not.}, {\bf 50}(12), 201--212.
+\newblock {\em {SIGPLAN} not.}, {\bf 50}(12), 201--212.
 
 \bibitem[\protect\citename{Michael {\em et~al.}\relax,
   }2009]{Michael:2009:IWS:1594835.1504186}
 Michael, Maged~M., Vechev, Martin~T., \& Saraswat, Vijay~A. (2009).
 \newblock Idempotent work stealing.
-\newblock {\em Sigplan not.}, {\bf 44}(4), 45--54.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(4), 45--54.
 
 \bibitem[\protect\citename{Nilsson {\em et~al.}\relax,
   }2002]{Nilsson:2002:FRP:581690.581695}
@@ -2679,7 +2726,7 @@ Olivier, S., \& Prins, J. (2008).
 \bibitem[\protect\citename{Paterson, }2001]{Paterson:2001:NNA:507669.507664}
 Paterson, Ross. (2001).
 \newblock A new notation for arrows.
-\newblock {\em Sigplan not.}, {\bf 36}(10), 229--240.
+\newblock {\em {SIGPLAN} not.}, {\bf 36}(10), 229--240.
 
 \bibitem[\protect\citename{Pe{\~n}a \& Rubio, }2001]{Eden:PPDP01}
 Pe{\~n}a, R., \& Rubio, F. (2001).
@@ -2734,8 +2781,8 @@ Rudolph, Larry, Slivkin-Allalouf, Miriam, \& Upfal, Eli. (1991).
   }2008]{Russo:2008:LLI:1411286.1411289}
 Russo, Alejandro, Claessen, Koen, \& Hughes, John. (2008).
 \newblock A library for light-weight information-flow security in {Haskell}.
-\newblock {\em Pages  13--24 of:} {\em Proceedings of the 1\st ACM SIGPLAN
-  Symposium on Haskell}.
+\newblock {\em Pages  13--24 of:} {\em Proceedings of the 1\st {ACM SIGPLAN}
+  Symposium on {Haskell}}.
 \newblock Haskell '08.
 \newblock ACM.
 
@@ -2747,7 +2794,7 @@ Stewart, Robert, Maier, Patrick, \& Trinder, Phil. (2016).
 
 \bibitem[\protect\citename{Svensson, }2011]{obsidian-phd}
 Svensson, Joel. (2011).
-\newblock {\em Obsidian: GPU kernel programming in Haskell}.
+\newblock {\em Obsidian: {GPU} kernel programming in {Haskell}}.
 \newblock Ph.D. thesis, Chalmers University of Technology.
 
 \bibitem[\protect\citename{Trinder {\em et~al.}\relax, }1996]{Trinder1996}
@@ -2767,7 +2814,7 @@ Trinder, P.W., Hammond, K., Loidl, H-W., \& {Peyton Jones}, S. (1998).
 van Nieuwpoort, Rob~V., Kielmann, Thilo, \& Bal, Henri~E. (2001).
 \newblock Efficient load balancing for wide-area divide-and-conquer
   applications.
-\newblock {\em Sigplan not.}, {\bf 36}(7), 34--43.
+\newblock {\em {SIGPLAN} not.}, {\bf 36}(7), 34--43.
 
 \bibitem[\protect\citename{Vizzotto {\em et~al.}\relax,
   }2006]{vizzotto_altenkirch_sabry_2006}

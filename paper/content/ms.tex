@@ -682,7 +682,7 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 \parbox[c][17em]{0.49\linewidth}{%
 \vfill
 \centering
-	\includegraphics{arrow}
+	\includegraphics{images/arrow}
 \vfill
 %	\caption{Schematic depiction of an Arrow.}
 %\label{fig:arrow-sch}
@@ -690,9 +690,9 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 \parbox[c][17em]{0.49\linewidth}{%
 \vfill
 \centering
-	{\includegraphics[scale=0.6]{arr}}
-	{\includegraphics[scale=0.6]{compose}}
-	{\includegraphics[scale=0.6]{first}}
+	{\includegraphics[scale=0.6]{images/arr}}
+	{\includegraphics[scale=0.6]{images/compose}}
+	{\includegraphics[scale=0.6]{images/first}}
 \vfill
 %\caption{Schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
 %\label{fig:arrows-viz}
@@ -707,15 +707,15 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 	\centering
 	\begin{tabular}{cc}
 		% \subcaptionbox
-{\label{t1}}{\includegraphics[width = 1.5in]{first}} &
+{\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
 		% \subcaptionbox
-{\label{fig:secondImg}}{\includegraphics[width = 1.5in]{second}} \\
+{\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
 \ensuremath{\Varid{first}} & \ensuremath{\Varid{second}} \\
 \midrule
 		% \subcaptionbox
-{}{\includegraphics[width = 1.5in]{starstarstar}} &
+{}{\includegraphics[width = 1.5in]{images/starstarstar}} &
 		% \subcaptionbox
-{}{\includegraphics[width = 1.5in]{andandand}}\\
+{}{\includegraphics[width = 1.5in]{images/andandand}}\\
 \ensuremath{(\mathbin{*\!*\!*})}\label{fig:***Img} & \ensuremath{(\mathbin{\&\!\&\!\&})} \label{fig:&&&Img} \\
 	\end{tabular}
 	\caption{Visual depiction of syntactic sugar for Arrows.}
@@ -772,7 +772,7 @@ While we could have based our DSL on Profunctors as well, we chose Arrows\mbcomm
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \ensuremath{\Varid{a}\to \Varid{b}} in parallel or \ensuremath{\Varid{parEvalN}\mathbin{::}[\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]\to [\mskip1.5mu \Varid{b}\mskip1.5mu]}, as also Figure~\ref{fig:parEvalN} symbolically shows.
 \begin{figure}[t]
   \centering
-	\includegraphics[scale=0.7]{parEvalN}
+	\includegraphics[scale=0.7]{images/parEvalN}
 	\caption{Schematic illustration of \ensuremath{\Varid{parEvalN}}. A list of inputs is transformed by different functions in parallel.}
 	\label{fig:parEvalN}
 \end{figure}
@@ -827,7 +827,7 @@ Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 % \end{figure}
 
 \begin{figure}[t]
-	\includegraphics[scale=0.5]{parEvalNMulticore}
+	\includegraphics[scale=0.5]{images/parEvalNMulticore}
 	\caption{\ensuremath{\Varid{parEvalN}} (GpH).}
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
@@ -862,7 +862,7 @@ Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 % \label{fig:parEvalNParMonad}
 % \end{figure}
 \begin{figure}[t]
-	\includegraphics[scale=0.5]{parEvalNParMonad}
+	\includegraphics[scale=0.5]{images/parEvalNParMonad}
 	\caption{\ensuremath{\Varid{parEvalN}} (\ensuremath{\Conid{Par}} Monad).}
 	\label{fig:parEvalNParMonadImg}
 \end{figure}
@@ -1122,7 +1122,7 @@ With the \ensuremath{\Conid{ArrowParallel}} type class in place and implemented,
 
 \subsubsection{Lazy \ensuremath{\Varid{parEvalN}}}
 \begin{figure}[tb]
-	\includegraphics[scale=0.7]{parEvalNLazy}
+	\includegraphics[scale=0.7]{images/parEvalNLazy}
 	\caption{\ensuremath{\Varid{parEvalNLazy}} depiction.}
 	\label{fig:parEvalNLazyImg}
 \end{figure}
@@ -1164,7 +1164,7 @@ The function \ensuremath{\Varid{parEvalN}} fully traverses the list of passed Ar
 
 \subsubsection{Heterogeneous tasks}
 \begin{figure}[tb]
-	\includegraphics[scale=0.7]{parEval2}
+	\includegraphics[scale=0.7]{images/parEval2}
 	\caption{\ensuremath{\Varid{parEval2}} depiction.}
 	\label{fig:parEval2Img}
 \end{figure}
@@ -1216,7 +1216,7 @@ While the example could be rewritten into a single \ensuremath{\Varid{parEvalN}}
 for a larger amount of data and number of processes \citep[as e.g.][showcases]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{withoutFutures}
+	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
 	\caption[without Futures]{Communication between 4 Eden processes without Futures. All communication goes through the master node. Each bar represents one process. Black lines represent communication. Colours: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
 % \olcomment{more practical and heavy-weight example! fft (I have the code)?}
@@ -1289,7 +1289,7 @@ In our communication example we can use this \ensuremath{\Conid{Future}} concept
 In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualisation in Fig.~\ref{fig:withFutures}. One especially elegant aspect of the definition in Fig.~\ref{fig:future} is that we can specify the type of \ensuremath{\Conid{Future}} to be used per backend with full interoperability between code using different backends, without even requiring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics as can be seen in Fig.~\ref{fig:someCombinatorParallel}. With the PArrows DSL we can also define default instances \ensuremath{\Conid{Future}\;\Varid{fut}\;\Varid{a}\;()} for each backend similar to how \ensuremath{\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}\;()} was defined in Section~\ref{sec:parallel-arrows}. Details can be found in Section~\ref{app:omitted}. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{withFutures}
+	\includegraphics[width=0.9\textwidth]{images/withFutures}
 	\caption[with Futures]{Communication between 4 Eden processes with Futures. Other than in Fig.~\ref{fig:withoutFutures}, processes communicate directly (one example message is highlighted) instead of always going through the master node (bottom bar).}
 	\label{fig:withFutures}
 \end{figure}
@@ -1309,7 +1309,7 @@ Because of this, it has the same restrictions as \ensuremath{\Varid{parEvalN}} a
 
 \begin{figure}[thb]
 %farm
-\includegraphics[scale=0.7]{farm}
+\includegraphics[scale=0.7]{images/farm}
 \caption{\ensuremath{\Varid{farm}} depiction.}
 \label{fig:farmImg}
 
@@ -1341,7 +1341,7 @@ Because of this, it has the same restrictions as \ensuremath{\Varid{parEvalN}} a
 \label{fig:farm}
 
 %farmChunk
-\includegraphics[scale=0.7]{farmChunk}
+\includegraphics[scale=0.7]{images/farmChunk}
 \caption{\ensuremath{\Varid{farmChunk}} depiction.}
 \label{fig:farmChunkImg}
 \end{figure}
@@ -1582,7 +1582,7 @@ Extensive use of \ensuremath{\Varid{pipe2}} over \ensuremath{\Varid{pipe}} with 
 
 \subsubsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
-	\includegraphics[scale=0.75]{ring}
+	\includegraphics[scale=0.75]{images/ring}
 	\caption{\ensuremath{\Varid{ring}} skeleton depiction.}
 	\label{fig:ringImg}
 \end{figure}
@@ -1647,7 +1647,7 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 
 \subsubsection{Torus skeleton}\label{sec:torus}
 \begin{figure}
-	\includegraphics[scale=0.75]{torus}
+	\includegraphics[scale=0.75]{images/torus}
 	\caption{\ensuremath{\Varid{torus}} skeleton depiction.}
 	\label{fig:ringTorusImg}
 \end{figure}
@@ -1799,14 +1799,14 @@ If we compare the trace from a call using our Arrow definition of the torus (Fig
 \begin{figure}[tb]
 \olcomment{more nodes!!!}
 	\centering
-	\includegraphics[width=0.9\textwidth]{torus_matrix_parrows_scale}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
 	\caption[Matrix multiplication with \ensuremath{\Varid{torus}} (PArrows)]{Matrix multiplication with \ensuremath{\Varid{torus}} (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[tb]
 	\centering
-	\includegraphics[width=0.9\textwidth]{torus_matrix_eden_scale}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
 	\caption[Matrix multiplication with \ensuremath{\Varid{torus}} (Eden)]{Matrix multiplication with \ensuremath{\Varid{torus}} (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
@@ -2016,7 +2016,7 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 
 \subsection{Discussion}
 
-\input{bestAndWorstBenchmarks}
+%input bestAndWorstBenchmarks.tex
 
 PArrows performed in our benchmarks with little to no overhead. Tables~\ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrows-enabled versions trade blows with their vanilla counterparts when comparing the means over all cores of the mean overheads. If we combine these findings with the usability of our DSL,
 the minor overhead induced by PArrows is outweighed by their convenience and usefulness to the user.
@@ -2143,7 +2143,7 @@ Alt, Martin, \& Gorlatch, Sergei. (2003).
 \bibitem[\protect\citename{Asada, }2010]{Asada:2010:ASM:1863597.1863607}
 Asada, Kazuyuki. (2010).
 \newblock Arrows are strong monads.
-\newblock {\em Pages  33--42 of:} {\em Proceedings of the Third ACM SIGPLAN
+\newblock {\em Pages  33--42 of:} {\em Proceedings of the Third {ACM SIGPLAN}
   Workshop on Mathematically Structured Functional Programming}.
 \newblock MSFP '10.
 \newblock New York, NY, USA: ACM.
@@ -2306,7 +2306,7 @@ Clifton-Everest, Robert, McDonell, Trevor~L, Chakravarty, Manuel M~T, \&
   }2013]{Czaplicki:2013:AFR:2499370.2462161}
 Czaplicki, Evan, \& Chong, Stephen. (2013).
 \newblock Asynchronous functional reactive programming for guis.
-\newblock {\em Sigplan not.}, {\bf 48}(6), 411--422.
+\newblock {\em {SIGPLAN} not.}, {\bf 48}(6), 411--422.
 
 \bibitem[\protect\citename{Dagand {\em et~al.}\relax,
   }2009]{Dagand:2009:ORD:1481861.1481870}
@@ -2410,7 +2410,7 @@ Foltzer, Adam, Kulkarni, Abhishek, Swords, Rebecca, Sasidharan, Sajith, Jiang,
   Eric, \& Newton, Ryan. (2012).
 \newblock A meta-scheduler for the {Par}-monad: Composable scheduling for the
   heterogeneous cloud.
-\newblock {\em Sigplan not.}, {\bf 47}(9), 235--246.
+\newblock {\em {SIGPLAN} not.}, {\bf 47}(9), 235--246.
 
 \bibitem[\protect\citename{Geimer {\em et~al.}\relax, }2010]{Geimer2010}
 Geimer, M., Wolf, F., Wylie, B. J.~N., {\'A}brah{\'a}m, E., Becker, D., \&
@@ -2452,7 +2452,7 @@ Harris, Mark, Sengupta, Shubhabrata, \& Owens, John~D. (2007).
   }2005]{Harris:2005:CMT:1065944.1065952}
 Harris, Tim, Marlow, Simon, {Peyton Jones}, Simon, \& Herlihy, Maurice. (2005).
 \newblock Composable memory transactions.
-\newblock {\em Pages  48--60 of:} {\em Proceedings of the 10\xth ACM SIGPLAN
+\newblock {\em Pages  48--60 of:} {\em Proceedings of the 10\xth {ACM SIGPLAN}
   Symposium on Principles and Practice of Parallel Programming}.
 \newblock PPoPP '05.
 \newblock ACM.
@@ -2522,7 +2522,7 @@ Karasawa, Y., \& Iwasaki, H. (2009).
 Keller, Gabriele, Chakravarty, Manuel~M.T., Leshchinskiy, Roman, {Peyton
   Jones}, Simon, \& Lippmeier, Ben. (2010).
 \newblock Regular, shape-polymorphic, parallel arrays in haskell.
-\newblock {\em Sigplan not.}, {\bf 45}(9), 261--272.
+\newblock {\em {SIGPLAN} not.}, {\bf 45}(9), 261--272.
 
 \bibitem[\protect\citename{Kuchen, }2002]{Kuchen2002}
 Kuchen, Herbert. (2002).
@@ -2537,7 +2537,7 @@ Kuchen, Herbert. (2002).
 Kuper, Lindsey, Todd, Aaron, Tobin-Hochstadt, Sam, \& Newton, Ryan~R. (2014).
 \newblock Taming the parallel effect zoo: Extensible deterministic parallelism
   with {LVish}.
-\newblock {\em Sigplan not.}, {\bf 49}(6), 2--14.
+\newblock {\em {SIGPLAN} not.}, {\bf 49}(6), 2--14.
 
 \bibitem[\protect\citename{Lengauer {\em et~al.}\relax, }1997]{Lengauer1997}
 Lengauer, Christian, Gorlatch, Sergei, \& Herrmann, Christoph. (1997).
@@ -2576,7 +2576,7 @@ Linton, S., Hammond, K., Konovalov, A., Al~Zain, A.~D., Trinder, P., Horn, P.,
   }2009]{Liu:2009:CCA:1631687.1596559}
 Liu, Hai, Cheng, Eric, \& Hudak, Paul. (2009).
 \newblock Causal commutative arrows and their optimization.
-\newblock {\em Sigplan not.}, {\bf 44}(9), 35--46.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(9), 35--46.
 
 \bibitem[\protect\citename{Lobachev, }2011]{lobachev-phd}
 Lobachev, Oleg. (2011).
@@ -2624,18 +2624,18 @@ Lämmel, Ralf. (2008).
   }2014]{Maier:2014:HDS:2775050.2633363}
 Maier, Patrick, Stewart, Robert, \& Trinder, Phil. (2014).
 \newblock The {HdpH} {DSLs} for scalable reliable computation.
-\newblock {\em Sigplan not.}, {\bf 49}(12), 65--76.
+\newblock {\em {SIGPLAN} not.}, {\bf 49}(12), 65--76.
 
 \bibitem[\protect\citename{Mainland \& Morrisett,
   }2010]{Mainland:2010:NEC:2088456.1863533}
 Mainland, Geoffrey, \& Morrisett, Greg. (2010).
 \newblock Nikola: Embedding compiled {GPU} functions in {Haskell}.
-\newblock {\em Sigplan not.}, {\bf 45}(11), 67--78.
+\newblock {\em {SIGPLAN} not.}, {\bf 45}(11), 67--78.
 
 \bibitem[\protect\citename{Marlow {\em et~al.}\relax, }2009]{Marlow2009}
 Marlow, S., {Peyton Jones}, S., \& Singh, S. (2009).
 \newblock Runtime support for multicore {Haskell}.
-\newblock {\em Acm sigplan notices}, {\bf 44}(9), 65--78.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(9), 65--78.
 
 \bibitem[\protect\citename{Marlow, }2013]{marlow2013parallel}
 Marlow, Simon. (2013).
@@ -2646,20 +2646,20 @@ Marlow, Simon. (2013).
 \bibitem[\protect\citename{Marlow {\em et~al.}\relax, }2011]{par-monad}
 Marlow, Simon, Newton, Ryan, \& {Peyton Jones}, Simon. (2011).
 \newblock A monad for deterministic parallelism.
-\newblock {\em Sigplan not.}, {\bf 46}(12), 71--82.
+\newblock {\em {SIGPLAN} not.}, {\bf 46}(12), 71--82.
 
 \bibitem[\protect\citename{McDonell {\em et~al.}\relax,
   }2015]{McDonell:2015:TRC:2887747.2804313}
 McDonell, Trevor~L., Chakravarty, Manuel M.~T., Grover, Vinod, \& Newton,
   Ryan~R. (2015).
 \newblock Type-safe runtime code generation: Accelerate to {LLVM}.
-\newblock {\em Sigplan not.}, {\bf 50}(12), 201--212.
+\newblock {\em {SIGPLAN} not.}, {\bf 50}(12), 201--212.
 
 \bibitem[\protect\citename{Michael {\em et~al.}\relax,
   }2009]{Michael:2009:IWS:1594835.1504186}
 Michael, Maged~M., Vechev, Martin~T., \& Saraswat, Vijay~A. (2009).
 \newblock Idempotent work stealing.
-\newblock {\em Sigplan not.}, {\bf 44}(4), 45--54.
+\newblock {\em {SIGPLAN} not.}, {\bf 44}(4), 45--54.
 
 \bibitem[\protect\citename{Nilsson {\em et~al.}\relax,
   }2002]{Nilsson:2002:FRP:581690.581695}
@@ -2679,7 +2679,7 @@ Olivier, S., \& Prins, J. (2008).
 \bibitem[\protect\citename{Paterson, }2001]{Paterson:2001:NNA:507669.507664}
 Paterson, Ross. (2001).
 \newblock A new notation for arrows.
-\newblock {\em Sigplan not.}, {\bf 36}(10), 229--240.
+\newblock {\em {SIGPLAN} not.}, {\bf 36}(10), 229--240.
 
 \bibitem[\protect\citename{Pe{\~n}a \& Rubio, }2001]{Eden:PPDP01}
 Pe{\~n}a, R., \& Rubio, F. (2001).
@@ -2734,8 +2734,8 @@ Rudolph, Larry, Slivkin-Allalouf, Miriam, \& Upfal, Eli. (1991).
   }2008]{Russo:2008:LLI:1411286.1411289}
 Russo, Alejandro, Claessen, Koen, \& Hughes, John. (2008).
 \newblock A library for light-weight information-flow security in {Haskell}.
-\newblock {\em Pages  13--24 of:} {\em Proceedings of the 1\st ACM SIGPLAN
-  Symposium on Haskell}.
+\newblock {\em Pages  13--24 of:} {\em Proceedings of the 1\st {ACM SIGPLAN}
+  Symposium on {Haskell}}.
 \newblock Haskell '08.
 \newblock ACM.
 
@@ -2747,7 +2747,7 @@ Stewart, Robert, Maier, Patrick, \& Trinder, Phil. (2016).
 
 \bibitem[\protect\citename{Svensson, }2011]{obsidian-phd}
 Svensson, Joel. (2011).
-\newblock {\em Obsidian: Gpu kernel programming in haskell}.
+\newblock {\em Obsidian: {GPU} kernel programming in {Haskell}}.
 \newblock Ph.D. thesis, Chalmers University of Technology.
 
 \bibitem[\protect\citename{Trinder {\em et~al.}\relax, }1996]{Trinder1996}
@@ -2767,7 +2767,7 @@ Trinder, P.W., Hammond, K., Loidl, H-W., \& {Peyton Jones}, S. (1998).
 van Nieuwpoort, Rob~V., Kielmann, Thilo, \& Bal, Henri~E. (2001).
 \newblock Efficient load balancing for wide-area divide-and-conquer
   applications.
-\newblock {\em Sigplan not.}, {\bf 36}(7), 34--43.
+\newblock {\em {SIGPLAN} not.}, {\bf 36}(7), 34--43.
 
 \bibitem[\protect\citename{Vizzotto {\em et~al.}\relax,
   }2006]{vizzotto_altenkirch_sabry_2006}
@@ -3008,7 +3008,7 @@ Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a v
 
 \begin{figure}[thb]
 %parMap
-\includegraphics[scale=0.7]{parMap}
+\includegraphics[scale=0.7]{images/parMap}
 \caption{\ensuremath{\Varid{parMap}} depiction.}
 \label{fig:parMapImg}
 
@@ -3024,7 +3024,7 @@ Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a v
 \label{fig:parMap}
 
 %parMapStream
-\includegraphics[scale=0.7]{parMapStream}
+\includegraphics[scale=0.7]{images/parMapStream}
 \caption{\ensuremath{\Varid{parMapStream}} depiction.}
 \label{fig:parMapStreamImg}
 
