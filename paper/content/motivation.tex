@@ -21,7 +21,7 @@ is defined as a common interface with varying implementations in
 the existing parallel Haskells. Thus, we not only define a parallel programming interface in a
 novel manner -- we tame the zoo of parallel Haskells. We provide a
 common, very low-penalty programming interface that allows to switch
-the parallel backends at will. The induced penalty was in the single-digit percent range, with means typically under 2\% overhead in our measurements over the varying cores configuration (Section~\ref{sec:benchmarks}). Further backends based on HdpH or a Frege implementation (on the Java Virtual Machine) are viable, too.
+the parallel implementations at will. The induced penalty was in the single-digit percent range, with means typically under 2\% overhead in our measurements over the varying cores configuration (Section~\ref{sec:benchmarks}). Further implementations, based on HdpH or a Frege implementation (on the Java Virtual Machine), are viable, too.
 
 \paragraph{Contributions.}
 %
@@ -33,9 +33,9 @@ We propose an Arrow-based encoding for parallelism based on a new Arrow combinat
 
 \begin{itemize}
 \item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types, facilitating composability (Section~\ref{sec:parallel-arrows}).
-\item We show that PArrow programs can readily exploit multiple parallel language implementations. We demonstrate the use of GpH, a |Par| Monad, and Eden. We do not re-implement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The backends can easily be swapped, so we are not bound to any specific one.
+\item We show that PArrow programs can readily exploit multiple parallel language implementations. We demonstrate the use of GpH, a |Par| Monad, and Eden. We do not re-implement all the parallel internals, as we host this functionality in the |ArrowParallel| type class, which abstracts all parallel implementation logic. The implementations can easily be swapped, so we are not bound to any specific one.
 
-This has many practical advantages. For example, during development we can run the program in a simple GHC-compiled variant using a GpH backend and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant (Section~\ref{sec:parallel-arrows}).
+This has many practical advantages. For example, during development we can run the program in a simple GHC-compiled variant using GpH and afterwards deploy it on a cluster by converting it into an Eden program, by just replacing the |ArrowParallel| instance and compiling with Eden's GHC variant (Section~\ref{sec:parallel-arrows}).
 \item We extend the PArrows formalism with |Future|s to enable direct communication of data between nodes in a distributed memory setting similar to Eden's Remote Data \citep[|RD|,][]{Dieterle2010}. Direct communication is useful in a distributed memory setting because it allows for inter-node communication without blocking the master-node. (Section~\ref{sec:futures})
 \item We demonstrate the expressiveness of PArrows by using them to define common algorithmic skeletons (Section~\ref{sec:skeletons}), and by using these skeletons to implement four benchmarks (Section~\ref{sec:benchmarks}).
 \item We practically demonstrate that Arrow parallelism has a low performance overhead compared with existing approaches, \eg the mean over all cores of relative mean overhead was less than $3.5\%$ and less than $0.8\%$ for all benchmarks with GpH and Eden, respectively. As for |Par| Monad, the mean of mean overheads was in our favour in all benchmarks (Section~\ref{sec:benchmarks}).

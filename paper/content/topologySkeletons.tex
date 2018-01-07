@@ -19,7 +19,7 @@ instance (ArrowChoice arr, ArrowParallel arr a b Conf) =>
     loopParEvalN = parEvalN
     postLoopParEvalN _ = evalN
 \end{code}
-As the backends for the |Par| Monad and GpH have problems with |parEvalN| inside of |loop| their respective instances for |ArrowLoopParallel| look like this:
+As |Par| Monad and GpH have problems with |parEvalN| inside of |loop| their respective instances for |ArrowLoopParallel| look like this:
 \begin{code}
 instance (ArrowChoice arr, ArrowParallel arr a b (Conf b)) =>
 	ArrowLoopParallel arr a b (Conf b) where
@@ -103,7 +103,7 @@ pipe2 conf f g =
 \label{fig:pipe2}
 \end{figure}
 
-Note that extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to |parEvalN| inside of |evalN|. Nonetheless, we can define a parallel piping operator |parcomp|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
+Extensive use of |pipe2| over |pipe| with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to |parEvalN| inside of |evalN|. Nonetheless, we can define a parallel piping operator |parcomp|, which is semantically equivalent to |>>>| similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
 
 
 %Another version of |>>>| is:

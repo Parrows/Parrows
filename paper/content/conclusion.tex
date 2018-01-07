@@ -18,7 +18,7 @@ We use a non-monadic interface (similar to Eden or GpH) and retain composibility
 The DSL allows for a direct parallelisation of monadic code via the Kleisli type and additionally allows to parallelise any Arrow type that has an instance for |ArrowChoice|. (Some skeletons require an additional |ArrowLoop| instance.)
 
 
-We have demonstrated the generality of the approach by exhibiting PArrow implementations for Eden, GpH, and the |Par| Monad. Hence, parallel programs can be ported between task parallel Haskell implementations with little or no effort. We are confident that it will be straightforward to add other task-parallel backends.
+We have demonstrated the generality of the approach by exhibiting PArrow implementations for Eden, GpH, and the |Par| Monad. Hence, parallel programs can be ported between task parallel Haskell implementations with little or no effort. We are confident that it will be straightforward to add other task-parallel Haskells.
 % Parallel Arrows, as presented here, feature an implementation of the |ArrowParallel| type class for GpH Haskell, |Par| Monad, and Eden. With our approach parallel programs can be ported across these flavours with little to no effort. It is quite straightforward to add further backends.
 % %
 % %
