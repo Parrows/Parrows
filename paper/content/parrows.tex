@@ -1,7 +1,7 @@
 \section{Parallel Arrows}
 \label{sec:parallel-arrows}
 While Arrows are a general interface to computation, we introduce here specialised Arrows as a general interface to \textit{parallel computations}. We present the |ArrowParallel| type class and explain the reasoning behind it before discussing some parallel Haskell implementations and basic extensions.
-\subsection{The ArrowParallel type class}
+\subsection{The |ArrowParallel| type class}
 A~parallel computation (on functions) can be seen as execution of some functions |a -> b| in parallel, as our |parEvalN| prototype shows (Section~\ref{sec:parEvalNIntro}).
 Translating this into Arrow terms gives us a new operator |parEvalN| that lifts a list of Arrows |[arr a b]| to a parallel Arrow |arr [a] [b]|. % (Fig.~\ref{fig:parEvalNArrowFn}) (
 This combinator is similar to |evalN| from Appendix~\ref{utilfns}, but does parallel instead of serial evaluation.
@@ -34,7 +34,7 @@ By restricting the implementations of our backends to a specific |conf| type, we
 % \end{figure}
 % , as we will see in the implementation of the GpH Haskell and the |Par| Monad backends.
 
-\subsection{ArrowParallel instances}
+\subsection{|ArrowParallel| instances}
 With the type class defined, we will now give implementations of it with GpH, the |Par| Monad and Eden.
 \subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
 The GpH implementation of |ArrowParallel| is implemented in a straightforward manner in Fig.~\ref{fig:ArrowParallelMulticore}, but a bit different compared to the variant from Section \ref{sec:GpHIntro}. We use |evalN :: [arr a b] -> arr [a] [b]| (definition in Appendix~\ref{utilfns}, think |zipWith ($)| on Arrows) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.

@@ -75,7 +75,7 @@ instance (Category p, Strong p, Choice p) => ArrowChoice p where
 \label{fig:profunctorArrow}
 \end{figure}
 
-\section{Omitted Function Definitions}
+\section{Additional function definitions}
 \label{app:omitted}
 We have omitted some function definitions in the main text for
 brevity, and redeem this here.
@@ -285,9 +285,9 @@ matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 \end{code}
 	\caption{|prMMTr|, |splitMatrix| and |matAdd| definition.}
 	\label{fig:torus_example_rest}
-\end{figure}
+\end{figure} %$
 
-\section{Syntactic Sugar} \label{syntacticSugar}
+\section{Syntactic sugar} \label{syntacticSugar}
 Finally, we also give the definitions for some syntactic sugar for PArrows, namely |parstar| and |parand|.
 For basic Arrows, we have the |***| combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two Arrows |arr a b| and |arr c d| into an Arrow |arr (a, c) (b, d)| which does both computations at once. This can easily be translated into a parallel version |parstar| with the use of |parEval2|, but for this we require a backend which has an implementation that does not require any configuration (hence the |()| as the |conf| parameter% in Fig.~\ref{fig:par***}
 ):
