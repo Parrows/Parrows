@@ -81,7 +81,7 @@ pipe2 :: (ArrowLoop arr, ArrowChoice arr,
     Future fut (([a], [b]), [c]) conf) =>
 	conf -> arr a b -> arr b c -> arr a c
 pipe2 conf f g =
-	(arr return &&& arr (const [])) &&& arr (const []) >>>
+    (arr return &&& arr (const [])) &&& arr (const []) >>>
     pipe conf (replicate 2 (unify f g)) >>>
     arr snd >>>
     arr head
