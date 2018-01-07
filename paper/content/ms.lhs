@@ -68,10 +68,9 @@
 	%\pagebreak
 	%include motivation.tex
 	%include relwork.tex
-	\begin{flushright}
-	
-	\end{flushright}\section{Background}
+        \section{Background}
 	\label{sec:background}
+	As an introduction, we here give a short overview over Arrows and GpH, the |Par| Monad, and Eden, the three parallel Haskells which we base our DSL on.
 	%include arrows.tex
 	%include parallelHaskells.tex
 	%\pagebreak
