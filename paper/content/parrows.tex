@@ -42,7 +42,7 @@ The GpH implementation of |ArrowParallel| is implemented in a straightforward ma
 \begin{code}
 data Conf a = Conf (Strategy a)
 
-instance (NFData b, ArrowChoice arr) =>
+instance (ArrowChoice arr) =>
   ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         evalN fs >>>
@@ -62,7 +62,7 @@ data Conf a = Conf (Strategy a)
 Now we can once again define our |ArrowParallel| instance as follows: First, we convert our Arrows |[arr a b]| with |evalN (map (>>> arr strat) fs)| into an Arrow |arr [a] [(Par (IVar b))]| that yields composable computations in the |Par| monad. By combining the result of this Arrow with |arr sequenceA|, we get an Arrow |arr [a] (Par [IVar b])|. Then, in order to fetch the results of the different threads, we map over the |IVar|s inside the |Par| Monad with |arr (>>= mapM get)| - our intermediary Arrow is of type |arr [a] (Par [b])|. Finally, we execute the computation |Par [b]| by composing with |arr runPar| and get the final Arrow |arr [a] [b]|.
 \begin{figure}[h]
 \begin{code}
-instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+instance (ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs = evalN (map (>>> arr strat) fs) >>>
                     arr sequenceA >>>
                     arr (>>= mapM Control.Monad.Par.get) >>>
