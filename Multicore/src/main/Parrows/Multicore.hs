@@ -52,7 +52,7 @@ defaultConf fs = stratToConf fs rdeepseq
 stratToConf :: [arr a b] -> Strategy b -> Conf b
 stratToConf _ strat = Conf strat
 
-instance (NFData b, ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
+instance (ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs =
         evalN fs >>>
         arr (withStrategy (parList strat))
