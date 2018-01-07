@@ -1,5 +1,5 @@
 \section{Futures} \label{sec:futures}\label{futures}
-Consider an outline parallel Arrow combinator:
+\begin{figure}[t]
 \begin{code}
 someCombinator:: (ArrowChoice arr,
 	ArrowParallel arr a b (),
@@ -10,8 +10,11 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () fs2
 \end{code}
+\caption{The outline combinator.}
+\label{fig:someCombinator}
+\end{figure}
 
-In a distributed environment such a combinator first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once (in the example we require |ArrowChoice| for this) and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
+Consider an outline parallel Arrow combinator in Fig.~\ref{fig:someCombinator}. In a distributed environment this first evaluates all |[arr a b]| in parallel, sends the results back to the master node, rotates the input once (in the example we require |ArrowChoice| for this) and then evaluates the |[arr b c]| in parallel to then gather the input once again on the master node.
 Such situations arise, \eg in scientific computations when the data distributed across the nodes needs to be transposed. A concrete example is 2D FFT computation \cite{Gorlatch,Berthold2009-fft}.
 
 While the example could be rewritten into a single |parEvalN| call by directly wiring the Arrows together before spawning, it illustrates an important problem. When using a |ArrowParallel| backend that resides on multiple computers, all communication between the nodes is done via the master node, as shown in the Eden trace in Figure~\ref{fig:withoutFutures}. This can become a serious bottleneck
@@ -46,9 +49,9 @@ Technical details are in Appendix, in Section~\ref{app:omitted}.
 For GpH and |Par| Monad, we can simply use |BasicFuture|s (Fig.~\ref{fig:BasicFuture}), which are just simple wrappers around the actual data with boiler-plate logic so that the type class is satisfied. This is because the concept of a |Future| does not change anything for shared-memory execution as there are no communication problems to fix. Nevertheless, we require a common interface so the parallel Arrows are portable across backends. The implementation can also be found in Section ~\ref{app:omitted}.
 
 In our communication example we can use this |Future| concept for direct communication between nodes as shown in Fig.~\ref{fig:someCombinatorParallel}.
-\begin{figure}[tbh]
+\begin{figure}[t]
 \begin{code}
-someCombinator :: (ArrowChoice arr, NFData b, NFData c,
+someCombinator :: (ArrowChoice arr,
 	ArrowParallel arr a (fut b) (), 
 	ArrowParallel arr (fut b) c (),
 	Future fut b ()) =>
@@ -58,7 +61,7 @@ someCombinator fs1 fs2 =
 	rightRotate >>>
 	parEvalN () (map (get () >>>) fs2)
 \end{code}
-\caption{The outline parallel combinator.}
+\caption{The outline combinator in parallel.}
 \label{fig:someCombinatorParallel}
 \end{figure}
 In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualisation in Fig.~\ref{fig:withFutures}. One especially elegant aspect of the definition in Fig.~\ref{fig:future} is that we can specify the type of |Future| to be used per backend with full interoperability between code using different backends, without even requiring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics as can be seen in Fig.~\ref{fig:someCombinatorParallel}. With the PArrows DSL we can also define default instances |Future fut a ()| for each backend similar to how |ArrowParallel arr a b ()| was defined in Section~\ref{sec:parallel-arrows}. Details can be found in Section~\ref{app:omitted}. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
