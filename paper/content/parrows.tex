@@ -35,7 +35,7 @@ By restricting the implementations of our backends to a specific |conf| type, we
 % , as we will see in the implementation of the GpH Haskell and the |Par| Monad backends.
 
 \subsection{ArrowParallel instances}
-
+With the type class defined, we will now give implementations of it with GpH, the |Par| Monad and Eden.
 \subsubsection{Glasgow parallel Haskell} \label{sec:parrows:multicore}
 The GpH implementation of |ArrowParallel| is implemented in a straightforward manner in Fig.~\ref{fig:ArrowParallelMulticore}, but a bit different compared to the variant from Section \ref{sec:GpHIntro}. We use |evalN :: [arr a b] -> arr [a] [b]| (definition in Appendix~\ref{utilfns}, think |zipWith ($)| on Arrows) combined with |withStrategy :: Strategy a -> a -> a| from GpH, where |withStrategy| is the same as |using :: a -> Strategy a -> a|, but with flipped parameters. Our |Conf a| datatype simply wraps a |Strategy a|, but could be extended in future versions of our DSL.
 \begin{figure}[t]

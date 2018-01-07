@@ -4,9 +4,7 @@
 \label{sec:benchmarks}
 
 The preceding section has shown that PArrows are expressive. This section evaluates the performance overhead of this compositional abstraction in comparison to  GpH and the |Par| Monad on shared memory architectures and Eden on  a distributed memory cluster.
-We start by explaining the hardware and software stack and outline the benchmark programs, and motivations for choosing them. Before we go into detail on the benchmarks we
-also shortly address hyper-threading and why we do not use it in our
-benchmarks. Our results show that PArrows hold up in terms of performance when compared to the original parallel Haskells, starting with the shared-memory variants (GpH, |Par| Monad and Eden~CP) and concluding with Eden in a distributed memory setting.
+We describe our measurement platform, the benchmark results -- the shared-memory variants (GpH, |Par| Monad and Eden~CP) followed by Eden in a distributed memory setting, and conclude that PArrows hold up in terms of performance when compared to the original parallel Haskells.
 
 
 \newcommand{\rmtest}{Rabin--Miller test\xspace}
@@ -49,6 +47,7 @@ xmax=#6]
 }
 
 \subsection{Measurement Platform}
+We start by explaining the hardware and software stack and outline the benchmark programs and motivation for choosing them. We also shortly address hyper-threading and why we do not use it in our benchmarks.
 
 \subsubsection{Hardware and Software}
 
