@@ -13,7 +13,7 @@ pure functions than Monads,  as the functions are already Arrows and can be used
 directly in our DSL.
 Arrows are a better fit to parallelise pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. % We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs)
 % while still having a generic and composable interface.
-We use a non-monadic interface (similar to Eden or GpH) and retain composibility.
+We use a non-monadic interface (similar to Eden or GpH) and retain composability.
 %
 The DSL allows for a direct parallelisation of monadic code via the Kleisli type and additionally allows to parallelise any Arrow type that has an instance for |ArrowChoice|. (Some skeletons require an additional |ArrowLoop| instance.)
 
