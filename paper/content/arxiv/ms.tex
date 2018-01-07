@@ -2028,16 +2028,16 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
 	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores (s)} \\ \hline \\
 	\multirow{3}{*}{\sudokutest 1000}
-	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
 	\multirow{1}{*}{\torustest 512}
-	\csvreader[head to column names]{benchmarks/torus-sm/bestAndWorstTorusSM-512.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstTorusSM-512.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
 	\multirow{3}{*}{\rmtest 11213 32}
-	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstRMSM-11213-32.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
 	\multirow{3}{*}{\rmtest 11213 64}
-	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstRMSM-11213-64.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 \end{tabular}
 \endgroup
 \end{table}
@@ -2054,13 +2054,13 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 \begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
 	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 256 cores (s)} \\ \hline \\
 	\multirow{1}{*}{\torustest 4096}
-	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
   	\multirow{1}{*}{\rmtest 44497 256}
-	\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 	\\ \hline \\
 	\multirow{1}{*}{\jacobitest 3217}
-	\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\csvreader[head to column names]{bestAndWorstJacobi-3217.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
 \end{tabular}
 \endgroup
 \end{table}
