@@ -8,7 +8,7 @@ With the |ArrowParallel| type class in place and implemented, we can now define 
 	\caption{|parEvalNLazy| depiction.}
 	\label{fig:parEvalNLazyImg}
 \end{figure}
-|parEvalN| fully traverses the list of passed Arrows as well as their inputs. Sometimes this might not be feasible, as it will not work on infinite lists of functions like e.g. |map (arr . (+)) [1..]| or just because we need the Arrows evaluated in chunks. |parEvalNLazy| (Figs.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from |[a]| to |[[a]]| with the given |chunkSize| in |arr (chunksOf chunkSize)|. These chunks are then fed into a list |[arr [a] [b]]| of chunk-wise parallel Arrows with the help of our lazy and sequential |evalN|. The resulting |[[b]]| is lastly converted into |[b]| with |arr concat|.
+The function |parEvalN| fully traverses the list of passed Arrows as well as their inputs. Sometimes this might not be feasible, as it will not work on infinite lists of functions like \eg |map (arr . (+)) [1..]| or just because we need the Arrows evaluated in chunks. |parEvalNLazy| (Figs.~\ref{fig:parEvalNLazyImg},~\ref{fig:parEvalNLazy}) fixes this. It works by first chunking the input from |[a]| to |[[a]]| with the given |chunkSize| in |arr (chunksOf chunkSize)|. These chunks are then fed into a list |[arr [a] [b]]| of chunk-wise parallel Arrows with the help of our lazy and sequential |evalN|. The resulting |[[b]]| is lastly converted into |[b]| with |arr concat|.
 \begin{figure}[t]
 \begin{code}
 parEvalNLazy :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
