@@ -9,16 +9,16 @@ Arrows, and hence to show their usefulness for
 composing parallel
 programs. We have shown that for a generic and extensible parallel Haskell, we do not have to restrict ourselves to a monadic interface. % Instead, we use Arrows which are a more general concept than Monads, but still allow for powerful composition. Furthermore, we think
 We argue that Arrows are better suited to  parallelise
-pure functions than monads,  as the functions are already Arrows and can be used
+pure functions than Monads,  as the functions are already Arrows and can be used
 directly in our DSL.
 Arrows are a better fit to parallelise pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. % We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs)
 % while still having a generic and composable interface.
 We use a non-monadic interface (similar to Eden or GpH) and retain composibility.
 %
-The DSL allows for a direct parallelisation of monadic code via the Kleisli type and additionally allows to parallelise any Arrow type that has an instance for |ArrowChoice| (but some skeletons require an additional |ArrowLoop| instance).
+The DSL allows for a direct parallelisation of monadic code via the Kleisli type and additionally allows to parallelise any Arrow type that has an instance for |ArrowChoice|. (Some skeletons require an additional |ArrowLoop| instance.)
 
 
-We have demonstrated the generality of the approach by exhibiting PArrow implementations for Eden, GpH, and the |Par| Monad. Hence, paralle programs can be ported between task parallel Haskell implementations with little or no effort. We are confident that it will be straightforward to add other task-parallel backends.
+We have demonstrated the generality of the approach by exhibiting PArrow implementations for Eden, GpH, and the |Par| Monad. Hence, parallel programs can be ported between task parallel Haskell implementations with little or no effort. We are confident that it will be straightforward to add other task-parallel backends.
 % Parallel Arrows, as presented here, feature an implementation of the |ArrowParallel| type class for GpH Haskell, |Par| Monad, and Eden. With our approach parallel programs can be ported across these flavours with little to no effort. It is quite straightforward to add further backends.
 % %
 % %
