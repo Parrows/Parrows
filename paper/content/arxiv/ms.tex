@@ -2000,7 +2000,7 @@ As seen in Fig.~\ref{fig:rabinMillerDistSpeedup}, we reached a speedup of 213.4 
 	\centering
 	\speedupplot{Speedup of distributed \rmtest \enquote{44497 256}}{PArrows Eden}{256}{32}{
 	\addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
-	smooth]{\benchmarkDir/distributed-rm/bench-distributed.bench.skelrm-parrows-44497-256.csv};
+	smooth]{bench-distributed.bench.skelrm-parrows-44497-256.csv};
 	}{272}{\plotwidthDist}{272}
 	\caption[Speedup distributed Rabin--Miller]{Speedup of the distributed \rmtest benchmark using PArrows with Eden.}
 	\label{fig:rabinMillerDistSpeedup}
@@ -2016,7 +2016,54 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 
 \subsection{Discussion}
 
-%input bestAndWorstBenchmarks.tex
+%\bestAndWorstBenchmarks
+
+\begin{table}[]
+\centering
+\caption{Overhead in the shared memory benchmarks. Bold marks values in favour of PArrows.}
+\label{tab:meanOverheadSharedMemory}
+\centering
+\begingroup\catcode`"=9
+\sisetup{round-mode=places, round-precision=3}
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 16 cores (s)} \\ \hline \\
+	\multirow{3}{*}{\sudokutest 1000}
+	\csvreader[head to column names]{benchmarks/sudoku-sm/bestAndWorstSudoku-1000.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\torustest 512}
+	\csvreader[head to column names]{benchmarks/torus-sm/bestAndWorstTorusSM-512.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 32}
+	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-32.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{3}{*}{\rmtest 11213 64}
+	\csvreader[head to column names]{benchmarks/sm-rm/bestAndWorstRMSM-11213-64.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Overhead in the distributed memory benchmarks. Bold marks values
+  in favour of PArrows.}
+% \olcomment{Vielleicht gleich durchmultiplizieren und \% angeben? Nicht
+% zu viele leere Zeilen in der Tabelle?}
+\label{tab:meanOverHeadDistributedMemory}
+\centering
+\begingroup\catcode`"=9
+\begin{tabular}{C{4cm} C{2cm} C{1.7cm} C{2.3cm} C{1.7cm}}
+	\thead{Benchmark} & \thead{Base}             & \thead{Mean of \\ mean \\overheads} & \thead{Maximum \\ normalised \\ stdDev} & \thead{Runtime for \\ 256 cores (s)} \\ \hline \\
+	\multirow{1}{*}{\torustest 4096}
+	\csvreader[head to column names]{benchmarks/distributed-torus/bestAndWorstTorus-4096.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+  	\multirow{1}{*}{\rmtest 44497 256}
+	\csvreader[head to column names]{benchmarks/distributed-rm/bestAndWorstRM-44497-256.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+	\\ \hline \\
+	\multirow{1}{*}{\jacobitest 3217}
+	\csvreader[head to column names]{benchmarks/distributed-jacobi/bestAndWorstJacobi-3217.csv}{}{& \vs & \meanOverhead & \maxStdDevForOverhead & \runtimeMaxCores \\}
+\end{tabular}
+\endgroup
+\end{table}
 
 PArrows performed in our benchmarks with little to no overhead. Tables~\ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrows-enabled versions trade blows with their vanilla counterparts when comparing the means over all cores of the mean overheads. If we combine these findings with the usability of our DSL,
 the minor overhead induced by PArrows is outweighed by their convenience and usefulness to the user.
