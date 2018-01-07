@@ -682,7 +682,7 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 \parbox[c][17em]{0.49\linewidth}{%
 \vfill
 \centering
-	\includegraphics{arrow}
+	\includegraphics{images/arrow}
 \vfill
 %	\caption{Schematic depiction of an Arrow.}
 %\label{fig:arrow-sch}
@@ -690,9 +690,9 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 \parbox[c][17em]{0.49\linewidth}{%
 \vfill
 \centering
-	{\includegraphics[scale=0.6]{arr}}
-	{\includegraphics[scale=0.6]{compose}}
-	{\includegraphics[scale=0.6]{first}}
+	{\includegraphics[scale=0.6]{images/arr}}
+	{\includegraphics[scale=0.6]{images/compose}}
+	{\includegraphics[scale=0.6]{images/first}}
 \vfill
 %\caption{Schematic depiction of |Arrow| combinators |arr|, |>>>| and |first|.}
 %\label{fig:arrows-viz}
@@ -707,15 +707,15 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 	\centering
 	\begin{tabular}{cc}
 		% \subcaptionbox
-{\label{t1}}{\includegraphics[width = 1.5in]{first}} &
+{\label{t1}}{\includegraphics[width = 1.5in]{images/first}} &
 		% \subcaptionbox
-{\label{fig:secondImg}}{\includegraphics[width = 1.5in]{second}} \\
+{\label{fig:secondImg}}{\includegraphics[width = 1.5in]{images/second}} \\
 \ensuremath{\Varid{first}} & \ensuremath{\Varid{second}} \\
 \midrule
 		% \subcaptionbox
-{}{\includegraphics[width = 1.5in]{starstarstar}} &
+{}{\includegraphics[width = 1.5in]{images/starstarstar}} &
 		% \subcaptionbox
-{}{\includegraphics[width = 1.5in]{andandand}}\\
+{}{\includegraphics[width = 1.5in]{images/andandand}}\\
 \ensuremath{(\mathbin{*\!*\!*})}\label{fig:***Img} & \ensuremath{(\mathbin{\&\!\&\!\&})} \label{fig:&&&Img} \\
 	\end{tabular}
 	\caption{Visual depiction of syntactic sugar for Arrows.}
@@ -772,7 +772,7 @@ While we could have based our DSL on Profunctors as well, we chose Arrows\mbcomm
 In its purest form, parallel computation (on functions) can be looked at as the execution of some functions \ensuremath{\Varid{a}\to \Varid{b}} in parallel or \ensuremath{\Varid{parEvalN}\mathbin{::}[\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]\to [\mskip1.5mu \Varid{b}\mskip1.5mu]}, as also Figure~\ref{fig:parEvalN} symbolically shows.
 \begin{figure}[t]
   \centering
-	\includegraphics[scale=0.7]{parEvalN}
+	\includegraphics[scale=0.7]{images/parEvalN}
 	\caption{Schematic illustration of \ensuremath{\Varid{parEvalN}}. A list of inputs is transformed by different functions in parallel.}
 	\label{fig:parEvalN}
 \end{figure}
@@ -827,7 +827,7 @@ Fig.~\ref{fig:parEvalNMulticoreImg} shows a visual representation of this code.
 % \end{figure}
 
 \begin{figure}[t]
-	\includegraphics[scale=0.5]{parEvalNMulticore}
+	\includegraphics[scale=0.5]{images/parEvalNMulticore}
 	\caption{\ensuremath{\Varid{parEvalN}} (GpH).}
 	\label{fig:parEvalNMulticoreImg}
 \end{figure} %$ %% formatting
@@ -862,7 +862,7 @@ Fig.~\ref{fig:parEvalNParMonadImg} shows a graphical representation.
 % \label{fig:parEvalNParMonad}
 % \end{figure}
 \begin{figure}[t]
-	\includegraphics[scale=0.5]{parEvalNParMonad}
+	\includegraphics[scale=0.5]{images/parEvalNParMonad}
 	\caption{\ensuremath{\Varid{parEvalN}} (\ensuremath{\Conid{Par}} Monad).}
 	\label{fig:parEvalNParMonadImg}
 \end{figure}
@@ -1122,7 +1122,7 @@ With the \ensuremath{\Conid{ArrowParallel}} type class in place and implemented,
 
 \subsubsection{Lazy \ensuremath{\Varid{parEvalN}}}
 \begin{figure}[tb]
-	\includegraphics[scale=0.7]{parEvalNLazy}
+	\includegraphics[scale=0.7]{images/parEvalNLazy}
 	\caption{\ensuremath{\Varid{parEvalNLazy}} depiction.}
 	\label{fig:parEvalNLazyImg}
 \end{figure}
@@ -1164,7 +1164,7 @@ The function \ensuremath{\Varid{parEvalN}} fully traverses the list of passed Ar
 
 \subsubsection{Heterogeneous tasks}
 \begin{figure}[tb]
-	\includegraphics[scale=0.7]{parEval2}
+	\includegraphics[scale=0.7]{images/parEval2}
 	\caption{\ensuremath{\Varid{parEval2}} depiction.}
 	\label{fig:parEval2Img}
 \end{figure}
@@ -1216,7 +1216,7 @@ While the example could be rewritten into a single \ensuremath{\Varid{parEvalN}}
 for a larger amount of data and number of processes \citep[as e.g.][showcases]{Berthold2009-fft}.
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{withoutFutures}
+	\includegraphics[width=0.9\textwidth]{images/withoutFutures}
 	\caption[without Futures]{Communication between 4 Eden processes without Futures. All communication goes through the master node. Each bar represents one process. Black lines represent communication. Colours: blue $\hat{=}$ idle, green $\hat{=}$ running, red  $\hat{=}$ blocked, yellow $\hat{=}$ suspended.}
 	\label{fig:withoutFutures}
 % \olcomment{more practical and heavy-weight example! fft (I have the code)?}
@@ -1289,7 +1289,7 @@ In our communication example we can use this \ensuremath{\Conid{Future}} concept
 In a distributed environment, this gives us a communication scheme with messages going through the master node only if it is needed -- similar to what is shown in the trace visualisation in Fig.~\ref{fig:withFutures}. One especially elegant aspect of the definition in Fig.~\ref{fig:future} is that we can specify the type of \ensuremath{\Conid{Future}} to be used per backend with full interoperability between code using different backends, without even requiring to know about the actual type used for communication. We only specify that there has to be a compatible Future and do not care about any specifics as can be seen in Fig.~\ref{fig:someCombinatorParallel}. With the PArrows DSL we can also define default instances \ensuremath{\Conid{Future}\;\Varid{fut}\;\Varid{a}\;()} for each backend similar to how \ensuremath{\Conid{ArrowParallel}\;\Varid{arr}\;\Varid{a}\;\Varid{b}\;()} was defined in Section~\ref{sec:parallel-arrows}. Details can be found in Section~\ref{app:omitted}. \olcomment{Fig. is not really clear. Do Figs with a lot of load? --- fft?}
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.9\textwidth]{withFutures}
+	\includegraphics[width=0.9\textwidth]{images/withFutures}
 	\caption[with Futures]{Communication between 4 Eden processes with Futures. Other than in Fig.~\ref{fig:withoutFutures}, processes communicate directly (one example message is highlighted) instead of always going through the master node (bottom bar).}
 	\label{fig:withFutures}
 \end{figure}
@@ -1309,7 +1309,7 @@ Because of this, it has the same restrictions as \ensuremath{\Varid{parEvalN}} a
 
 \begin{figure}[thb]
 %farm
-\includegraphics[scale=0.7]{farm}
+\includegraphics[scale=0.7]{images/farm}
 \caption{\ensuremath{\Varid{farm}} depiction.}
 \label{fig:farmImg}
 
@@ -1341,7 +1341,7 @@ Because of this, it has the same restrictions as \ensuremath{\Varid{parEvalN}} a
 \label{fig:farm}
 
 %farmChunk
-\includegraphics[scale=0.7]{farmChunk}
+\includegraphics[scale=0.7]{images/farmChunk}
 \caption{\ensuremath{\Varid{farmChunk}} depiction.}
 \label{fig:farmChunkImg}
 \end{figure}
@@ -1582,7 +1582,7 @@ Extensive use of \ensuremath{\Varid{pipe2}} over \ensuremath{\Varid{pipe}} with 
 
 \subsubsection{Ring skeleton} \label{sec:ring}
 \begin{figure}[tb]
-	\includegraphics[scale=0.75]{ring}
+	\includegraphics[scale=0.75]{images/ring}
 	\caption{\ensuremath{\Varid{ring}} skeleton depiction.}
 	\label{fig:ringImg}
 \end{figure}
@@ -1647,7 +1647,7 @@ This combinator can, for example, be used to calculate the shortest paths in a g
 
 \subsubsection{Torus skeleton}\label{sec:torus}
 \begin{figure}
-	\includegraphics[scale=0.75]{torus}
+	\includegraphics[scale=0.75]{images/torus}
 	\caption{\ensuremath{\Varid{torus}} skeleton depiction.}
 	\label{fig:ringTorusImg}
 \end{figure}
@@ -1799,14 +1799,14 @@ If we compare the trace from a call using our Arrow definition of the torus (Fig
 \begin{figure}[tb]
 \olcomment{more nodes!!!}
 	\centering
-	\includegraphics[width=0.9\textwidth]{torus_matrix_parrows_scale}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
 	\caption[Matrix multiplication with \ensuremath{\Varid{torus}} (PArrows)]{Matrix multiplication with \ensuremath{\Varid{torus}} (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[tb]
 	\centering
-	\includegraphics[width=0.9\textwidth]{torus_matrix_eden_scale}
+	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
 	\caption[Matrix multiplication with \ensuremath{\Varid{torus}} (Eden)]{Matrix multiplication with \ensuremath{\Varid{torus}} (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
@@ -2016,7 +2016,7 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 
 \subsection{Discussion}
 
-\input{bestAndWorstBenchmarks}
+%input bestAndWorstBenchmarks.tex
 
 PArrows performed in our benchmarks with little to no overhead. Tables~\ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrows-enabled versions trade blows with their vanilla counterparts when comparing the means over all cores of the mean overheads. If we combine these findings with the usability of our DSL,
 the minor overhead induced by PArrows is outweighed by their convenience and usefulness to the user.
@@ -3008,7 +3008,7 @@ Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a v
 
 \begin{figure}[thb]
 %parMap
-\includegraphics[scale=0.7]{parMap}
+\includegraphics[scale=0.7]{images/parMap}
 \caption{\ensuremath{\Varid{parMap}} depiction.}
 \label{fig:parMapImg}
 
@@ -3024,7 +3024,7 @@ Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a v
 \label{fig:parMap}
 
 %parMapStream
-\includegraphics[scale=0.7]{parMapStream}
+\includegraphics[scale=0.7]{images/parMapStream}
 \caption{\ensuremath{\Varid{parMapStream}} depiction.}
 \label{fig:parMapStreamImg}
 
