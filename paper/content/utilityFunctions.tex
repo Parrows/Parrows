@@ -24,7 +24,7 @@ evalN [] = arr (const [])
 \end{figure}
 
 The |mapArr| combinator (Fig.~\ref{fig:mapArr}) lifts any Arrow |arr a
-b| to an Arrow |arr [a] [b]|. The original inspiration was from \citet{programming_with_arrows},
+b| to an Arrow |arr [a] [b]|. The original inspiration was from \citet{Hughes2005},
 but the definition as then unified with |evalN|. 
 
 \begin{figure}[h]
@@ -56,7 +56,7 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 \section{Profunctor Arrows}
 \label{app:profunctorArrows}
 
-In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. This works because Arrows are strong Monads in the bicategory |Prof| of Profunctors as shown by \citet{Asada:2010:ASM:1863597.1863607}. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| type class like presented in this paper.\footnote{For additional information on the type classes used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}.}
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. This works because Arrows are strong Monads in the bicategory |Prof| of Profunctors as shown by \citet{Asada:2010:ASM:1863597.1863607}. In Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| type class like presented in this paper.\footnote{For additional information on the type classes used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}.}
 
 
 \begin{figure}[h]
@@ -134,7 +134,7 @@ instance Future BasicFuture a () where
     put _ = put'
     get _ = get'
 \end{code}
-\caption{The |BasicFuture| type and its |Future| instance for the |Par| Monad and GpH Haskell backends.}
+\caption{|BasicFuture| type and its |Future| instance for the |Par| Monad and GpH Haskell backends.}
 \label{fig:BasicFuture}
 \end{figure}
 
@@ -146,7 +146,7 @@ Figures~\ref{fig:parMapImg}--\ref{fig:parMapStream} show the definitions and a v
 \begin{figure}[thb]
 %parMap
 \includegraphics[scale=0.7]{images/parMap}
-\caption{Schematic depiction of |parMap|.}
+\caption{|parMap| depiction.}
 \label{fig:parMapImg}
 
 \begin{code}
@@ -158,7 +158,7 @@ parMap conf f = parEvalN conf (repeat f)
 
 %parMapStream
 \includegraphics[scale=0.7]{images/parMapStream}
-\caption{Schematic depiction of |parMapStream|.}
+\caption{|parMapStream| depiction.}
 \label{fig:parMapStreamImg}
 
 \begin{code}
@@ -166,7 +166,7 @@ parMapStream :: (ArrowParallel arr a b conf, ArrowChoice arr, ArrowApply arr) =>
 	conf -> ChunkSize -> arr a b -> arr [a] [b]
 parMapStream conf chunkSize f = parEvalNLazy conf chunkSize (repeat f)
 \end{code}
-\caption{Definition of |parMapStream|.}
+\caption{|parMapStream| definition.}
 \label{fig:parMapStream}
 \end{figure}
 
@@ -187,7 +187,7 @@ takeEach :: Int -> [a] -> [a]
 takeEach n [] = []
 takeEach n (x:xs) = x : takeEach n (drop (n-1) xs)
 \end{code}
-\caption{Definitions of |shuffle|, |unshuffle|, |takeEach|.}
+\caption{|shuffle|, |unshuffle|, |takeEach| definition.}
 \label{fig:edenshuffleetc}
 \end{figure}
 
@@ -201,7 +201,7 @@ rightRotate = arr $ \list -> case list of
   [] -> []
   xs -> last xs : init xs
 \end{code}
-\caption{Definitions of |lazy| and |rightRotate|.}
+\caption{|lazy| and |rightRotate| definitions.}
 \label{fig:edenlazyrightrotate}
 \end{figure}
 
@@ -216,7 +216,7 @@ uncurry3 f (a, (b, c)) = f a b c
 threetotwo :: (Arrow arr) => arr (a, b, c) (a, (b, c))
 threetotwo = arr $ \ ~(a, b, c) -> (a, (b, c))
 \end{code}
-\caption{Definitions of |lazyzip3|, |uncurry3| and |threetotwo|.}
+\caption{|lazyzip3|, |uncurry3| and |threetotwo| definitions.}
 \label{fig:lazyzip3etc}
 \end{figure}
 
@@ -230,7 +230,7 @@ farmChunk conf chunkSize numCores f =
 	parEvalNLazy conf chunkSize (repeat (mapArr f)) >>>
 	shuffle
 \end{code}
-\caption{Definition of |farmChunk|.}
+\caption{|farmChunk| definition.}
 \label{fig:farmChunk}
 \end{figure}
 
@@ -270,7 +270,7 @@ parEval2 conf f g =
 	arr partitionEithers >>>
 	arr head *** arr head
 \end{code}
-	\caption{Definition of |parEval2|.}
+	\caption{|parEval2| definition.}
 	\label{fig:parEval2}
 \end{figure}
 Furthermore, Fig.~\ref{fig:torus_example_rest} contains the omitted definitions of |prMMTr| (which calculates $AB^T$ for two matrices $A$ and $B$), |splitMatrix| (which splits the a matrix into chunks), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
@@ -283,7 +283,7 @@ splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size 
 
 matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 \end{code}
-	\caption{Definition of |prMMTr|, |splitMatrix| and |matAdd|.}
+	\caption{|prMMTr|, |splitMatrix| and |matAdd| definition.}
 	\label{fig:torus_example_rest}
 \end{figure}
 
