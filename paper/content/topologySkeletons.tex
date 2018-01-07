@@ -3,8 +3,9 @@
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a |pipe|, a |ring|, and a |torus| implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with parallel Arrows as well.
 
-If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and Par Monad backends which during runtime would result in the program crashing. This materialises with the usage of |loop| of the |ArrowLoop| type class and we think that this is due to difference of how evaluation is done in these backends when compared to Eden. An investigation of why this difference exists is beyond the scope of this work, we only provide a workaround for these types of skeletons as such they probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting even though other skeletons would be better suited to be run with them.
-The idea of the fix is to provide a |ArrowLoopParallel| type class that has two functions - |loopParEvalN| and |postLoopParEvalN| where the first is to be used inside an |loop| construct while the latter will be used right outside of the |loop|. This way we can delegate to the actual |parEvalN| in the spot where the backend supports it.
+If we used the original definition of |parEvalN|, however, these skeletons would produce an infinite loop with the GpH and |Par| Monad which during runtime would result in the program crash. This materialises with the usage of |loop| of the |ArrowLoop| type class and we think that this is due to difference of how evaluation is done in these backends when compared to Eden. An investigation of why this difference exists is beyond the scope of this work, we only provide a workaround for these types of skeletons as such they probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting.
+% even though other skeletons would be better suited to be run with them. --- OL: I don't get this sentence part
+The idea of the fix is to provide a |ArrowLoopParallel| type class that has two functions -- |loopParEvalN| and |postLoopParEvalN|, where the first is to be used inside an |loop| construct while the latter will be used right outside of the |loop|. This way we can delegate to the actual |parEvalN| in the spot where the backend supports it.
 \begin{code}
 class ArrowParallel arr a b conf =>
 	ArrowLoopParallel arr a b conf where
@@ -231,14 +232,14 @@ If we compare the trace from a call using our Arrow definition of the torus (Fig
 \olcomment{more nodes!!!}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_parrows_scale}
-	\caption[Matrix multiplication with |torus| (PArrows)]{Matrix Multiplication with |torus| (PArrows).}
+	\caption[Matrix multiplication with |torus| (PArrows)]{Matrix multiplication with |torus| (PArrows).}
 	\label{fig:torus_parrows_trace}
 \end{figure}
 
 \begin{figure}[tb]
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/torus_matrix_eden_scale}
-	\caption[Matrix multiplication with |torus| (Eden)]{Matrix Multiplication with |torus| (Eden).}
+	\caption[Matrix multiplication with |torus| (Eden)]{Matrix multiplication with |torus| (Eden).}
 	\label{fig:torus_eden_trace}
 \end{figure}
 
