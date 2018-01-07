@@ -159,7 +159,7 @@ Quite often the zero value lies in the error margin of the mean overhead. This m
 \subsubsection{Shared memory}
 
 \paragraph{Speedup.}
-The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden~CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (|Par| Monad), 8.14 (Eden~CP) for 16 cores and 1000 Sudokus. In contrast to Rabin--Miller, here the |GpH| seems to be the best of all, while Rabin--Miller profited most from Eden CP (i.e., Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for the Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
+The \rmtest benchmark showed almost linear speedup for both 32 and 64 tasks, the performance is slightly better in the latter case: 13.7 at 16 cores for input $2^{11213}-1$ and 64 tasks in the best case scenario with Eden~CP. The performance of the \sudokutest benchmark merely reaches a speedup of 9.19 (GpH), 8.78 (|Par| Monad), 8.14 (Eden~CP) for 16 cores and 1000 Sudokus. In contrast to Rabin--Miller, here the |GpH| seems to be the best of all, while Rabin--Miller profited most from Eden~CP (\ie Eden with direct memory copy) implementation of PArrows. Gentleman on shared memory has a plummeting speedup curve with GpH and |Par| Monad and logarithmically increasing speedup for the Eden-based version. The latter reached a speedup of 6.56 at 16 cores.
 
 \paragraph{Overhead.}
 

@@ -74,7 +74,7 @@ unliftFut conf f = put conf >>> f >>> get conf
 \end{figure}
 
 
-Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe Arrows of mixed types together, i.e. |arr a b| and |arr b c|. By wrapping these two Arrows inside a bigger Arrow |arr (([a], [b]), [c]) (([a], [b]), [c])| suitable for |pipe|, we can define |pipe2| as in Fig.~\ref{fig:pipe2}.
+Sometimes, this |pipe| definition can be a bit inconvenient, especially if we want to pipe Arrows of mixed types together, \ie  |arr a b| and |arr b c|. By wrapping these two Arrows inside a bigger Arrow |arr (([a], [b]), [c]) (([a], [b]), [c])| suitable for |pipe|, we can define |pipe2| as in Fig.~\ref{fig:pipe2}.
 \begin{figure}[tb]
 \begin{code}
 pipe2 :: (ArrowLoop arr, ArrowChoice arr,
