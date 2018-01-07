@@ -70,7 +70,10 @@
 	%include relwork.tex
         \section{Background}
 	\label{sec:background}
-	As an introduction, we here give a short overview over Arrows and GpH, the |Par| Monad, and Eden, the three parallel Haskells which we base our DSL on.
+	This section gives a short overview of Arrows
+        (Section~\ref{sec:arrows}) and of GpH, the |Par| Monad, and
+        Eden, the three parallel Haskells which we base our DSL on
+        (Section~\ref{sec:parallelHaskells}).
 	%include arrows.tex
 	%include parallelHaskells.tex
 	%\pagebreak
