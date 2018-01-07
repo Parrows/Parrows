@@ -56,7 +56,7 @@ These combinators make use of the |ArrowChoice| type class which provides the |p
 \section{Profunctor Arrows}
 \label{app:profunctorArrows}
 
-In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. This works because Arrows are strong Monads in the bicategory |Prof| of Profunctors as shown by \citet{Asada:2010:ASM:1863597.1863607}. Note that in Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| type class like presented in this paper.\footnote{For additional information on the type classes used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}.}
+In Fig.~\ref{fig:profunctorArrow} we show how specific Profunctors can be turned into Arrows. This works because Arrows are strong Monads in the bicategory |Prof| of Profunctors as shown by \citet{Asada:2010:ASM:1863597.1863607}. In Standard GHC |(>>>)| has the type |(>>>) :: Category cat => cat a b -> cat b c -> cat a c| and is therefore not part of the |Arrow| type class like presented in this paper.\footnote{For additional information on the type classes used, see: \url{https://hackage.haskell.org/package/profunctors-5.2.1/docs/Data-Profunctor.html} and \url{https://hackage.haskell.org/package/base-4.9.1.0/docs/Control-Category.html}.}
 
 
 \begin{figure}[h]
