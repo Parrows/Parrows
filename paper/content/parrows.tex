@@ -78,7 +78,7 @@ For both the GpH Haskell and |Par| Monad implementations we could use general in
 % \begin{figure}[h]
 \begin{code}
 class (Arrow arr) => ArrowUnwrap arr where
-	arr a b -> (a -> b)
+	unwrap :: arr a b -> (a -> b)
 \end{code}
 % \caption{possible ArrowUnwrap typeclass}
 % \label{fig:ArrowUnwrap}
