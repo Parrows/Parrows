@@ -209,25 +209,25 @@ As an example of using this skeleton, \citet{Eden:SkeletonBookChapter02} showed 
 type Matrix = [[Int]]
 
 prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
-prMM_torus numCores problemSizeVal m1 m2 =
-	combine $ torus () (mult torusSize) $ zipWith (zipWith (,)) (split m1) (split m2)
-    	where   torusSize = (floor . sqrt) $ fromIntegral numCores
-            	combine = concat . (map (foldr (zipWith (++)) (repeat [])))
-            	split = splitMatrix (problemSizeVal `div` torusSize)
+prMM_torus numCores problemSizeVal m1 m2 = 
+	combine $ torus () (mult torusSize) $ zipWith zip (split1 m1) (split2 m2)
+    where   torusSize = (floor . sqrt) $ fromIntegral $ numCoreCalc numCores
+            combine x = concat (map ((map (concat)) . transpose) x)
+            split1 x = staggerHorizontally (splitMatrix (problemSizeVal `div` torusSize) x)
+            split2 x = staggerVertically (splitMatrix (problemSizeVal `div` torusSize) x)
 
 -- Function performed by each worker
 mult :: Int -> ((Matrix,Matrix),[Matrix],[Matrix]) -> (Matrix,[Matrix],[Matrix])
 mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
-    where toRight = take (size-1) (sm1:sm1s)
-          toBottom = take (size-1) (sm2':sm2s)
-          sm2' = transpose sm2
-          sms = zipWith prMMTr (sm1:sm1s) (sm2':sm2s)
-          result = foldl1' matAdd sms
+    where 	toRight = take (size-1) (sm1:sm1s)
+            toBottom = take (size-1) (sm2:sm2s)
+            sms = zipWith prMM (sm1:sm1s) (sm2:sm2s)
+            result = foldl1' matAdd sms
 \end{code} %$
-\caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMMTr| calculates $AB^T$ and is used for the (sequential) calculation in the chunks. |splitMatrix| splits the Matrix into chunks. |matAdd| calculates $A + B$. Omitted definitions can be found in \ref{fig:torus_example_rest}. }
+\caption{Adapted matrix multiplication in Eden using a the |torus| skeleton. |prMM_torus| is the parallel matrix multiplication. |mult| is the function performed by each worker. |prMM| is the sequential matrix multiplication in the chunks. |splitMatrix| splits the Matrix into chunks. |staggerHorizontally| and |staggerVertically| pre-rotate the matrices. |matAdd| calculates $A + B$. Omitted definitions can be found in \ref{fig:torus_example_rest}. }
 \label{fig:torusMatMult}
 \end{figure}
-If we compare the trace from a call using our Arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the Arrow version and execution times are comparable. We discuss further benchmarks on larger clusters and in a more detail in the next section.
+If we compare the trace from a call using our Arrow definition of the torus (Fig.~\ref{fig:torus_parrows_trace}) with the Eden version (Fig.~\ref{fig:torus_eden_trace}) we can see that the behaviour of the Arrow version and execution times are comparable. We discuss further benchmarks on larger clusters in more detail in the next section.
 \begin{figure}[tb]
 \olcomment{more nodes!!!}
 	\centering
