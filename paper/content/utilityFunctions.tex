@@ -273,17 +273,30 @@ parEval2 conf f g =
 	\caption{|parEval2| definition.}
 	\label{fig:parEval2}
 \end{figure}
-Furthermore, Fig.~\ref{fig:torus_example_rest} contains the omitted definitions of |prMMTr| (which calculates $AB^T$ for two matrices $A$ and $B$), |splitMatrix| (which splits the a matrix into chunks), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
+Furthermore, Fig.~\ref{fig:torus_example_rest} contains the omitted definitions of |prMM| (sequential matrix multiplication), |splitMatrix| (which splits the a matrix into chunks), |staggerHorizontally| and |staggerVertically| (to pre-rotate the matrices), and lastly |matAdd|, that calculates $A + B$ for two matrices $A$ and $B$.
 \begin{figure}[h]
 \begin{code}
-prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
+prMM :: Matrix -> Matrix -> Matrix
+prMM m1 m2 = prMMTr m1 (transpose m2)
+  where
+    prMMTr m1' m2' = [[sum (zipWith (*) row col) | col <- m2' ] | row <- m1']
 
 splitMatrix :: Int -> Matrix -> [[Matrix]]
 splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
 
+staggerHorizontally :: [[a]] -> [[a]]
+staggerHorizontally matrix = zipWith leftRotate [0..] matrix
+
+staggerVertically :: [[a]] -> [[a]]
+staggerVertically matrix = transpose $ zipWith leftRotate [0..] (transpose matrix)
+
+leftRotate :: Int -> [a] -> [a]
+leftRotate i xs = xs2 ++ xs1 where
+    (xs1,xs2) = splitAt i xs
+
 matAdd = chunksOf (dimX x) $ zipWith (+) (concat x) (concat y)
 \end{code}
-	\caption{|prMMTr|, |splitMatrix| and |matAdd| definition.}
+	\caption{|prMMTr|, |splitMatrix|, |staggerHorizontally|, |staggerVertically| and |matAdd| definition.}
 	\label{fig:torus_example_rest}
 \end{figure} %$
 
