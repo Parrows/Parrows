@@ -1,31 +1,37 @@
-module Main where
+module TorusSpec (spec) where
 
-import Parrows.Definition
-import Parrows.Future
-import Control.Parallel.Eden.Topology
---import Parrows.Skeletons.Topology
-import Control.Parallel.Eden.Map
-import Control.Parallel.Eden
-import Parrows.Eden
+import Test.Hspec
+import Test.Hspec.QuickCheck
+
+import Parrows.Skeletons.Topology as P
+import Parrows.Multicore.Simple()
 import Data.List
 
-import Control.Applicative
-import Data.Functor
 import Data.List.Split
 
-import Control.DeepSeq
+import Control.DeepSeq()
 
-import System.Environment
+spec :: Spec
+spec = do
+    torusSpec
 
-import System.Random
+torusSpec :: Spec
+torusSpec = describe "torus Test" $ do
+    prop "Basic Torus Test" $ torusTest
+    prop "Identity Torus Test" $ torusTestIdentity
+        where
+            vals = [1..256]
+            matrixA = toMatrix 256 (cycle vals)
+            matrixB = toMatrix 256 (cycle (tail vals))
 
-import Debug.Trace
+            torusTest :: Bool
+            torusTest = (prMM_torus noPe 256 matrixA matrixB) == (prMM matrixA matrixB)
 
-randoms1 :: [Int]
-randoms1 = cycle [4,5,6]
+            torusTestIdentity :: Bool
+            torusTestIdentity = (prMM_torus noPe 256 matrixA (identity 256)) == matrixA
 
-randoms2 :: [Int]
-randoms2 = cycle [7,8,9]
+noPe :: Int
+noPe = 4
 
 type Vector = [Int]
 type Matrix = [Vector]
@@ -46,15 +52,26 @@ toMatrix :: Int -> [Int] -> Matrix
 toMatrix cnt randoms = chunksOf n $ take (matrixIntSize n) randoms
         where n = cnt
 
+identity :: Int -> Matrix
+identity size = [((replicate (shift) 0) ++ [1] ++ (replicate (size-1-shift) 0)) | shift <- [0..size-1]]
+
 matrixIntSize :: Int -> Int
 matrixIntSize n = n * n
 
 splitMatrix :: Int -> Matrix -> [[Matrix]]
-splitMatrix size matrix = map (transpose . map (chunksOf size)) $ chunksOf size $ matrix
+splitMatrix size matrix = (map (transpose . map (chunksOf size)) $ chunksOf size $ matrix)
 
 prMM :: Matrix -> Matrix -> Matrix
 prMM m1 m2 = prMMTr m1 (transpose m2)
-prMMTr m1 m2 = [[sum (zipWith (*) row col) | col <- m2 ] | row <- m1]
+  where
+    prMMTr m1' m2' = [[sum (zipWith (*) row col) | col <- m2' ] | row <- m1']
+
+--  1  2  3  4
+--  5  6  7  8
+--  9 10 11 12
+-- 13 14 15 16
+
+--let x = [[[[1,2],[5,6]],[[3,4],[7,8]]],[[[9,10],[13,14]],[[11,12],[15,16]]]]
 
 numCoreCalc :: Int -> Int
 numCoreCalc num
@@ -66,7 +83,7 @@ numCoreCalc num
         | otherwise = error "too many cores!"
 
 prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
-prMM_torus numCores problemSizeVal m1 m2 = combine $ torus (\x y z -> mult torusSize (x, y, z)) $ zipWith zip (split1 m1) (split2 m2)
+prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith zip (split1 m1) (split2 m2)
     where   torusSize = (floor . sqrt) $ fromIntegral $ numCoreCalc numCores
             combine x = concat (map ((map (concat)) . transpose) x)
             split1 x = staggerHorizontally (splitMatrix (problemSizeVal `div` torusSize) x)
@@ -91,14 +108,3 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
           toBottom = take (size-1) (sm2:sm2s)
           sms = zipWith prMM (sm1:sm1s) (sm2:sm2s)
           result = foldl1' matAdd sms
-
-main = do
-        args <- getArgs
-        let (problemSize:rest) = args
-        let problemSizeVal = read problemSize
-        let numCores = noPe
-        let matrixA = toMatrix problemSizeVal randoms1
-        let matrixB = toMatrix problemSizeVal randoms2
-
-        let matrixC = prMM_torus numCores problemSizeVal matrixA matrixB
-        print $ length $ (rnf matrixC) `seq` matrixC

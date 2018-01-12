@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 90986ef32f113c8fa793b853b8e2f270907f6e27e4e82ef6c42f790aa7b8b228
+-- hash: 4c04e4685dfc00c1b394be9cf6f04fbe29a41cb990902a3bebad468b003690ea
 
 name:           Parrows-Multicore
 version:        0.1.0.2
@@ -38,5 +38,25 @@ library
       Parrows.Multicore
       Parrows.Multicore.Simple
   other-modules:
+      Paths_Parrows_Multicore
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      src/test
+  ghc-options: -Wall
+  build-depends:
+      Parrows
+    , Parrows-Multicore
+    , base
+    , deepseq
+    , hspec ==2.*
+    , parallel
+    , split
+  other-modules:
+      EdenSpec
+      TorusSpec
       Paths_Parrows_Multicore
   default-language: Haskell2010

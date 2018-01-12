@@ -29,10 +29,10 @@ import System.Environment
 import Debug.Trace
 
 randoms1 :: [Int]
-randoms1 = cycle [4,5,6]
+randoms1 = [1..]
 
 randoms2 :: [Int]
-randoms2 = cycle [7,8,9]
+randoms2 = [1..]
 
 type Vector = [Int]
 type Matrix = [Vector]
