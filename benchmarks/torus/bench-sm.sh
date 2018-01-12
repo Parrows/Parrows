@@ -33,7 +33,7 @@ do
         else
             for (( j=${procCount}; j>=1; j=j/2 ));
             do
-                cmd="\"./"${progName}" "${parameter}" +RTS -N"${j}"\""
+                cmd="\"./"${progName}" "${parameter}" "${j}" +RTS -N"${j}"\""
 
                 benchCmds=${benchCmds}" "${cmd}
             done

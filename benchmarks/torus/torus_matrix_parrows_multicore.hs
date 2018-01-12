@@ -113,9 +113,9 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
 
 main = do
         args <- getArgs
-        let (problemSize:rest) = args
+        let (problemSize:noPeStr:rest) = args
         let problemSizeVal = read problemSize
-        let numCores = noPe
+        let numCores = read noPeStr
         let matrixA = toMatrix problemSizeVal randoms1
         --let matrixB = identity problemSizeVal
         let matrixB = toMatrix problemSizeVal randoms2
