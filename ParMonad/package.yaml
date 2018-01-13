@@ -16,6 +16,20 @@ library:
   - split
   - Parrows
   source-dirs: src/main
+tests:
+  spec:
+    source-dirs:
+      - src/test
+      - ../Definition/src/test
+    main: Spec.hs
+    dependencies:
+      - hspec == 2.*
+      - base
+      - deepseq
+      - monad-par
+      - split
+      - Parrows
+      - Parrows-ParMonad
 license: MIT
 maintainer: Martin Braun
 name: Parrows-ParMonad

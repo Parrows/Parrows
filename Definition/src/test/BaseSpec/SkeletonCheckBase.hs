@@ -1,10 +1,11 @@
-module EdenSpec (spec) where
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+module BaseSpec.SkeletonCheckBase where
 
 import Parrows.Definition
 import Parrows.Skeletons.Topology
 import Parrows.Skeletons.Map
-import Parrows.Multicore
-import Parrows.Multicore.Simple
+
 import Parrows.Future
 
 import Control.Arrow
@@ -12,34 +13,9 @@ import Control.Arrow
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
-spec :: Spec
-spec = do
-    parEvalSpec
-    pipeSpec
-    ringSpec
-    mapSpec
-    mapReduceSpec
-
-parEvalSpec :: Spec
-parEvalSpec = describe "Basic Parrow Functionality Eden" $ do
-    prop "Basic parEvalN" $ basicParEvalN
-    prop "parEvalNLazy" $ parEvalNLazyInt
-    prop "parEvalNFut" $ parEvalNFutInt
-    prop "parEval2" $ parEval2Int
-     where
-        basicParEvalN :: [Int] -> Bool
-        basicParEvalN xs =  parEvalN () (repeat (+1)) xs == map (+1) xs
-
-        parEvalNLazyInt :: [Int] -> Bool
-        parEvalNLazyInt xs = parEvalNLazy () 4 (repeat (+1)) xs == map (+1) xs
-
-        parEvalNFutInt :: [Int] -> Bool
-        parEvalNFutInt xs = (map (get ()) (parEvalNFut () (repeat (+1)) (map (put ()) xs))) == map (+1) xs
-
-        parEval2Int :: (Int, Int) -> Bool
-        parEval2Int (x, y) = (parEval2 () (+1) (*2) (x, y)) == (x+1,y*2)
-
-pipeSpec :: Spec
+pipeSpec :: (ArrowLoopParallel (->) Int Int (),
+  Future fut Int (),  ArrowLoopParallel (->) (fut Int) (fut Int) (),
+  Future fut (([Int], [Int]) ,[Int]) (), ArrowLoopParallel (->) (fut (([Int], [Int]), [Int])) (fut (([Int], [Int]), [Int])) ()) => Spec
 pipeSpec = describe "Pipe Test" $ do
     prop "Pipe 4 times (+1)" $ pipeTest
     prop "Pipe (Future) 4 times (+1)" $ pipeSimpleTest
@@ -59,7 +35,8 @@ pipeSpec = describe "Pipe Test" $ do
          pipeCombinatorTest :: Int -> Bool
          pipeCombinatorTest x = (((+1) |>>>| (*2)) x) == (((+1) >>> (*2)) x)
 
-ringSpec :: Spec
+ringSpec :: (Future fut Int (), ArrowLoopParallel (->) (Int, fut Int) (Int, fut Int) (),
+              ArrowLoopParallel (->) Int Int ()) => Spec
 ringSpec = describe "Ring Test" $ do
     prop "" $ ringTest
       where
@@ -73,7 +50,7 @@ ringSpec = describe "Ring Test" $ do
         rightRotate [] =  []
         rightRotate xs =  last xs : init xs
 
-mapSpec :: Spec
+mapSpec :: (ArrowParallel (->) Int Int (), ArrowParallel (->) [Int] [Int] ()) => Spec
 mapSpec = describe "mapTest" $ do
     prop "parMap" $ parMapTest $ parMap ()
     prop "parMapStream" $ parMapTest $ parMapStream () 4
@@ -83,7 +60,7 @@ mapSpec = describe "mapTest" $ do
           parMapTest :: ((Int -> Int) -> ([Int] -> [Int])) -> [Int] -> Bool
           parMapTest skel xs = skel (+1) xs == map (+1) xs
 
-mapReduceSpec :: Spec
+mapReduceSpec ::  (ArrowParallel (->) (Int, [Int]) Int ()) => Spec
 mapReduceSpec = describe "parMapReduceDirect Test" $
     prop "Basic parMapReduceDirect Test" $ parMapReduceDirectTest
       where

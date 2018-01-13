@@ -1,21 +1,22 @@
-module TorusSpec (spec) where
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+module BaseSpec.TorusSpecBase (torusSpec, Matrix) where
 
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
 import Parrows.Skeletons.Topology as P
-import Parrows.Multicore.Simple()
-import Data.List
 
+import Parrows.Definition
+import Parrows.Future
+
+import Data.List
 import Data.List.Split
 
-import Control.DeepSeq()
-
-spec :: Spec
-spec = do
-    torusSpec
-
-torusSpec :: Spec
+torusSpec :: (Future fut [Matrix] (),
+  ArrowLoopParallel (->) [Matrix] [Matrix] (),
+  ArrowLoopParallel (->) ((Matrix, Matrix), fut [Matrix], fut [Matrix]) (Matrix, fut [Matrix], fut [Matrix]) ())
+  => Spec
 torusSpec = describe "torus Test" $ do
     prop "Basic Torus Test" $ torusTest
     prop "Identity Torus Test" $ torusTestIdentity
@@ -82,7 +83,10 @@ numCoreCalc num
         | num <= 512 = 512
         | otherwise = error "too many cores!"
 
-prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
+prMM_torus :: (Future fut [Matrix] (),
+  ArrowLoopParallel (->) [Matrix] [Matrix] (),
+  ArrowLoopParallel (->) ((Matrix, Matrix), fut [Matrix], fut [Matrix]) (Matrix, fut [Matrix], fut [Matrix]) ())
+  => Int -> Int -> Matrix -> Matrix -> Matrix
 prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith zip (split1 m1) (split2 m2)
     where   torusSize = (floor . sqrt) $ fromIntegral $ numCoreCalc numCores
             combine x = concat (map ((map (concat)) . transpose) x)

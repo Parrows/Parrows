@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 80d96165454268cc1c30c1b2fb5c9f6804d4892bf10d77d2813e8edbeeb39fdc
+-- hash: f94a33419429b0e5ee1a787888bc51f8bec1e5ed882a00d2729228b579d9725f
 
 name:           Parrows
 version:        0.1.0.2
@@ -34,10 +34,32 @@ library
     , split
   exposed-modules:
       Parrows.Definition
+      Parrows.Dummy
+      Parrows.Dummy.Simple
       Parrows.Future
       Parrows.Skeletons.Map
       Parrows.Skeletons.Topology
       Parrows.Util
   other-modules:
+      Paths_Parrows
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: DefinitionSpec.hs
+  hs-source-dirs:
+      src/test
+  ghc-options: -Wall
+  build-depends:
+      Parrows
+    , base
+    , hspec ==2.*
+    , split
+  other-modules:
+      BaseSpec.BasicSpecBase
+      BaseSpec.CompleteSpecBase
+      BaseSpec.SkeletonCheckBase
+      BaseSpec.TorusSpecBase
+      DummySpec
       Paths_Parrows
   default-language: Haskell2010

@@ -18,7 +18,9 @@ library:
   source-dirs: src/main
 tests:
   spec:
-    source-dirs: src/test
+    source-dirs:
+      - src/test
+      - ../Definition/src/test
     main: Spec.hs
     dependencies:
       - hspec == 2.*

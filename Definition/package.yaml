@@ -14,6 +14,15 @@ library:
   - deepseq
   - split
   source-dirs: src/main
+tests:
+  spec:
+    source-dirs: src/test
+    main: DefinitionSpec.hs
+    dependencies:
+      - hspec == 2.*
+      - base
+      - Parrows
+      - split
 license: MIT
 maintainer: Martin Braun
 name: Parrows

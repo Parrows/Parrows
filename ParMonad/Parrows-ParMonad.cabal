@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8865a59a09fbed42c4a7ace505a6098bd732d3819472afd7138079a4b99ae76f
+-- hash: 01871f7242e3f0fb9767bd3f942469e0f042873441f47ef1e67fb4f611069a52
 
 name:           Parrows-ParMonad
 version:        0.1.0.2
@@ -38,5 +38,31 @@ library
       Parrows.ParMonad
       Parrows.ParMonad.Simple
   other-modules:
+      Paths_Parrows_ParMonad
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      src/test
+      ../Definition/src/test
+  ghc-options: -Wall
+  build-depends:
+      Parrows
+    , Parrows-ParMonad
+    , base
+    , deepseq
+    , hspec ==2.*
+    , monad-par
+    , split
+  other-modules:
+      ParMonadSpec
+      BaseSpec.BasicSpecBase
+      BaseSpec.CompleteSpecBase
+      BaseSpec.SkeletonCheckBase
+      BaseSpec.TorusSpecBase
+      DefinitionSpec
+      DummySpec
       Paths_Parrows_ParMonad
   default-language: Haskell2010
