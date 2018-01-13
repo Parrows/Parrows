@@ -14,7 +14,7 @@ import Test.Hspec
 specBase :: (
   Future fut Int (),
   Future fut [Matrix] (),
-  Future fut (([Int], [Int]) ,[Int]) (),
+  Future fut (([Int], [Int]), [Int]) (),
   ArrowParallel (->) [Int] [Int] (),
   ArrowParallel (->) (Int, [Int]) Int (),
   ArrowParallel (->) (Either Int Int) (Either Int Int) (),
