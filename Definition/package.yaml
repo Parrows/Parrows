@@ -1,8 +1,17 @@
 # This YAML file describes your package. Stack will automatically generate a
 # Cabal file when you run `stack build`. See the hpack website for help with
 # this file: <https://github.com/sol/hpack>.
-category: Other
-description: Multithreaded evaluation using Arrows
+category: Parallelism,Arrows
+description:
+  Arrows are a suitable abstraction for parallel programming.
+  This package offers a general interface for parallelizing Arrows.
+  This package however only contains the interface and code written against it
+  must be used with a backend such as @Parallel-Arrows-Multicore@,
+  @Parallel-Arrows-ParMonad@, @Parallel-Arrows-Eden@ in order to have any parallel speedup.
+  This package also contains some parallel skeletons such as variants of parMap
+  and some topology skeletons.
+
+  For more info see check out the paper at https://arxiv.org/abs/1801.02216
 extra-source-files:
 - package.yaml
 - stack.yaml
@@ -10,7 +19,7 @@ ghc-options: -Wall
 github: s4ke/Parrows
 library:
   dependencies:
-  - base
+  - base >= 4.7 && < 5.0
   - deepseq
   - split
   source-dirs: src/main
@@ -21,11 +30,12 @@ tests:
     dependencies:
       - hspec == 2.*
       - base
-      - Parrows
+      - Parallel-Arrows-Definition
       - split
 license: MIT
+license-file: LICENSE.md
 maintainer: Martin Braun
-name: Parrows
-synopsis: Multithreaded evaluation using Arrows
+name: Parallel-Arrows-Definition
+synopsis: Multithreaded evaluation using Arrows.
 
-version: '0.1.0.2'
+version: '0.1.1.0'

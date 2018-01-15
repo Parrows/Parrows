@@ -2,17 +2,17 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f94a33419429b0e5ee1a787888bc51f8bec1e5ed882a00d2729228b579d9725f
+-- hash: 18a9cfeea5f0b3f50440e4336f7223ffe240b2ace38157a58fcb63f449912fe0
 
-name:           Parrows
-version:        0.1.0.2
-synopsis:       Multithreaded evaluation using Arrows
-description:    Multithreaded evaluation using Arrows
-category:       Other
+name:           Parallel-Arrows-ParMonad
+version:        0.1.1.0
+synopsis:       Par Monad (@monad-par@) based backend for @Parallel-Arrows-Definition@.
+category:       Parallelism,Arrows
 homepage:       https://github.com/s4ke/Parrows#readme
 bug-reports:    https://github.com/s4ke/Parrows/issues
 maintainer:     Martin Braun
 license:        MIT
+license-file:   LICENSE.md
 build-type:     Simple
 cabal-version:  >= 1.10
 
@@ -29,37 +29,40 @@ library
       src/main
   ghc-options: -Wall
   build-depends:
-      base
+      Parallel-Arrows-Definition
+    , base >=4.7 && <5.0
     , deepseq
+    , monad-par
     , split
   exposed-modules:
-      Parrows.Definition
-      Parrows.Dummy
-      Parrows.Dummy.Simple
-      Parrows.Future
-      Parrows.Skeletons.Map
-      Parrows.Skeletons.Topology
-      Parrows.Util
+      Parrows.ParMonad
+      Parrows.ParMonad.Simple
   other-modules:
-      Paths_Parrows
+      Paths_Parallel_Arrows_ParMonad
   default-language: Haskell2010
 
 test-suite spec
   type: exitcode-stdio-1.0
-  main-is: DefinitionSpec.hs
+  main-is: Spec.hs
   hs-source-dirs:
       src/test
+      ../Definition/src/test
   ghc-options: -Wall
   build-depends:
-      Parrows
+      Parallel-Arrows-Definition
+    , Parallel-Arrows-ParMonad
     , base
+    , deepseq
     , hspec ==2.*
+    , monad-par
     , split
   other-modules:
+      ParMonadSpec
       BaseSpec.BasicSpecBase
       BaseSpec.CompleteSpecBase
       BaseSpec.SkeletonCheckBase
       BaseSpec.TorusSpecBase
+      DefinitionSpec
       DummySpec
-      Paths_Parrows
+      Paths_Parallel_Arrows_ParMonad
   default-language: Haskell2010

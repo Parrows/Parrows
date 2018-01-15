@@ -1,8 +1,8 @@
 # This YAML file describes your package. Stack will automatically generate a
 # Cabal file when you run `stack build`. See the hpack website for help with
 # this file: <https://github.com/sol/hpack>.
-category: Other
-description: Multithreaded evaluation using Arrows
+category: Parallelism,Arrows
+description: GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
 extra-source-files:
 - package.yaml
 - stack.yaml
@@ -10,11 +10,11 @@ ghc-options: -Wall
 github: s4ke/Parrows
 library:
   dependencies:
-  - base
+  - base >= 4.7 && < 5.0
   - deepseq
   - parallel
   - split
-  - Parrows
+  - Parallel-Arrows-Definition
   source-dirs: src/main
 tests:
   spec:
@@ -28,10 +28,11 @@ tests:
       - deepseq
       - parallel
       - split
-      - Parrows
-      - Parrows-Multicore
+      - Parallel-Arrows-Definition
+      - Parallel-Arrows-Multicore
 license: MIT
+license-file: LICENSE.md
 maintainer: Martin Braun
-name: Parrows-Multicore
-synopsis: Multithreaded evaluation using Arrows
-version: '0.1.0.2'
+name: Parallel-Arrows-Multicore
+synopsis: GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
+version: '0.1.1.0'

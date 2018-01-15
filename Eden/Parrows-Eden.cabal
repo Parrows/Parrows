@@ -4,15 +4,17 @@
 
 -- modified file from ../Parrows.cabal
 
-name:           Parrows-Eden
-version:        0.1.0.2
-synopsis:       Multithreaded evaluation using Arrows
-description:    Multithreaded evaluation using Arrows
-category:       Other
+name:           Parallel-Arrows-Eden
+version:        0.1.1.0
+synopsis:       Eden based backend for @Parallel-Arrows-Definition@.
+description:    Eden based backend for @Parallel-Arrows-Definition@.
+                For parallel evaluation on clusters you will have to compile your own Eden GHC (http://www.mathematik.uni-marburg.de/~eden/).
+category:       Parallelism,Arrows
 homepage:       https://github.com/s4ke/Parrows#readme
 bug-reports:    https://github.com/s4ke/Parrows/issues
 maintainer:     Martin Braun
 license:        MIT
+license-file:   LICENSE.md
 build-type:     Simple
 cabal-version:  >= 1.10
 
@@ -31,7 +33,7 @@ Test-Suite spec
                           src/main
     Ghc-Options:          -Wall -parcp
     Main-Is:              Spec.hs
-    Build-Depends:        base
+    Build-Depends:        base >= 4.7 && < 5.0
                         , hspec
                         , QuickCheck
                         , base
@@ -51,7 +53,7 @@ library
     , parallel
     , split
     , edenmodules
-    , Parrows
+    , Parallel-Arrows-Definition
   exposed-modules:
       Parrows.Eden
       Parrows.Eden.Simple
