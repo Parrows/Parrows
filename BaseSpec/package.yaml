@@ -2,7 +2,7 @@
 # Cabal file when you run `stack build`. See the hpack website for help with
 # this file: <https://github.com/sol/hpack>.
 category: Parallelism,Arrows
-description: GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
+description: BaseSpecs.
 extra-source-files:
 - package.yaml
 - stack.yaml
@@ -11,28 +11,25 @@ github: s4ke/Parrows
 library:
   dependencies:
   - base >= 4.7 && < 5.0
+  - hspec == 2.*
   - deepseq
-  - parallel
   - split
   - Parallel-Arrows-Definition == 0.1.1.0
   source-dirs: src/main
 tests:
   spec:
-    source-dirs:
-      - src/test
-    main: Spec.hs
+    source-dirs: src/test
+    main: DefinitionSpec.hs
     dependencies:
       - hspec == 2.*
       - base
-      - deepseq
-      - parallel
-      - split
-      - Parallel-Arrows-Definition == 0.1.1.0
       - Parallel-Arrows-BaseSpec == 0.1.1.0
-      - Parallel-Arrows-Multicore == 0.1.1.0
+      - Parallel-Arrows-Definition == 0.1.1.0
+      - split
 license: MIT
 license-file: LICENSE.md
 maintainer: Martin Braun
-name: Parallel-Arrows-Multicore
-synopsis: GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
+name: Parallel-Arrows-BaseSpec
+synopsis: BaseSpecs.
+
 version: '0.1.1.0'

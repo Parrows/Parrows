@@ -14,13 +14,12 @@ library:
   - deepseq
   - monad-par
   - split
-  - Parallel-Arrows-Definition
+  - Parallel-Arrows-Definition == 0.1.1.0
   source-dirs: src/main
 tests:
   spec:
     source-dirs:
       - src/test
-      - ../Definition/src/test
     main: Spec.hs
     dependencies:
       - hspec == 2.*
@@ -28,8 +27,9 @@ tests:
       - deepseq
       - monad-par
       - split
-      - Parallel-Arrows-Definition
-      - Parallel-Arrows-ParMonad
+      - Parallel-Arrows-Definition == 0.1.1.0
+      - Parallel-Arrows-BaseSpec == 0.1.1.0
+      - Parallel-Arrows-ParMonad == 0.1.1.0
 license: MIT
 license-file: LICENSE.md
 maintainer: Martin Braun

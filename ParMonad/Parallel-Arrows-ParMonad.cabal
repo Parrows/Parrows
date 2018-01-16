@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 18a9cfeea5f0b3f50440e4336f7223ffe240b2ace38157a58fcb63f449912fe0
+-- hash: 9c977b9e5ece66928ed2abeaaf22cda541e0e2e418e286d97ef18076eb272329
 
 name:           Parallel-Arrows-ParMonad
 version:        0.1.1.0
@@ -29,7 +29,7 @@ library
       src/main
   ghc-options: -Wall
   build-depends:
-      Parallel-Arrows-Definition
+      Parallel-Arrows-Definition ==0.1.1.0
     , base >=4.7 && <5.0
     , deepseq
     , monad-par
@@ -46,11 +46,11 @@ test-suite spec
   main-is: Spec.hs
   hs-source-dirs:
       src/test
-      ../Definition/src/test
   ghc-options: -Wall
   build-depends:
-      Parallel-Arrows-Definition
-    , Parallel-Arrows-ParMonad
+      Parallel-Arrows-BaseSpec ==0.1.1.0
+    , Parallel-Arrows-Definition ==0.1.1.0
+    , Parallel-Arrows-ParMonad ==0.1.1.0
     , base
     , deepseq
     , hspec ==2.*
@@ -58,11 +58,5 @@ test-suite spec
     , split
   other-modules:
       ParMonadSpec
-      BaseSpec.BasicSpecBase
-      BaseSpec.CompleteSpecBase
-      BaseSpec.SkeletonCheckBase
-      BaseSpec.TorusSpecBase
-      DefinitionSpec
-      DummySpec
       Paths_Parallel_Arrows_ParMonad
   default-language: Haskell2010

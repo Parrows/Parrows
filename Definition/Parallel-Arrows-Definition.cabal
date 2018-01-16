@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 87e55a344a3bdcafb1f79a1e11c0ef97e790d192716a98e4dc4075362e72425a
+-- hash: cd21f0b9dc6ae149e8b7990e5d2d7354f4538432d348ae7e0489d387bdcbff5f
 
 name:           Parallel-Arrows-Definition
 version:        0.1.1.0
@@ -43,25 +43,5 @@ library
       Parrows.Skeletons.Topology
       Parrows.Util
   other-modules:
-      Paths_Parallel_Arrows_Definition
-  default-language: Haskell2010
-
-test-suite spec
-  type: exitcode-stdio-1.0
-  main-is: DefinitionSpec.hs
-  hs-source-dirs:
-      src/test
-  ghc-options: -Wall
-  build-depends:
-      Parallel-Arrows-Definition
-    , base
-    , hspec ==2.*
-    , split
-  other-modules:
-      BaseSpec.BasicSpecBase
-      BaseSpec.CompleteSpecBase
-      BaseSpec.SkeletonCheckBase
-      BaseSpec.TorusSpecBase
-      DummySpec
       Paths_Parallel_Arrows_Definition
   default-language: Haskell2010

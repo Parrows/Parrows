@@ -28,9 +28,6 @@ Test-Suite spec
     Type:                 exitcode-stdio-1.0
     Default-Language:     Haskell2010
     Hs-Source-Dirs:       src/test
-                          ../Definition/src/main
-                          ../Definition/src/test
-                          src/main
     Ghc-Options:          -Wall -parcp
     Main-Is:              Spec.hs
     Build-Depends:        base >= 4.7 && < 5.0
@@ -41,7 +38,9 @@ Test-Suite spec
                         , parallel
                         , split
                         , edenmodules
-                        , Parrows
+                        , Parallel-Arrows-Definition == 0.1.1.0
+                        , Parallel-Arrows-BaseSpec == 0.1.1.0
+                        , Parallel-Arrows-Eden == 0.1.1.0
 
 library
   hs-source-dirs:
@@ -53,7 +52,7 @@ library
     , parallel
     , split
     , edenmodules
-    , Parallel-Arrows-Definition
+    , Parallel-Arrows-Definition == 0.1.1.0
   exposed-modules:
       Parrows.Eden
       Parrows.Eden.Simple
