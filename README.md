@@ -17,7 +17,7 @@ https://arxiv.org/abs/1801.02216
 Install
 =======
 
-Currently, all Haskell modules in this repository are on hackage in version 0.1.1.0. They are named "Parallel-Arrows-<NameOfSubmodule>".
+Currently, all Haskell modules in this repository are on hackage in version 0.1.1.0. They are named `Parallel-Arrows-<NameOfSubmodule>`.
 
 
 Currently supported modes:
