@@ -17,7 +17,7 @@ Roadmap:
 \begin{itemize}
 \item Implement using existing Haskells
 \begin{itemize}
-\item Multicore
+\item GpH
 \item ParMonad
 \item Eden
 \end{itemize}
@@ -27,7 +27,7 @@ Roadmap:
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Multicore Haskell}
+\begin{frame}[fragile]{GpH}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
@@ -37,18 +37,18 @@ parEvalN fs as = zipWith ($) fs as `using` parList rdeepseq
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{ParMonad}
+\begin{frame}[fragile]{Par Monad}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
-	(sequence $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
+	(sequenceA $ map (spawnP) $ zipWith ($) fs as) >>= mapM get
 \end{lstlisting}
 \begin{center}
 \includegraphics[scale=0.4]{images/parEvalNParMonad1}
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{ParMonad}
+\begin{frame}[fragile]{Par Monad}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (NFData b) => [a -> b] -> [a] -> [b]
 parEvalN fs as = runPar $ 
@@ -59,7 +59,7 @@ parEvalN fs as = runPar $
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{ParMonad}
+\begin{frame}[fragile]{Par Monad}
 \begin{center}
 	\includegraphics[scale=0.4]{images/parEvalNParMonad}
 \end{center}
@@ -68,7 +68,7 @@ parEvalN fs as = runPar $
 \begin{frame}[fragile]{Eden}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
-parEvalN fs as = spawnF fs as
+parEvalN = spawnF
 \end{lstlisting}
 \begin{center}
 \includegraphics[scale=0.4]{images/parEvalNEden}
