@@ -42,9 +42,9 @@ instance (ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
 \end{frame}
 
 
-\begin{frame}[fragile]{Eden (1)}
+\begin{frame}[fragile]{Eden problems}
 For Eden we need separate implementations.\\~\\
-This is because of \code{spawnF} only supporting functions \lstinline{(->)}.
+This is because of \code{spawnF} only supporting functions \lstinline{(->)}:
 \begin{lstlisting}[frame=htrbl]
 spawnF :: (Trans a, Trans b) => [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -56,8 +56,8 @@ class (Arrow arr) => ArrowUnwrap arr where
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Eden (2)}
-Implementation for Functions
+\begin{frame}[fragile]{Eden implementation - Functions}
+Straightforward:
 \begin{lstlisting}[frame=htrbl]
 data Conf = Nil
 
@@ -69,7 +69,7 @@ instance (Trans a, Trans b) => ArrowParallel (->) a b conf where
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Eden (3)}
+\begin{frame}[fragile]{Eden implementation - Kleisli}
 Implementation for the Kleisli Type:
 \begin{lstlisting}[frame=htrbl]
 instance (ArrowParallel (->) a (m b) Conf,
