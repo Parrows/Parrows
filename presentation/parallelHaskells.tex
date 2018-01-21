@@ -1,6 +1,6 @@
 \section{Parallel Arrows}
 \subsection{Introduction to Parallelism}
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Basic Parallelism (1)}
 In general, Parallelism can be looked at as:
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
@@ -9,7 +9,7 @@ parEvalN :: [a -> b] -> [a] -> [b]
 \includegraphics[scale=0.5]{images/parEvalN}
 \end{center}
 \end{frame}
-\begin{frame}[fragile]
+\begin{frame}[fragile]{Basic Parallelism (2)}
 \begin{lstlisting}[frame=htrbl]
 parEvalN :: [a -> b] -> [a] -> [b]
 \end{lstlisting}
@@ -22,7 +22,6 @@ Roadmap:
 \item Eden
 \end{itemize}
 \item Generalize to Arrows
-\item Adapt Implementations
 \item Profit
 \end{itemize}
 \end{frame}

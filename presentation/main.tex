@@ -7,6 +7,7 @@
 \usepackage{pgfplots, pgfplotstable}
 \usepgfplotslibrary{statistics}
 \usepackage{graphicx}
+\usepackage{appendixnumberbeamer}
 
 \usepackage[utf8]{inputenc}
 \usepackage{color}
@@ -76,36 +77,40 @@
 	\begin{frame}[fragile]
 		\centering
 		\vspace{0.75cm}
-		{\huge\bfseries Building a Parallel Haskell based on Arrows\par}
+		{\huge\bfseries Arrows for\\Parallel Computation\par}
 		\vspace{0.5cm}
 		{\Large\itshape Martin Braun\par}
+		~\\
+		University of Bayreuth\\
+		martinbraun123@aol.com
 		\vspace{0.5cm}
-		\vfill
-		Großes Masterprojekt\par
-		Universität Bayreuth\par
-		Supervisor:	Dr. Oleg Lobachev
 		
 		\vfill
 		
 		% Bottom of the page
-		{\large February 2, 2017\par}
+		{\large January 24, 2018\par}
 	\end{frame}
 	\begin{frame}
 		\tableofcontents
 	\end{frame}
-	\include{functionalprogramming}
 	%\include{monads}
+	\section{Arrows 101}
 	\include{arrows}
 	\include{parallelHaskells}
 	\include{parrows}
 	%\include{utilityFunctions}
 	\include{parrowsImpl}
-	\include{skeletons}
+	\section{Usability}
 	\include{syntacticSugar}
-	\include{benchmarks}
+	\include{skeletons}
+	\include{futures}
+	\include{topologySkeletons}
 	\AtBeginSection{}
 	\bibliography{../paper/references}
 	\section{Further Notes}
 	\include{profit}
 	\include{lastpage}
+	\appendix
+	\include{functionalprogramming}
+	\include{benchmarks}
 \end{document}

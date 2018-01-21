@@ -1,7 +1,7 @@
 \section{Futures} \label{sec:futures}\label{futures}
 \begin{figure}[t]
 \begin{code}
-someCombinator:: (ArrowChoice arr,
+someCombinator :: (ArrowChoice arr,
 	ArrowParallel arr a b (),
 	ArrowParallel arr b c ()) =>
 	[arr a b] -> [arr b c] -> arr [a] [c]
