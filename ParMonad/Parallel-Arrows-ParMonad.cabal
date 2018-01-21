@@ -2,11 +2,12 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9c977b9e5ece66928ed2abeaaf22cda541e0e2e418e286d97ef18076eb272329
+-- hash: 4b21a2a6bc5ef1e9c1a808a01640729079b28535021a60ed15386380a8eebdda
 
 name:           Parallel-Arrows-ParMonad
 version:        0.1.1.0
 synopsis:       Par Monad (@monad-par@) based backend for @Parallel-Arrows-Definition@.
+description:    Par Monad (@monad-par@) based backend for @Parallel-Arrows-Definition@. Use this backend for shared-memory programs.
 category:       Parallelism,Arrows
 homepage:       https://github.com/s4ke/Parrows#readme
 bug-reports:    https://github.com/s4ke/Parrows/issues
@@ -50,7 +51,7 @@ test-suite spec
   build-depends:
       Parallel-Arrows-BaseSpec ==0.1.1.0
     , Parallel-Arrows-Definition ==0.1.1.0
-    , Parallel-Arrows-ParMonad ==0.1.1.0
+    , Parallel-Arrows-ParMonad
     , base
     , deepseq
     , hspec ==2.*

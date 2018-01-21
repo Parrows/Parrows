@@ -2,12 +2,12 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c28813354b729fe972746f6a2469c0cec053b5e1d46f554cd9c6d5b500534d27
+-- hash: b3a28531a690aa75424a58102595fed4c11eafaaecce8080b723b1f0d6863f7b
 
 name:           Parallel-Arrows-Multicore
 version:        0.1.1.0
 synopsis:       GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
-description:    GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant.
+description:    GpH based backend for @Parallel-Arrows-Definition@ in a multicore variant. Use this backend for shared-memory programs.
 category:       Parallelism,Arrows
 homepage:       https://github.com/s4ke/Parrows#readme
 bug-reports:    https://github.com/s4ke/Parrows/issues
@@ -51,7 +51,7 @@ test-suite spec
   build-depends:
       Parallel-Arrows-BaseSpec ==0.1.1.0
     , Parallel-Arrows-Definition ==0.1.1.0
-    , Parallel-Arrows-Multicore ==0.1.1.0
+    , Parallel-Arrows-Multicore
     , base
     , deepseq
     , hspec ==2.*

@@ -8,6 +8,7 @@ name:           Parallel-Arrows-Eden
 version:        0.1.1.0
 synopsis:       Eden based backend for @Parallel-Arrows-Definition@.
 description:    Eden based backend for @Parallel-Arrows-Definition@.
+                This backend works on shared-memory (compile with -parcp) systems or on clusters (only -parmpi was tested).
                 For parallel evaluation on clusters you will have to compile your own Eden GHC (http://www.mathematik.uni-marburg.de/~eden/).
 category:       Parallelism,Arrows
 homepage:       https://github.com/s4ke/Parrows#readme
@@ -35,21 +36,19 @@ Test-Suite spec
                         , QuickCheck
                         , base
                         , deepseq
-                        , parallel
                         , split
                         , edenmodules
                         , Parallel-Arrows-Definition == 0.1.1.0
                         , Parallel-Arrows-BaseSpec == 0.1.1.0
-                        , Parallel-Arrows-Eden == 0.1.1.0
+                        , Parallel-Arrows-Eden
 
 library
   hs-source-dirs:
       src/main
   ghc-options: -Wall
   build-depends:
-      base
+      base >= 4.7 && < 5.0
     , deepseq
-    , parallel
     , split
     , edenmodules
     , Parallel-Arrows-Definition == 0.1.1.0

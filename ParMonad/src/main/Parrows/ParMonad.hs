@@ -63,7 +63,7 @@ stratToConf _ strat = Conf strat
 
 instance (ArrowChoice arr) => ArrowParallel arr a b (Conf b) where
     parEvalN (Conf strat) fs = evalN (map (>>> arr strat) fs) >>>
-                    arr sequenceA >>>
+                    arr sequence >>>
                     arr (>>= mapM Control.Monad.Par.get) >>>
                     arr runPar
 

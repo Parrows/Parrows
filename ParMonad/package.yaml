@@ -2,7 +2,8 @@
 # Cabal file when you run `stack build`. See the hpack website for help with
 # this file: <https://github.com/sol/hpack>.
 category: Parallelism,Arrows
-synopsis: Par Monad (@monad-par@) based backend for @Parallel-Arrows-Definition@.
+description: Par Monad (@monad-par@) based backend for @Parallel-Arrows-Definition@.
+  Use this backend for shared-memory programs.
 extra-source-files:
 - package.yaml
 - stack.yaml
@@ -29,7 +30,7 @@ tests:
       - split
       - Parallel-Arrows-Definition == 0.1.1.0
       - Parallel-Arrows-BaseSpec == 0.1.1.0
-      - Parallel-Arrows-ParMonad == 0.1.1.0
+      - Parallel-Arrows-ParMonad
 license: MIT
 license-file: LICENSE.md
 maintainer: Martin Braun
