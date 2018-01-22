@@ -56,7 +56,8 @@ However, using this definition directly will make the master node a potential bo
 
 \begin{figure}[t]
 \begin{code}
-pipe :: (ArrowLoop arr, ArrowLoopParallel arr (fut a) (fut a) conf,
+pipe :: (ArrowLoop arr,
+    ArrowLoopParallel arr (fut a) (fut a) conf,
 	Future fut a conf) =>
 	conf -> [arr a a] -> arr a a
 pipe conf fs = unliftFut conf (pipeSimple conf (map (liftFut conf) fs))

@@ -1,6 +1,5 @@
-\section{Usability}
-\subsection{Skeletons}
-\begin{frame}[fragile]{Skeletons... (1)}
+\subsection{Map Skeletons}
+\begin{frame}[fragile]{Map Skeletons (1)}
 parEvalN, but \textbf{chunky}:
 \begin{lstlisting}[frame=htrbl]
 parEvalNLazy :: conf -> ChunkSize -> [arr a b] -> arr [a] [b]
@@ -16,7 +15,7 @@ parEval2 :: conf -> arr a b -> arr c d -> arr (a, c) (b, d)
 \includegraphics[scale=0.5]{images/parEval2}
 \end{center}
 \end{frame}
-\begin{frame}[fragile]{Skeletons... (2)}
+\begin{frame}[fragile] {Map Skeletons (2)}
 map, but in \textbf{parallel}:
 \begin{lstlisting}[frame=htrbl]
 parMap :: conf -> arr a b -> arr [a] [b]
@@ -32,7 +31,7 @@ parMapStream :: conf -> ChunkSize -> arr a b -> arr [a] [b]
 \includegraphics[scale=0.5]{images/parMapStream}
 \end{center}
 \end{frame}
-\begin{frame}[fragile]{Skeletons... (3)}
+\begin{frame}[fragile]{Map Skeletons (3)}
 parMap, but with \textbf{workload distribution}:
 \begin{lstlisting}[frame=htrbl]
 farm :: conf -> NumCores -> arr a b -> arr [a] [b]
