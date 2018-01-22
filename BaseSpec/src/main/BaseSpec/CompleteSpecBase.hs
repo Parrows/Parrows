@@ -25,7 +25,7 @@ specBase :: (
   ArrowLoopParallel (->) (fut (([Int], [Int]), [Int])) (fut (([Int], [Int]), [Int])) (),
   ArrowLoopParallel (->) ((Matrix, Matrix), fut [Matrix], fut [Matrix]) (Matrix, fut [Matrix], fut [Matrix]) ()) =>
   Spec
-specBase = describe "Dummy Parrow Check" $ do
+specBase = do
     basicSpec
     pipeSpec
     ringSpec
