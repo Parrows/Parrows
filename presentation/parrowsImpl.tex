@@ -14,7 +14,7 @@ instance (ArrowChoice arr) =>
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{ParMonad}
+\begin{frame}[fragile]{Par Monad}
 \begin{lstlisting}[frame=htrbl]
 type Strategy a = a -> Par (IVar a)
 data Conf a = Conf (Strategy a)

@@ -1,0 +1,44 @@
+\begin{frame}[fragile]{pipe2}
+\begin{lstlisting}[frame=htrbl, language=java]
+pipe2 :: conf -> arr a b -> arr b c -> arr a c
+pipe2 conf f g =
+    (arr return &&& arr (const [])) &&& arr (const []) >>>
+    pipe conf (replicate 2 (unify f g)) >>>
+    arr snd >>>
+    arr head
+    where
+        unify :: arr a b -> arr b c -> 
+            arr (([a], [b]), [c]) (([a], [b]), [c])
+        unify f' g' = (mapArr f' *** mapArr g') *** arr (const [])
+            >>> arr (\((b, c), a) -> ((a, b), c))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{ring}
+\begin{lstlisting}[frame=htrbl, language=java]
+ring :: conf -> arr (i, r) (o, r) -> arr [i] [o]
+ring conf f =
+    loop (second (rightRotate >>> lazy) >>>
+        arr (uncurry zip) >>>
+        loopParEvalN conf
+            (repeat (second (get conf) >>> f >>>
+                second (put conf))) >>>
+        arr unzip) >>>
+    postLoopParEvalN conf (repeat (arr id))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{torus}
+\begin{lstlisting}[frame=htrbl, language=java]
+torus :: conf -> arr (c, a, b) (d, a, b) -> arr [[c]] [[d]]
+torus conf f =
+    loop (second ((mapArr rightRotate >>> lazy)
+            *** (arr rightRotate >>> lazy)) >>>
+        arr (uncurry3 (zipWith3 lazyzip3)) >>>
+        arr length &&& (shuffle >>>
+            loopParEvalN conf (repeat (ptorus conf f))) >>>
+        arr (uncurry unshuffle) >>>
+        arr (map unzip3) >>> arr unzip3 >>> threetotwo) >>>
+    postLoopParEvalN conf (repeat (arr id))
+\end{lstlisting}
+\end{frame}
