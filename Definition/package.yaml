@@ -11,7 +11,7 @@ description:
   This package also contains some parallel skeletons such as variants of parMap
   and some topology skeletons.
 
-  For more info see check out the paper at https://arxiv.org/abs/1801.02216
+  For more info, check out the paper at https://arxiv.org/abs/1801.02216
 extra-source-files:
 - package.yaml
 - stack.yaml
