@@ -10,18 +10,13 @@ module Parrows.CloudHaskell.SimpleLocalNet(
   defaultInitConf,
   defaultBufSize,
 
+  BackendType(..),
+  startBackend,
+
   Evaluatable(..),
   evalTaskBase,
 
-  ownLocalConfMVar,
-  ownLocalConf,
-
   CloudFuture(..),
-
-  master,
-  evalParallel,
-
-  waitForStartup,
 
   module Data.Binary,
   module Data.Typeable,
@@ -293,6 +288,36 @@ instance (Binary a, Typeable a) => Future CloudFuture a Conf where
 
 instance (NFData a, Evaluatable b, ArrowChoice arr) => ArrowParallel arr a b Conf where
     parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runPar
+
+data BackendType = Master | Slave
+type Host = String
+type Port = String
+
+startBackend :: RemoteTable -> BackendType -> Host -> Port -> IO Conf
+startBackend remoteTable Master host port = do
+	backend <- initializeBackend host port remoteTable
+
+	localNode <- newLocalNode backend
+
+	conf <- defaultInitConf localNode
+	putMVar ownLocalConfMVar conf
+
+	-- fork away the master node
+	forkIO $ startMaster backend (master conf backend)
+
+	-- wait for startup
+	waitForStartup conf
+	return conf
+startBackend remoteTable Slave host port = do
+	backend <- initializeBackend host port remoteTable
+
+	localNode <- newLocalNode backend
+
+	conf <- defaultInitConf localNode
+	putMVar ownLocalConfMVar conf
+
+	startSlave backend
+	return conf
 
 -- some utils...
 

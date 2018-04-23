@@ -50,19 +50,7 @@ main = do
 
   case args of
     ["master", host, port] -> do
-      backend <- initializeBackend host port myRemoteTable
-
-      localNode <- newLocalNode backend
-
-      conf <- defaultInitConf localNode
-      putMVar ownLocalConfMVar conf
-
-      -- fork away the master node
-      forkIO $ startMaster backend (master conf backend)
-
-      -- wait for startup
-      waitForStartup conf
-
+      conf <- startBackend myRemoteTable Master host port
       -- wait a bit
       --threadDelay 1000000
       readMVar (workers conf) >>= print
@@ -73,11 +61,5 @@ main = do
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do
-      backend <- initializeBackend host port myRemoteTable
-
-      localNode <- newLocalNode backend
-
-      conf <- defaultInitConf localNode
-      putMVar ownLocalConfMVar conf
-
-      startSlave backend
+      startBackend myRemoteTable Slave host port
+      print "slave shutdown."
