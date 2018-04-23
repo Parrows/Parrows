@@ -1,8 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Parrows.CloudHaskell.EvalGen(
-    mkEvalTasksNamed,
-    mkRemotablesNamed,
-    mkEvaluatablesNamed,
+    mkEvalTasks,
+    mkRemotables,
+    mkEvaluatables,
     evalTaskFn,
 ) where
 

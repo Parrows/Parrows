@@ -41,7 +41,8 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - packman-0.5.0
-- Parallel-Arrows-Definition-0.1.1.0
+- ../PArrows-Cloud-Haskell-Eval
+- ../../Definition
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

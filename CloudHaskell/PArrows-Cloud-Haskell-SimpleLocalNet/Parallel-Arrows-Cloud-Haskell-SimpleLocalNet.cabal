@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f9e6972efdad89e19c595e661a3bcf824518e3613dfd38b218a0d43bb1989dce
+-- hash: ae38c49c7ac5174ee3b3a48fc1be455cf6e821cf964d983b372561c43f15a799
 
 name:           Parallel-Arrows-Cloud-Haskell-SimpleLocalNet
 version:        0.1.0.0
@@ -29,7 +29,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      Parallel-Arrows-Definition >=0.1 && <0.2
+      Parallel-Arrows-Cloud-Haskell-Eval >=0.1 && <0.2
+    , Parallel-Arrows-Definition >=0.1 && <0.2
     , array >=0.5 && <0.6
     , base >=4.7 && <5
     , binary >=0.6.3 && <0.9

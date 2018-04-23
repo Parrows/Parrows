@@ -1,6 +1,8 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances  #-}
 module Parrows.CloudHaskell.SimpleLocalNet(
-  Par(),
   Thunk(),
 
   Conf(..),
@@ -11,7 +13,11 @@ module Parrows.CloudHaskell.SimpleLocalNet(
   Evaluatable(..),
   evalTaskBase,
 
-  runPar,
+  ownLocalConfMVar,
+  ownLocalConf,
+
+  CloudFuture(..),
+
   master,
   evalParallel,
 
@@ -23,12 +29,23 @@ module Parrows.CloudHaskell.SimpleLocalNet(
   module Control.Distributed.Process,
   module Control.Distributed.Process.Closure,
   module Control.Distributed.Process.Backend.SimpleLocalnet,
-  module Control.Distributed.Process.Node
+  module Control.Distributed.Process.Node,
+
+  module Parrows.Definition,
+  module Parrows.Util,
+  module Parrows.CloudHaskell.EvalGen
 ) where
 
 import Data.Bool
 
 import Data.Array.IO
+
+import Parrows.Definition
+import Parrows.Util
+import Parrows.Future hiding (get', put')
+import Parrows.CloudHaskell.EvalGen
+
+import Control.Arrow
 
 -- packman
 import GHC.Packing
@@ -38,7 +55,7 @@ import Data.Typeable
 
 -- imports for SimpleLocalNet backend compatibility
 import Control.Distributed.Process
-import Control.Distributed.Process.Node (forkProcess, LocalNode, initRemoteTable)
+import Control.Distributed.Process.Node (runProcess, forkProcess, LocalNode, initRemoteTable)
 import Control.Distributed.Process.Backend.SimpleLocalnet
 import Control.Distributed.Process.Closure
 
@@ -111,9 +128,9 @@ newtype Thunk a = Thunk { fromThunk :: Serialized a } deriving (Typeable)
 toThunk a = Thunk { fromThunk = a }
 
 instance (Typeable a) => Binary (Thunk a) where
-  put = put . fromThunk
+  put = Data.Binary.put . fromThunk
   get = do
-    (ser :: Serialized a) <- get
+    (ser :: Serialized a) <- Data.Binary.get
     return $ Thunk { fromThunk = ser }
 
 class (Binary a, Typeable a, NFData a) => Evaluatable a where
@@ -184,7 +201,7 @@ evalParallel conf as = do
 
   -- shuffle the list of workers, so we don't end up spawning
   -- all tasks in the same order everytime
-  shuffledWorkers <- shuffle workers
+  shuffledWorkers <- randomShuffle workers
 
   -- complete the work assignment node to task (NodeId, a)
   let workAssignment = zipWith (,) (cycle shuffledWorkers) as
@@ -227,14 +244,63 @@ hasSlaveNode conf = readMVar (started conf)
 waitForStartup :: Conf -> IO ()
 waitForStartup conf = waitUntil (hasSlaveNode conf)
 
+newtype CloudFuture a = CF (SendPort (SendPort a))
+
+instance NFData (CloudFuture a) where
+  rnf _ = ()
+
+{-# NOINLINE ownLocalConf #-}
+ownLocalConf :: Conf
+ownLocalConf = unsafePerformIO $ readMVar ownLocalConfMVar
+
+{-# NOINLINE ownLocalConfMVar #-}
+ownLocalConfMVar :: MVar Conf
+ownLocalConfMVar = unsafePerformIO $ newEmptyMVar
+
+{-# NOINLINE put' #-}
+put' :: (Binary a, Typeable a) => Conf -> a -> CloudFuture a
+put' conf a = unsafePerformIO $ do
+  mvar <- newEmptyMVar
+  runProcess (localNode conf) $ do
+    (senderSender, senderReceiver) <- newChan
+
+    liftIO $ do
+      forkProcess (localNode conf) $ do
+        sender <- receiveChan senderReceiver
+        sendChan sender a
+
+    liftIO $ putMVar mvar senderSender
+  takeMVar mvar >>= (return . CF)
+
+{-# NOINLINE get' #-}
+get' :: (Binary a, Typeable a) => Conf -> CloudFuture a -> a
+get' conf (CF senderSender) = unsafePerformIO $ do
+  mvar <- newEmptyMVar
+  runProcess (localNode conf) $ do
+    (sender, receiver) <- newChan
+    sendChan senderSender sender
+    a <- receiveChan receiver
+    liftIO $ putMVar mvar a
+  takeMVar mvar
+
+instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
+    loopParEvalN = parEvalN
+    postLoopParEvalN _ = evalN
+
+instance (Binary a, Typeable a) => Future CloudFuture a Conf where
+    put = arr . put'
+    get = arr . get'
+
+instance (NFData a, Evaluatable b, ArrowChoice arr) => ArrowParallel arr a b Conf where
+    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runPar
 
 -- some utils...
 
 -- | Randomly shuffle a list
 --   /O(N)/
 -- from: https://wiki.haskell.org/Random_shuffle
-shuffle :: [a] -> IO [a]
-shuffle xs = do
+randomShuffle :: [a] -> IO [a]
+randomShuffle xs = do
         ar <- newArray n xs
         forM [1..n] $ \i -> do
             j <- randomRIO (i,n)
