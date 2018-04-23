@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances, FlexibleContexts, UndecidableInstances,
-MultiParamTypeClasses #-}
+MultiParamTypeClasses, TemplateHaskell #-}
 module Main where
 
 --import Parrows.Eden
-import Parrows.ParMonad.Simple
+import Parrows.CloudHaskell.SimpleLocalNet
 import Parrows.Definition
 import Parrows.Future
 import Parrows.Util
@@ -83,8 +83,8 @@ numCoreCalc num
         | num <= 512 = 512
         | otherwise = error "too many cores!"
 
-prMM_torus :: Int -> Int -> Matrix -> Matrix -> Matrix
-prMM_torus numCores problemSizeVal m1 m2 = combine $ torus () (mult torusSize) $ zipWith zip (split1 m1) (split2 m2)
+prMM_torus :: Conf -> Int -> Int -> Matrix -> Matrix -> Matrix
+prMM_torus conf numCores problemSizeVal m1 m2 = combine $ torus conf (mult torusSize) $ zipWith zip (split1 m1) (split2 m2)
     where   torusSize = (floor . sqrt) $ fromIntegral $ numCoreCalc numCores
             combine x = concat (map ((map (concat)) . transpose) x)
             split1 x = staggerHorizontally (splitMatrix (problemSizeVal `div` torusSize) x)
@@ -110,14 +110,39 @@ mult size ((sm1,sm2),sm1s,sm2s) = (result,toRight,toBottom)
           sms = zipWith prMM (sm1:sm1s) (sm2:sm2s)
           result = foldl1' matAdd sms
 
-main = do
-        args <- getArgs
-        let (problemSize:noPeStr:rest) = args
-        let problemSizeVal = read problemSize
-        let numCores = read noPeStr
-        let matrixA = toMatrix problemSizeVal randoms1
-        --let matrixB = identity problemSizeVal
-        let matrixB = toMatrix problemSizeVal randoms2
+type MatrixList = [Matrix]
 
-        let matrixC = prMM_torus numCores problemSizeVal matrixA matrixB
-        print $ length $ (rnf matrixC) `seq` matrixC
+type MyType = (Matrix, CloudFuture [Matrix], CloudFuture [Matrix])
+
+-- remotable declaration for all eval tasks
+$(mkEvalTasks [''Matrix, ''MatrixList, ''MyType])
+$(mkRemotables [''Matrix, ''MatrixList, ''MyType])
+$(mkEvaluatables [''Matrix, ''MatrixList, ''MyType])
+
+myRemoteTable :: RemoteTable
+myRemoteTable = Main.__remoteTable initRemoteTable
+
+main :: IO ()
+main = do
+  args <- getArgs
+  case args of
+    ["master", host, port] -> do
+      conf <- startBackend myRemoteTable Master host port
+
+      --readMVar (workers conf) >>= print
+      -- wait a bit
+      --threadDelay 1000000
+      let problemSizeVal = 512
+      let numCores = 4
+
+      let matrixA = toMatrix problemSizeVal randoms1
+      --let matrixB = identity problemSizeVal
+      let matrixB = toMatrix problemSizeVal randoms2
+
+      let matrixC = prMM_torus conf numCores problemSizeVal matrixA matrixB
+      print $ length $ (rnf matrixC) `seq` matrixC
+
+      -- TODO: actual computation here!
+    ["slave", host, port] -> do
+      startBackend myRemoteTable Slave host port
+      print "slave shutdown."

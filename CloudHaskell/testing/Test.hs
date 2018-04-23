@@ -47,7 +47,6 @@ myRemoteTable = Main.__remoteTable initRemoteTable
 main :: IO ()
 main = do
   args <- getArgs
-
   case args of
     ["master", host, port] -> do
       conf <- startBackend myRemoteTable Master host port

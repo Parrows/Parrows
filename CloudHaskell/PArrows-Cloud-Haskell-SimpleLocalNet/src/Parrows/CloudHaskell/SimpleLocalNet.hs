@@ -61,7 +61,7 @@ import System.Random
 
 import Control.Monad
 import Control.Monad.Fix
-import Control.Concurrent(forkIO, threadDelay)
+import Control.Concurrent(forkIO, threadDelay, yield)
 import Control.Concurrent.MVar
 
 import Debug.Trace
@@ -241,6 +241,12 @@ waitForStartup conf = waitUntil (hasSlaveNode conf)
 
 newtype CloudFuture a = CF (SendPort (SendPort a))
 
+instance (Typeable a, Binary a) => Binary (CloudFuture a) where
+    put (CF sp) = Data.Binary.put sp
+    get = do
+        val <- Data.Binary.get
+        return $ CF val
+
 instance NFData (CloudFuture a) where
   rnf _ = ()
 
@@ -253,36 +259,42 @@ ownLocalConfMVar :: MVar Conf
 ownLocalConfMVar = unsafePerformIO $ newEmptyMVar
 
 {-# NOINLINE put' #-}
-put' :: (Binary a, Typeable a) => Conf -> a -> CloudFuture a
+put' :: (NFData a, Binary a, Typeable a) => Conf -> a -> CloudFuture a
 put' conf a = unsafePerformIO $ do
+  print "put'"
   mvar <- newEmptyMVar
-  runProcess (localNode conf) $ do
+  forkProcess (localNode conf) $ do
     (senderSender, senderReceiver) <- newChan
-
+    liftIO $ putStrLn $ show senderSender
     liftIO $ do
       forkProcess (localNode conf) $ do
         sender <- receiveChan senderReceiver
         sendChan sender a
-
+    liftIO $ yield
     liftIO $ putMVar mvar senderSender
-  takeMVar mvar >>= (return . CF)
+  takeMVar mvar >>= (return . CF . traceShowId)
 
 {-# NOINLINE get' #-}
-get' :: (Binary a, Typeable a) => Conf -> CloudFuture a -> a
+get' :: (NFData a, Binary a, Typeable a) => Conf -> CloudFuture a -> a
 get' conf (CF senderSender) = unsafePerformIO $ do
+  print "get'"
   mvar <- newEmptyMVar
-  runProcess (localNode conf) $ do
+  forkProcess (localNode conf) $ do
+    liftIO $ print "toast"
     (sender, receiver) <- newChan
-    sendChan senderSender sender
+    sendChan senderSender (traceShowId sender)
     a <- receiveChan receiver
+    liftIO $ print "kartoffel"
     liftIO $ putMVar mvar a
-  takeMVar mvar
+  val <- takeMVar mvar
+  print "took mvar"
+  return val
 
 instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
     loopParEvalN = parEvalN
     postLoopParEvalN _ = evalN
 
-instance (Binary a, Typeable a) => Future CloudFuture a Conf where
+instance (NFData a, Binary a, Typeable a) => Future CloudFuture a Conf where
     put = arr . put'
     get = arr . get'
 
@@ -293,7 +305,7 @@ data BackendType = Master | Slave
 type Host = String
 type Port = String
 
-startBackend :: RemoteTable -> BackendType -> Host -> Port -> IO Conf
+startBackend :: RemoteTable -> BackendType -> Host -> Port -> IO (Backend, Conf)
 startBackend remoteTable Master host port = do
 	backend <- initializeBackend host port remoteTable
 
@@ -307,7 +319,7 @@ startBackend remoteTable Master host port = do
 
 	-- wait for startup
 	waitForStartup conf
-	return conf
+	return (backend, conf)
 startBackend remoteTable Slave host port = do
 	backend <- initializeBackend host port remoteTable
 
@@ -317,7 +329,7 @@ startBackend remoteTable Slave host port = do
 	putMVar ownLocalConfMVar conf
 
 	startSlave backend
-	return conf
+	return (backend, conf)
 
 -- some utils...
 
