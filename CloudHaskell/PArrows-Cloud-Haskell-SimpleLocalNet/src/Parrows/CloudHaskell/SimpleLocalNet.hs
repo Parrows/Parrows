@@ -50,7 +50,7 @@ import Data.Typeable
 
 -- imports for SimpleLocalNet backend compatibility
 import Control.Distributed.Process
-import Control.Distributed.Process.Node (runProcess, forkProcess, LocalNode, initRemoteTable)
+import Control.Distributed.Process.Node (runProcess, forkProcess, LocalNode(..), initRemoteTable)
 import Control.Distributed.Process.Backend.SimpleLocalnet
 import Control.Distributed.Process.Closure
 
@@ -258,36 +258,46 @@ ownLocalConf = unsafePerformIO $ readMVar ownLocalConfMVar
 ownLocalConfMVar :: MVar Conf
 ownLocalConfMVar = unsafePerformIO $ newEmptyMVar
 
+isDebug :: Bool
+isDebug = True
+
+debug :: (Show a) => a -> Process ()
+debug a = if isDebug then liftIO $ putStrLn $ show a else return ()
+
 {-# NOINLINE put' #-}
 put' :: (NFData a, Binary a, Typeable a) => Conf -> a -> CloudFuture a
 put' conf a = unsafePerformIO $ do
-  print "put'"
   mvar <- newEmptyMVar
   forkProcess (localNode conf) $ do
-    (senderSender, senderReceiver) <- newChan
-    liftIO $ putStrLn $ show senderSender
-    liftIO $ do
-      forkProcess (localNode conf) $ do
-        sender <- receiveChan senderReceiver
-        sendChan sender a
-    liftIO $ yield
+    (senderSender :: SendPort (SendPort a), senderReceiver :: ReceivePort (SendPort a)) <- newChan
+    debug $ (typeOf senderSender)
     liftIO $ putMVar mvar senderSender
-  takeMVar mvar >>= (return . CF . traceShowId)
+    debug $ "put mvar"
+    debug $ "pre receive sender"
+    debug $ "type: " ++ (show $ typeOf $ senderReceiver)
+    sender <- receiveChan senderReceiver
+    debug $ "received sender"
+    sendChan sender a
+    debug $ "sent"
+  takeMVar mvar >>= (return . CF)
 
 {-# NOINLINE get' #-}
 get' :: (NFData a, Binary a, Typeable a) => Conf -> CloudFuture a -> a
 get' conf (CF senderSender) = unsafePerformIO $ do
-  print "get'"
   mvar <- newEmptyMVar
   forkProcess (localNode conf) $ do
-    liftIO $ print "toast"
+    debug $ "toast"
     (sender, receiver) <- newChan
-    sendChan senderSender (traceShowId sender)
+    debug $ "created sender: " ++ (show $ sender)
+    sendChan senderSender sender
+    debug $ "sent sender over senderSender: " ++ (show $ senderSender) ++ " " ++ (show $ sender)
+    debug $ "get' : pre receiveChan receiver"
+    debug $ "type: " ++ (show $ typeOf $ receiver)
     a <- receiveChan receiver
-    liftIO $ print "kartoffel"
+    debug $ "kartoffel"
     liftIO $ putMVar mvar a
+  print "before takeMVar"
   val <- takeMVar mvar
-  print "took mvar"
   return val
 
 instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where

@@ -24,6 +24,8 @@ import Control.Applicative
 import Data.Functor
 import Data.List.Split
 
+import Control.Concurrent
+
 import System.Environment
 
 import Debug.Trace
@@ -138,26 +140,27 @@ main = do
       localNode <- newLocalNode backend
 
       conf2 <- defaultInitConf localNode
+      --putStrLn $ show $ (fun1 conf >>> fun2 conf) 3
 
-      putStrLn $ show $ (fun1 conf >>> fun2 conf2) 3
+      print "TOAST"
+      modifyMVar_ (workers conf2) (\_ -> return  [localNodeId localNode])
+      print "TOAST2"
 
-{-
+
       --readMVar (workers conf) >>= print
       -- wait a bit
       --threadDelay 1000000
       let problemSizeVal = 512
       let numCores = 4
 
-
-
       let matrixA = toMatrix problemSizeVal randoms1
       --let matrixB = identity problemSizeVal
       let matrixB = toMatrix problemSizeVal randoms2
 
-      let matrixC = prMM_torus conf numCores problemSizeVal matrixA matrixB
+      let matrixC = prMM_torus conf2 numCores problemSizeVal matrixA matrixB
       print $ length $ (rnf matrixC) `seq` matrixC
 
-      -}
+      
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do
