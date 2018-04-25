@@ -68,13 +68,29 @@ import Debug.Trace
 
 data Computation a = Comp {
   computation :: IO (),
-  result :: IO a
+  result :: MVar a
 }
 
-sequenceComp :: [Computation a] -> Computation [a]
-sequenceComp comps = Comp { computation = newComp, result = newRes } 
-  where newComp = sequence_ $ map computation comps
-        newRes = sequence $ map result comps
+sequenceComp :: (NFData a) => [Computation a] -> IO (Computation [a])
+sequenceComp comps = do
+  mvar <- newEmptyMVar
+  return Comp { 
+    computation = newComp comps mvar,
+    result = mvar
+  } 
+    where 
+      newComp :: [Computation a] -> MVar [a] -> IO ()
+      newComp comps mvar = do
+            -- run the computations
+            sequence_ $ map computation comps
+
+            putStrLn "preSequence"
+            let resMVars = map result comps
+            putStrLn $ "res MVars: " ++ (show $ length resMVars)
+
+            res <- resMVars `seq` sequence $ map (takeMVar) resMVars
+            putStrLn "postSequence"
+            putMVar mvar res
 
 -- our internal Par Monad, we just use IO for now
 type Par a = IO (Computation a)
@@ -83,7 +99,7 @@ runPar :: Par a -> a
 runPar x = unsafePerformIO $ do
   comp <- x
   computation comp
-  result comp
+  takeMVar $ result comp
 
 -- our config type. for now, this only hosts the current state
 -- of the backend
@@ -185,26 +201,34 @@ forceSingle node out a = do
 -- | evaluates a single value inside the Par monad
 evalSingle :: Evaluatable a => Conf -> NodeId -> a -> Par a
 evalSingle conf node a = do
-  mvar <- newEmptyMVar
-  let computation = forkProcess (localNode conf) $ forceSingle node mvar a
-  return $ Comp { computation = computation >> return (), result = takeMVar mvar }
+  mvar <- newEmptyMVar 
+  return $ Comp { 
+      computation = do
+        pid <- forkProcess (localNode conf) $ forceSingle node mvar a
+        putStrLn $ "pid" ++ show pid
+      ,result = mvar
+  }
 
 -- | evaluates multiple values inside the Par monad
 evalParallel :: Evaluatable a => Conf -> [a] -> Par [a]
 evalParallel conf as = do
+  putStrLn "toast"
   workers <- readMVar $ workers conf
+  putStrLn "soap"
 
   -- shuffle the list of workers, so we don't end up spawning
   -- all tasks in the same order everytime
   shuffledWorkers <- randomShuffle workers
+  putStrLn $ show shuffledWorkers
 
   -- complete the work assignment node to task (NodeId, a)
   let workAssignment = zipWith (,) (cycle shuffledWorkers) as
 
   -- build the parallel computation with sequence
-  comps <-  sequence $ map (uncurry $ evalSingle conf) workAssignment
+  comps <- sequence $ map (uncurry $ evalSingle conf) workAssignment
 
-  return $ sequenceComp comps
+  res <- sequenceComp comps
+  return res
 
 -- | the code for the master node. automatically discovers all slaves and 
 -- adds/removes them from the Conf object
@@ -252,7 +276,10 @@ instance NFData (CloudFuture a) where
 
 {-# NOINLINE ownLocalConf #-}
 ownLocalConf :: Conf
-ownLocalConf = unsafePerformIO $ readMVar ownLocalConfMVar
+ownLocalConf = unsafePerformIO $ do
+  conf <- readMVar ownLocalConfMVar
+  putStrLn $ "workers from conf: " ++ show (unsafePerformIO $ readMVar $ workers conf)
+  return conf
 
 {-# NOINLINE ownLocalConfMVar #-}
 ownLocalConfMVar :: MVar Conf
@@ -269,7 +296,7 @@ put' :: (NFData a, Binary a, Typeable a) => Conf -> a -> CloudFuture a
 put' conf a = unsafePerformIO $ do
   mvar <- newEmptyMVar
   forkProcess (localNode conf) $ do
-    (senderSender :: SendPort (SendPort a), senderReceiver :: ReceivePort (SendPort a)) <- newChan
+    (senderSender, senderReceiver) <- newChan
     debug $ (typeOf senderSender)
     liftIO $ putMVar mvar senderSender
     debug $ "put mvar"
@@ -309,7 +336,7 @@ instance (NFData a, Binary a, Typeable a) => Future CloudFuture a Conf where
     get = arr . get'
 
 instance (NFData a, Evaluatable b, ArrowChoice arr) => ArrowParallel arr a b Conf where
-    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runPar
+    parEvalN conf fs = arr force >>> evalN fs >>> arr (evalParallel conf) >>> arr runPar
 
 data BackendType = Master | Slave
 type Host = String

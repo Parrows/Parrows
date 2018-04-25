@@ -142,10 +142,7 @@ main = do
       conf2 <- defaultInitConf localNode
       --putStrLn $ show $ (fun1 conf >>> fun2 conf) 3
 
-      print "TOAST"
       modifyMVar_ (workers conf2) (\_ -> return  [localNodeId localNode])
-      print "TOAST2"
-
 
       --readMVar (workers conf) >>= print
       -- wait a bit
