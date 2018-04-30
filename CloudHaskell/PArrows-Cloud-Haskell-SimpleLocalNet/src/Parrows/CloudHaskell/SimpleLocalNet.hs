@@ -140,7 +140,7 @@ initialState localNode = do
   }
 
 -- Wrapper for the packman type Serialized
-data Thunk a = Thunk { fromThunk :: Serialized a } deriving (Typeable)
+newtype Thunk a = Thunk { fromThunk :: Serialized a } deriving (Typeable)
 
 toThunk a = Thunk { fromThunk = a }
 
@@ -189,7 +189,7 @@ forceSingle node out a = do
   -- wait for the slave to send the input sender
   inputSender <- receiveChan inputSenderReceiver
 
-  debug "preSerialize"
+  debug $ "preSerialize " ++ (show $ typeOf $ a)
 
   thunkA <- liftIO $ trySerialize a
 
@@ -276,8 +276,8 @@ instance (Typeable a, Binary a) => Binary (CloudFuture a) where
         val <- Data.Binary.get
         return $ CF val
 
-instance NFData (CloudFuture a) where
-  rnf _ = ()
+instance (NFData a) => NFData (CloudFuture a) where
+  rnf (CF sp) = rnf sp
 
 {-# NOINLINE localState #-}
 localState :: State
@@ -333,8 +333,8 @@ get' conf (CF senderSender) = unsafePerformIO $ do
   return val
 
 instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
-    loopParEvalN = parEvalN
-    postLoopParEvalN _ = evalN
+    loopParEvalN _ = evalN
+    postLoopParEvalN = parEvalN
 
 instance (NFData a, Binary a, Typeable a) => Future CloudFuture a Conf where
     put = arr . put'
