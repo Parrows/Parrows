@@ -135,26 +135,23 @@ main = do
   args <- getArgs
   case args of
     ["master", host, port] -> do
-      (backend, conf) <- startBackend myRemoteTable Master host port
+      (backend, state) <- startBackend myRemoteTable Master host port
 
       localNode <- newLocalNode backend
 
-      conf2 <- defaultInitConf localNode
-      --putStrLn $ show $ (fun1 conf >>> fun2 conf) 3
-
-      modifyMVar_ (workers conf2) (\_ -> return  [localNodeId localNode])
+      conf <- defaultConf
 
       --readMVar (workers conf) >>= print
       -- wait a bit
       --threadDelay 1000000
-      let problemSizeVal = 512
+      let problemSizeVal = 256
       let numCores = 4
 
       let matrixA = toMatrix problemSizeVal randoms1
       --let matrixB = identity problemSizeVal
       let matrixB = toMatrix problemSizeVal randoms2
 
-      let matrixC = prMM_torus conf2 numCores problemSizeVal matrixA matrixB
+      let matrixC = prMM_torus conf numCores problemSizeVal matrixA matrixB
       print $ length $ (rnf matrixC) `seq` matrixC
 
       

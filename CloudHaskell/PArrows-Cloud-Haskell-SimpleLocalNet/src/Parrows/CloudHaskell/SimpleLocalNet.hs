@@ -7,7 +7,7 @@ module Parrows.CloudHaskell.SimpleLocalNet(
 
   Conf(..),
   State(..),
-  defaultInitConf,
+  defaultConf,
   defaultBufSize,
 
   BackendType(..),
@@ -103,38 +103,44 @@ runPar x = unsafePerformIO $ do
 
 -- our config type. for now, this only hosts the current state
 -- of the backend
-type Conf = State
+data Conf = Conf {
+  workers :: [NodeId],
+  serializeBufferSize :: Int
+}
 
 data State = State {
-  workers :: MVar [NodeId],
+  workersMVar :: MVar [NodeId],
   shutdown :: MVar Bool,
   started :: MVar Bool,
-  localNode :: LocalNode,
-  serializeBufferSize :: Int
+  localNode :: LocalNode
 }
 
 -- | default buffer size used by trySerialize
 defaultBufSize :: Int
 defaultBufSize = 10 * 2^20 -- 10 MB
 
-defaultInitConf :: LocalNode -> IO Conf
-defaultInitConf = initialConf defaultBufSize
+defaultConf :: IO Conf
+defaultConf = do
+  workers <- readMVar $ workersMVar $ localState
+  return Conf {
+    workers = workers,
+    serializeBufferSize = defaultBufSize
+  }
 
-initialConf :: Int -> LocalNode -> IO Conf
-initialConf serializeBufferSize localNode = do
+initialState :: LocalNode -> IO State
+initialState localNode = do
   workersMVar <- newMVar []
   shutdownMVar <- newMVar False
   startedMVar <- newMVar False
   return State {
-    workers = workersMVar,
+    workersMVar = workersMVar,
     shutdown = shutdownMVar,
     started = startedMVar,
-    localNode = localNode,
-    serializeBufferSize = serializeBufferSize
+    localNode = localNode
   }
 
 -- Wrapper for the packman type Serialized
-newtype Thunk a = Thunk { fromThunk :: Serialized a } deriving (Typeable)
+data Thunk a = Thunk { fromThunk :: Serialized a } deriving (Typeable)
 
 toThunk a = Thunk { fromThunk = a }
 
@@ -183,7 +189,11 @@ forceSingle node out a = do
   -- wait for the slave to send the input sender
   inputSender <- receiveChan inputSenderReceiver
 
+  debug "preSerialize"
+
   thunkA <- liftIO $ trySerialize a
+
+  debug "postSerialize"
 
   -- send the input to the slave
   sendChan inputSender $ toThunk thunkA
@@ -204,7 +214,7 @@ evalSingle conf node a = do
   mvar <- newEmptyMVar 
   return $ Comp { 
       computation = do
-        pid <- forkProcess (localNode conf) $ forceSingle node mvar a
+        pid <- forkProcess (localNode localState) $ forceSingle node mvar a
         putStrLn $ "pid" ++ show pid
       ,result = mvar
   }
@@ -212,14 +222,9 @@ evalSingle conf node a = do
 -- | evaluates multiple values inside the Par monad
 evalParallel :: Evaluatable a => Conf -> [a] -> Par [a]
 evalParallel conf as = do
-  putStrLn "toast"
-  workers <- readMVar $ workers conf
-  putStrLn "soap"
-
   -- shuffle the list of workers, so we don't end up spawning
   -- all tasks in the same order everytime
-  shuffledWorkers <- randomShuffle workers
-  putStrLn $ show shuffledWorkers
+  shuffledWorkers <- randomShuffle $ workers conf
 
   -- complete the work assignment node to task (NodeId, a)
   let workAssignment = zipWith (,) (cycle shuffledWorkers) as
@@ -232,10 +237,10 @@ evalParallel conf as = do
 
 -- | the code for the master node. automatically discovers all slaves and 
 -- adds/removes them from the Conf object
-master :: Conf -> Backend -> [NodeId] -> Process ()
-master conf backend slaves = do
+master :: Backend -> [NodeId] -> Process ()
+master backend slaves = do
     forever $ do
-      shutdown <- liftIO $ readMVar $ shutdown conf
+      shutdown <- liftIO $ readMVar $ shutdown localState
       if shutdown
         then do
           terminateAllSlaves backend
@@ -244,9 +249,9 @@ master conf backend slaves = do
           slaveProcesses <- findSlaves backend
           let slaveNodes = map processNodeId slaveProcesses
           liftIO $ do
-              modifyMVar_ (workers conf) (\_ -> return slaveNodes)
+              modifyMVar_ (workersMVar localState) (\_ -> return slaveNodes)
               if (length slaveNodes) > 0 then
-                modifyMVar_ (started conf) (\_ -> return True)
+                modifyMVar_ (started localState) (\_ -> return True)
               else
                 return ()
 
@@ -256,12 +261,12 @@ waitUntil condition = fix $ \loop -> do
     then return ()
     else threadDelay 100 >> loop
 
-hasSlaveNode :: Conf -> IO Bool
-hasSlaveNode conf = readMVar (started conf)
+hasSlaveNode :: State -> IO Bool
+hasSlaveNode state = readMVar (started state)
 
 -- | wait for the (started Conf) == true (i.e. the master node has found slaves)
-waitForStartup :: Conf -> IO ()
-waitForStartup conf = waitUntil (hasSlaveNode conf)
+waitForStartup :: State -> IO ()
+waitForStartup state = waitUntil (hasSlaveNode state)
 
 newtype CloudFuture a = CF (SendPort (SendPort a))
 
@@ -274,16 +279,16 @@ instance (Typeable a, Binary a) => Binary (CloudFuture a) where
 instance NFData (CloudFuture a) where
   rnf _ = ()
 
-{-# NOINLINE ownLocalConf #-}
-ownLocalConf :: Conf
-ownLocalConf = unsafePerformIO $ do
-  conf <- readMVar ownLocalConfMVar
-  putStrLn $ "workers from conf: " ++ show (unsafePerformIO $ readMVar $ workers conf)
-  return conf
+{-# NOINLINE localState #-}
+localState :: State
+localState = unsafePerformIO $ do
+  locState <- readMVar localStateMVar
+  putStrLn $ "workers from conf: " ++ show (unsafePerformIO $ readMVar $ workersMVar locState)
+  return locState
 
-{-# NOINLINE ownLocalConfMVar #-}
-ownLocalConfMVar :: MVar Conf
-ownLocalConfMVar = unsafePerformIO $ newEmptyMVar
+{-# NOINLINE localStateMVar #-}
+localStateMVar :: MVar State
+localStateMVar = unsafePerformIO $ newEmptyMVar
 
 isDebug :: Bool
 isDebug = True
@@ -295,7 +300,7 @@ debug a = if isDebug then liftIO $ putStrLn $ show a else return ()
 put' :: (NFData a, Binary a, Typeable a) => Conf -> a -> CloudFuture a
 put' conf a = unsafePerformIO $ do
   mvar <- newEmptyMVar
-  forkProcess (localNode conf) $ do
+  forkProcess (localNode localState) $ do
     (senderSender, senderReceiver) <- newChan
     debug $ (typeOf senderSender)
     liftIO $ putMVar mvar senderSender
@@ -304,7 +309,7 @@ put' conf a = unsafePerformIO $ do
     debug $ "type: " ++ (show $ typeOf $ senderReceiver)
     sender <- receiveChan senderReceiver
     debug $ "received sender"
-    sendChan sender a
+    sendChan sender (rnf a `seq` a)
     debug $ "sent"
   takeMVar mvar >>= (return . CF)
 
@@ -312,7 +317,7 @@ put' conf a = unsafePerformIO $ do
 get' :: (NFData a, Binary a, Typeable a) => Conf -> CloudFuture a -> a
 get' conf (CF senderSender) = unsafePerformIO $ do
   mvar <- newEmptyMVar
-  forkProcess (localNode conf) $ do
+  forkProcess (localNode localState) $ do
     debug $ "toast"
     (sender, receiver) <- newChan
     debug $ "created sender: " ++ (show $ sender)
@@ -342,31 +347,31 @@ data BackendType = Master | Slave
 type Host = String
 type Port = String
 
-startBackend :: RemoteTable -> BackendType -> Host -> Port -> IO (Backend, Conf)
+startBackend :: RemoteTable -> BackendType -> Host -> Port -> IO (Backend, State)
 startBackend remoteTable Master host port = do
 	backend <- initializeBackend host port remoteTable
 
 	localNode <- newLocalNode backend
 
-	conf <- defaultInitConf localNode
-	putMVar ownLocalConfMVar conf
+	locState <- initialState localNode
+	putMVar localStateMVar locState
 
 	-- fork away the master node
-	forkIO $ startMaster backend (master conf backend)
+	forkIO $ startMaster backend (master backend)
 
 	-- wait for startup
-	waitForStartup conf
-	return (backend, conf)
+	waitForStartup locState
+	return (backend, locState)
 startBackend remoteTable Slave host port = do
 	backend <- initializeBackend host port remoteTable
 
 	localNode <- newLocalNode backend
 
-	conf <- defaultInitConf localNode
-	putMVar ownLocalConfMVar conf
+	locState <- initialState localNode
+	putMVar localStateMVar locState
 
 	startSlave backend
-	return (backend, conf)
+	return (backend, locState)
 
 -- some utils...
 

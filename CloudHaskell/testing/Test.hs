@@ -35,11 +35,12 @@ import Data.Maybe
 
 type MaybeGrid = Maybe Grid
 type MaybeGridList = [Maybe Grid]
+type FutureGridList = CloudFuture [Maybe Grid]
 
 -- remotable declaration for all eval tasks
-$(mkEvalTasks [''MaybeGrid, ''MaybeGridList])
-$(mkRemotables [''MaybeGrid, ''MaybeGridList])
-$(mkEvaluatables [''MaybeGrid, ''MaybeGridList])
+$(mkEvalTasks [''MaybeGrid, ''MaybeGridList, ''FutureGridList])
+$(mkRemotables [''MaybeGrid, ''MaybeGridList, ''FutureGridList])
+$(mkEvaluatables [''MaybeGrid, ''MaybeGridList, ''FutureGridList])
 
 myRemoteTable :: RemoteTable
 myRemoteTable = Main.__remoteTable initRemoteTable
@@ -50,13 +51,12 @@ main = do
   case args of
     ["master", host, port] -> do
       conf <- startBackend myRemoteTable Master host port
-      -- wait a bit
-      --threadDelay 1000000
-      readMVar (workers conf) >>= print
 
       grids <- fmap lines $ readFile "sudoku.txt"
 
-      print (length (filter isJust (farm conf 4 solve grids)))
+      let inputs = rnf grids `seq` map (put conf) grids
+
+      print (length (filter isJust $ map (get conf) (farm conf 4 (liftFut conf solve) grids)))
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do
