@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ae38c49c7ac5174ee3b3a48fc1be455cf6e821cf964d983b372561c43f15a799
+-- hash: dc646700cc882ce59137a75118b154d01e91549c32fcd4f1c13a527718a58bf5
 
 name:           Parallel-Arrows-Cloud-Haskell-SimpleLocalNet
 version:        0.1.0.0
@@ -40,6 +40,7 @@ library
     , deepseq >=1.4 && <1.5
     , distributed-process >=0.5.0 && <0.8
     , distributed-process-simplelocalnet >0.2 && <0.3
+    , ghc-prim >=0.5 && <0.6
     , network >=2.3 && <2.7
     , network-multicast >=0.1.1 && <0.3
     , network-transport >=0.5 && <0.6

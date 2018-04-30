@@ -18,6 +18,8 @@ import Data.List
 import Control.Arrow
 import Control.DeepSeq
 
+import GHC.Magic
+
 import Control.DeepSeq
 
 import Control.Applicative
@@ -92,7 +94,6 @@ prMM_torus conf numCores problemSizeVal m1 m2 = combine $ torus conf (mult torus
             split1 x = staggerHorizontally (splitMatrix (problemSizeVal `div` torusSize) x)
             split2 x = staggerVertically (splitMatrix (problemSizeVal `div` torusSize) x)
 
-
 --https://books.google.de/books?id=Hfnj5WmFVNUC&pg=PA499&lpg=PA499&dq=matrix+blockwise+multiplication+torus&source=bl&ots=H_jKeqVBJk&sig=GFIllvD9DKTXJaBMetoJyaLE-4A&hl=de&sa=X&ved=0ahUKEwjorcaTu9LYAhXEtBQKHQCVDSQQ6AEILjAB#v=onepage&q=matrix%20blockwise%20multiplication%20torus&f=false
 
 staggerHorizontally :: [[a]] -> [[a]]
@@ -144,17 +145,15 @@ main = do
       --readMVar (workers conf) >>= print
       -- wait a bit
       --threadDelay 1000000
-      let problemSizeVal = 256
+      let problemSizeVal = 512
       let numCores = 4
 
       let matrixA = toMatrix problemSizeVal randoms1
       --let matrixB = identity problemSizeVal
       let matrixB = toMatrix problemSizeVal randoms2
 
-      let matrixC = prMM_torus conf numCores problemSizeVal matrixA matrixB
+      let matrixC = prMM_torus conf numCores problemSizeVal (rnf matrixA `seq` matrixA) (rnf matrixB `seq` matrixB)
       print $ length $ (rnf matrixC) `seq` matrixC
-
-      
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do

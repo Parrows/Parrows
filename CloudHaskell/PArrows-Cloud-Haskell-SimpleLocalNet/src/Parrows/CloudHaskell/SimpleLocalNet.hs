@@ -45,6 +45,8 @@ import Control.Arrow
 -- packman
 import GHC.Packing
 
+import GHC.Magic
+
 import Data.Binary
 import Data.Typeable
 
@@ -117,7 +119,7 @@ data State = State {
 
 -- | default buffer size used by trySerialize
 defaultBufSize :: Int
-defaultBufSize = 10 * 2^20 -- 10 MB
+defaultBufSize = 100 * 2^20 -- 50 MB
 
 defaultConf :: IO Conf
 defaultConf = do
@@ -173,8 +175,8 @@ evalTaskBase (inputPipe, output) = do
   sendChan output (rnf a `seq` a)
 
 -- | forces a single value
-forceSingle :: (Evaluatable a) => NodeId -> MVar a -> a -> Process ()
-forceSingle node out a = do
+forceSingle :: (Evaluatable a) => Conf -> NodeId -> MVar a -> a -> Process ()
+forceSingle conf node out a = do
   -- create the Channel that we use to send the 
   -- Sender of the input from the slave node from
   (inputSenderSender, inputSenderReceiver) <- newChan
@@ -191,7 +193,7 @@ forceSingle node out a = do
 
   debug $ "preSerialize " ++ (show $ typeOf $ a)
 
-  thunkA <- liftIO $ trySerialize a
+  thunkA <- liftIO $ trySerializeWith a (serializeBufferSize conf)
 
   debug "postSerialize"
 
@@ -214,7 +216,7 @@ evalSingle conf node a = do
   mvar <- newEmptyMVar 
   return $ Comp { 
       computation = do
-        pid <- forkProcess (localNode localState) $ forceSingle node mvar a
+        pid <- forkProcess (localNode localState) $ forceSingle conf node mvar a
         putStrLn $ "pid" ++ show pid
       ,result = mvar
   }
@@ -226,8 +228,10 @@ evalParallel conf as = do
   -- all tasks in the same order everytime
   shuffledWorkers <- randomShuffle $ workers conf
 
+  putStrLn $ show shuffledWorkers
+
   -- complete the work assignment node to task (NodeId, a)
-  let workAssignment = zipWith (,) (cycle shuffledWorkers) as
+  let workAssignment = zipWith (,) (cycle $ shuffledWorkers) as
 
   -- build the parallel computation with sequence
   comps <- sequence $ map (uncurry $ evalSingle conf) workAssignment
