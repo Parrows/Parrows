@@ -1,5 +1,11 @@
-resolver: lts-7.1
+flags: {}
 packages:
-  - ./Definition
-  - ./Multicore
-  - ./ParMonad
+- ./Definition
+- ./Multicore
+- ./ParMonad
+- ./BaseSpec
+- ./CloudHaskell/PArrows-Cloud-Haskell-Eval
+- ./CloudHaskell/PArrows-Cloud-Haskell-SimpleLocalNet
+extra-deps:
+- packman-0.5.0
+resolver: lts-11.5

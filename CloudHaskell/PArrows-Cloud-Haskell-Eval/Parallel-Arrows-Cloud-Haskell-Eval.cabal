@@ -1,0 +1,40 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: eccb87024aa7f1fdbc0d277ed0cf6c75f7de5ffb4638f4987862682fd61b5ce0
+
+name:           Parallel-Arrows-Cloud-Haskell-Eval
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet#readme>
+homepage:       https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet#readme
+bug-reports:    https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2018 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , distributed-process >=0.5.0 && <0.8
+    , distributed-process-simplelocalnet >0.2 && <0.3
+    , template-haskell >=2.12 && <2.13
+  exposed-modules:
+      Parrows.CloudHaskell.EvalGen
+  other-modules:
+      Paths_Parallel_Arrows_Cloud_Haskell_Eval
+  default-language: Haskell2010

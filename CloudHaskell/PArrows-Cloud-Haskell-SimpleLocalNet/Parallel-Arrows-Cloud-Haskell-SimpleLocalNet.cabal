@@ -1,0 +1,54 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: ae38c49c7ac5174ee3b3a48fc1be455cf6e821cf964d983b372561c43f15a799
+
+name:           Parallel-Arrows-Cloud-Haskell-SimpleLocalNet
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet#readme>
+homepage:       https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet#readme
+bug-reports:    https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2018 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/PArrows-Cloud-Haskell-SimpleLocalNet
+
+library
+  hs-source-dirs:
+      src
+  build-depends:
+      Parallel-Arrows-Cloud-Haskell-Eval >=0.1 && <0.2
+    , Parallel-Arrows-Definition >=0.1 && <0.2
+    , array >=0.5 && <0.6
+    , base >=4.7 && <5
+    , binary >=0.6.3 && <0.9
+    , bytestring >=0.9 && <0.11
+    , containers >=0.4 && <0.6
+    , data-accessor >=0.2 && <0.3
+    , deepseq >=1.4 && <1.5
+    , distributed-process >=0.5.0 && <0.8
+    , distributed-process-simplelocalnet >0.2 && <0.3
+    , network >=2.3 && <2.7
+    , network-multicast >=0.1.1 && <0.3
+    , network-transport >=0.5 && <0.6
+    , network-transport-tcp >=0.4 && <0.7
+    , packman >=0.5 && <0.6
+    , random >=1.1 && <1.2
+    , transformers >=0.2 && <0.6
+  exposed-modules:
+      Parrows.CloudHaskell.SimpleLocalNet
+  other-modules:
+      Paths_Parallel_Arrows_Cloud_Haskell_SimpleLocalNet
+  default-language: Haskell2010
