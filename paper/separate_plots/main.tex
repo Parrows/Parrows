@@ -195,7 +195,7 @@ smooth]{\benchmarkDir/sudoku-sm/bench-sudoku-sm.bench.parrows-sudoku-parmap-par-
 
 \subsection{\torustest}
 \subsubsection{Speedup}
-\speedupplot{Parallel speedup of \sudokutest \enquote{512}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
+\speedupplot{Parallel speedup of \torustest \enquote{512}}{Eden CP, GpH, \ensuremath{\Conid{Par}} Monad}{16}{4}{
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
 smooth]{\benchmarkDir/torus-sm/bench-torus-sm.bench.torus-matrix-parrows-eden-sm-512.csv};
 \addplot+ [very thick] table [scatter, x="nCores", y="speedup", col sep=comma, mark=none,
@@ -234,7 +234,6 @@ smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-3217.c
 \meanOverheadPlot{Mean Overhead for distributed \\ \jacobitest 3217}{0.04}{32}{272}{\benchmarkDir/distributed-jacobi/3-3217-diff.csv}
 
 \subsection{\torustest}
-\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.04}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
 
 \subsubsection{Speedup}
 \speedupplot{Speedup of distributed \torustest \enquote{4096}}{PArrows Eden}{256}{32}{
@@ -242,6 +241,7 @@ smooth]{\benchmarkDir/distributed-jacobi/bench-jacobi.bench.jacobi-parr-3-3217.c
 smooth]{\benchmarkDir/distributed-torus/bench-torus-distributed.bench.torus-matrix-parrows-eden-4096.csv};
 }{272}{\plotwidthDist}{160}
 
-
+\subsubsection{Overhead}
+\meanOverheadPlot{Mean Overhead for distributed \\ \torustest 4096}{0.04}{32}{272}{\benchmarkDir/distributed-torus/4096-diff.csv}
 
 \end{document}
