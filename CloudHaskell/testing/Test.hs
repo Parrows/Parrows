@@ -50,7 +50,7 @@ main = do
 
   case args of
     ["master", host, port] -> do
-      conf <- startBackend myRemoteTable Master host port
+      conf <- initializeMaster myRemoteTable host port
       -- wait a bit
       --threadDelay 1000000
       readMVar (workers conf) >>= print
@@ -61,5 +61,5 @@ main = do
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do
-      startBackend myRemoteTable Slave host port
+      initializeSlave myRemoteTable host port
       print "slave shutdown."
