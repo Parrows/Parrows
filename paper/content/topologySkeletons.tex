@@ -37,7 +37,7 @@ which is the same as
 \begin{code}
 loop (arr snd &&& arr (uncurry (:)))
 \end{code}
-defines an Arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using |loop| to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |evalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
+defines an Arrow that takes its input |a| and converts it into an infinite stream |[a]| of it. Using |loop| to our advantage gives us a first draft of a pipe implementation (Fig.~\ref{fig:pipeSimple}) by plugging in the parallel evaluation call |loopParEvalN conf fs| inside the second argument of |&&&| and then only picking the first element of the resulting list with |arr last|.
 
 \begin{figure}[t]
 \begin{code}
@@ -48,7 +48,7 @@ pipeSimple conf fs =
         (arr (uncurry (:) >>> lazy) >>> loopParEvalN conf fs)) >>>
     arr last
 \end{code}
-\caption{Simple |pipe| skeleton. The use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to enforce that the evaluation of the input |[a]| terminates before passing it into |evalN|.}
+\caption{Simple |pipe| skeleton. The use of |lazy| (Fig.~\ref{fig:edenlazyrightrotate}) is essential as without it programs using this definition would never halt. We need to ensure that the evaluation of the input |[a]| is not forced fully before passing it into |loopParEvalN|.}
 \label{fig:pipeSimple}
 \end{figure}
 

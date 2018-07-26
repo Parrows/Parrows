@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 404ed7125b0eb57e5d242946f33e499790b42fc44cd03a167d184d63909748fb
+-- hash: 949236026f392cfca62740fbe1cd0065a32460fc75b4a6250a1f233e3dc79cb4
 
 name:           Parallel-Arrows-Definition
 version:        0.1.1.0
@@ -17,7 +17,6 @@ license:        MIT
 license-file:   LICENSE.md
 build-type:     Simple
 cabal-version:  >= 1.10
-
 extra-source-files:
     package.yaml
     stack.yaml
