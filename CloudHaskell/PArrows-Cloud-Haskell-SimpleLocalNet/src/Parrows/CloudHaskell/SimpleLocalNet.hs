@@ -76,11 +76,8 @@ sequenceComp comps = Comp { computation = newComp, result = newRes }
   where newComp = sequence_ $ map computation comps
         newRes = sequence $ map result comps
 
--- our internal Par Monad, we just use IO for now
-type Par a = IO (Computation a)
-
-runPar :: Par a -> a
-runPar x = unsafePerformIO $ do
+runComputation :: IO (Computation a) -> a
+runComputation x = unsafePerformIO $ do
   comp <- x
   computation comp
   result comp
@@ -92,7 +89,7 @@ type Conf = State
 data State = State {
   workers :: MVar [NodeId],
   shutdown :: MVar Bool,
-  started :: MVar Bool,
+  started :: MVar (),
   localNode :: LocalNode,
   serializeBufferSize :: Int
 }
@@ -108,7 +105,7 @@ initialConf :: Int -> LocalNode -> IO Conf
 initialConf serializeBufferSize localNode = do
   workersMVar <- newMVar []
   shutdownMVar <- newMVar False
-  startedMVar <- newMVar False
+  startedMVar <- newEmptyMVar
   return State {
     workers = workersMVar,
     shutdown = shutdownMVar,
@@ -182,15 +179,15 @@ forceSingle node out a = do
   -- put the output back into the passed MVar
   liftIO $ putMVar out forcedA
 
--- | evaluates a single value inside the Par monad
-evalSingle :: Evaluatable a => Conf -> NodeId -> a -> Par a
+-- | evaluates a single value
+evalSingle :: Evaluatable a => Conf -> NodeId -> a -> IO (Computation a)
 evalSingle conf node a = do
   mvar <- newEmptyMVar
   let computation = forkProcess (localNode conf) $ forceSingle node mvar a
   return $ Comp { computation = computation >> return (), result = takeMVar mvar }
 
--- | evaluates multiple values inside the Par monad
-evalParallel :: Evaluatable a => Conf -> [a] -> Par [a]
+-- | evaluates multiple values 
+evalParallel :: Evaluatable a => Conf -> [a] -> IO (Computation [a])
 evalParallel conf as = do
   workers <- readMVar $ workers conf
 
@@ -218,26 +215,21 @@ master conf backend slaves = do
           die "terminated"
         else do
           slaveProcesses <- findSlaves backend
+          redirectLogsHere backend slaveProcesses
           let slaveNodes = map processNodeId slaveProcesses
           liftIO $ do
               modifyMVar_ (workers conf) (\_ -> return slaveNodes)
-              if (length slaveNodes) > 0 then
-                modifyMVar_ (started conf) (\_ -> return True)
+              isEmpty <- isEmptyMVar $ started conf
+              if (isEmpty && length slaveNodes > 0) then
+                  putMVar (started conf) ()
               else
                 return ()
 
-waitUntil condition = fix $ \loop -> do
-  cond <- condition
-  if cond
-    then return ()
-    else threadDelay 100 >> loop
-
 hasSlaveNode :: Conf -> IO Bool
-hasSlaveNode conf = readMVar (started conf)
+hasSlaveNode conf = isEmptyMVar (started conf)
 
--- | wait for the (started Conf) == true (i.e. the master node has found slaves)
 waitForStartup :: Conf -> IO ()
-waitForStartup conf = waitUntil (hasSlaveNode conf)
+waitForStartup conf = readMVar (started conf)
 
 newtype CloudFuture a = CF (SendPort (SendPort a))
 
@@ -287,7 +279,7 @@ instance (Binary a, Typeable a) => Future CloudFuture a Conf where
     get = arr . get'
 
 instance (NFData a, Evaluatable b, ArrowChoice arr) => ArrowParallel arr a b Conf where
-    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runPar
+    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runComputation
 
 type Host = String
 type Port = String
