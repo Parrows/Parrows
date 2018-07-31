@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE OverlappingInstances  #-}
 module Parrows.CloudHaskell.SimpleLocalNet(
   Thunk(),
 
@@ -12,6 +13,8 @@ module Parrows.CloudHaskell.SimpleLocalNet(
 
   initializeSlave,
   initializeMaster,
+
+  Trans(..),
 
   Evaluatable(..),
   evalTaskBase,
@@ -66,21 +69,37 @@ import Control.Concurrent.MVar
 
 import Debug.Trace
 
-data Computation a = Comp {
-  computation :: IO (),
-  result :: IO a
-}
+type Computation a = SendPort (SendPort (Maybe a))
 
-sequenceComp :: [Computation a] -> Computation [a]
-sequenceComp comps = Comp { computation = newComp, result = newRes } 
-  where newComp = sequence_ $ map computation comps
-        newRes = sequence $ map result comps
+class (Typeable a, Binary a, NFData a) => Trans a where
+  writeChan :: SendPort (Maybe a) -> a -> Process ()
+  writeChan sp x = do 
+    rnf x `seq` sendChan sp $ Just x
 
-runComputation :: IO (Computation a) -> a
-runComputation x = unsafePerformIO $ do
-  comp <- x
-  computation comp
-  result comp
+  readChan :: Conf -> ReceivePort (Maybe a) -> Process a
+  readChan conf sp = do
+      val <- readSingle conf sp
+      case val of
+        Just x -> return x
+        Nothing -> error "expected value"
+
+readSingle :: (Binary a, Typeable a) => Conf -> ReceivePort (Maybe a) -> Process (Maybe a)
+readSingle conf recPort = receiveChan recPort
+
+instance (Trans a) => Trans [a] where
+  writeChan sp [] = sendChan sp Nothing
+  writeChan sp x = do
+    sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ trace "Trans [a]" [val]) x
+    sendChan sp Nothing
+
+  readChan conf sp = readUntilNothing conf sp []
+      where
+        readUntilNothing :: Conf -> ReceivePort (Maybe [a]) -> [a] -> Process [a]
+        readUntilNothing conf sp vals = do 
+          x <- readSingle conf sp
+          case x of
+              Just val -> readUntilNothing conf sp ((head val) : vals)
+              Nothing -> return vals
 
 -- our config type. for now, this only hosts the current state
 -- of the backend
@@ -125,13 +144,13 @@ instance (Typeable a) => Binary (Thunk a) where
     (ser :: Serialized a) <- Data.Binary.get
     return $ Thunk { fromThunk = ser }
 
-class (Binary a, Typeable a, NFData a) => Evaluatable a where
-  evalTask :: (SendPort (SendPort (Thunk a)), SendPort a) -> Closure (Process ())
+class (Trans a, Binary a, Typeable a, NFData a) => Evaluatable a where
+  evalTask :: (SendPort (SendPort (Thunk a)), SendPort (SendPort (SendPort (Maybe a)))) -> Closure (Process ())
 
 -- | base evaluation task for easy instance declaration
-evalTaskBase :: (Binary a, Typeable a, NFData a) => 
-  (SendPort (SendPort (Thunk a)), SendPort a) -> Process ()
-evalTaskBase (inputPipe, output) = do
+evalTaskBase :: (Trans a, Binary a, Typeable a, NFData a) => 
+  (SendPort (SendPort (Thunk a)), SendPort (SendPort (SendPort (Maybe a)))) -> Process ()
+evalTaskBase (inputPipe, outputSenderSenderSender) = do
   (sendMaster, rec) <- newChan
 
   -- send the master the SendPort, that we
@@ -145,21 +164,30 @@ evalTaskBase (inputPipe, output) = do
   a <- liftIO $ deserialize $ fromThunk thunkA
 
   -- force the input and send it back to master
-  sendChan output (rnf a `seq` a)
+  (outputSenderSender, outputSenderReceiver) <- newChan
+
+  sendChan outputSenderSenderSender outputSenderSender
+  liftIO $ putStrLn "post send outputSenderSender"
+
+  outputSender <- receiveChan outputSenderReceiver
+
+  liftIO $ putStrLn "before writechan"
+  writeChan outputSender a
+
+
+type RelaySendPort a = SendPort (SendPort (SendPort (Maybe a)))
+type RelayReceivePort a = ReceivePort (SendPort (SendPort (Maybe a)))
 
 -- | forces a single value
-forceSingle :: (Evaluatable a) => NodeId -> MVar a -> a -> Process ()
+forceSingle :: (Evaluatable a) => NodeId -> RelaySendPort a -> a -> Process ()
 forceSingle node out a = do
   -- create the Channel that we use to send the 
   -- Sender of the input from the slave node from
   (inputSenderSender, inputSenderReceiver) <- newChan
 
-  -- create the channel to receive the output from
-  (outputSender, outputReceiver) <- newChan
-
   -- spawn the actual evaluation task on the given node
   -- and pass the two sender objects we created above
-  spawn node (evalTask (inputSenderSender, outputSender))
+  spawn node (evalTask (inputSenderSender, out))
 
   -- wait for the slave to send the input sender
   inputSender <- receiveChan inputSenderReceiver
@@ -168,40 +196,75 @@ forceSingle node out a = do
 
   -- send the input to the slave
   sendChan inputSender $ toThunk thunkA
-
-  -- TODO: do optional timeout variant so that the computation
-  -- runs on the master machine instead
-  -- so that we can guarantee results
-
-  -- wait for the result from the slave
-  forcedA <- receiveChan outputReceiver
-
-  -- put the output back into the passed MVar
-  liftIO $ putMVar out forcedA
-
+  
 -- | evaluates a single value
-evalSingle :: Evaluatable a => Conf -> NodeId -> a -> IO (Computation a)
-evalSingle conf node a = do
-  mvar <- newEmptyMVar
-  let computation = forkProcess (localNode conf) $ forceSingle node mvar a
-  return $ Comp { computation = computation >> return (), result = takeMVar mvar }
+evalSingle :: Evaluatable a => Conf -> ReceivePort (Sender a) -> NodeId -> a -> Process ()
+evalSingle conf outputSenderReceiver node a = do
+  (relaySp, relayRp) <- newChan
+  putStrLn  "pre fork relay"
+  liftIO $ forkProcess (localNode conf) $ do
+    forceSingle node relaySp a
+
+    liftIO $ putStrLn $ "pre receiveChan relayRp"
+    outputSenderSenderFromSlave <- receiveChan relayRp
+    liftIO $ putStrLn "received outputSenderSenderFrom slave"
+
+    liftIO $ putStrLn $ "pre receive outputSender from Accessor SP " ++ (show outputSenderSender)
+    outputSenderFromAccessor <- receiveChan outputSenderReceiver
+    liftIO $ putStrLn "received outputSender from Accessor"
+
+    sendChan outputSenderSenderFromSlave outputSenderFromAccessor
+    liftIO $ putStrLn "sent outputSender from Accessor"
+
+  putStrLn $ "return for " ++ (show outputSenderSender)
+  return $ outputSenderSender
 
 -- | evaluates multiple values 
-evalParallel :: Evaluatable a => Conf -> [a] -> IO (Computation [a])
-evalParallel conf as = do
-  workers <- readMVar $ workers conf
+{-# NOINLINE evalParallel #-}
+evalParallel :: Evaluatable a => Conf -> [a] -> [a]
+evalParallel conf as = 
+  unsafePerformIO $ do
+    workers <- readMVar $ workers conf
 
-  -- shuffle the list of workers, so we don't end up spawning
-  -- all tasks in the same order everytime
-  shuffledWorkers <- randomShuffle workers
+    -- shuffle the list of workers, so we don't end up spawning
+    -- all tasks in the same order everytime
+    shuffledWorkers <- randomShuffle workers
 
-  -- complete the work assignment node to task (NodeId, a)
-  let workAssignment = zipWith (,) (cycle shuffledWorkers) as
+    -- complete the work assignment node to task (NodeId, a)
+    let workAssignment = zipWith (,) (cycle shuffledWorkers) as
 
-  -- build the parallel computation with sequence
-  comps <-  sequence $ map (uncurry $ evalSingle conf) workAssignment
+    channels <- sequence $ repeat newChan
 
-  return $ sequenceComp comps
+    let senders = map fst channels
+    let receivers = map fst channels
+
+    let evalTasks = zipWith ($) (evalSingle conf) receivers
+
+    -- build the parallel computation with sequence
+    forkProcess (localNode conf) $ sequence $ zipWith ($) (map uncurry evalTasks) workAssignment
+
+    ret <- runComputations conf comps
+
+    return ret
+
+
+runComputations :: Trans a => Conf -> [Computation a] -> IO [a]
+runComputations conf comps = do
+  mvars <- mapM (runComputation conf) comps
+  vals <- mapM (takeMVar) mvars
+  return vals
+
+runComputation :: Trans a => Conf -> (Computation a) -> IO (MVar a)
+runComputation conf comp = do
+  resMVar <- newEmptyMVar
+  forkProcess (localNode conf) $ do
+    (outputSender, outputReceiver) <- newChan
+    sendChan comp outputSender
+    liftIO $ putStrLn $ "sent outputSender " ++ (show outputSender) ++ " to relay over " ++ (show comp)
+    output <- readChan conf outputReceiver
+    liftIO $ putStrLn "received output from outputReceiver"
+    liftIO $ putMVar resMVar output
+  return resMVar
 
 -- | the code for the master node. automatically discovers all slaves and 
 -- adds/removes them from the Conf object
@@ -279,7 +342,7 @@ instance (Binary a, Typeable a) => Future CloudFuture a Conf where
     get = arr . get'
 
 instance (NFData a, Evaluatable b, ArrowChoice arr) => ArrowParallel arr a b Conf where
-    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf) >>> arr runComputation
+    parEvalN conf fs = arr (force) >>> evalN fs >>> arr (evalParallel conf)
 
 type Host = String
 type Port = String

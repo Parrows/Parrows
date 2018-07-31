@@ -57,7 +57,7 @@ main = do
 
       grids <- fmap lines $ readFile "sudoku.txt"
 
-      print (length (filter isJust (farm conf 4 solve grids)))
+      print (length (filter isJust (farm conf 1 solve $ force grids)))
 
       -- TODO: actual computation here!
     ["slave", host, port] -> do
