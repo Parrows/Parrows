@@ -125,12 +125,42 @@ instance (Typeable a) => Binary (Thunk a) where
     (ser :: Serialized a) <- Data.Binary.get
     return $ Thunk { fromThunk = ser }
 
-class (Binary a, Typeable a, NFData a) => Evaluatable a where
-  evalTask :: (SendPort (SendPort (Thunk a)), SendPort a) -> Closure (Process ())
+class (Typeable a, Binary a, NFData a) => Trans a where
+  writeChan :: SendPort (Maybe a) -> a -> Process ()
+  writeChan sp x = do 
+    rnf x `seq` sendChan sp $ Just x
+
+  readChan :: Conf -> ReceivePort (Maybe a) -> Process a
+  readChan conf sp = do
+      val <- readSingle conf sp
+      case val of
+        Just x -> return x
+        Nothing -> error "expected value"
+
+readSingle :: (Binary a, Typeable a) => Conf -> ReceivePort (Maybe a) -> Process (Maybe a)
+readSingle conf recPort = receiveChan recPort
+
+instance (Trans a) => Trans [a] where
+  writeChan sp [] = sendChan sp Nothing
+  writeChan sp x = do
+    sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ trace "Trans [a]" [val]) x
+    sendChan sp Nothing
+
+  readChan conf sp = readUntilNothing conf sp []
+      where
+        readUntilNothing :: Conf -> ReceivePort (Maybe [a]) -> [a] -> Process [a]
+        readUntilNothing conf sp vals = do 
+          x <- readSingle conf sp
+          case x of
+              Just val -> readUntilNothing conf sp ((head val) : vals)
+              Nothing -> return vals
+
+class (Trans a, Binary a, Typeable a, NFData a) => Evaluatable a where
+  evalTask :: (SendPort (SendPort (Thunk a)), SendPort (Maybe a)) -> Closure (Process ())
 
 -- | base evaluation task for easy instance declaration
-evalTaskBase :: (Binary a, Typeable a, NFData a) => 
-  (SendPort (SendPort (Thunk a)), SendPort a) -> Process ()
+evalTaskBase :: (Trans a, Binary a, Typeable a, NFData a) => 
+  (SendPort (SendPort (Thunk a)), SendPort (Maybe a)) -> Process ()
 evalTaskBase (inputPipe, output) = do
   (sendMaster, rec) <- newChan
 
@@ -145,11 +175,11 @@ evalTaskBase (inputPipe, output) = do
   a <- liftIO $ deserialize $ fromThunk thunkA
 
   -- force the input and send it back to master
-  sendChan output (rnf a `seq` a)
+  writeChan output a
 
 -- | forces a single value
-forceSingle :: (Evaluatable a) => NodeId -> MVar a -> a -> Process ()
-forceSingle node out a = do
+forceSingle :: (Evaluatable a) => Conf -> NodeId -> MVar a -> a -> Process ()
+forceSingle conf node out a = do
   -- create the Channel that we use to send the 
   -- Sender of the input from the slave node from
   (inputSenderSender, inputSenderReceiver) <- newChan
@@ -174,7 +204,7 @@ forceSingle node out a = do
   -- so that we can guarantee results
 
   -- wait for the result from the slave
-  forcedA <- receiveChan outputReceiver
+  forcedA <- readChan conf outputReceiver
 
   -- put the output back into the passed MVar
   liftIO $ putMVar out forcedA
@@ -183,7 +213,7 @@ forceSingle node out a = do
 evalSingle :: Evaluatable a => Conf -> NodeId -> a -> IO (Computation a)
 evalSingle conf node a = do
   mvar <- newEmptyMVar
-  let computation = forkProcess (localNode conf) $ forceSingle node mvar a
+  let computation = forkProcess (localNode conf) $ forceSingle conf node mvar a
   return $ Comp { computation = computation >> return (), result = takeMVar mvar }
 
 -- | evaluates multiple values 
