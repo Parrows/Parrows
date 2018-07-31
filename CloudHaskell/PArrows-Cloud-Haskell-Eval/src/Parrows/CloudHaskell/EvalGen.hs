@@ -63,8 +63,9 @@ mkEvalTasks :: [Name] -> Q [Dec]
 mkEvalTasks names = do
 	let fnNames = map nameToFnName names
   	evalTasks <- (mapM (uncurry evalTaskFn) (zipWith (,) names fnNames))
-  	transInstances <- (mapM transInstance names)
-	return . concat $ transInstances ++ (evalTasks)
+  	--transInstances <- (mapM transInstance names)
+	-- return . concat $ transInstances ++ (evalTasks)
+	return . concat $ (evalTasks)
 
 mkRemotables :: [Name] -> Q [Dec]
 mkRemotables names = do

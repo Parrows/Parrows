@@ -13,6 +13,8 @@ module Parrows.CloudHaskell.SimpleLocalNet(
   initializeSlave,
   initializeMaster,
 
+  Trans(..),
+
   Evaluatable(..),
   evalTaskBase,
 
@@ -143,7 +145,7 @@ readSingle conf recPort = receiveChan recPort
 instance (Trans a) => Trans [a] where
   writeChan sp [] = sendChan sp Nothing
   writeChan sp x = do
-    sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ trace "Trans [a]" [val]) x
+    sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ [val]) x
     sendChan sp Nothing
 
   readChan conf sp = readUntilNothing conf sp []

@@ -36,6 +36,8 @@ import Data.Maybe
 type MaybeGrid = Maybe Grid
 type MaybeGridList = [Maybe Grid]
 
+instance Trans MaybeGrid
+
 -- remotable declaration for all eval tasks
 $(mkEvalTasks [''MaybeGrid, ''MaybeGridList])
 $(mkRemotables [''MaybeGrid, ''MaybeGridList])
