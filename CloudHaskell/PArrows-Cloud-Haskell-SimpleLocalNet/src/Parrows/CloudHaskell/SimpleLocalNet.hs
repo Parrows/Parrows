@@ -201,6 +201,14 @@ class (Typeable a, Binary a, NFData a) => Trans a where
       Just x -> return x
       Nothing -> error "expected value"
 
+instance (Typeable a, Binary a) => Trans (CloudFuture a)
+
+instance (Typeable a, Binary a) => Binary (CloudFuture a) where
+    put (CF sp) = Data.Binary.put sp
+    get = do
+        val <- Data.Binary.get
+        return $ CF val
+
 dtt :: a
 dtt = error "don't touch this!"
 
@@ -371,31 +379,48 @@ ownLocalConf = unsafePerformIO $ readMVar ownLocalConfMVar
 ownLocalConfMVar :: MVar Conf
 ownLocalConfMVar = unsafePerformIO $ newEmptyMVar
 
+
+isDebug :: Bool
+isDebug = True
+
+debug :: (Show a) => a -> Process ()
+debug a = if isDebug then liftIO $ putStrLn $ show a else return ()
+
 {-# NOINLINE put' #-}
 put' :: (Binary a, Typeable a) => Conf -> a -> CloudFuture a
 put' conf a = unsafePerformIO $ do
-  mvar <- newEmptyMVar
-  runProcess (localNode conf) $ do
-    (senderSender, senderReceiver) <- newChan
-
-    liftIO $ do
-      forkProcess (localNode conf) $ do
-        sender <- receiveChan senderReceiver
-        sendChan sender a
-
-    liftIO $ putMVar mvar senderSender
-  takeMVar mvar >>= (return . CF)
+    mvar <- newEmptyMVar
+    forkProcess (localNode ownLocalConf) $ do
+      (senderSender, senderReceiver) <- newChan
+      debug $ (typeOf senderSender)
+      liftIO $ putMVar mvar senderSender
+      debug $ "put mvar"
+      debug $ "pre receive sender"
+      debug $ "type: " ++ (show $ typeOf $ senderReceiver)
+      sender <- receiveChan senderReceiver
+      debug $ "received sender"
+      sendChan sender a
+      debug $ "sent"
+    takeMVar mvar >>= (return . CF)
 
 {-# NOINLINE get' #-}
 get' :: (Binary a, Typeable a) => Conf -> CloudFuture a -> a
 get' conf (CF senderSender) = unsafePerformIO $ do
-  mvar <- newEmptyMVar
-  runProcess (localNode conf) $ do
-    (sender, receiver) <- newChan
-    sendChan senderSender sender
-    a <- receiveChan receiver
-    liftIO $ putMVar mvar a
-  takeMVar mvar
+    mvar <- newEmptyMVar
+    forkProcess (localNode ownLocalConf) $ do
+      debug $ "toast"
+      (sender, receiver) <- newChan
+      debug $ "created sender: " ++ (show $ sender)
+      sendChan senderSender sender
+      debug $ "sent sender over senderSender: " ++ (show $ senderSender) ++ " " ++ (show $ sender)
+      debug $ "get' : pre receiveChan receiver"
+      debug $ "type: " ++ (show $ typeOf $ receiver)
+      a <- receiveChan receiver
+      debug $ "kartoffel"
+      liftIO $ putMVar mvar a
+    print "before takeMVar"
+    val <- takeMVar mvar
+    return val
 
 instance (ArrowChoice arr, ArrowParallel arr a b Conf) => ArrowLoopParallel arr a b Conf where
     loopParEvalN = parEvalN

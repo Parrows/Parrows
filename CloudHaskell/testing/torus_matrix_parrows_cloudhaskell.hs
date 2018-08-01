@@ -114,6 +114,8 @@ type MatrixList = [Matrix]
 
 type MyType = (Matrix, CloudFuture [Matrix], CloudFuture [Matrix])
 
+instance Trans Int
+
 -- remotable declaration for all eval tasks
 $(mkEvalTasks [''Matrix, ''MatrixList, ''MyType])
 $(mkRemotables [''Matrix, ''MatrixList, ''MyType])
