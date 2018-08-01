@@ -13,6 +13,8 @@ module Parrows.CloudHaskell.SimpleLocalNet(
   initializeSlave,
   initializeMaster,
 
+  PipeIn(..),
+  PipeOut(..),
   Trans(..),
 
   Evaluatable(..),
@@ -127,42 +129,94 @@ instance (Typeable a) => Binary (Thunk a) where
     (ser :: Serialized a) <- Data.Binary.get
     return $ Thunk { fromThunk = ser }
 
+type PipeIn a = SendPort (SendPort (Maybe (SendPort (Maybe a))))
+type PipeOut a = ReceivePort (SendPort (Maybe (SendPort (Maybe a))))
+
 class (Typeable a, Binary a, NFData a) => Trans a where
-  writeChan :: SendPort (Maybe a) -> a -> Process ()
-  writeChan sp x = do 
+  writeChan :: PipeIn a -> a -> Process ()
+  writeChan cin x = do
+    sps <- connectAsSender cin
+    let sp = head sps
     rnf x `seq` sendChan sp $ Just x
 
-  readChan :: Conf -> ReceivePort (Maybe a) -> Process a
-  readChan conf sp = do
-      val <- readSingle conf sp
+  readChan :: PipeOut a -> Process a
+  readChan cout = do
+      rp <- connectAsReceiverSingle cout
+      val <- readSingle rp
       case val of
         Just x -> return x
         Nothing -> error "expected value"
 
-readSingle :: (Binary a, Typeable a) => Conf -> ReceivePort (Maybe a) -> Process (Maybe a)
-readSingle conf recPort = receiveChan recPort
+createC :: (Binary a, Typeable a) => Process (PipeIn a, PipeOut a)
+createC = newChan
+
+readSingle :: (Binary a, Typeable a) => ReceivePort (Maybe a) -> Process (Maybe a)
+readSingle recPort = receiveChan recPort
+
+connectAsSender :: (Typeable a, Binary a) => PipeIn a -> Process [SendPort (Maybe a)]
+connectAsSender pipeIn = do
+  (sp, cin) <- newChan
+  -- liftIO $ putStrLn $ "pre send (connectAsSender) to pipeIn"
+  sendChan pipeIn sp
+  -- liftIO $ putStrLn $ "pre getAllSenders"
+  getAllSenders cin []
+
+connectAsReceiver :: (Typeable a, Binary a) => Int -> PipeOut a -> Process [ReceivePort (Maybe a)]
+connectAsReceiver cnt pipeOut = do 
+  spsp <- receiveChan pipeOut
+  retVal <- sequence $ replicate cnt (sendSingleSendPort spsp)
+  sendChan spsp Nothing
+  return retVal
+
+sendSingleSendPort :: (Binary a, Typeable a) =>
+  (SendPort (Maybe (SendPort (Maybe a)))) ->
+  Process (ReceivePort (Maybe a))
+sendSingleSendPort spsp = do
+  (sp, rp) <- newChan
+  -- liftIO $ putStrLn $ "sending back sp" ++ (show spsp)
+  sendChan spsp (Just sp)
+  -- liftIO $ putStrLn $ "sent back sp " ++ (show sp)
+  return rp
+
+connectAsReceiverSingle :: (Binary a, Typeable a) => PipeOut a -> Process (ReceivePort (Maybe a))
+connectAsReceiverSingle pipeOut = do
+  retVals <- connectAsReceiver 1 pipeOut
+  return $ head retVals
+
+getAllSenders :: (Typeable a, Binary a) =>
+  ReceivePort (Maybe (SendPort (Maybe a))) ->
+  [SendPort (Maybe a)] ->
+  Process [SendPort (Maybe a)]
+getAllSenders sp vals = do 
+  x <- readSingle sp
+  case x of
+      Just val -> getAllSenders sp (val : vals)
+      Nothing -> return vals
 
 instance (Trans a) => Trans [a] where
-  writeChan sp [] = sendChan sp Nothing
-  writeChan sp x = do
+  writeChan cin x = do
+    sps <- connectAsSender cin
+    let sp = head sps
     sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ [val]) x
     sendChan sp Nothing
 
-  readChan conf sp = readUntilNothing conf sp []
+  readChan cout = do
+    rp <- connectAsReceiverSingle cout
+    readUntilNothing rp []
       where
-        readUntilNothing :: Conf -> ReceivePort (Maybe [a]) -> [a] -> Process [a]
-        readUntilNothing conf sp vals = do 
-          x <- readSingle conf sp
+        readUntilNothing :: ReceivePort (Maybe [a]) -> [a] -> Process [a]
+        readUntilNothing rp vals = do 
+          x <- readSingle rp
           case x of
-              Just val -> readUntilNothing conf sp ((head val) : vals)
+              Just val -> readUntilNothing rp ((head val) : vals)
               Nothing -> return vals
 
 class (Trans a, Binary a, Typeable a, NFData a) => Evaluatable a where
-  evalTask :: (SendPort (SendPort (Thunk a)), SendPort (Maybe a)) -> Closure (Process ())
+  evalTask :: (SendPort (SendPort (Thunk a)), PipeIn a) -> Closure (Process ())
 
 -- | base evaluation task for easy instance declaration
 evalTaskBase :: (Trans a, Binary a, Typeable a, NFData a) => 
-  (SendPort (SendPort (Thunk a)), SendPort (Maybe a)) -> Process ()
+  (SendPort (SendPort (Thunk a)), PipeIn a) -> Process ()
 evalTaskBase (inputPipe, output) = do
   (sendMaster, rec) <- newChan
 
@@ -187,7 +241,7 @@ forceSingle conf node out a = do
   (inputSenderSender, inputSenderReceiver) <- newChan
 
   -- create the channel to receive the output from
-  (outputSender, outputReceiver) <- newChan
+  (outputSender, outputReceiver) <- createC
 
   -- spawn the actual evaluation task on the given node
   -- and pass the two sender objects we created above
@@ -206,7 +260,7 @@ forceSingle conf node out a = do
   -- so that we can guarantee results
 
   -- wait for the result from the slave
-  forcedA <- readChan conf outputReceiver
+  forcedA <- readChan outputReceiver
 
   -- put the output back into the passed MVar
   liftIO $ putMVar out forcedA

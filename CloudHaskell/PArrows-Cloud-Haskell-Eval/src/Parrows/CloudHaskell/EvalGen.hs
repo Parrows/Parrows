@@ -40,9 +40,9 @@ evalTaskFn typeName fnName = do
 	let sendPort = ConT $ mkName "SendPort"
 	    thunk = ConT $ mkName "Thunk"
 	    process = ConT $ mkName "Process"
-	    maybe = ConT $ mkName "Maybe"
+	    pipeIn = ConT $ mkName "PipeIn"
 	    firstTup = (sendPort `nested` (sendPort `nested` (thunk `nested` (ConT typeName))))
-	    secondTup = sendPort `nested` (maybe `nested` ConT typeName)
+	    secondTup = pipeIn `nested` (ConT typeName)
 	    procNil = process `AppT` (TupleT 0)
 	return [
 			SigD fnName ((firstTup `tuple2` secondTup) `fn` procNil),
