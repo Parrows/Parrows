@@ -132,21 +132,6 @@ instance (Typeable a) => Binary (Thunk a) where
 type PipeIn a = SendPort (SendPort (Maybe (SendPort (Maybe a))))
 type PipeOut a = ReceivePort (SendPort (Maybe (SendPort (Maybe a))))
 
-class (Typeable a, Binary a, NFData a) => Trans a where
-  writeChan :: PipeIn a -> a -> Process ()
-  writeChan cin x = do
-    sps <- connectAsSender cin
-    let sp = head sps
-    rnf x `seq` sendChan sp $ Just x
-
-  readChan :: PipeOut a -> Process a
-  readChan cout = do
-      rp <- connectAsReceiverSingle cout
-      val <- readSingle rp
-      case val of
-        Just x -> return x
-        Nothing -> error "expected value"
-
 createC :: (Binary a, Typeable a) => Process (PipeIn a, PipeOut a)
 createC = newChan
 
@@ -193,15 +178,71 @@ getAllSenders sp vals = do
       Just val -> getAllSenders sp (val : vals)
       Nothing -> return vals
 
+
+class (Typeable a, Binary a, NFData a) => Trans a where
+  writeChan :: PipeIn a -> a -> Process ()
+  writeChan pipeIn x = do
+    sps <- connectAsSender pipeIn
+    let sp = head sps  
+    sendVal sp x    
+
+  sendVal :: SendPort (Maybe a) -> a -> Process ()
+  sendVal sp x = rnf x `seq` sendChan sp $ Just x
+
+  readChan :: PipeOut a -> Process a
+  readChan pipeOut = do
+      rp <- connectAsReceiverSingle pipeOut
+      readVal rp
+
+  readVal :: ReceivePort (Maybe a) -> Process a
+  readVal rp = do
+    val <- readSingle rp
+    case val of
+      Just x -> return x
+      Nothing -> error "expected value"
+
+dtt :: a
+dtt = error "don't touch this!"
+
+instance (Trans a, Trans b, Trans c) => Trans (a, b, c) where
+  writeChan pipeIn (a, b, c) = do
+    [spA, spB, spC] <- connectAsSender pipeIn
+    liftIO $ forkProcess (localNode ownLocalConf) $ relaySP a (\a -> (a, dtt, dtt)) spA
+    liftIO $ forkProcess (localNode ownLocalConf) $ relaySP b (\b -> (dtt, b, dtt)) spB
+    relaySP c (\b -> (dtt, dtt, c)) spC
+
+  -- only the outermost tuple has proper streaming, so no sendVal or readVal 
+  -- sendVal sp x = ..
+  -- readVal rp = ...
+
+  readChan pipeOut = do
+    [rpA, rpB, rpC] <- connectAsReceiver 3 pipeOut
+    a <- relayRP rpA (\(a, _, _) -> a)
+    b <- relayRP rpA (\(_, b, _) -> b)
+    c <- relayRP rpA (\(_, _, c) -> c)
+    return (a, b, c)
+
+
+relaySP :: (Trans a, Trans b) => a -> (a -> b) -> SendPort (Maybe b) -> Process ()
+relaySP a f out = do
+  (sp, rp) <- newChan
+  sendVal sp a
+  againA <- readVal rp
+  let b = f againA
+  sendVal out b
+
+relayRP :: (Trans a, Trans b) => ReceivePort (Maybe b) -> (b -> a) -> Process a
+relayRP rp f = do
+  b <- readVal rp
+  let a = f b
+  return a
+
 instance (Trans a) => Trans [a] where
-  writeChan cin x = do
-    sps <- connectAsSender cin
-    let sp = head sps
+  sendVal sp x = do
     sequence_ $ map (\val -> rnf val `seq` sendChan sp $ Just $ [val]) x
     sendChan sp Nothing
 
-  readChan cout = do
-    rp <- connectAsReceiverSingle cout
+  readVal rp = do
     readUntilNothing rp []
       where
         readUntilNothing :: ReceivePort (Maybe [a]) -> [a] -> Process [a]
