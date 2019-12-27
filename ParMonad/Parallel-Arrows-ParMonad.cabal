@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6cc57ed68fc548b90642f284110c79acc3850dead7aabe33b4aeed903fecfb67
+-- hash: 857ea119188432565d2dd5f5acbf43e689047a66486094006668e9f1df8b01a1
 
 name:           Parallel-Arrows-ParMonad
 version:        0.1.1.0
@@ -15,7 +17,6 @@ maintainer:     Martin Braun
 license:        MIT
 license-file:   LICENSE.md
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
     package.yaml
     stack.yaml

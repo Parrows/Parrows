@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e8c8a2274c6e90c85d0913678c7a06451ec7c72276dc085f421fdf4f405d1913
+-- hash: 0cff32d964694201619c296d6d64908ad76fbf85bbee84eb036aeba7fd115e4b
 
 name:           Parallel-Arrows-Cloud-Haskell-SimpleLocalNet
 version:        0.1.0.0
@@ -14,10 +16,9 @@ maintainer:     example@example.com
 copyright:      2018 Author name here
 license:        BSD3
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
-    ChangeLog.md
     README.md
+    ChangeLog.md
 
 source-repository head
   type: git

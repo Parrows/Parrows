@@ -95,9 +95,9 @@
 	%%\pagebreak
 	%include conclusion.tex
 	%\pagebreak
-        %\bibliographystyle{jfp}
-	%\bibliography{references,main}
-        %include main.bbl
+        \bibliographystyle{jfp}
+	\bibliography{references,main}
+        %%%--%include main.bbl
         \appendix
 	%include utilityFunctions.tex
 \end{document}

@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2317b9e5d89a4a0250dd6c2a0250879c1dc5fd25941af967ce596c17604d67ee
+-- hash: 9681500877a6146bdc9d94ade83241b9ca72e61154734855b3a935329a0e1e2d
 
 name:           Parallel-Arrows-BaseSpec
 version:        0.1.1.0
@@ -15,7 +17,6 @@ maintainer:     Martin Braun
 license:        MIT
 license-file:   LICENSE.md
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
     package.yaml
     stack.yaml

@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 377f05d0b5050efe05a40223e404991b3c9a96b40486d0401dd833e61dd75563
+-- hash: ead902837cb918eef687db06c1f67f5d1db83e0522044453ac80a68c0b9fb2aa
 
 name:           Parallel-Arrows-Cloud-Haskell-Eval
 version:        0.1.0.0
@@ -14,10 +16,9 @@ maintainer:     example@example.com
 copyright:      2018 Author name here
 license:        BSD3
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
-    ChangeLog.md
     README.md
+    ChangeLog.md
 
 source-repository head
   type: git
