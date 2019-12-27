@@ -488,22 +488,22 @@ Benchmarks show that our framework does not induce any notable performance overh
 \label{sec:introduction}
 
 Parallel functional languages have a long history of being used for experimenting with novel parallel programming paradigms. Haskell, which we focus on in this paper, has  several mature implementations. We regard here in-depth
-Glasgow parallel Haskell or short GpH (its Multicore SMP implementation, in particular), the
+Glasgow parallel Haskell or for short GpH (its Multicore SMP implementation, in particular), the
 \ensuremath{\Conid{Par}} Monad, and Eden, a distributed memory parallel Haskell. These
 languages represent orthogonal approaches. Some use a Monad, even if
 only for the internal representation. Some introduce additional
 language constructs. Section \ref{sec:parallelHaskells} gives a short overview over these languages.
 
-A key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they can be thought of as a more general function arrow (\ensuremath{\to }) and serve as general interface to computations while not being as restrictive as Monads \citep{HughesArrows}. Section \ref{sec:arrows} gives a short introduction to Arrows.
+The key novelty in this paper is to use Arrows to represent parallel computations. They seem a natural fit as they can be thought of as a more general function arrow (\ensuremath{\to }) and serve as general interface to computations while not being as restrictive as Monads \citep{HughesArrows}. Section \ref{sec:arrows} gives a short introduction to Arrows.
 
-We provide an Arrows-based type class and implementations for the three above mentioned parallel Haskells.
+We provide an Arrow-based type class and implementations for the three above mentioned parallel Haskells.
 Instead of 
 introducing a new low-level parallel backend to implement our
-Arrows-based interface, we define a shallow-embedded DSL for Arrows. This DSL
+Arrow-based interface, we define a shallow-embedded DSL using Arrows. This DSL
 is defined as a common interface with varying implementations in
 the existing parallel Haskells. Thus, we not only define a parallel programming interface in a
 novel manner---we tame the zoo of parallel Haskells. We provide a
-common, very low-penalty programming interface that allows to switch
+common, low-penalty programming interface that allows to switch
 the parallel implementations at will. The induced penalty was in the single-digit percent range, with means typically under 2\% overhead in our measurements over the varying cores configuration (Section~\ref{sec:benchmarks}). We have also conducted some initial experiments with HdpH and Frege; those experiments inducate that our parallel Arrows DSL can be relatively easily extended to further languages.
 
 \paragraph{Contributions.}
@@ -512,7 +512,7 @@ the parallel implementations at will. The induced penalty was in the single-digi
 %
 %\subsection{Impact of parallel Arrows}
 %\olcomment{move this to Contributions in the front or something}
-We propose an Arrow-based encoding for parallelism based on a new Arrow combinator \ensuremath{\Varid{parEvalN}\mathbin{::}[\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]\to \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]}. A parallel Arrow is still an Arrow, hence the resulting parallel Arrow can still be used in the same way as a potential sequential version. In this paper we evaluate the expressive power of such a formalism in the context of parallel programming.
+We propose an Arrow-based encoding for parallelism based on a new Arrow combinator \ensuremath{\Varid{parEvalN}\mathbin{::}(\Conid{Arrow}\;\Varid{arr})\Rightarrow [\mskip1.5mu \Varid{arr}\;\Varid{a}\;\Varid{b}\mskip1.5mu]\to \Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]{}}. A parallel Arrow (short: PArrow) is still an Arrow, hence the resulting parallel Arrow can still be used in the same way as a potential sequential version. In this paper we evaluate the expressive power of such a formalism in the context of parallel programming.
 
 \begin{itemize}
 \item We introduce a parallel evaluation formalism using Arrows. One big advantage of our specific approach is that we do not have to introduce any new types, facilitating composability (Section~\ref{sec:parallel-arrows}).
@@ -530,7 +530,7 @@ PArrows are open source and are available from \url{https://github.com/s4ke/Parr
 
 
 \paragraph{Parallel Haskells.}
-The non-strict semantics of Haskell, and the fact that reduction encapsulates computations as closures, makes it relatively easy to define alternate parallelisations. A range of approaches have been explored, including data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
+The non-strict semantics of Haskell, and the fact that reduction encapsulates computations as closures, makes it relatively easy to define alternate execution strategies, including parallel evaluation. A range of approaches have been explored, including data parallelism \cite{Chakravarty2007,Keller:2010:RSP:1932681.1863582}, GPU-based approaches \cite{Mainland:2010:NEC:2088456.1863533,obsidian-phd}, software transactional memory \cite{Harris:2005:CMT:1065944.1065952,Perfumo:2008:LST:1366230.1366241}.
 The Haskell--GPU bridge Accelerate
 \cite{Chakravarty:2011:AHA:1926354.1926358,CMCK14,McDonell:2015:TRC:2887747.2804313}
 is completely orthogonal to our approach.
@@ -541,7 +541,7 @@ Research on Eden includes low-level  implementation
 \cite{JostThesis,berthold_loidl_hammond_2016}, skeleton composition
 \cite{dieterle_horstmeyer_loogen_berthold_2016}, communication \cite{Dieterle2010}, and generation of process networks \cite{Horstmeyer2013}. The definitions of new Eden skeletons is a specific focus \cite{doi:10.1142/S0129626403001380,Eden:PARCO05,Berthold2009-mr,Berthold2009-fft,dieterle2010skeleton,delaEncina2011,Dieterle2013,janjic2013space}.
 
-Other task parallel Haskells related to Eden, GpH, and the \ensuremath{\Conid{Par}} Monad include the following.  
+Other task parallel Haskells related to Eden, GpH, and the \ensuremath{\Conid{Par}} Monad include the following: 
 HdpH \cite{Maier:2014:HDS:2775050.2633363,stewart_maier_trinder_2016} is an extension of \ensuremath{\Conid{Par}} Monad to
 heterogeneous clusters. LVish \cite{Kuper:2014:TPE:2666356.2594312} is a communication-centred extension
 of \ensuremath{\Conid{Par}} Monad.
@@ -563,7 +563,11 @@ The effort is ongoing, including topological skeletons \cite{Eden:PARCO05}, spec
 
 \paragraph{Arrows.}
 Arrows were introduced by \citet{HughesArrows} as a less restrictive alternative to Monads, in essence they are a generalised function arrow~\ensuremath{\to }. \citet{Hughes2005} presents a tutorial on Arrows. \citet{jacobs_heunen_hasuo_2009,LINDLEY201197,ATKEY201119} develop theoretical background of Arrows. \citet{Paterson:2001:NNA:507669.507664} introduced a new notation for Arrows. Arrows have applications in information flow research \cite{1648705,LI20101974,Russo:2008:LLI:1411286.1411289}, invertible programming \cite{Alimarine:2005:BAA:1088348.1088357}, and quantum computer simulation \cite{vizzotto_altenkirch_sabry_2006}. But probably most prominent application of Arrows is Arrow-based functional reactive programming, AFRP \cite{Nilsson:2002:FRP:581690.581695,Hudak2003,Czaplicki:2013:AFR:2499370.2462161}.
-\citet{Liu:2009:CCA:1631687.1596559} formally define a more special kind of Arrows that capsule the computation more than regular Arrows do and thus enable optimisations. Their approach would allow parallel composition, as their special Arrows would not interfere with each other in concurrent execution. In contrast, we capture a whole parallel computation as a single entity: our main instantiation function \ensuremath{\Varid{parEvalN}} makes a single (parallel) Arrow out of a list of Arrows. \citet{Huang2007} utilise Arrows for parallelism, but strikingly different from our approach. They use Arrows to orchestrate several tasks in robotics. We, however, propose a general interface for parallel programming, while remaining completely in Haskell.
+\citet{Liu:2009:CCA:1631687.1596559} formally define a more special
+% kind of Arrows that encapsulate the computation more than regular
+% Arrows do and thus enable optimisations.
+implementation of Arrows that allows for better optimisations.
+Their approach would allow parallel composition, as their special Arrows would not interfere with each other in concurrent execution. In contrast, we capture a whole parallel computation as a single entity: our main instantiation function \ensuremath{\Varid{parEvalN}} makes a single (parallel) Arrow out of a list of Arrows. \citet{Huang2007} utilise Arrows for parallelism, but strikingly different from our approach. They use Arrows to orchestrate several tasks in robotics. We, however, propose a general interface for parallel programming, while remaining completely in Haskell.
 \citet{zhang_session_2019} introduced a session-type framework that generates parallel code. As they stated, their approach to express dataflow with Arrows was inspired by our formalism.
 
 \paragraph{Arrows in other languages.}
@@ -2025,7 +2029,7 @@ Similar to the shared memory setting, PArrows only imply a very low penalty with
 PArrows performed in our benchmarks with little to no overhead. Tables~\ref{tab:meanOverheadSharedMemory} and \ref{tab:meanOverHeadDistributedMemory} clarify this once more: The PArrows-enabled versions trade blows with their vanilla counterparts when comparing the means over all cores of the mean overheads. If we combine these findings with the usability of our DSL,
 the minor overhead induced by PArrows is outweighed by their convenience and usefulness to the user.
 
-PArrows is an extendable formalism, they can be easily ported to further parallel Haskells while still maintaining interchangeability. It is straightforward to provide further implementations of algorithmic skeletons in PArrows.
+PArrows is an extendable formalism that can be easily ported to further parallel Haskells while still maintaining interchangeability. It is straightforward to provide further implementations of algorithmic skeletons in PArrows.
 	%%\pagebreak
 	
 \section{Conclusion}
@@ -2037,9 +2041,9 @@ Arrows, and hence to show their usefulness for
 % Arrows are a useful tool for
 composing parallel
 programs. We have shown that for a generic and extensible parallel Haskell, we do not have to restrict ourselves to a monadic interface. % Instead, we use Arrows which are a more general concept than Monads, but still allow for powerful composition. Furthermore, we think
-We argue that Arrows are better suited to  parallelise
-pure functions than Monads,  as the functions are already Arrows and can be used
-directly in our DSL.
+% We argue that Arrows are better suited to  parallelise
+% pure functions than Monads,  as the functions are already Arrows and can be used
+% directly in our DSL.
 Arrows are a better fit to parallelise pure code than a monadic solution as regular functions are already Arrows and can be used with our DSL in a more natural way. % We manage to retain this nice property of parallel Haskells such as Eden or GpH (which use pure constructs)
 % while still having a generic and composable interface.
 We use a non-monadic interface (similar to Eden or GpH) and retain composability.

@@ -33,6 +33,8 @@ Thank you.
 
 TODO
 
+Our formalism inspired S. Zhang's Session Arrows (Zhang, 2019).
+
 > After all, it wasn't particularly difficult or challenging to use arrows for 
 > parallel computing. Assuming the authors are right that no-one tried before
 > them, and I have no reason to doubt this, maybe simply no-one has found it
@@ -104,33 +106,51 @@ We clarified the wording.
 > Provide a brief characterisation of profunctors, or at least a reference.
 > "since they they allow"
 
-We provided an additional reference explaining Profunctors in the main text, (Boisseau & Gibbons). It is possible to define Arrows deriving from Profunctors, as Appendix B shows. There we also cite Asada (2010).
+We rephrased the offending paragraph, providing an additional reference explaining Profunctors (Boisseau & Gibbons, 2018). The text emphases now that it is possible to define Arrows deriving from Profunctors, as Appendix B shows. There we also cite Asada (2010).
 
 > 
 > The introductory text of section 3.2 (before 3.2.1) is mostly re-iterating 
 > aspects already discussed in previous sections, partially with identical
 > phrasing. I suggest to cut this short.
+
+The text was removed.
+
 > 
 > Other side issues like LVish or HdpH should have been discussed earlier.
 > The background section should really focus on the relevant background,
 > whereas the selection of background topics should be clear at this point.
-> 
+>
+
+We moved the text ob LVish and HdpH to the related work.
+
 > page 10:
 > 
 > "efficiency OR the lack thereof" maybe?
+
+Fixed.
+
 > 
 > page 11:
 > 
 > The dashes should be longer, or in Latex terms: "---".
+
+Fixed globally.
+
 > 
 > page 13:
 > 
 > "instances of the ArrowParallel instances" ?
+
+This was obviously a writing mishap, fixed.
+
 > 
 > page 15:
 > 
 > What is meant be the term "implementation agnostic"? Any (high-level) 
 > programming approach is somewhat implementation-agnostic.
+
+We clarified the wording and emphasised portability across parallel Haskells.
+
 > 
 > page 16ff:
 > 
@@ -140,23 +160,40 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > implementation, illustration, etc, is relevant for the reader then it should
 > appear immediately and not in the appendix. Everything else should either be
 > skipped or the remaining contents of the appendix should be explained once.
-> 
+>
+
+TODO
+
 > page 16:
 > 
 > "toplogical"
+
+Fixed.
+
 > 
 > page 19:
 > 
 > The question arising on the top of page 19 should be investigated. The statement
 > that such differences would be beyond the scope of the paper appears a bit lame.
-> 
+>
+
+We changed the wording.
+
+Our reasoning is that the behaviour in question arises from the subtle details of laziness and demand in Eden standard library. We argue that such details are not of major interest to the generic JFP audience. Our paper focuses on establishing a common interface between different parallel Haskells, with a minor workaround the above demand issue becomes irrelevant.
+
 > page 22:
 > 
-> "repeating": why is the front part of the word set in italics? 
+> "repeating": why is the front part of the word set in italics?
+
+We were referencing the `repeat` function. We now use an apostrophe for more clarity.
+
 > 
 > page 23:
 > 
-> "using the Gentleman algorithm" -> "using Gentleman's algorithm" 
+> "using the Gentleman algorithm" -> "using Gentleman's algorithm"
+
+Fixed.
+
 > 
 > page 24:
 > 
@@ -165,6 +202,11 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > single figure. A related question is: why should there be any observable
 > difference? After all the exact same infrastructure and almost the same
 > implementation are used.
+
+We forced both figures on a single page.
+
+The point of those figures is exactly to showcase that there is no observable difference, despite using a further intermediate abstraction layer in form of our API.
+
 > 
 > page 25:
 > 
@@ -182,6 +224,9 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > page 27:
 > 
 > The text in 7.1.4 and the beginning of 7.2 should be condensed.
+
+We implemented this change request.
+
 > 
 > page 28:
 > 
@@ -189,8 +234,14 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > The mentioning of a zillion number is pretty unreadable and complicates
 > comprehension of the results. The text should be used to explain the most
 > interesting numbers and discuss the findings.
+
+TODO
+
 > 
 > The term "speedup" is used extensively without ever explaining the base line.
+
+We added a definition of speedup.
+
 > 
 > page 30:
 > 
@@ -200,13 +251,22 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > more reliable experimental results.
 > 
 > "extensible formalism THAT can be easily ported"
+
+Fixed.
+
 > 
 > The sentence "We argue that ..." is pretty much repeated right thereafter.
+
+We removed this sentence all together.
+
 > 
 > page 32ff:
 > 
 > The references contain numerous capitalisation errors. For conferences
-> there is an unmotivated but consistent space between the acronym and the year. 
+> there is an unmotivated but consistent space between the acronym and the year.
+
+The space is removed.
+
 > 
 > 
 > ***************************************************************************
@@ -268,11 +328,17 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > language defined in this paper sufficient?  Or in other words, is
 > there any parallelism in the current parallel Haskell system (say GhP)
 > that cannot be described in this arrow-based interface?
-> 
+>
+
+We would expect some at least technical difficulties with Accelerate. However, our interface seems to be fairly universal. A very different approach is data parallel programming. Our approach is task parallel.
+
 > Section 3:
 > 
 > For GpH, can you describe the two primitives par/seq in terms of
-> PArrows? 
+> PArrows?
+
+Our approach is directly reversed: we define PArrows in terms of par/seq. However, TODO TODO
+
 > 
 > Section 4:
 > 
@@ -288,6 +354,9 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > understand why it can support direct communications between
 > nodes. What is the relationship between "Future" and "parEvalN"? Is
 > "Future" part of PArrows?
+
+It is not part of the class holding parEvalN, but it extends the general interface of PArrows.
+
 > 
 > Section 6:
 > 
@@ -326,6 +395,9 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > My problem with this paper is that I can't see why Arrows are
 > essential. Since the title is "Arrows for Parallel Computation", this
 > is a major problem.
+
+TODO
+
 > 
 > Why don't I think Arrows are essential to this work? The authors
 > present the ArrowParallel type class (Sec 4.1, pg 11):
@@ -343,6 +415,9 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > the only serious program presented). Are there any examples of using
 > other Arrow instances? Is there any point in using anything other than
 > the (->) and Kleisli instances if they don't work with Eden?
+
+It would be possible to creature further special instances for Eden, if those are of interest.
+
 > 
 > The code in Figure 9 shows that a 'parEvalN' for monadic computations
 > is derivable from one for pure arrows. So one could present the
@@ -475,6 +550,9 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 >  make programs go faster, it would seem to me that a particular
 >  construct in a paper about parallelism should only appear if it can
 >  be shown to actually make programs go faster.
+
+The `pipe` and `ring` skeletons are needed, as they allow for a more explainable and didactic introduction of the `torus`. Basically, `ring` is a warped `pipe`, and `torus` is a `ring` of `ring`s. Hence, the `torus` benchmark is the ultimate test for the whole family of `pipe`, `ring`, and `torus`.
+
 > 
 > - A frustrating amount of the code is placed in the appendix (mainly
 >  appendix C) and referenced from the main text. It would be much
@@ -501,28 +579,53 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > *using* Arrows?
 > 
 > Para 3: line 6: "very" is vague.
+
+We fixed the above spelling problems, thank you very much.
+
 > 
 > Para 4: line 2: is there a missing 'Arrow arr' constraint on the type
 > signature?
-> 
+>
+
+Indeed, we fixed this mistake and apologize.
+
 > Para 6: line 1: this is the first mention of "PArrow" -- it should be
 > defined earlier.
+
+We fixed this.
+
 > 
 > ### Page 3
 > 
 > Para 1: line 1: "This has many practical advantages". Are there any
 > others beyond being able to switch backend easily?
+
+TODO
+
 > 
 > Para 6: line 2: "parallelisations" => "execution strategies"
-> 
+
+Thank you for this suggestion. We accepted it, the final wording is: "... relatively easy to define alternate execution strategies, including parallel evaluation."
+ 
 > Para 6: line 7: "is completely orthogonal to our approach". This seems
 > a bit defensive. But since you bring it up, then why not explain why
 > it is orthogonal?
+
+Accelerate focuses on accessing the GPU and adapts to the notions of Cuda language. We found it hard to combine the concepts of PArrows and Accelerate under one hood. However, we are considering to use PArrows to orchestrate multiple Accelerate instances.
+
+We reason that such an in-depth explanation is going to far in the paper text, hence we omit it.
+
 > 
 > Para 8: line 2: Should be a colon after "following"?
+
+Fixed.
+
 > 
 > Para 8: line 3: I'm not sure what you mean by "communication-centred"
 > in relation to LVars?
+
+TODO
+
 > 
 > ### Page 4
 > 
@@ -532,7 +635,10 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > 
 > "Arrows" para: "less restrictive alternative", well, it is less
 > restrictive for the writer of the arrow, but not for the user.
-> 
+>
+
+TODO
+
 > "Arrow": line 10: "capsule the computation", do you mean "encapsulate
 > the computation"? This whole sentence seems quite vague anyway. I'd
 > characterise Liu et al's work as providing a specific implementation
@@ -541,7 +647,14 @@ We provided an additional reference explaining Profunctors in the main text, (Bo
 > comparison with you work confuses me: you say that their arrows allow
 > parallel composition, but then seem to say that yours is different?
 > What is a thing that you can express but they can't?
-> 
+>
+
+We adjusted the description of Lue et al.'s work.
+
+The difference between our work and Lue et al. is that they would allow for composition of their arrows in parallel. We provide operators to execute a set of arrows in parallel (yielding an arrow again).
+
+WHAT'S THE DIFFERENCE
+
 > "Arrow": line 14: missing "a" before "list".
 > 
 > "Arrow": line 15: "different" => "differently"
