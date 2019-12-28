@@ -677,19 +677,32 @@ Thank you for this reference, we include it now.
 > 
 > Para 1: Line 2: "which is basically"; better "A Haskell-like language
 > for the JVM"
+
+We adapted your wording.
+
 > 
 > Para 2; line 2: "typical GUI tasks" => you could be less vague.
+
+Fixed.
+
 > 
 > Sec 3.1, para 1, last line: why not use the typeclass constraint
 > "Monad m =>" instead of saying "where m is a Monad"?
-> 
+
+Fixed.
+ 
 > Sec 3.1, para 2, first line: What does the "This" at the end of the
 > line refer to? Also, there is no mention of the Arrow laws.
-> 
+>
+
+XXXXXXXXXXXXXXXXX
+
 > Sec 3.1, para 3: "syntactic sugar". I don't think these derived
 > combinators should be called syntactic sugar, because you aren't
 > defining the syntax of a language anywhere. They are either "derived
 > combinators", or more prosaically, "utility functions".
+
+We changed the way we reference those combinators throughout the text.
 > 
 > ### Page 6
 > 
@@ -700,32 +713,50 @@ Thank you for this reference, we include it now.
 > 
 > `ArrowApply`, `ArrowLoop` and `ArrowChoice` aren't defined anywhere -- how much
 > background knowledge about Arrows do you expect the reader to have?
-> 
+
+XXXXXXXXXXXXXXXXXXX
+
+
 > "we have a truly more general interface as compared to a monadic one"
 > -- but this isn't true for Eden right? And there are no examples in
 > the paper of using non `(->)` arrows to write programs, unless I've
 > missed one?
+
+TODO: monadic RabinMiller!
+
 > 
 > ### Page 7
 > 
 > You need some reference to where Profunctors are defined, or at least
 > a short introduction to them.
+
+Fixed, as mentioned above.
+
 > 
 > "Among the most important are probably" ... "probably" is a vague. You
 > could just say "the ones we focus on are...". Also, this sentence is
 > sort of claiming that you chose these ones because they are the "most
 > important", but the first sentence on the next page gives reasons in
 > terms of the features of each one.
-> 
+>
+
+We have severely shortened and rewritten this paragraph alltogether, now there is no mention of importance at this point.
+
 > ### Page 9
 > 
 > You could write `parEvalN` for the Par monad more concisely as:
 > 
 >    parEvalN fs as = runPar $ mapM (return >>> spawn >>= get) $ zipWith ($) fs as
+
+Thank you very much, we replace the definition.
+
 > 
 > ### Page 10
 > 
 > You don't explain what the `Trans` typeclass is. `Trans`portable?
+
+Yes, specialization of packing and unpacking and network transmission, e.g. streams for lists. We added two sentences explaining this issue.
+
 > 
 > ### Page 11
 > 
@@ -742,10 +773,16 @@ Thank you for this reference, we include it now.
 > 
 > Figure 9: does the second instance need the `Trans b` constraint?
 > Should the `conf` before the `where` be a `Conf`?
-> 
+>
+
+XXXXXXXXXXXXXXXXXXX
+
 > ### Page 14
 > 
 > Figure 11: what is the `ChunkSize` type? `Int`?
+
+Yes. We added an explanation.
+
 > 
 > Where is the `ArrowApply` constraint used? Is it in `chunksOf` -- I
 > can't find a definition of this function in the paper.
@@ -757,24 +794,42 @@ Thank you for this reference, we include it now.
 > 
 > As I said above, Section 5 doesn't really explain how Futures fix the
 > problem.
+
+XXXXXXXXXXXXXX
+
 > 
 > ### Page 17
 > 
 > Fig 17, caption: "Other than" => "Unlike"
+
+Fixed.
+
 > 
 > ### Page 18
 > 
 > second last line: remove the final "the"
+
+Fixed.
+
 > 
 > ### Page 19
 > 
 > first line: remove "when"
+
+Fixed.
+
 > 
 > ### Page 20
 > 
 > paragraph 3: "probably": do some benchmarks?
+
+This was more of an speculation on what is the better in the API than a solid performance claim. We adjusted the wording correspondingly.
+
 > 
 > last line: "send" => "sent"
+
+Fixed.
+
 > 
 > ### Page 22
 > 
@@ -793,13 +848,21 @@ Thank you for this reference, we include it now.
 > "We disregarded the hyper-threading ability in most of the cases."
 > There should be a forward reference to the section discussing hyper
 > threading specifically.
-> 
+>
+
+XXXXXXXXXXXXXXXXXX
+
 > ### Page 37
 > 
 > last line: "as" => "was"
+
+Fixed.
+
 > 
 > ### Page 38
 > 
 > The type signature for `(|||)` seems messed up (the ArrowChoice
 > typeclass constraint is muddled up with the type of the first
 > argument).
+
+TODO TODO TODO

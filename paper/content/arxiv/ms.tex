@@ -578,10 +578,10 @@ Their approach would allow parallel composition, as their special Arrows would n
 \citet{zhang_session_2019} introduced a session-type framework that generates parallel code. As they stated, their approach to express dataflow with Arrows was inspired by our formalism.
 
 \paragraph{Arrows in other languages.}
-Although this work is centred on Haskell implementation of Arrows, it is applicable to any functional programming language where parallel evaluation and Arrows can be defined. Preliminary experiments show that basic definitions of PArrows are possible in the Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (which is basically Haskell on the JVM). However, they are beyond the scope of this work, as are similar experiments with the Eta language\footnote{Eta project page at \url{http://eta-lang.org}}, 
+Although this work is centred on Haskell implementation of Arrows, it is applicable to any functional programming language where parallel evaluation and Arrows can be defined. Preliminary experiments show that basic definitions of PArrows are possible in the Frege language\footnote{GitHub project page at \url{https://github.com/Frege/frege}} (a Haskell-like language for the JVM). However, they are beyond the scope of this work, as are similar experiments with the Eta language\footnote{Eta project page at \url{http://eta-lang.org}}, 
 a new approach to Haskell on the JVM.
 
-\citet{achten2004arrows,achten2007arrow} use an Arrow implementation in Clean for better handling of typical GUI tasks. \citet{Dagand:2009:ORD:1481861.1481870} used Arrows in OCaml in the implementation of a distributed system.
+\citet{achten2004arrows,achten2007arrow} use an Arrow implementation in Clean for graphical user interfaces. \citet{Dagand:2009:ORD:1481861.1481870} used Arrows in OCaml in the implementation of a distributed system.
 
 \citet{turon_reagents:_2012} has somewhat similar goals to our work. They deriving a formalism for concurrency, including commits, choice, channels, with composable components.
 
@@ -597,7 +597,7 @@ a new approach to Haskell on the JVM.
         (Section~\ref{sec:parallelHaskells}).
 	\subsection{Arrows}
 \label{sec:arrows}
-Arrows were introduced by \citet{HughesArrows} as a general interface for computation and a less restrictive generalisation of Monads. \citeauthor{HughesArrows} motivates the broader interface of Arrows with the example of a parser with added static meta-information that can not satisfy the monadic bind operator \ensuremath{(\bind )\mathbin{::}\Varid{m}\;\Varid{a}\to (\Varid{a}\to \Varid{m}\;\Varid{b})\to \Varid{m}\;\Varid{b}} (with \ensuremath{\Varid{m}} being a Monad)\footnote{In the example a parser of the type \ensuremath{\Conid{Parser}\;\Varid{s}\;\Varid{a}} with static meta information \ensuremath{\Varid{s}} and result \ensuremath{\Varid{a}} is shown to not be able to use the static information \ensuremath{\Varid{s}} without applying the monadic function \ensuremath{\Varid{a}\to \Varid{m}\;\Varid{b}}. With Arrows this is possible.}.
+Arrows were introduced by \citet{HughesArrows} as a general interface for computation and a less restrictive generalisation of Monads. \citeauthor{HughesArrows} motivates the broader interface of Arrows with the example of a parser with added static meta-information that can not satisfy the monadic bind operator \ensuremath{(\bind )\mathbin{::}\Conid{Monad}\;\Varid{m}\Rightarrow \Varid{m}\;\Varid{a}\to (\Varid{a}\to \Varid{m}\;\Varid{b})\to \Varid{m}\;\Varid{b}}.\footnote{In the example a parser of the type \ensuremath{\Conid{Parser}\;\Varid{s}\;\Varid{a}} with static meta information \ensuremath{\Varid{s}} and result \ensuremath{\Varid{a}} is shown to not be able to use the static information \ensuremath{\Varid{s}} without applying the monadic function \ensuremath{\Varid{a}\to \Varid{m}\;\Varid{b}}. With Arrows this is possible.}.
 
 An Arrow \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} represents a computation that converts an input \ensuremath{\Varid{a}} to an output \ensuremath{\Varid{b}}. This is defined in the \ensuremath{\Conid{Arrow}} type class shown in Fig.~\ref{fig:ArrowDefinition}.
 %
@@ -694,10 +694,10 @@ and the Kleisli type (Fig.~\ref{fig:ArrowDefinition}), which wraps monadic funct
 {}{\includegraphics[width = 1.5in]{andandand}}\\
 \ensuremath{(\mathbin{*\!*\!*})}\label{fig:***Img} & \ensuremath{(\mathbin{\&\!\&\!\&})} \label{fig:&&&Img} \\
 	\end{tabular}
-	\caption{Visual depiction of syntactic sugar for Arrows.}
+	\caption{Visual depiction of derived combinators for Arrows.}
 	\label{fig:syntacticSugarArrows}
 \end{figure}
-Hughes also defined some syntactic sugar (Fig.~\ref{fig:syntacticSugarArrows}): \ensuremath{\Varid{second}}, \ensuremath{\mathbin{*\!*\!*}} and \ensuremath{\mathbin{\&\!\&\!\&}}. 
+Hughes also derived some further combinators (Fig.~\ref{fig:syntacticSugarArrows}): \ensuremath{\Varid{second}}, \ensuremath{\mathbin{*\!*\!*}} and \ensuremath{\mathbin{\&\!\&\!\&}}. 
 \ensuremath{\Varid{second}} is the mirrored version of \ensuremath{\Varid{first}} (Appendix~\ref{utilfns}).
 The \ensuremath{\mathbin{*\!*\!*}} function combines \ensuremath{\Varid{first}} and \ensuremath{\Varid{second}} to handle two inputs in one arrow, and is defined as follows:
 % \begin{figure}[h]
@@ -802,14 +802,8 @@ The \ensuremath{\Conid{Par}} Monad\footnote{The \ensuremath{\Conid{Par}} monad c
 
 \begin{hscode}\SaveRestoreHook
 \column{B}{@{}>{\hspre}l<{\hspost}@{}}%
-\column{9}{@{}>{\hspre}l<{\hspost}@{}}%
 \column{E}{@{}>{\hspre}l<{\hspost}@{}}%
-\>[B]{}\Varid{parEvalN}\mathbin{::}(\Conid{NFData}\;\Varid{b})\Rightarrow [\mskip1.5mu \Varid{a}\to \Varid{b}\mskip1.5mu]\to [\mskip1.5mu \Varid{a}\mskip1.5mu]\to [\mskip1.5mu \Varid{b}\mskip1.5mu]{}\<[E]%
-\\
-\>[B]{}\Varid{parEvalN}\;\Varid{fs}\;\Varid{as}\mathrel{=}\Varid{runPar}\mathbin{\$}{}\<[E]%
-\\
-\>[B]{}\hsindent{9}{}\<[9]%
-\>[9]{}(\Varid{sequenceA}\;(\Varid{map}\;(\Varid{return}\mathbin{\circ}\Varid{spawn})\;(\Varid{zipWith}\;(\mathbin{\$})\;\Varid{fs}\;\Varid{as})))\bind \Varid{mapM}\;\Varid{get}{}\<[E]%
+\>[B]{}\Varid{parEvalN}\;\Varid{fs}\;\Varid{as}\mathrel{=}\Varid{runPar}\mathbin{\$}\Varid{mapM}\;(\Varid{return}\mathbin{>>>}\Varid{spawn}\bind \Varid{get})\mathbin{\$}\Varid{zipWith}\;(\mathbin{\$})\;\Varid{fs}\;\Varid{as}{}\<[E]%
 \ColumnHook
 \end{hscode}\resethooks
 
@@ -858,6 +852,7 @@ allows us to define \ensuremath{\Varid{parEvalN}} directly:
 % 	\label{fig:parEvalNEden}
 % \end{figure}
 % A simplistic graphical depiction of this definition can be found in Fig.~\ref{fig:parEvalNEden}.
+Here, the \ensuremath{\Conid{Trans}} typeclass originates from the Eden standard library and details the implementation of packing and of the transmission. A~default instance of \ensuremath{\Conid{Trans}} exists.
 
 \paragraph{Eden TraceViewer.}
 \label{sec:edentv}
@@ -1123,7 +1118,7 @@ The function \ensuremath{\Varid{parEvalN}} fully traverses the list of passed Ar
 \ColumnHook
 \end{hscode}\resethooks
  %$ %% formatting
-\caption{Definition of \ensuremath{\Varid{parEvalNLazy}}.}
+\caption{Definition of \ensuremath{\Varid{parEvalNLazy}}. The type \ensuremath{\Conid{ChunkSize}} is an alias to \ensuremath{\Conid{Int}}.}
 \label{fig:parEvalNLazy}
 \end{figure}
 
@@ -1255,7 +1250,7 @@ In a distributed environment, this gives us a communication scheme with messages
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.9\textwidth]{withFutures}
-	\caption[with Futures]{Communication between 4 Eden processes with Futures. Other than in Fig.~\ref{fig:withoutFutures}, processes communicate directly (one example message is highlighted) instead of always going through the master node (bottom bar).}
+	\caption[with Futures]{Communication between 4 Eden processes with Futures. Unlike in Fig.~\ref{fig:withoutFutures}, processes communicate directly (one example message is highlighted) instead of always going through the master node (bottom bar).}
 	\label{fig:withFutures}
 \end{figure}
 	%\pagebreak
@@ -1328,7 +1323,7 @@ Since a \ensuremath{\Varid{farm}}  is basically just \ensuremath{\Varid{parMap}}
 \label{sec:topology-skeletons}
 Even though many algorithms can be expressed by parallel maps, some problems require more sophisticated skeletons. The Eden library leverages this problem and already comes with more predefined skeletons\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}.}, among them a \ensuremath{\Varid{pipe}}, a \ensuremath{\Varid{ring}}, and a \ensuremath{\Varid{torus}} implementations \citep{Eden:SkeletonBookChapter02}. These seem like reasonable candidates to be ported to our Arrow-based parallel Haskell. We aim to showcase that we can express more sophisticated skeletons with parallel Arrows as well.
 
-If we used the original definition of \ensuremath{\Varid{parEvalN}}, however, these skeletons would produce an infinite loop with the GpH and \ensuremath{\Conid{Par}} Monad which during runtime would result in the program crash. This materialises with the usage of \ensuremath{\Varid{loop}} of the \ensuremath{\Conid{ArrowLoop}} type class and we think that this is due to difference of how evaluation is done in these backends when compared to Eden. We provide a workaround for these types of skeletons as such they probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting.
+If we used the original definition of \ensuremath{\Varid{parEvalN}}, however, these skeletons would produce an infinite loop with the GpH and \ensuremath{\Conid{Par}} Monad which during runtime would result in program crash. This materialises with the usage of \ensuremath{\Varid{loop}} of the \ensuremath{\Conid{ArrowLoop}} type class and we think that this is due to difference of how evaluation is done in these backends compared to Eden. We provide a workaround for these types of skeletons as such they probably are not of much importance outside of a distributed memory environment. However our workaround enables users of the DSL to test their code within a shared memory setting.
 % even though other skeletons would be better suited to be run with them. --- OL: I don't get this sentence part
 The idea of the fix is to provide a \ensuremath{\Conid{ArrowLoopParallel}} type class that has two functions---\ensuremath{\Varid{loopParEvalN}} and \ensuremath{\Varid{postLoopParEvalN}}, where the first is to be used inside an \ensuremath{\Varid{loop}} construct while the latter will be used right outside of the \ensuremath{\Varid{loop}}. This way we can delegate to the actual \ensuremath{\Varid{parEvalN}} in the spot where the backend supports it.
 \begin{hscode}\SaveRestoreHook
@@ -1536,7 +1531,7 @@ Sometimes, this \ensuremath{\Varid{pipe}} definition can be a bit inconvenient, 
 \label{fig:pipe2}
 \end{figure}
 
-Extensive use of \ensuremath{\Varid{pipe2}} over \ensuremath{\Varid{pipe}} with a hand-written combination data type will probably result in worse performance because of more communication overhead from the many calls to \ensuremath{\Varid{parEvalN}} inside of \ensuremath{\Varid{evalN}}. Nonetheless, we can define a parallel piping operator \ensuremath{\mathbin{|\!>\!\!>\!\!>\!|}}, which is semantically equivalent to \ensuremath{\mathbin{>\!\!>\!\!>}} similarly to other parallel syntactic sugar from Appendix~\ref{syntacticSugar}.
+We speculate that extensive use of \ensuremath{\Varid{pipe2}} over \ensuremath{\Varid{pipe}} with a hand-written combination data type would result in worse performance because of more communication overhead from the many calls to \ensuremath{\Varid{parEvalN}} inside of \ensuremath{\Varid{evalN}}. Nonetheless, we can define a parallel piping operator \ensuremath{\mathbin{|\!>\!\!>\!\!>\!|}}, which is semantically equivalent to \ensuremath{\mathbin{>\!\!>\!\!>}} similarly to other parallel derived combinators from Appendix~\ref{syntacticSugar}.
 
 
 %Another version of |>>>| is:
@@ -1551,7 +1546,7 @@ Extensive use of \ensuremath{\Varid{pipe2}} over \ensuremath{\Varid{pipe}} with 
 	\caption{\ensuremath{\Varid{ring}} skeleton depiction.}
 	\label{fig:ringImg}
 \end{figure}
-Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}} (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \ensuremath{[\mskip1.5mu \Varid{i}\mskip1.5mu]\to [\mskip1.5mu \Varid{o}\mskip1.5mu]} with a ring of nodes that communicate with each other. Its input is a node function \ensuremath{\Varid{i}\to \Varid{r}\to (\Varid{o},\Varid{r})} in which \ensuremath{\Varid{r}} serves as the intermediary output that gets send to the neighbour of each node. This data is sent over direct communication channels, the so called \enquote{remote data}. We depict it in Appendix, Fig.~\ref{fig:ringEden}.
+Eden comes with a ring skeleton\footnote{Available on Hackage: \url{https://hackage.haskell.org/package/edenskel-2.1.0.0/docs/Control-Parallel-Eden-Topology.html}} (Fig.~\ref{fig:ringImg}) implementation that allows the computation of a function \ensuremath{[\mskip1.5mu \Varid{i}\mskip1.5mu]\to [\mskip1.5mu \Varid{o}\mskip1.5mu]} with a ring of nodes that communicate with each other. Its input is a node function \ensuremath{\Varid{i}\to \Varid{r}\to (\Varid{o},\Varid{r})} in which \ensuremath{\Varid{r}} serves as the intermediary output that gets sent to the neighbour of each node. This data is sent over direct communication channels, the so called \enquote{remote data}. We depict it in Appendix, Fig.~\ref{fig:ringEden}.
 %\end{code}
 %with toRD (to make use of remote data)
 %\begin{code}
@@ -2143,7 +2138,7 @@ The \ensuremath{\Varid{evalN}} combinator in Fig.~\ref{fig:evalN} converts a lis
 \end{figure}
 
 The \ensuremath{\Varid{mapArr}} combinator (Fig.~\ref{fig:mapArr}) lifts any Arrow \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} to an Arrow \ensuremath{\Varid{arr}\;[\mskip1.5mu \Varid{a}\mskip1.5mu]\;[\mskip1.5mu \Varid{b}\mskip1.5mu]}. The original inspiration was from \citet{Hughes2005},
-but the definition as then unified with \ensuremath{\Varid{evalN}}. 
+but the definition was then unified with \ensuremath{\Varid{evalN}}. 
 
 \begin{figure}[h]
 \begin{hscode}\SaveRestoreHook
@@ -2561,8 +2556,8 @@ Furthermore, Fig.~\ref{fig:torus_example_rest} contains the omitted definitions 
 	\label{fig:torus_example_rest}
 \end{figure} %$
 
-\section{Syntactic sugar} \label{syntacticSugar}
-Finally, we also give the definitions for some syntactic sugar for PArrows, namely \ensuremath{\mathbin{\mid\!\!*\!*\!*\!\!\mid}} and \ensuremath{\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}}.
+\section{Derived combinators} \label{syntacticSugar}
+Finally, we also give the definitions for some derived combinators for PArrows, namely \ensuremath{\mathbin{\mid\!\!*\!*\!*\!\!\mid}} and \ensuremath{\mathbin{\mid\!\!\&\!\&\!\&\!\!\mid}}.
 For basic Arrows, we have the \ensuremath{\mathbin{*\!*\!*}} combinator (Fig.~\ref{fig:syntacticSugarArrows}) which allows us to combine two Arrows \ensuremath{\Varid{arr}\;\Varid{a}\;\Varid{b}} and \ensuremath{\Varid{arr}\;\Varid{c}\;\Varid{d}} into an Arrow \ensuremath{\Varid{arr}\;(\Varid{a},\Varid{c})\;(\Varid{b},\Varid{d})} which does both computations at once. This can easily be translated into a parallel version \ensuremath{\mathbin{\mid\!\!*\!*\!*\!\!\mid}} with the use of \ensuremath{\Varid{parEval2}}, but for this we require a backend which has an implementation that does not require any configuration (hence the \ensuremath{()} as the \ensuremath{\Varid{conf}} parameter% in Fig.~\ref{fig:par***}
 ):
 % \begin{figure}[h]
