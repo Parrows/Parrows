@@ -662,11 +662,17 @@ WHAT'S THE DIFFERENCE
 > "Arrow": line 16: "several tasks in robotics". This is ambiguous, do
 > you mean several different sorts of tasks that a robot might be asked
 > to do separately, or orchestrate the tasks at runtime?
-> 
+>
+
+XXXXXXXXXXXXXXXXX
+
 > Another potential piece of related work is Turon's Reagents, that are
 > based on an Arrow-like interface (albeit for concurrency, not
 > parallelism): https://people.mpi-sws.org/~turon/reagents.pdf
-> 
+>
+
+Thank you for this reference, we include it now.
+
 > ### Page 5
 > 
 > Para 1: Line 2: "which is basically"; better "A Haskell-like language
